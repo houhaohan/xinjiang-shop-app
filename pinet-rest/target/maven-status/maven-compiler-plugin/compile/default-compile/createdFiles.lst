@@ -1,0 +1,6 @@
+com\pinet\PinetApplication.class
+com\pinet\rest\mapper\ShopMapper.class
+com\pinet\rest\service\impl\ShopServiceImpl.class
+com\pinet\rest\service\ShopService.class
+com\pinet\rest\entity\Shop.class
+com\pinet\rest\controller\ShopController.class

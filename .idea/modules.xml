@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/pinet-parent/pinet.iml" filepath="$PROJECT_DIR$/pinet-parent/pinet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-common/pinet-common.iml" filepath="$PROJECT_DIR$/pinet-common/pinet-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-common/pinet-common-db/pinet-common-db.iml" filepath="$PROJECT_DIR$/pinet-common/pinet-common-db/pinet-common-db.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-common/pinet-common-file/pinet-common-file.iml" filepath="$PROJECT_DIR$/pinet-common/pinet-common-file/pinet-common-file.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-common/pinet-common-interceptor/pinet-common-interceptor.iml" filepath="$PROJECT_DIR$/pinet-common/pinet-common-interceptor/pinet-common-interceptor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-common/pinet-common-log/pinet-common-log.iml" filepath="$PROJECT_DIR$/pinet-common/pinet-common-log/pinet-common-log.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-common/pinet-common-mq/pinet-common-mq.iml" filepath="$PROJECT_DIR$/pinet-common/pinet-common-mq/pinet-common-mq.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-common/pinet-common-redis/pinet-common-redis.iml" filepath="$PROJECT_DIR$/pinet-common/pinet-common-redis/pinet-common-redis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-core/pinet-core.iml" filepath="$PROJECT_DIR$/pinet-core/pinet-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-parent/pinet-parent.iml" filepath="$PROJECT_DIR$/pinet-parent/pinet-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pinet-rest/pinet-rest.iml" filepath="$PROJECT_DIR$/pinet-rest/pinet-rest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/xinjiang-shop-app.iml" filepath="$PROJECT_DIR$/.idea/xinjiang-shop-app.iml" />
+    </modules>
+  </component>
+</project>
