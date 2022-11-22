@@ -1,4 +1,4 @@
-//package com.uugamer.core.page;
+package com.pinet.core.page;//package com.uugamer.core.page;
 //
 //import java.util.List;
 //

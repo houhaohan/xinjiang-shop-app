@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 启动类
  */
 
-@SpringBootApplication(scanBasePackages = "com.pinet")
+@SpringBootApplication
 @MapperScan("com.pinet.rest.mapper")
 public class PinetApplication {
 

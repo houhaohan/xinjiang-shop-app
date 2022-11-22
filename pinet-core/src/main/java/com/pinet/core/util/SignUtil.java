@@ -2,7 +2,7 @@ package com.pinet.core.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.pinet.core.exception.UguessException;
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.ApiErrorEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -77,16 +77,16 @@ public class SignUtil {
      */
     public static void verifySign(String reqBody, String appSecret) {
         if (StringUtils.isEmpty(reqBody)) {
-            throw new UguessException(ApiErrorEnum.PARAM_T_ERROR.getMsg(), ApiErrorEnum.PARAM_T_ERROR.getCode());
+            throw new PinetException(ApiErrorEnum.PARAM_T_ERROR.getMsg(), ApiErrorEnum.PARAM_T_ERROR.getCode());
         }
         if (StringUtil.isEmpty(appSecret)) {
-            throw new UguessException(ApiErrorEnum.PARAM_KEY_ERROR.getMsg(), ApiErrorEnum.PARAM_T_ERROR.getCode());
+            throw new PinetException(ApiErrorEnum.PARAM_KEY_ERROR.getMsg(), ApiErrorEnum.PARAM_T_ERROR.getCode());
 
         }
         JSONObject jsonObject = JSON.parseObject(reqBody);
         String sign = jsonObject.getString("sign");
         if (StringUtil.isEmpty(sign)) {
-            throw new UguessException(ApiErrorEnum.PARAM_SIGN_ERROR.getMsg(), ApiErrorEnum.PARAM_SIGN_ERROR.getCode());
+            throw new PinetException(ApiErrorEnum.PARAM_SIGN_ERROR.getMsg(), ApiErrorEnum.PARAM_SIGN_ERROR.getCode());
         }
         Set<Map.Entry<String, Object>> entrySet = jsonObject.entrySet();
         Map<String, String> map = new HashMap<>();
@@ -97,7 +97,7 @@ public class SignUtil {
         String verifiedSign = MD5Util.md5(prestr).toLowerCase();
         logger.info("请求参数:{},签名结果:{}", reqBody, verifiedSign);
         if (!verifiedSign.equals(sign.toLowerCase())) {
-            throw new UguessException(ApiErrorEnum.PARAM_AUTH_ERROR.getMsg(), ApiErrorEnum.PARAM_AUTH_ERROR.getCode());
+            throw new PinetException(ApiErrorEnum.PARAM_AUTH_ERROR.getMsg(), ApiErrorEnum.PARAM_AUTH_ERROR.getCode());
         }
 
     }

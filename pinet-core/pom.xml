@@ -7,10 +7,10 @@
     <packaging>jar</packaging>
     <version>1.0.0-SNAPSHOT</version>
     <name>pinet-core</name>
-    <description>uguess-core</description>
+    <description>pinet-core</description>
 
     <parent>
-        <artifactId>pinet</artifactId>
+        <artifactId>pinet-parent</artifactId>
         <groupId>com.pinet</groupId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pinet-parent/pom.xml</relativePath>
@@ -83,15 +83,16 @@
             <version>${jwt.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.12.0</version>
+        </dependency>
     </dependencies>
 
     <build>
         <finalName>${project.artifactId}</finalName>
     </build>
 
-    <scm>
-        <url>https://codeup.aliyun.com/qiyuan/uugamer/uguess-parent.git</url>
-        <connection>scm:git:git@codeup.aliyun.com:qiyuan/uugamer/uguess-parent.git</connection>
-        <developerConnection>scm:git:git@codeup.aliyun.com:qiyuan/uugamer/uguess-parent.git</developerConnection>
-    </scm>
 </project>

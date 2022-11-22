@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.ShopMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Shop">
+
+        <result column="name" property="name" />
+        <result column="business" property="business" />
+        <result column="phone" property="phone" />
+        <result column="avatar" property="avatar" />
+        <result column="is_open" property="isOpen" />
+        <result column="status" property="status" />
+        <result column="shop_address" property="shopAddress" />
+        <result column="receive_address" property="receiveAddress" />
+        <result column="is_free_shipping" property="isFreeShipping" />
+        <result column="free_goods_amount" property="freeGoodsAmount" />
+        <result column="lng" property="lng" />
+        <result column="lat" property="lat" />
+        <result column="admin_id" property="adminId" />
+        <result column="admin_name" property="adminName" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="contact" property="contact" />
+        <result column="shop_phone" property="shopPhone" />
+        <result column="cover" property="cover" />
+        <result column="geohash" property="geohash" />
+        <result column="service_id" property="serviceId" />
+        <result column="shop_type" property="shopType" />
+        <result column="home_time" property="homeTime" />
+        <result column="aging_type" property="agingType" />
+        <result column="shipping_time" property="shippingTime" />
+        <result column="open_time" property="openTime" />
+        <result column="rest_time" property="restTime" />
+        <result column="is_cross" property="isCross" />
+        <result column="pick_time" property="pickTime" />
+        <result column="is_preferential" property="isPreferential" />
+        <result column="sort" property="sort" />
+        <result column="is_self" property="isSelf" />
+        <result column="self_start_time" property="selfStartTime" />
+        <result column="self_end_time" property="selfEndTime" />
+        <result column="is_buy" property="isBuy" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+
+        name, business, phone, avatar, is_open, status, shop_address, receive_address, is_free_shipping, free_goods_amount, lng, lat, admin_id, admin_name, is_deleted, contact, shop_phone, cover, geohash, service_id, shop_type, home_time, aging_type, shipping_time, open_time, rest_time, is_cross, pick_time, is_preferential, sort, is_self, self_start_time, self_end_time, is_buy
+    </sql>
+
+</mapper>

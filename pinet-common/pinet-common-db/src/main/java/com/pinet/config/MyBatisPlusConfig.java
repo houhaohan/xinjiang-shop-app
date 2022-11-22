@@ -14,13 +14,6 @@ public class MyBatisPlusConfig {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
-//        // 分页插件
-//        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor();
-//        paginationInterceptor.setOverflow(mybatisProperties.getPage().isOverflow());
-//        paginationInterceptor.setMaxLimit(mybatisProperties.getPage().getMaxLimit());
-//        paginationInterceptor.setOptimizeJoin(mybatisProperties.getPage().isOptimizeJoin());
-//        interceptor.addInnerInterceptor(paginationInterceptor);
-
         return interceptor;
     }
 

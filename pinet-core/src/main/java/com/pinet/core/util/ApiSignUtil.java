@@ -1,7 +1,7 @@
 package com.pinet.core.util;
 
 import cn.hutool.core.codec.Base64Encoder;
-import com.pinet.core.exception.UguessException;
+import com.pinet.core.exception.PinetException;
 
 
 import javax.crypto.Mac;
@@ -73,7 +73,7 @@ public class ApiSignUtil {
         if(body==null || body.length<=0){
 
         }else{
-            if(body.length>1)throw new UguessException("post请求不允许传入多个请求体！");
+            if(body.length>1)throw new PinetException("post请求不允许传入多个请求体！");
             // 如果是post，对请求体生成md5摘要
             reqBody=body[0];
         }
@@ -240,7 +240,7 @@ public class ApiSignUtil {
      */
     public static String toGMTString(Date date) {
         SimpleDateFormat df = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z", Locale.UK);
-        df.setTimeZone(new java.util.SimpleTimeZone(0, "GMT"));
+        df.setTimeZone(new SimpleTimeZone(0, "GMT"));
         return df.format(date);
     }
 
