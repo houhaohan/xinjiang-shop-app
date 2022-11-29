@@ -34,6 +34,11 @@
         </dependency>
         <dependency>
             <groupId>com.pinet</groupId>
+            <artifactId>pinet-common-file</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pinet</groupId>
             <artifactId>pinet-core</artifactId>
             <version>${project.version}</version>
         </dependency>

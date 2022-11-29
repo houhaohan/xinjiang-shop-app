@@ -28,13 +28,12 @@
 .springBeans
 .sts4-cache
 
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
 # idea
 *.idea
-/uguess-game/uguess-game.iml
-/uguess-settle/uguess-settle.iml
 .idea
 *.iws
 *.ipr

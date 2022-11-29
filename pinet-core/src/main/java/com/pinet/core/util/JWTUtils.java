@@ -1,5 +1,6 @@
 package com.pinet.core.util;
 
+import com.alibaba.fastjson.JSONObject;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -9,19 +10,19 @@ import java.util.Date;
 @Slf4j
 public class JWTUtils {
     private final String secret="a9fd38419340ee10";
-    private long expire;
+    private long expire = 7200;
 
     /**
      * 生成jwt token
      */
-    public String generateToken(String userName) {
+    public String generateToken(String userId) {
         Date nowDate = new Date();
         //过期时间
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
 
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(userName)
+                .setSubject(userId)
                 .setIssuedAt(nowDate)
                 .setExpiration(expireDate)
                 .signWith(SignatureAlgorithm.HS512, secret)
@@ -57,7 +58,19 @@ public class JWTUtils {
         this.expire = expire;
     }
 
+    public static void main(String[] args) {
 
+        JWTUtils utils = new JWTUtils();
+        String token = utils.generateToken("10");
+        System.out.println(token);
 
+        Claims cli = utils.getClaimByToken(token);
+
+        Date expiration = cli.getExpiration();
+        System.out.println(JSONObject.toJSONString(cli));
+        System.out.println(expiration);
+
+        //{"sub":"10","iat":1669342560,"exp":1669349760}
+    }
 }
 

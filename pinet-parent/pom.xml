@@ -48,14 +48,12 @@
                 <scope>import</scope>
             </dependency>
 
-
             <!--  SpringBoot 监控客户端 -->
             <dependency>
                 <groupId>de.codecentric</groupId>
                 <artifactId>spring-boot-admin-starter-client</artifactId>
                 <version>${springboot.admin.version}</version>
             </dependency>
-
 
             <!--mybatis plus-->
             <dependency>
@@ -96,23 +94,40 @@
                 <version>${commons.beanutils.version}</version>
             </dependency>
 
-
             <!--knife4j-->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>knife4j-spring-boot-starter</artifactId>
                 <version>${knife4j.version}</version>
             </dependency>
-
-
         </dependencies>
     </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>aliyun</id>
+            <name>aliyun Repository</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>nexus</id>
+            <name>nexus Repository</name>
+            <url>http://192.168.1.91:8081/nexus/content/repositories/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <modules>
         <module>../pinet-common</module>
         <module>../pinet-core</module>
         <module>../pinet-rest</module>
-
+        <module>../pinet-pay</module>
     </modules>
     
 </project>

@@ -12,18 +12,16 @@ import java.util.Date;
 @Data
 public class BaseEntity implements Serializable {
     @ApiModelProperty("主键")
-    @TableId(value = "id",type = IdType.ASSIGN_UUID)
+    @TableId(value = "id",type = IdType.AUTO)
     private Long id;
-
-
-    @ApiModelProperty(value = "创建人",hidden=true)
+    @ApiModelProperty(value = "创建人")
     private String createUser;
-    @ApiModelProperty(value = "创建时间",hidden=true)
+    @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-    @ApiModelProperty(value = "更新人",hidden=true)
+    @ApiModelProperty(value = "更新人")
     private String updateUser;
-    @ApiModelProperty(value = "更新时间",hidden=true)
+    @ApiModelProperty(value = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
 

@@ -33,7 +33,7 @@ hs_err_pid*
 
 # idea
 *.idea
-/pinet-rest/pinet-rest.iml
+/pinet-common/pinet-common-mq/pinet-common-mq.iml
 .idea
 *.iws
 *.ipr
