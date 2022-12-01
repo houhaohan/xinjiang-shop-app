@@ -39,17 +39,17 @@ spring:
           username: root
           password: root
           driver-class-name: com.mysql.cj.jdbc.Driver
+
   redis:
     database: 0
-    host: 127.0.0.1
-#    password: qwer1234
-    password:
-    port: 6379
+    host: 47.110.9.224
+    password: qwer1234
+    port: 8379
 
 
 
 mybatis-plus:
-  mapper-locations: classpath*:com/pinet/mapper/xml/*.xml
+  mapper-locations: classpath*:com/pinet/rest/mapper/xml/*.xml
   configuration:
     ## 自动驼峰命名规则映射
     map-underscore-to-camel-case: true
@@ -62,28 +62,9 @@ mybatis-plus:
     db-config:
       ## 逻辑删除字段
       logic-delete-field: del_flag
-      ## 配置逻辑删除字段为1是删除
-      logic-not-delete-value: 0
       ## 逻辑删除未删除值
+      logic-not-delete-value: 0
+      ## 配置逻辑删除字段为1是删除
       logic-delete-value: 1
 
-wxpay:
-  #应用编号
-  appId: xxxx
-  #商户号
-  mchId: xxx
-  # APIv2密钥
-  apiKey: xxxx
-  # APIv3密钥
-  apiV3Key: xxx
-  # 微信支付V3-url前缀
-  baseUrl: https://api.mch.weixin.qq.com/v3
-  # 支付通知回调, pjm6m9.natappfree.cc 为内网穿透地址
-  notifyUrl: http://pjm6m9.natappfree.cc/pay/payNotify
-  # 退款通知回调, pjm6m9.natappfree.cc 为内网穿透地址
-  refundNotifyUrl: http://pjm6m9.natappfree.cc/pay/refundNotify
-  # 密钥路径,resources根目录下
-  keyPemPath: apiclient_key.pem
-  #商户证书序列号
-  serialNo: xxxxx
 

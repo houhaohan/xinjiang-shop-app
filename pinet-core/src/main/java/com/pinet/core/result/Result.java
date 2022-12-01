@@ -85,8 +85,8 @@ public class Result<T> implements Serializable {
 		return r;
 	}
 	
-	public static Result<Object> ok(Object data) {
-		Result<Object> r = new Result<Object>();
+	public static <T> Result<T> ok(T data) {
+		Result<T> r = new Result<T>();
 		r.setSuccess(true);
 		r.setCode(HttpStatus.SC_OK);
 		r.setResult(data);

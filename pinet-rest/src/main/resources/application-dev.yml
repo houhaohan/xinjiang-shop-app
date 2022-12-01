@@ -6,33 +6,53 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  autoconfigure:
+    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    druid:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://192.168.1.91:3306/xjs?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
-      username: root
-      password: 123456
-      min-idle: 10
-      max-pool-prepared-statement-per-connection-size: 20
-      validation-query-timeout: 30000
-      test-while-idle: true
-      time-between-eviction-runs-millis: 5000
-      max-active: 400
-      validation-query: SELECT 1 FROM DUAL
-      max-wait: 60000
-      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-      test-on-borrow: false
-      pool-prepared-statements: true
-      initial-size: 20
-      min-evictable-idle-time-millis: 300000
-      test-on-return: false
+    dynamic:
+      primary: master
+      druid:
+        min-idle: 10
+        max-pool-prepared-statement-per-connection-size: 20
+        validation-query-timeout: 30000
+        test-while-idle: true
+        time-between-eviction-runs-millis: 5000
+        max-active: 400
+        validation-query: SELECT 1 FROM DUAL
+        max-wait: 60000
+        connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+        test-on-borrow: false
+        pool-prepared-statements: true
+        initial-size: 20
+        min-evictable-idle-time-millis: 300000
+        test-on-return: false
+        filter: stat,wall,slf4j
+      datasource:
+        master:
+          url: jdbc:mysql://192.168.1.91:3306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+          username: root
+          password: root
+          driver-class-name: com.mysql.cj.jdbc.Driver
+        slave:
+          url: jdbc:mysql://192.168.1.91:3306/xjs?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+          username: root
+          password: root
+          driver-class-name: com.mysql.cj.jdbc.Driver
+
 
   redis:
     database: 0
     host: 192.168.1.91
     password: qwer1234
     port: 6379
+    lettuce:
+      pool:
+        max-active: 8   #最大连接数据库连接数,设 0 为没有限制
+        max-idle: 8     #最大等待连接中的数量,设 0 为没有限制
+        max-wait: -1ms  #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
+        min-idle: 0     #最小等待连接中的数量,设 0 为没有限制
+      shutdown-timeout: 100ms
 
 
 
@@ -55,4 +75,9 @@ mybatis-plus:
       ## 配置逻辑删除字段为1是删除
       logic-delete-value: 1
 
+wx:
+  app_id: wx7d9b680a3e2a4d95
+  app_secret: 2e63c469aad961ca3a5ae63733575b6f
+  mch_id: 1502596231
+  grant_type: authorization_code
 

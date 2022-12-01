@@ -8,6 +8,28 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "spring.datasource.druid")
 public class DruidDataSourceProperties {
 
+	//datasource:
+	//    type: com.alibaba.druid.pool.DruidDataSource
+	//    druid:
+	//      driver-class-name: com.mysql.cj.jdbc.Driver
+	//      url: jdbc:mysql://192.168.1.91:3306/xjs?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+	//      username: root
+	//      password: 123456
+	//      min-idle: 10
+	//      max-pool-prepared-statement-per-connection-size: 20
+	//      validation-query-timeout: 30000
+	//      test-while-idle: true
+	//      time-between-eviction-runs-millis: 5000
+	//      max-active: 400
+	//      validation-query: SELECT 1 FROM DUAL
+	//      max-wait: 60000
+	//      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+	//      test-on-borrow: false
+	//      pool-prepared-statements: true
+	//      initial-size: 20
+	//      min-evictable-idle-time-millis: 300000
+	//      test-on-return: false
+
 	// jdbc
 	private String driverClassName;
 	private String url;

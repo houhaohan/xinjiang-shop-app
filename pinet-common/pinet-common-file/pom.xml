@@ -12,11 +12,11 @@
     <artifactId>pinet-common-file</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.pinet</groupId>
-            <artifactId>pinet-oss</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.pinet</groupId>-->
+<!--            <artifactId>pinet-oss</artifactId>-->
+<!--            <version>1.0.0</version>-->
+<!--        </dependency>-->
     </dependencies>
     <build>
 
