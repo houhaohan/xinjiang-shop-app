@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 public class CodeGenerateUtil {
 
 //    private static String url = "jdbc:mysql://127.0.0.1:3306/xjs?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";
-    private static String url = "jdbc:mysql://127.0.0.1:3306/qingshi?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";
+    private static String url = "jdbc:mysql://192.168.1.91:3306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false";
     private static String username = "root";
-    private static String password = "root";
-    private static String[] tables = {"shop"};
+    private static String password = "123456";
+    private static String[] tables = {"order"};
 
     public static void main(String[] args) {
         new CodeGenerationManager(url, username, password, tables).execute();
