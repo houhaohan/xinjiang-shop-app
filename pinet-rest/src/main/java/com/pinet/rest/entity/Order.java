@@ -15,7 +15,7 @@ import lombok.Setter;
  * </p>
  *
  * @author wlbz
- * @since 2022-12-02
+ * @since 2022-12-06
  */
 @Getter
 @Setter
@@ -26,6 +26,9 @@ public class Order extends BaseEntity {
 
     @ApiModelProperty("订单编号")
     private Long orderNo;
+
+    @ApiModelProperty("订单状态  1外卖  2自提")
+    private Integer orderType;
 
     @ApiModelProperty("订单状态 10待付款   20已支付（已下单）  30商家制作中   40商品配送中   50商品已送达   90订单已退款     99订单取消   100订单完成")
     private Integer orderStatus;

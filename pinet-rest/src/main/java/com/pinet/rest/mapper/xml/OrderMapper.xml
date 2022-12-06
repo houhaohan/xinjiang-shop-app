@@ -11,6 +11,7 @@
         <result column="update_time" property="updateTime" />
         <result column="del_flag" property="delFlag" />
         <result column="order_no" property="orderNo" />
+        <result column="order_type" property="orderType" />
         <result column="order_status" property="orderStatus" />
         <result column="customer_id" property="customerId" />
         <result column="shop_id" property="shopId" />
@@ -33,7 +34,7 @@
         update_by,
         update_time,
         del_flag,
-        order_no, order_status, customer_id, shop_id, shop_name, order_price, order_prod_price, shipping_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark
+        order_no, order_type, order_status, customer_id, shop_id, shop_name, order_price, order_prod_price, shipping_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark
     </sql>
 
 </mapper>

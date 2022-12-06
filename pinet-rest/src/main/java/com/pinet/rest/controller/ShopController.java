@@ -8,14 +8,14 @@ import com.pinet.core.controller.BaseController;
 
 /**
  * <p>
- * 订单表 前端控制器
+ * 店铺表 前端控制器
  * </p>
  *
  * @author wlbz
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/order")
-public class OrderController extends BaseController {
+@RequestMapping("/shop")
+public class ShopController extends BaseController {
 
 }
