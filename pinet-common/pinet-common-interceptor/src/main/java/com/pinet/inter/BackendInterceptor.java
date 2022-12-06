@@ -31,6 +31,9 @@ public class BackendInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if("/doc.html".equals(request.getRequestURI()) || "/swagger-resources".equals(request.getRequestURI())){
+            return true;
+        }
         String accessToken = request.getHeader(ACCESS_TOKEN);
 
         if (handler != null && handler instanceof HandlerMethod) {
