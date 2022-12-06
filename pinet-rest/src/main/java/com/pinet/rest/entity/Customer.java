@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -147,6 +148,7 @@ public class Customer implements Serializable {
     * 是否被删除，1为删除，0为未被删除
     */
     @ApiModelProperty("是否被删除，1为删除，0为未被删除")
+    @TableLogic(value = "0",delval = "1")
     private Integer isDeleted;
     /**
     * 是否需要推送，默认为1
