@@ -29,5 +29,9 @@
         del_flag,
         customer_id, shop_id, prod_id, prod_num, prod_sku_id, prod_spec_id, cart_status
     </sql>
+    <select id="selectCartList" resultType="com.pinet.rest.entity.vo.CartListVo"
+            parameterType="com.pinet.rest.entity.dto.CartListDto">
+
+    </select>
 
 </mapper>

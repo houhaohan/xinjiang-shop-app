@@ -1,55 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pinet.rest.mapper.CustomerMapper">
 
-    <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Customer">
-        <id column="customer_id" property="customerId" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-        <result column="open_id" property="openId" />
-        <result column="uuid" property="uuid" />
-        <result column="pid" property="pid" />
-        <result column="password" property="password" />
-        <result column="nickname" property="nickname" />
-        <result column="realname" property="realname" />
-        <result column="phone" property="phone" />
-        <result column="sex" property="sex" />
-        <result column="avatar" property="avatar" />
-        <result column="email" property="email" />
-        <result column="birthday" property="birthday" />
-        <result column="is_identity" property="isIdentity" />
-        <result column="active" property="active" />
-        <result column="province_id" property="provinceId" />
-        <result column="city_id" property="cityId" />
-        <result column="area" property="area" />
-        <result column="create_ip" property="createIp" />
-        <result column="last_login_time" property="lastLoginTime" />
-        <result column="last_login_ip" property="lastLoginIp" />
-        <result column="jpush_token" property="jpushToken" />
-        <result column="yx_token" property="yxToken" />
-        <result column="terminal" property="terminal" />
-        <result column="is_deleted" property="isDeleted" />
-        <result column="need_push" property="needPush" />
-        <result column="balance" property="balance" />
-        <result column="total_recharge" property="totalRecharge" />
-        <result column="pay_password" property="payPassword" />
-        <result column="hx_uuid" property="hxUuid" />
-        <result column="is_pay_password" property="isPayPassword" />
-        <result column="is_new" property="isNew" />
-        <result column="rid_is_receive" property="ridIsReceive" />
-        <result column="rid_answer_num" property="ridAnswerNum" />
-        <result column="is_partner" property="isPartner" />
-        <result column="total_integral" property="totalIntegral" />
-        <result column="used_integral" property="usedIntegral" />
-        <result column="character_set" property="characterSet" />
+            <id property="customerId" column="customer_id" jdbcType="BIGINT"/>
+            <result property="openId" column="open_id" jdbcType="VARCHAR"/>
+            <result property="uuid" column="uuid" jdbcType="VARCHAR"/>
+            <result property="pid" column="pid" jdbcType="BIGINT"/>
+            <result property="password" column="password" jdbcType="VARCHAR"/>
+            <result property="nickname" column="nickname" jdbcType="VARCHAR"/>
+            <result property="realname" column="realname" jdbcType="VARCHAR"/>
+            <result property="phone" column="phone" jdbcType="VARCHAR"/>
+            <result property="sex" column="sex" jdbcType="SMALLINT"/>
+            <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+            <result property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="birthday" column="birthday" jdbcType="BIGINT"/>
+            <result property="isIdentity" column="is_identity" jdbcType="SMALLINT"/>
+            <result property="active" column="active" jdbcType="TINYINT"/>
+            <result property="provinceId" column="province_id" jdbcType="INTEGER"/>
+            <result property="cityId" column="city_id" jdbcType="INTEGER"/>
+            <result property="area" column="area" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="BIGINT"/>
+            <result property="createIp" column="create_ip" jdbcType="VARCHAR"/>
+            <result property="lastLoginTime" column="last_login_time" jdbcType="BIGINT"/>
+            <result property="lastLoginIp" column="last_login_ip" jdbcType="VARCHAR"/>
+            <result property="jpushToken" column="jpush_token" jdbcType="VARCHAR"/>
+            <result property="yxToken" column="yx_token" jdbcType="VARCHAR"/>
+            <result property="terminal" column="terminal" jdbcType="SMALLINT"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+            <result property="needPush" column="need_push" jdbcType="TINYINT"/>
+            <result property="balance" column="balance" jdbcType="DECIMAL"/>
+            <result property="totalRecharge" column="total_recharge" jdbcType="DECIMAL"/>
+            <result property="payPassword" column="pay_password" jdbcType="VARCHAR"/>
+            <result property="hxUuid" column="hx_uuid" jdbcType="VARCHAR"/>
+            <result property="isPayPassword" column="is_pay_password" jdbcType="TINYINT"/>
+            <result property="isNew" column="is_new" jdbcType="INTEGER"/>
+            <result property="ridIsReceive" column="rid_is_receive" jdbcType="TINYINT"/>
+            <result property="ridAnswerNum" column="rid_answer_num" jdbcType="TINYINT"/>
+            <result property="isPartner" column="is_partner" jdbcType="INTEGER"/>
+            <result property="totalIntegral" column="total_integral" jdbcType="DECIMAL"/>
+            <result property="usedIntegral" column="used_integral" jdbcType="DECIMAL"/>
+            <result property="characterSet" column="character_set" jdbcType="INTEGER"/>
+            <result property="updateTime" column="update_time" jdbcType="BIGINT"/>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        create_time,
-        update_time,
-        customer_id, open_id, uuid, pid, password, nickname, realname, phone, sex, avatar, email, birthday, is_identity, active, province_id, city_id, area, create_ip, last_login_time, last_login_ip, jpush_token, yx_token, terminal, is_deleted, need_push, balance, total_recharge, pay_password, hx_uuid, is_pay_password, is_new, rid_is_receive, rid_answer_num, is_partner, total_integral, used_integral, character_set
+        customer_id,open_id,uuid,
+        pid,password,nickname,
+        realname,phone,sex,
+        avatar,email,birthday,
+        is_identity,active,province_id,
+        city_id,area,create_time,
+        create_ip,last_login_time,last_login_ip,
+        jpush_token,yx_token,terminal,
+        is_deleted,need_push,balance,
+        total_recharge,pay_password,hx_uuid,
+        is_pay_password,is_new,rid_is_receive,
+        rid_answer_num,is_partner,total_integral,
+        used_integral,character_set,update_time
     </sql>
-
 </mapper>

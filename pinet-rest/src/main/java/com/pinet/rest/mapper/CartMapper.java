@@ -2,6 +2,10 @@ package com.pinet.rest.mapper;
 
 import com.pinet.rest.entity.Cart;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.dto.CartListDto;
+import com.pinet.rest.entity.vo.CartListVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface CartMapper extends BaseMapper<Cart> {
 
+    List<CartListVo> selectCartList(CartListDto dto);
 }

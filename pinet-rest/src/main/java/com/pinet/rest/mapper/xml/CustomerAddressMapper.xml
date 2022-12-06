@@ -1,38 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pinet.rest.mapper.CustomerAddressMapper">
 
-    <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pinet.rest.entity.CustomerAddress">
-        <result column="id" property="id" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-        <result column="customer_id" property="customerId" />
-        <result column="province_id" property="provinceId" />
-        <result column="city_id" property="cityId" />
-        <result column="district_id" property="districtId" />
-        <result column="name" property="name" />
-        <result column="address" property="address" />
-        <result column="province" property="province" />
-        <result column="city" property="city" />
-        <result column="district" property="district" />
-        <result column="postcode" property="postcode" />
-        <result column="phone" property="phone" />
-        <result column="tel" property="tel" />
-        <result column="active" property="active" />
-        <result column="status" property="status" />
-        <result column="lng" property="lng" />
-        <result column="lat" property="lat" />
-        <result column="house_number" property="houseNumber" />
-        <result column="address_name" property="addressName" />
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="customerId" column="customer_id" jdbcType="BIGINT"/>
+            <result property="provinceId" column="province_id" jdbcType="INTEGER"/>
+            <result property="cityId" column="city_id" jdbcType="INTEGER"/>
+            <result property="districtId" column="district_id" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="address" column="address" jdbcType="VARCHAR"/>
+            <result property="province" column="province" jdbcType="VARCHAR"/>
+            <result property="city" column="city" jdbcType="VARCHAR"/>
+            <result property="district" column="district" jdbcType="VARCHAR"/>
+            <result property="postcode" column="postcode" jdbcType="VARCHAR"/>
+            <result property="phone" column="phone" jdbcType="VARCHAR"/>
+            <result property="tel" column="tel" jdbcType="VARCHAR"/>
+            <result property="active" column="active" jdbcType="TINYINT"/>
+            <result property="status" column="status" jdbcType="TINYINT"/>
+            <result property="createTime" column="create_time" jdbcType="BIGINT"/>
+            <result property="updateTime" column="update_time" jdbcType="BIGINT"/>
+            <result property="lng" column="lng" jdbcType="DECIMAL"/>
+            <result property="lat" column="lat" jdbcType="DECIMAL"/>
+            <result property="houseNumber" column="house_number" jdbcType="VARCHAR"/>
+            <result property="addressName" column="address_name" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id,
-        create_time,
-        update_time,
-        customer_id, province_id, city_id, district_id, name, address, province, city, district, postcode, phone, tel, active, status, lng, lat, house_number, address_name
+        id,customer_id,province_id,
+        city_id,district_id,name,
+        address,province,city,
+        district,postcode,phone,
+        tel,active,status,
+        create_time,update_time,lng,
+        lat,house_number,address_name
     </sql>
-
 </mapper>
