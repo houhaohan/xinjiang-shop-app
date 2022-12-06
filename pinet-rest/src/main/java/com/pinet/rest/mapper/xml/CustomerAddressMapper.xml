@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.CustomerAddressMapper">
+
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.CustomerAddress">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="customerId" column="customer_id" jdbcType="BIGINT"/>
+            <result property="provinceId" column="province_id" jdbcType="INTEGER"/>
+            <result property="cityId" column="city_id" jdbcType="INTEGER"/>
+            <result property="districtId" column="district_id" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="address" column="address" jdbcType="VARCHAR"/>
+            <result property="province" column="province" jdbcType="VARCHAR"/>
+            <result property="city" column="city" jdbcType="VARCHAR"/>
+            <result property="district" column="district" jdbcType="VARCHAR"/>
+            <result property="postcode" column="postcode" jdbcType="VARCHAR"/>
+            <result property="phone" column="phone" jdbcType="VARCHAR"/>
+            <result property="tel" column="tel" jdbcType="VARCHAR"/>
+            <result property="active" column="active" jdbcType="TINYINT"/>
+            <result property="status" column="status" jdbcType="TINYINT"/>
+            <result property="createTime" column="create_time" jdbcType="BIGINT"/>
+            <result property="updateTime" column="update_time" jdbcType="BIGINT"/>
+            <result property="lng" column="lng" jdbcType="DECIMAL"/>
+            <result property="lat" column="lat" jdbcType="DECIMAL"/>
+            <result property="houseNumber" column="house_number" jdbcType="VARCHAR"/>
+            <result property="addressName" column="address_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,customer_id,province_id,
+        city_id,district_id,name,
+        address,province,city,
+        district,postcode,phone,
+        tel,active,status,
+        create_time,update_time,lng,
+        lat,house_number,address_name
+    </sql>
+</mapper>
