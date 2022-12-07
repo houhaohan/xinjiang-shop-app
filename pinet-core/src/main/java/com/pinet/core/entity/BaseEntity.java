@@ -11,6 +11,10 @@ import java.util.Date;
 
 @Data
 public class BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+
     @ApiModelProperty("主键")
     @TableId(value = "id",type = IdType.AUTO)
     private Long id;

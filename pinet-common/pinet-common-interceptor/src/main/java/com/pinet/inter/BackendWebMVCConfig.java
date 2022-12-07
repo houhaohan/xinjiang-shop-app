@@ -13,6 +13,10 @@ public class BackendWebMVCConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(backendInterceptor);
+        registry.addInterceptor(backendInterceptor)
+                //默认拦截所有请求
+                .addPathPatterns("/**")
+                //不需要拦截的请求 swagger
+                .excludePathPatterns("/swagger-resources/**","/swagger-ui/**","/v3/**");
     }
 }

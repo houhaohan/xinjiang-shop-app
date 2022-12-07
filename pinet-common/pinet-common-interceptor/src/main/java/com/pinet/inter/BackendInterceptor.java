@@ -8,12 +8,12 @@ import com.pinet.core.util.StringUtil;
 import com.pinet.inter.annotation.NotTokenSign;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -21,21 +21,16 @@ import java.io.IOException;
 @Component
 public class BackendInterceptor implements HandlerInterceptor {
     private static Logger logger = LoggerFactory.getLogger(BackendInterceptor.class);
-    public static final String ACCESS_TOKEN = "access_token";
+    private static final String ACCESS_TOKEN = "access_token";
     @Value("${spring.application.name}")
     private String applicationName;
 
-    @Autowired
+    @Resource
     private RedisUtil redisUtil;
 
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
-
-        if("/doc.html".equals(request.getRequestURI()) || "/swagger-resources".equals(request.getRequestURI()) || "/v3/api-docs".equals(request.getRequestURI())){
-            return true;
-        }
         String accessToken = request.getHeader(ACCESS_TOKEN);
 
         if (handler != null && handler instanceof HandlerMethod) {
@@ -53,10 +48,6 @@ public class BackendInterceptor implements HandlerInterceptor {
             if(StringUtil.isEmpty(tokenData)){
                 return error(request,response);
             }
-            if(!accessToken.equals(tokenData)){
-                return false;
-            }
-
         }
         return true;
     }
