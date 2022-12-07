@@ -1,6 +1,8 @@
 package com.pinet.core.result;
 
 import java.io.Serializable;
+
+import com.pinet.core.enums.ErrorCodeEnum;
 import com.pinet.core.http.HttpStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -69,16 +71,16 @@ public class Result<T> implements Serializable {
 	}
 	
 	
-	public static Result<Object> ok() {
-		Result<Object> r = new Result<Object>();
+	public static <T> Result<T> ok() {
+		Result<T> r = new Result<T>();
 		r.setSuccess(true);
 		r.setCode(HttpStatus.SC_OK);
 		r.setMessage("成功");
 		return r;
 	}
 	
-	public static Result<Object> ok(String msg) {
-		Result<Object> r = new Result<Object>();
+	public static <T> Result<T> ok(String msg) {
+		Result<T> r = new Result<T>();
 		r.setSuccess(true);
 		r.setCode(HttpStatus.SC_OK);
 		r.setMessage(msg);
@@ -93,8 +95,8 @@ public class Result<T> implements Serializable {
 		return r;
 	}
 
-	public static Result<Object> ok(String msg,Object data) {
-		Result<Object> r = new Result<Object>();
+	public static <T> Result<T> ok(String msg,T data) {
+		Result<T> r = new Result<T>();
 		r.setSuccess(true);
 		r.setCode(HttpStatus.SC_OK);
 		r.setMessage(msg);
@@ -102,26 +104,26 @@ public class Result<T> implements Serializable {
 		return r;
 	}
 	
-	public static Result<Object> error(String msg) {
+	public static <T> Result<T> error(String msg) {
 		return error(HttpStatus.SC_INTERNAL_SERVER_ERROR, msg);
 	}
 	
-	public static Result<Object> error(int code, String msg) {
-		Result<Object> r = new Result<Object>();
+	public static <T> Result<T> error(int code, String msg) {
+		Result<T> r = new Result<T>();
 		r.setCode(code);
 		r.setMessage(msg);
 		r.setSuccess(false);
 		return r;
 	}
 
-	public static Result<Object> error(String msg,Object data) {
-		Result<Object> r = error(HttpStatus.SC_INTERNAL_SERVER_ERROR, msg);
+	public static <T> Result<T> error(String msg,T data) {
+		Result<T> r = error(HttpStatus.SC_INTERNAL_SERVER_ERROR, msg);
 		r.setResult(data);
 		return r;
 	}
 
-	public static Result<Object> error(int code, String msg,Object data) {
-		Result<Object> r = new Result<Object>();
+	public static <T> Result<T> error(int code, String msg,T data) {
+		Result<T> r = new Result<T>();
 		r.setCode(code);
 		r.setMessage(msg);
 		r.setResult(data);
@@ -134,6 +136,10 @@ public class Result<T> implements Serializable {
 		this.code = HttpStatus.SC_INTERNAL_SERVER_ERROR;
 		this.success = false;
 		return this;
+	}
+
+	public static <T> Result<T> error(ErrorCodeEnum errorCodeEnum) {
+		return error(errorCodeEnum.getCode(), errorCodeEnum.getMessage());
 	}
 
 }

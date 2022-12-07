@@ -221,4 +221,7 @@ public class Customer implements Serializable {
     @ApiModelProperty("最近修改密码或者绑定账户的时间")
     private Long updateTime;
 
+    @ApiModelProperty("轻食openID")
+    private String qsOpenId;
+
 }

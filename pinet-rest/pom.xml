@@ -43,6 +43,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.pinet</groupId>
+            <artifactId>sms</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
         <!-- db orm -->
         <dependency>
             <groupId>mysql</groupId>

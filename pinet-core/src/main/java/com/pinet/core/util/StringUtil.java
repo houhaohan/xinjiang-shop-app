@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
+import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -422,4 +423,16 @@ public class StringUtil extends StrUtil {
         }
         return str;
     }
+
+    /**
+     * 产生随机6位整数
+     *
+     * @return
+     */
+    public static int randomSixCode() {
+        Random rand = new Random();
+        int num = rand.nextInt(899999) + 100000;
+        return num;
+    }
+
 }

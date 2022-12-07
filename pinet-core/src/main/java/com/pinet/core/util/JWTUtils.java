@@ -9,13 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
 @Slf4j
 public class JWTUtils {
-    private final String secret="a9fd38419340ee10";
-    private long expire = 7200;
+    private static final String secret="a9fd38419340ee10";
+    private static long expire = 7200;
 
     /**
      * 生成jwt token
      */
-    public String generateToken(String userId) {
+    public static String generateToken(String userId) {
         Date nowDate = new Date();
         //过期时间
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
@@ -29,7 +29,7 @@ public class JWTUtils {
                 .compact();
     }
 
-    public Claims getClaimByToken(String token) {
+    public static Claims getClaimByToken(String token) {
         try {
             return Jwts.parser()
                     .setSigningKey(secret)
@@ -46,17 +46,10 @@ public class JWTUtils {
      *
      * @return true：过期
      */
-    public boolean isTokenExpired(Date expiration) {
+    public static boolean isTokenExpired(Date expiration) {
         return expiration.before(new Date());
     }
 
-    public long getExpire() {
-        return expire;
-    }
-
-    public void setExpire(long expire) {
-        this.expire = expire;
-    }
 
     public static void main(String[] args) {
 

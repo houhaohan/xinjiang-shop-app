@@ -81,3 +81,12 @@ wx:
   mch_id: 1502596231
   grant_type: authorization_code
 
+jwt:
+  access_token:
+    # token 有效期2小时
+    expire: 7200
+sms:
+  code:
+    # 验证码 有效期10分钟
+    expire: 600
+

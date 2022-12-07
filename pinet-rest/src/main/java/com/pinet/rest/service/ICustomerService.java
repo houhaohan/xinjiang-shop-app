@@ -10,4 +10,18 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface ICustomerService extends IService<Customer> {
 
+    /**
+     * 根据openId获取用户
+     * @param openId
+     * @return
+     */
+    Customer getByQsOpenId(String openId);
+
+    /**
+     *
+     * @param phone
+     * @return
+     */
+    Customer getByPhone(String phone);
+
 }
