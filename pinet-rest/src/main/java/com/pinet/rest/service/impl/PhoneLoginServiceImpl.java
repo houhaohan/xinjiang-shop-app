@@ -16,8 +16,6 @@ import com.pinet.rest.service.ICustomerService;
 import com.pinet.rest.service.ILoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -26,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 public class PhoneLoginServiceImpl implements ILoginService {
 
     private final ICustomerService customerService;
-
-    private final HttpServletRequest request;
 
     private final RedisUtil redisUtil;
 
@@ -50,11 +46,11 @@ public class PhoneLoginServiceImpl implements ILoginService {
             if(customer.getActive() == 0){
                 throw new LoginException(ErrorCodeEnum.CUSTOMER_NOT_ACTIVE);
             }
-            customer.setLastLoginIp(IPUtils.getIpAddr(request));
+            customer.setLastLoginIp(IPUtils.getIpAddr());
             customer.setLastLoginTime(System.currentTimeMillis());
             customerService.updateById(customer);
         }else {
-            String ip = IPUtils.getIpAddr(request);
+            String ip = IPUtils.getIpAddr();
             customer = Customer.builder()
                     .createTime(System.currentTimeMillis())
                     .createIp(ip)
@@ -76,6 +72,19 @@ public class PhoneLoginServiceImpl implements ILoginService {
         userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JWTUtils.expire));
         userInfo.setUser(customer);
         return userInfo;
+    }
+
+    @Override
+    public void logout(String token) {
+        redisUtil.delete(UserConstant.PREFIX_REFRESH_TOKEN+token);
+
+        String userId = JWTUtils.getUserId(token);
+        if(StringUtil.isEmpty(userId)){
+            return;
+        }
+        redisUtil.delete(UserConstant.PREFIX_USER_TOKEN+userId);
+
+
     }
 
     /**

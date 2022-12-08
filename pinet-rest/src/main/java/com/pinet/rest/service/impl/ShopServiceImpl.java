@@ -4,7 +4,9 @@ import com.pinet.rest.entity.Shop;
 import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.service.IShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -16,5 +18,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
+    @Autowired
+    private ShopMapper shopMapper;
 
+    @Override
+    public Shop getMinDistanceShop(BigDecimal lat, BigDecimal lng) {
+        return shopMapper.getMinDistanceShop(lat,lng);
+    }
 }

@@ -31,6 +31,7 @@ public class LoginController {
     }
 
     /**
+     * 参考：https://blog.csdn.net/weixin_45411101/article/details/124491929
      * 微信小程序登入
      * @param request
      * @return
@@ -42,9 +43,11 @@ public class LoginController {
             ILoginService loginService = SpringContextUtils.getBean("wxLoginService", ILoginService.class);
             UserInfo userInfo = loginService.login(request);
             return Result.ok(userInfo);
-        }catch (WxErrorException e){
+        }
+        catch (WxErrorException e){
             log.error("微信登入失败，失败原因=======》{}",e.getMessage());
-        } catch (Exception e){
+        }
+        catch (Exception e){
             log.error("微信登入失败，失败原因=======》{}",e.getMessage());
         }
         return Result.error(500,"登入失败");
@@ -67,5 +70,23 @@ public class LoginController {
             log.error("手机验证码登入失败，失败原因=======》{}",e.getMessage());
         }
         return Result.error(500,"登入失败");
+    }
+
+
+    /**
+     * 退出登入
+     * @return
+     */
+    @RequestMapping("/logout")
+    @ApiOperation("退出登入")
+    public Result<?> logout(@RequestParam String token){
+        try{
+            ILoginService loginService = SpringContextUtils.getBean("phoneLoginService", ILoginService.class);
+            loginService.logout(token);
+            return Result.ok();
+        }catch (Exception e){
+            log.error("手机验证码登入失败，失败原因=======》{}",e.getMessage());
+        }
+        return Result.error(500,"退出失败");
     }
 }
