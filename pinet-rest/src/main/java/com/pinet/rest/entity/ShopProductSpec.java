@@ -37,9 +37,6 @@ public class ShopProductSpec extends BaseEntity {
     @ApiModelProperty("sku id")
     private Long skuId;
 
-    @ApiModelProperty("规格name")
-    private String skuName;
-
     @ApiModelProperty("价格")
     private BigDecimal price;
 

@@ -31,6 +31,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/cart")
+@Api(tags = "购物车模块")
 public class CartController extends BaseController {
     @Resource
     private ICartService cartService;

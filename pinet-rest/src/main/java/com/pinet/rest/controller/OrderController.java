@@ -1,6 +1,7 @@
 package com.pinet.rest.controller;
 
 
+import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import com.pinet.core.controller.BaseController;
  */
 @RestController
 @RequestMapping("/order")
+@Api(tags = "订单模块")
 public class OrderController extends BaseController {
 
 }

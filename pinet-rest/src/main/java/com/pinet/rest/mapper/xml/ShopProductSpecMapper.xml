@@ -14,7 +14,6 @@
         <result column="prod_spec_id" property="prodSpecId" />
         <result column="spec_name" property="specName" />
         <result column="sku_id" property="skuId" />
-        <result column="sku_name" property="skuName" />
         <result column="price" property="price" />
         <result column="stock" property="stock" />
     </resultMap>
@@ -27,7 +26,7 @@
         update_by,
         update_time,
         del_flag,
-        shop_prod_id, prod_spec_id, spec_name, sku_id, sku_name, price, stock
+        shop_prod_id, prod_spec_id, spec_name, sku_id, price, stock
     </sql>
 
 </mapper>

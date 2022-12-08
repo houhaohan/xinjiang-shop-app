@@ -20,6 +20,6 @@ public class EditCartProdNumDto {
 
     @NotNull(message = "商品数量不能为空")
     @Min(value = 0,message = "商品数量最小为0")
-    @ApiModelProperty(value = "商品数量",name = "prodNum")
+    @ApiModelProperty(value = "商品数量(数量为0时则会删除该记录)",name = "prodNum")
     private Integer prodNum;
 }
