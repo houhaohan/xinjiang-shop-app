@@ -1,10 +1,5 @@
 package com.pinet.rest.service.impl;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.api.WxMaUserService;
-import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
-import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
-import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.UserConstant;
@@ -16,72 +11,56 @@ import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
 import com.pinet.rest.entity.request.SmsLoginRequest;
-import com.pinet.rest.entity.request.WxLoginRequest;
 import com.pinet.rest.entity.vo.UserInfo;
 import com.pinet.rest.service.ICustomerService;
 import com.pinet.rest.service.ILoginService;
 import lombok.RequiredArgsConstructor;
-import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
-@Service("wxLoginService")
+@Service("phoneLoginService")
 @RequiredArgsConstructor
-public class WxLoginServiceImpl implements ILoginService {
+public class PhoneLoginServiceImpl implements ILoginService {
 
     private final ICustomerService customerService;
 
     private final HttpServletRequest request;
 
-    private final WxMaService wxMaService;
-
     private final RedisUtil redisUtil;
 
     @Override
-    public UserInfo login(LoginRequest loginRequest) throws WxErrorException {
-        WxLoginRequest wxLoginRequest = (WxLoginRequest)loginRequest;
-        WxMaUserService userService = wxMaService.getUserService();
-        WxMaJscode2SessionResult sessionInfo = userService.getSessionInfo(wxLoginRequest.getCode());
-        Customer customer = customerService.getByQsOpenId(sessionInfo.getOpenid());
+    public UserInfo login(LoginRequest loginRequest) {
+        SmsLoginRequest smsLoginRequest = (SmsLoginRequest)loginRequest;
+        if(StringUtil.isEmpty(smsLoginRequest.getCode())){
+            throw new LoginException(ErrorCodeEnum.SMS_EMPTY);
+        }
+        String code = redisUtil.get(CommonConstant.SMS_CODE_LOGIN + smsLoginRequest.getPhone());
+        if(StringUtil.isEmpty(code)){
+            throw new LoginException(ErrorCodeEnum.SMS_EXPIRED);
+        }
+        if(!code.equals(smsLoginRequest.getCode())){
+            throw new LoginException(ErrorCodeEnum.SMS_ERROR);
+        }
+
+        Customer customer = customerService.getByPhone(smsLoginRequest.getPhone());
         if(customer != null){
             if(customer.getActive() == 0){
-                throw new LoginException("该用户已禁用");
+                throw new LoginException(ErrorCodeEnum.CUSTOMER_NOT_ACTIVE);
             }
             customer.setLastLoginIp(IPUtils.getIpAddr(request));
             customer.setLastLoginTime(System.currentTimeMillis());
-            customer.setQsOpenId(sessionInfo.getOpenid());
             customerService.updateById(customer);
         }else {
-            //创建新用户
-            if(sessionInfo == null){
-                throw new LoginException("获取session失败");
-            }
-            if(sessionInfo.getOpenid() == null){
-                throw new LoginException("获取openid失败");
-            }
-
-            //获取用户信息
-            WxMaUserInfo userInfo = userService.getUserInfo(sessionInfo.getSessionKey(), wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
-
-            //获取手机号
-            WxMaPhoneNumberInfo wxMaPhoneNumberInfo = userService.getPhoneNoInfo(sessionInfo.getSessionKey(), wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
-            if(wxMaPhoneNumberInfo == null || StringUtil.isEmpty(wxMaPhoneNumberInfo.getPhoneNumber())){
-                throw new LoginException("获取手机号失败");
-            }
             String ip = IPUtils.getIpAddr(request);
             customer = Customer.builder()
                     .createTime(System.currentTimeMillis())
                     .createIp(ip)
                     .lastLoginIp(ip)
                     .lastLoginTime(System.currentTimeMillis())
-                    .qsOpenId(sessionInfo.getOpenid())
-                    .nickname(userInfo.getNickName())
-                    .avatar(userInfo.getAvatarUrl())
-                    .sex(Integer.valueOf(userInfo.getGender()))
-                    .phone(wxMaPhoneNumberInfo.getPhoneNumber())
+                    .phone(smsLoginRequest.getPhone())
                     .active(1)
                     .build();
             customerService.save(customer);
@@ -91,6 +70,7 @@ public class WxLoginServiceImpl implements ILoginService {
         String token = JWTUtils.generateToken(userId);
         cacheToken(userId,token);
 
+        //todo 登入日志
         UserInfo userInfo = new UserInfo();
         userInfo.setAccess_token(token);
         userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JWTUtils.expire));

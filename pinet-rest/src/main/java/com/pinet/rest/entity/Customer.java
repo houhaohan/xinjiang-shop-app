@@ -1,19 +1,16 @@
 package com.pinet.rest.entity;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
-
 import java.math.BigDecimal;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
+import lombok.NoArgsConstructor;
 
 /**
 * 用户表
@@ -21,7 +18,12 @@ import org.hibernate.validator.constraints.Length;
 * @TableName customer
 */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Customer implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
     * 用户id

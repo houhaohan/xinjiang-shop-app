@@ -75,18 +75,14 @@ mybatis-plus:
       ## 配置逻辑删除字段为1是删除
       logic-delete-value: 1
 
-wx:
-  app_id: wx7d9b680a3e2a4d95
-  app_secret: 2e63c469aad961ca3a5ae63733575b6f
-  mch_id: 1502596231
-  grant_type: authorization_code
 
-jwt:
-  access_token:
-    # token 有效期2小时
-    expire: 7200
 sms:
   code:
     # 验证码 有效期10分钟
     expire: 600
 
+# 微信开发配置
+wx:
+  miniapp:
+    appid: wx7d9b680a3e2a4d95
+    secret: 2e63c469aad961ca3a5ae63733575b6f

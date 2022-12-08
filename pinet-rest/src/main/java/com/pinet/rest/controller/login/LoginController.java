@@ -3,16 +3,16 @@ package com.pinet.rest.controller.login;
 import com.alibaba.fastjson.JSONObject;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.OkHttpUtil;
-import com.pinet.rest.entity.dto.SmsDto;
-import com.pinet.rest.entity.vo.LoginResponse;
-import com.pinet.rest.entity.vo.WxLoginResult;
+import com.pinet.core.util.SpringContextUtils;
+import com.pinet.rest.entity.request.SmsLoginRequest;
+import com.pinet.rest.entity.request.WxLoginRequest;
+import com.pinet.rest.entity.vo.UserInfo;
 import com.pinet.rest.entity.vo.WxToken;
 import com.pinet.rest.service.ILoginService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,16 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "登入")
 @Slf4j
 public class LoginController {
-    @Value("wx.app_id")
-    private String app_id;
-    @Value("wx.app_secret")
-    private String app_secret;
-    @Value("wx.authorization_code")
-    private String authorization_code;
-
-    @Autowired
-    private ILoginService loginService;
-
 
     @RequestMapping("/getAccessToken")
     public Result<WxToken> getAccessToken(){
@@ -42,19 +32,19 @@ public class LoginController {
 
     /**
      * 微信小程序登入
-     * @param code
+     * @param request
      * @return
      */
     @PostMapping("/wx")
     @ApiOperation("微信登入")
-    public Result<LoginResponse> wxLogin(@RequestParam String code){
+    public Result<UserInfo> wxLogin(@RequestBody WxLoginRequest request){
         try{
-            String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+app_id+"&secret="+app_secret+"&js_code="+code+"&grant_type="+authorization_code;
-            String result = OkHttpUtil.get(url, null);
-            WxLoginResult wxLoginResult = JSONObject.parseObject(result, WxLoginResult.class);
-            LoginResponse response = loginService.login(wxLoginResult);
-            return Result.ok(response);
-        }catch (Exception e){
+            ILoginService loginService = SpringContextUtils.getBean("wxLoginService", ILoginService.class);
+            UserInfo userInfo = loginService.login(request);
+            return Result.ok(userInfo);
+        }catch (WxErrorException e){
+            log.error("微信登入失败，失败原因=======》{}",e.getMessage());
+        } catch (Exception e){
             log.error("微信登入失败，失败原因=======》{}",e.getMessage());
         }
         return Result.error(500,"登入失败");
@@ -63,14 +53,15 @@ public class LoginController {
 
     /**
      * 手机验证码登入
-     * @param smsDto
+     * @param request
      * @return
      */
     @PostMapping("/sms_code")
     @ApiOperation("手机验证码登入")
-    public Result<?> smsLogin(@RequestBody SmsDto smsDto){
+    public Result<?> smsLogin(@RequestBody SmsLoginRequest request){
         try{
-            LoginResponse response = loginService.login(smsDto);
+            ILoginService loginService = SpringContextUtils.getBean("phoneLoginService", ILoginService.class);
+            UserInfo response = loginService.login(request);
             return Result.ok(response);
         }catch (Exception e){
             log.error("手机验证码登入失败，失败原因=======》{}",e.getMessage());

@@ -10,7 +10,7 @@ import java.util.Date;
 @Slf4j
 public class JWTUtils {
     private static final String secret="a9fd38419340ee10";
-    private static long expire = 7200;
+    public static long expire = 7200;
 
     /**
      * 生成jwt token
