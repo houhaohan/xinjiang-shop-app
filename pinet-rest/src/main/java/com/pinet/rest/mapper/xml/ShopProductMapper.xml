@@ -12,6 +12,11 @@
         <result column="del_flag" property="delFlag" />
         <result column="shop_id" property="shopId" />
         <result column="prod_id" property="prodId" />
+        <result column="product_name" property="productName" />
+        <result column="product_img" property="productImg" />
+        <result column="product_desc" property="productDesc" />
+        <result column="product_type_id" property="productTypeId" />
+        <result column="product_type" property="productType" />
         <result column="shop_prod_status" property="shopProdStatus" />
     </resultMap>
 
@@ -23,7 +28,7 @@
         update_by,
         update_time,
         del_flag,
-        shop_id, prod_id, shop_prod_status
+        shop_id, prod_id, product_name, product_img, product_desc, product_type_id, product_type, shop_prod_status
     </sql>
 
 </mapper>

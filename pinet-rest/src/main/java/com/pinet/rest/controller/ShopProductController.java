@@ -8,11 +8,11 @@ import com.pinet.core.controller.BaseController;
 
 /**
  * <p>
- *  前端控制器
+ * 店铺商品表 前端控制器
  * </p>
  *
  * @author wlbz
- * @since 2022-12-06
+ * @since 2022-12-08
  */
 @RestController
 @RequestMapping("/shop-product")

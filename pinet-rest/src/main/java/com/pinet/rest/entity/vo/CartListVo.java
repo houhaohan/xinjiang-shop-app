@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @program: xinjiang-shop-app
  * @description: 购物车列表vo
@@ -26,11 +28,14 @@ public class CartListVo {
     @ApiModelProperty(value = "商品数量",name = "prodNum")
     private Integer prodNum;
 
+    @ApiModelProperty(value = "商品单价",name = "prodPrice")
+    private BigDecimal prodPrice;
+
     @ApiModelProperty(value = "商品规格",name = "prodSkuName")
     private String prodSkuName;
 
-    @ApiModelProperty(value = "商品样式",name = "prodSpecId")
-    private String prodSpecId;
+    @ApiModelProperty(value = "商品样式",name = "prodSpecName")
+    private String prodSpecName;
 
     @ApiModelProperty(value = "购物车状态 1正常  2失效",name = "cartStatus")
     private Integer cartStatus;

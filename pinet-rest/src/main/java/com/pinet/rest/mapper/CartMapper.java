@@ -9,11 +9,11 @@ import java.util.List;
 
 /**
  * <p>
- *  Mapper 接口
+ * 购物车 Mapper 接口
  * </p>
  *
  * @author wlbz
- * @since 2022-12-06
+ * @since 2022-12-08
  */
 public interface CartMapper extends BaseMapper<Cart> {
 

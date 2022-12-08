@@ -4,19 +4,18 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Cart">
-        <result column="id" property="id" />
-        <result column="create_by" property="createBy" />
-        <result column="create_time" property="createTime" />
-        <result column="update_by" property="updateBy" />
-        <result column="update_time" property="updateTime" />
-        <result column="del_flag" property="delFlag" />
-        <result column="customer_id" property="customerId" />
-        <result column="shop_id" property="shopId" />
-        <result column="prod_id" property="prodId" />
-        <result column="prod_num" property="prodNum" />
-        <result column="prod_sku_id" property="prodSkuId" />
-        <result column="prod_spec_id" property="prodSpecId" />
-        <result column="cart_status" property="cartStatus" />
+        <result column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="shop_prod_id" property="shopProdId"/>
+        <result column="prod_num" property="prodNum"/>
+        <result column="shop_prod_spec_id" property="shopProdSpecId"/>
+        <result column="cart_status" property="cartStatus"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -27,11 +26,24 @@
         update_by,
         update_time,
         del_flag,
-        customer_id, shop_id, prod_id, prod_num, prod_sku_id, prod_spec_id, cart_status
+        customer_id, shop_id, shop_prod_id, prod_num, shop_prod_spec_id, cart_status
     </sql>
     <select id="selectCartList" resultType="com.pinet.rest.entity.vo.CartListVo"
             parameterType="com.pinet.rest.entity.dto.CartListDto">
-
+        select c.id            cartId,
+               sp.product_name prodName,
+               sp.product_img  prodImg,
+               c.prod_num      prodNum,
+               sps.price       prodPrice,
+               sps.sku_name    prodSkuName,
+               sps.spec_name   prodSpecName,
+               c.cart_status   cartStatus
+        from qingshi.cart c
+                 left join shop_product sp on sp.id = c.shop_prod_id
+                 left join shop_product_spec sps on sps.shop_prod_id = sp.id
+        where c.del_flag = 0
+          and c.shop_id = #{shopId} and c.customer_id = #{customerId}
+        order by c.cart_status, create_time desc
     </select>
 
 </mapper>

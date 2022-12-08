@@ -26,9 +26,6 @@ public class Product extends BaseEntity {
     @ApiModelProperty("商品名称")
     private String productName;
 
-    @ApiModelProperty("商品价格")
-    private BigDecimal price;
-
     @ApiModelProperty("商品图片")
     private String productImg;
 

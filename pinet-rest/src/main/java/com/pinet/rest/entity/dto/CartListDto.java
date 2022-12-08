@@ -21,4 +21,6 @@ public class CartListDto {
     @ApiModelProperty(value = "店铺id",name = "shopId")
     @NotNull(message = "店铺id不能为空")
     private Integer shopId;
+
+    private Integer customerId;
 }

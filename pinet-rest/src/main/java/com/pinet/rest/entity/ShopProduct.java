@@ -10,16 +10,16 @@ import lombok.Setter;
 
 /**
  * <p>
- * 
+ * 店铺商品表
  * </p>
  *
  * @author wlbz
- * @since 2022-12-06
+ * @since 2022-12-08
  */
 @Getter
 @Setter
 @TableName("shop_product")
-@ApiModel(value = "ShopProduct对象", description = "")
+@ApiModel(value = "ShopProduct对象", description = "店铺商品表")
 public class ShopProduct extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -29,6 +29,21 @@ public class ShopProduct extends BaseEntity {
 
     @ApiModelProperty("商品id")
     private Long prodId;
+
+    @ApiModelProperty("商品名称")
+    private String productName;
+
+    @ApiModelProperty("商品图片")
+    private String productImg;
+
+    @ApiModelProperty("商品描述(富文本框)")
+    private String productDesc;
+
+    @ApiModelProperty("所属分类id")
+    private Long productTypeId;
+
+    @ApiModelProperty("所属分类")
+    private String productType;
 
     @ApiModelProperty("店铺商品状态  1正常  2下架")
     private Integer shopProdStatus;
