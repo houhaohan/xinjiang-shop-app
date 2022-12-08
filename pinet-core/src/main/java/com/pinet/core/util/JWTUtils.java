@@ -41,6 +41,19 @@ public class JWTUtils {
         }
     }
 
+    public static String getUserId(String token) {
+        try {
+            Claims claims = getClaimByToken(token);
+            if(claims == null){
+                return null;
+            }
+            return claims.getSubject();
+        } catch (Exception e) {
+            log.debug("token error : ", e);
+            return null;
+        }
+    }
+
     /**
      * token是否过期
      *
@@ -57,11 +70,14 @@ public class JWTUtils {
         String token = utils.generateToken("10");
         System.out.println(token);
 
-        Claims cli = utils.getClaimByToken(token);
+        String userId = getUserId(token);
+        System.out.println("userId=====>"+userId);
 
-        Date expiration = cli.getExpiration();
-        System.out.println(JSONObject.toJSONString(cli));
-        System.out.println(expiration);
+//        Claims cli = utils.getClaimByToken(token);
+//
+//        Date expiration = cli.getExpiration();
+//        System.out.println(JSONObject.toJSONString(cli));
+//        System.out.println(expiration);
 
         //{"sub":"10","iat":1669342560,"exp":1669349760}
     }

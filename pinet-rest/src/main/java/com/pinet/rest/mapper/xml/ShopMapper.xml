@@ -37,4 +37,13 @@
         shop_name, avatar, province, city, district, province_id, city_id, district_id, address, lng, lat, linkman, shop_phone, shop_status
     </sql>
 
+    <select id="getMinDistanceShop" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+        round(st_distance_sphere(point(#{lng},#{lat}),point(`lng`,`lat`)),10) dis
+        FROM shop
+        WHERE shop_status = 1
+        AND del_flag = 0
+        ORDER BY dis limit 1
+    </select>
+
 </mapper>

@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.rest.entity.CustomerAddress;
 import com.pinet.rest.service.ICustomerAddressService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2022-12-06 16:58:34
 */
 @Service
+@DS("slave")
 public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMapper, CustomerAddress>
     implements ICustomerAddressService {
 

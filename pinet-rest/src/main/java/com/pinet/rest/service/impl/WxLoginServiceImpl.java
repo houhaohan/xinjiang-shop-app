@@ -6,16 +6,13 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.pinet.common.redis.util.RedisUtil;
-import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.UserConstant;
-import com.pinet.core.enums.ErrorCodeEnum;
 import com.pinet.core.exception.LoginException;
 import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.JWTUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
-import com.pinet.rest.entity.request.SmsLoginRequest;
 import com.pinet.rest.entity.request.WxLoginRequest;
 import com.pinet.rest.entity.vo.UserInfo;
 import com.pinet.rest.service.ICustomerService;
@@ -23,8 +20,6 @@ import com.pinet.rest.service.ILoginService;
 import lombok.RequiredArgsConstructor;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -33,8 +28,6 @@ import java.util.concurrent.TimeUnit;
 public class WxLoginServiceImpl implements ILoginService {
 
     private final ICustomerService customerService;
-
-    private final HttpServletRequest request;
 
     private final WxMaService wxMaService;
 
@@ -50,7 +43,7 @@ public class WxLoginServiceImpl implements ILoginService {
             if(customer.getActive() == 0){
                 throw new LoginException("该用户已禁用");
             }
-            customer.setLastLoginIp(IPUtils.getIpAddr(request));
+            customer.setLastLoginIp(IPUtils.getIpAddr());
             customer.setLastLoginTime(System.currentTimeMillis());
             customer.setQsOpenId(sessionInfo.getOpenid());
             customerService.updateById(customer);
@@ -71,7 +64,7 @@ public class WxLoginServiceImpl implements ILoginService {
             if(wxMaPhoneNumberInfo == null || StringUtil.isEmpty(wxMaPhoneNumberInfo.getPhoneNumber())){
                 throw new LoginException("获取手机号失败");
             }
-            String ip = IPUtils.getIpAddr(request);
+            String ip = IPUtils.getIpAddr();
             customer = Customer.builder()
                     .createTime(System.currentTimeMillis())
                     .createIp(ip)
@@ -96,6 +89,11 @@ public class WxLoginServiceImpl implements ILoginService {
         userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JWTUtils.expire));
         userInfo.setUser(customer);
         return userInfo;
+    }
+
+    @Override
+    public void logout(String token) {
+
     }
 
     /**
