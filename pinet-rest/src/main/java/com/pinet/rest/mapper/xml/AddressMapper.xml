@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.AddressMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Address">
+        <result column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="parent_id" property="parentId" />
+        <result column="short_name" property="shortName" />
+        <result column="level" property="level" />
+        <result column="pinyin" property="pinyin" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="update_name" property="updateName" />
+        <result column="update_parent_id" property="updateParentId" />
+        <result column="update_short_name" property="updateShortName" />
+        <result column="update_level" property="updateLevel" />
+        <result column="update_pinyin" property="updatePinyin" />
+        <result column="update_is_deleted" property="updateIsDeleted" />
+        <result column="address" property="address" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,
+        `name`, parent_id, short_name, `level`, pinyin, is_deleted, update_name, update_parent_id, update_short_name, update_level, update_pinyin, update_is_deleted, address
+    </sql>
+
+
+    <select id="selectIdByName" resultType="com.pinet.rest.entity.vo.AddressIdVo">
+        select p.id as  provinceId, c.id as cityId, d.id as districtId
+        from address p
+        left join address c on p.id = c.parent_id
+        left join address d on c.id = d.parent_id
+        <where>
+            <if test="province != null and province != ''">
+                and p.name = #{province}
+            </if>
+            <if test="city != null and city != ''">
+                and p.name = #{city}
+            </if>
+            <if test="district != null and district != ''">
+                and p.name = #{district}
+            </if>
+        </where>
+    </select>
+</mapper>
