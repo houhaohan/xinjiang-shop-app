@@ -39,6 +39,11 @@
         </dependency>
         <dependency>
             <groupId>com.pinet</groupId>
+            <artifactId>pinet-common-mq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pinet</groupId>
             <artifactId>pinet-core</artifactId>
             <version>${project.version}</version>
         </dependency>

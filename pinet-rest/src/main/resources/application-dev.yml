@@ -54,6 +54,13 @@ spring:
         min-idle: 0     #最小等待连接中的数量,设 0 为没有限制
       shutdown-timeout: 100ms
 
+  activemq:
+    broker-url: tcp://192.168.1.91:61616
+    user: admin
+    password: admin
+    pool:
+      enabled: true #连接池启动
+      max-connections: 10 #最大连接数
 
 
 mybatis-plus:
