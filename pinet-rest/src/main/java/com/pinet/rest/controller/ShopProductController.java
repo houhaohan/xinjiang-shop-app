@@ -4,10 +4,12 @@ package com.pinet.rest.controller;
 import com.pinet.core.result.Result;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.ShopProduct;
+import com.pinet.rest.entity.vo.ShopProductVo;
 import com.pinet.rest.service.IShopProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
@@ -32,12 +34,11 @@ public class ShopProductController extends BaseController {
      * @param id 商品ID
      * @return
      */
-    @RequestMapping("/getById")
+    @RequestMapping(value = "/getById",method = RequestMethod.GET)
     @NotTokenSign
-    public Result<ShopProduct> getById(@RequestParam Long id){
-        shopProductService.getDetailById(id);
-        return null;
-
+    public Result<ShopProductVo> getById(@RequestParam Long id){
+        ShopProductVo shopProductVo = shopProductService.getDetailById(id);
+        return Result.ok(shopProductVo);
     }
 
 }

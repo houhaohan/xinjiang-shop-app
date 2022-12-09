@@ -40,6 +40,9 @@ public class ShopProductSpec extends BaseEntity {
     @ApiModelProperty("价格")
     private BigDecimal price;
 
+    @ApiModelProperty("市场价")
+    private BigDecimal marketPrice;
+
     @ApiModelProperty("剩余库存")
     private Integer stock;
 

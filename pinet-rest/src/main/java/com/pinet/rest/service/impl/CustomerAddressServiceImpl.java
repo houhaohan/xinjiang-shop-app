@@ -1,10 +1,18 @@
 package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.CustomerAddress;
+import com.pinet.rest.entity.dto.CustomerAddressDto;
+import com.pinet.rest.entity.vo.AddressIdVo;
+import com.pinet.rest.service.IAddressService;
 import com.pinet.rest.service.ICustomerAddressService;
 import com.pinet.rest.mapper.CustomerAddressMapper;
+import com.pinet.rest.util.LoginUser;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,9 +21,62 @@ import org.springframework.stereotype.Service;
 * @createDate 2022-12-06 16:58:34
 */
 @Service
-@DS("slave")
-public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMapper, CustomerAddress>
-    implements ICustomerAddressService {
+@DS(DB.SLAVE)
+public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMapper, CustomerAddress> implements ICustomerAddressService {
+
+    @Autowired
+    private IAddressService addressService;
+    @Autowired
+    private LoginUser loginUser;
+
+    @Override
+    public boolean add(CustomerAddressDto customerAddressDto) {
+        AddressIdVo addressIdVo = addressService.selectIdByName(customerAddressDto.getProvince(), customerAddressDto.getCity(), customerAddressDto.getDistrict());
+        CustomerAddress entity = new CustomerAddress();
+        BeanUtils.copyProperties(customerAddressDto,entity);
+        entity.setCreateTime(System.currentTimeMillis());
+        entity.setProvinceId(addressIdVo.getProvinceId());
+        entity.setCityId(addressIdVo.getCityId());
+        entity.setDistrictId(addressIdVo.getDistrictId());
+        StringBuffer sb = new StringBuffer();
+        sb.append(entity.getProvince())
+                .append(entity.getCity())
+                .append(entity.getDistrict())
+                .append(customerAddressDto.getAddressName());
+        entity.setAddress(sb.toString());
+        entity.setCustomerId(Long.valueOf(loginUser.currentUserId()));
+        return this.save(entity);
+    }
+
+    @Override
+    public boolean edit(CustomerAddressDto customerAddressDto) {
+        CustomerAddress customerAddress = getById(customerAddressDto.getId());
+
+        CustomerAddress entity = new CustomerAddress();
+        BeanUtils.copyProperties(customerAddressDto,entity);
+        entity.setCreateTime(System.currentTimeMillis());
+        if(!equals(customerAddressDto,customerAddress)){
+            AddressIdVo addressIdVo = addressService.selectIdByName(customerAddressDto.getProvince(), customerAddressDto.getCity(), customerAddressDto.getDistrict());
+            entity.setProvinceId(addressIdVo.getProvinceId());
+            entity.setCityId(addressIdVo.getCityId());
+            entity.setDistrictId(addressIdVo.getDistrictId());
+            StringBuffer sb = new StringBuffer();
+            sb.append(entity.getProvince())
+                    .append(entity.getCity())
+                    .append(entity.getDistrict())
+                    .append(customerAddressDto.getAddressName());
+            entity.setAddress(sb.toString());
+        }
+        entity.setCustomerId(Long.valueOf(loginUser.currentUserId()));
+        entity.setUpdateTime(System.currentTimeMillis());
+        return this.updateById(entity);
+    }
+
+    private boolean equals(CustomerAddressDto customerAddressDto,CustomerAddress customerAddress){
+        return customerAddressDto.getProvince().equals(customerAddress.getProvince())
+                && customerAddressDto.getCity().equals(customerAddress.getCity())
+                && customerAddressDto.getDistrict().equals(customerAddress.getDistrict());
+    }
 
 }
 

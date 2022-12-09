@@ -22,6 +22,35 @@
         <result column="shop_prod_status" property="shopProdStatus" />
     </resultMap>
 
+
+    <resultMap id="ShopProductMap" type="com.pinet.rest.entity.vo.ShopProductVo">
+        <id column="id" property="id" />
+        <result column="prod_id" property="prodId" />
+        <result column="product_name" property="productName" />
+        <result column="product_img" property="productImg" />
+        <result column="product_desc" property="productDesc" />
+        <result column="shop_id" property="shopId" />
+        <result column="product_type_id" property="productTypeId" />
+        <result column="product_type" property="productType" />
+        <result column="price" property="price" />
+        <result column="market_price" property="marketPrice" />
+        <collection property="skuList" resultMap="SkuMap" />
+    </resultMap>
+
+    <resultMap id="SkuMap" type="com.pinet.rest.entity.vo.ShopProductSkuVo">
+        <result column="skuId" property="skuId" />
+        <result column="skuName" property="skuName" />
+        <collection property="skuSpecs" resultMap="SkuSpecsMap" />
+    </resultMap>
+
+    <resultMap id="SkuSpecsMap" type="com.pinet.rest.entity.vo.ShopProductSpecVo">
+        <result column="prod_spec_id" property="prodSpecId" />
+        <result column="spec_name" property="specName" />
+        <result column="sku_id" property="skuId" />
+        <result column="spsPrice" property="price" />
+        <result column="market_price" property="marketPrice" />
+    </resultMap>
+
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id,
@@ -60,4 +89,30 @@
          order by pgo.times desc
          limit 8
     </select>
+
+
+    <select id="getDetailById" resultType="com.pinet.rest.entity.vo.ShopProductVo">
+         select sp.id,
+         sp.prod_id,
+         sp.product_name,
+         sp.product_img,
+         sp.product_desc,
+         sp.shop_id,
+         sp.product_type_id,
+         sp.product_type,
+         sps.price as productPriice,
+         sp.market_price as productMarketPrice,
+         ps.id as skuId,
+         ps.sku_name as skuName,
+         sps.prod_spec_id,
+         sps.spec_name,
+         sps.sku_id,
+         sps.price as spsPrice,
+         sps.market_price as spsMarketPrice
+         from shop_product sp
+         left join shop_product_spec sps on sps.shop_prod_id = sp.prod_id and sps.del_flag = 0
+         left join product_sku ps on ps.id = sps.sku_id and ps.del_flag = 0
+         where sp.id = #{id}
+    </select>
+
 </mapper>

@@ -59,6 +59,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Override
     public ShopProductVo getDetailById(Long id) {
         //记录商品浏览表
-        return null;
+        ShopProductVo shopProductVo = baseMapper.getDetailById(id);
+        return shopProductVo;
     }
 }
