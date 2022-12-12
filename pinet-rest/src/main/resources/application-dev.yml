@@ -93,3 +93,11 @@ wx:
   miniapp:
     appid: wx7d9b680a3e2a4d95
     secret: 2e63c469aad961ca3a5ae63733575b6f
+
+#oss配置
+oss:
+  qiniu:
+    access_key: qSK4UbqoR7gb0gkmHcwBeY3K3GoiW1UmDm01CMNx
+    secret_key: eE83WK1Bo3iR7YyMfyTwsqTJL3HFFz14dNiimBDl
+    bucket: testpinets
+    url: http://image.ypxlbz.com
