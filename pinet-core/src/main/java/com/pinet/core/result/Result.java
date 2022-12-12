@@ -42,7 +42,7 @@ public class Result<T> implements Serializable {
 	 * 返回数据对象 data
 	 */
 	@ApiModelProperty(value = "返回数据对象")
-	private T result;
+	private T data;
 	
 	/**
 	 * 时间戳
@@ -54,13 +54,13 @@ public class Result<T> implements Serializable {
 		
 	}
 
-	public Result(Integer code, String message, T result) {
+	public Result(Integer code, String message, T data) {
 		if(!code.equals(200) ){
 			this.success = false;
 		}
 		this.message = message;
 		this.code = code;
-		this.result = result;
+		this.data = data;
 	}
 
 	public Result<T> success(String message) {
@@ -91,7 +91,7 @@ public class Result<T> implements Serializable {
 		Result<T> r = new Result<T>();
 		r.setSuccess(true);
 		r.setCode(HttpStatus.SC_OK);
-		r.setResult(data);
+		r.setData(data);
 		return r;
 	}
 
@@ -100,7 +100,7 @@ public class Result<T> implements Serializable {
 		r.setSuccess(true);
 		r.setCode(HttpStatus.SC_OK);
 		r.setMessage(msg);
-		r.setResult(data);
+		r.setData(data);
 		return r;
 	}
 	
@@ -118,7 +118,7 @@ public class Result<T> implements Serializable {
 
 	public static <T> Result<T> error(String msg,T data) {
 		Result<T> r = error(HttpStatus.SC_INTERNAL_SERVER_ERROR, msg);
-		r.setResult(data);
+		r.setData(data);
 		return r;
 	}
 
@@ -126,7 +126,7 @@ public class Result<T> implements Serializable {
 		Result<T> r = new Result<T>();
 		r.setCode(code);
 		r.setMessage(msg);
-		r.setResult(data);
+		r.setData(data);
 		r.setSuccess(false);
 		return r;
 	}

@@ -12,5 +12,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-12-06
  */
 public interface IOrderAddressService extends IService<OrderAddress> {
+    /**
+     * 根据订单id获取订单地址
+     * @param orderId 订单id
+     * @return OrderAddress
+     */
+    OrderAddress getOrderAddress(Long orderId);
+
 
 }

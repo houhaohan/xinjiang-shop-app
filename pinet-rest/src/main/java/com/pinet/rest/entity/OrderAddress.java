@@ -55,5 +55,14 @@ public class OrderAddress extends BaseEntity {
     @ApiModelProperty("详细地址")
     private String address;
 
+    @ApiModelProperty("名称")
+    private String name;
+
+    @ApiModelProperty("电话")
+    private String tel;
+
+    @ApiModelProperty("1先生 2女士")
+    private String sex;
+
 
 }
