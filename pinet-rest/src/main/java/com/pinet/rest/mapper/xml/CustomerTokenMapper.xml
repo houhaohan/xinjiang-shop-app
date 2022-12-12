@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.CustomerTokenMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.CustomerToken">
+        <result column="id" property="id" />
+        <result column="create_time" property="createTime" />
+        <result column="customer_id" property="customerId" />
+        <result column="token" property="token" />
+        <result column="terminal" property="terminal" />
+        <result column="is_blackmail" property="isBlackmail" />
+        <result column="expire_time" property="expireTime" />
+        <result column="grace_time" property="graceTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,
+        create_time,
+        customer_id, token, terminal, is_blackmail, expire_time, grace_time
+    </sql>
+
+
+    <select id="selectByToken" parameterType="string" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List" />
+        from customer_token
+        where token = #{token}
+    </select>
+</mapper>
