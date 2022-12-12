@@ -12,13 +12,10 @@
     <artifactId>pinet-common-file</artifactId>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>com.pinet</groupId>-->
-<!--            <artifactId>pinet-oss</artifactId>-->
-<!--            <version>1.0.0</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.qiniu</groupId>
+            <artifactId>qiniu-java-sdk</artifactId>
+            <version>7.7.0</version>
+        </dependency>
     </dependencies>
-    <build>
-
-    </build>
 </project>
