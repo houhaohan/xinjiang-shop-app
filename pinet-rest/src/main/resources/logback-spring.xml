@@ -111,7 +111,7 @@
     </springProfile>
     <springProfile name="test">
         <logger name="com.pinet.rest" level="DEBUG"/>
-        <root level="debug">
+        <root level="info">
             <appender-ref ref="CONSOLE-LOG"/>
             <appender-ref ref="DEBUG-LOG"/>
             <appender-ref ref="INFO-LOG"/>

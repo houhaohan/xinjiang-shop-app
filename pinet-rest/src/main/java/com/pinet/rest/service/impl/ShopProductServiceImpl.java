@@ -1,6 +1,5 @@
 package com.pinet.rest.service.impl;
 
-import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.param.HomeProductParam;
@@ -48,12 +47,12 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     }
 
     @Override
-    public List<RecommendProductVo> recommendList(String userId) {
-        if(StringUtil.isEmpty(userId)){
+    public List<RecommendProductVo> recommendList(Long userId) {
+        if(userId == null){
             //随机查找8条数据
             return baseMapper.selectRecommendList();
         }
-        return baseMapper.selectRecommendListByUserId(Long.valueOf(userId));
+        return baseMapper.selectRecommendListByUserId(userId);
     }
 
     @Override

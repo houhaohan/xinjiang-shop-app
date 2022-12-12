@@ -39,17 +39,32 @@ spring:
           username: root
           password: root
           driver-class-name: com.mysql.cj.jdbc.Driver
+
+
   redis:
     database: 0
     host: 127.0.0.1
-#    password: qwer1234
     password:
     port: 6379
+    lettuce:
+      pool:
+        max-active: 8   #最大连接数据库连接数,设 0 为没有限制
+        max-idle: 8     #最大等待连接中的数量,设 0 为没有限制
+        max-wait: -1ms  #最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。
+        min-idle: 0     #最小等待连接中的数量,设 0 为没有限制
+      shutdown-timeout: 100ms
 
+  activemq:
+    broker-url: tcp://127.0.0.1:61616
+    user: admin
+    password: admin
+    pool:
+      enabled: true #连接池启动
+      max-connections: 10 #最大连接数
 
 
 mybatis-plus:
-  mapper-locations: classpath*:com/pinet/mapper/xml/*.xml
+  mapper-locations: classpath*:com/pinet/rest/mapper/xml/*.xml
   configuration:
     ## 自动驼峰命名规则映射
     map-underscore-to-camel-case: true
@@ -62,28 +77,27 @@ mybatis-plus:
     db-config:
       ## 逻辑删除字段
       logic-delete-field: del_flag
-      ## 配置逻辑删除字段为1是删除
-      logic-not-delete-value: 0
       ## 逻辑删除未删除值
+      logic-not-delete-value: 0
+      ## 配置逻辑删除字段为1是删除
       logic-delete-value: 1
 
-wxpay:
-  #应用编号
-  appId: xxxx
-  #商户号
-  mchId: xxx
-  # APIv2密钥
-  apiKey: xxxx
-  # APIv3密钥
-  apiV3Key: xxx
-  # 微信支付V3-url前缀
-  baseUrl: https://api.mch.weixin.qq.com/v3
-  # 支付通知回调, pjm6m9.natappfree.cc 为内网穿透地址
-  notifyUrl: http://pjm6m9.natappfree.cc/pay/payNotify
-  # 退款通知回调, pjm6m9.natappfree.cc 为内网穿透地址
-  refundNotifyUrl: http://pjm6m9.natappfree.cc/pay/refundNotify
-  # 密钥路径,resources根目录下
-  keyPemPath: apiclient_key.pem
-  #商户证书序列号
-  serialNo: xxxxx
 
+sms:
+  code:
+    # 验证码 有效期10分钟
+    expire: 600
+
+# 微信开发配置
+wx:
+  miniapp:
+    appid: wx7d9b680a3e2a4d95
+    secret: 2e63c469aad961ca3a5ae63733575b6f
+
+#oss配置
+oss:
+  qiniu:
+    access_key: qSK4UbqoR7gb0gkmHcwBeY3K3GoiW1UmDm01CMNx
+    secret_key: eE83WK1Bo3iR7YyMfyTwsqTJL3HFFz14dNiimBDl
+    bucket: testpinets
+    url: http://image.ypxlbz.com

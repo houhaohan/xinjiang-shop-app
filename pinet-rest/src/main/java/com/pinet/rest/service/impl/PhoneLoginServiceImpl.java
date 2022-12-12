@@ -6,7 +6,7 @@ import com.pinet.core.constants.UserConstant;
 import com.pinet.core.enums.ErrorCodeEnum;
 import com.pinet.core.exception.LoginException;
 import com.pinet.core.util.IPUtils;
-import com.pinet.core.util.JWTUtils;
+import com.pinet.core.util.JwtTokenUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
@@ -63,13 +63,13 @@ public class PhoneLoginServiceImpl implements ILoginService {
         }
 
         String userId = "" + customer.getCustomerId();
-        String token = JWTUtils.generateToken(userId);
+        String token = JwtTokenUtils.generateToken(customer.getCustomerId());
         cacheToken(userId,token);
 
         //todo 登入日志
         UserInfo userInfo = new UserInfo();
         userInfo.setAccess_token(token);
-        userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JWTUtils.expire));
+        userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JwtTokenUtils.EXPIRE_TIME/1000));
         userInfo.setUser(customer);
         return userInfo;
     }
@@ -78,8 +78,8 @@ public class PhoneLoginServiceImpl implements ILoginService {
     public void logout(String token) {
         redisUtil.delete(UserConstant.PREFIX_REFRESH_TOKEN+token);
 
-        String userId = JWTUtils.getUserId(token);
-        if(StringUtil.isEmpty(userId)){
+        Long userId = JwtTokenUtils.getUserIdFromToken(token);
+        if(userId == null){
             return;
         }
         redisUtil.delete(UserConstant.PREFIX_USER_TOKEN+userId);
@@ -93,7 +93,7 @@ public class PhoneLoginServiceImpl implements ILoginService {
      * @param token
      */
     private void cacheToken(String userId,String token){
-        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+userId,token,JWTUtils.expire, TimeUnit.SECONDS);
-        redisUtil.set(UserConstant.PREFIX_REFRESH_TOKEN+token, userId,JWTUtils.expire+1800, TimeUnit.SECONDS);
+        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+userId,token,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
+        redisUtil.set(UserConstant.PREFIX_REFRESH_TOKEN+token, userId,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
     }
 }

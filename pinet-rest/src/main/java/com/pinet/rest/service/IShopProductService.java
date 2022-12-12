@@ -29,7 +29,7 @@ public interface IShopProductService extends IService<ShopProduct> {
      * 首页推荐商品
      * @return
      */
-    List<RecommendProductVo> recommendList(String userId);
+    List<RecommendProductVo> recommendList(Long userId);
 
 
     /**

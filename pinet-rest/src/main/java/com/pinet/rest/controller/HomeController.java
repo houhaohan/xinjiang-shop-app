@@ -41,10 +41,11 @@ public class HomeController extends BaseController {
     @RequestMapping("/recommend/list")
     @NotTokenSign
     public Result<List<RecommendProductVo>> recommendList(){
-        String userId = loginUser.currentUserId();
+        Long userId = loginUser.currentUserId();
         List<RecommendProductVo> list = shopProductService.recommendList(userId);
         return Result.ok(list);
     }
+
 }
 
 

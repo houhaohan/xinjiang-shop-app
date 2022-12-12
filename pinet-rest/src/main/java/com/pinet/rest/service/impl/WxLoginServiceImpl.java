@@ -9,7 +9,7 @@ import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.UserConstant;
 import com.pinet.core.exception.LoginException;
 import com.pinet.core.util.IPUtils;
-import com.pinet.core.util.JWTUtils;
+import com.pinet.core.util.JwtTokenUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
@@ -80,13 +80,12 @@ public class WxLoginServiceImpl implements ILoginService {
             customerService.save(customer);
         }
 
-        String userId = "" + customer.getCustomerId();
-        String token = JWTUtils.generateToken(userId);
-        cacheToken(userId,token);
+        String token = JwtTokenUtils.generateToken(customer.getCustomerId());
+        cacheToken(customer.getCustomerId(),token);
 
         UserInfo userInfo = new UserInfo();
         userInfo.setAccess_token(token);
-        userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JWTUtils.expire));
+        userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JwtTokenUtils.EXPIRE_TIME/1000));
         userInfo.setUser(customer);
         return userInfo;
     }
@@ -101,8 +100,8 @@ public class WxLoginServiceImpl implements ILoginService {
      * @param userId
      * @param token
      */
-    private void cacheToken(String userId,String token){
-        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+userId,token,JWTUtils.expire, TimeUnit.SECONDS);
-        redisUtil.set(UserConstant.PREFIX_REFRESH_TOKEN+token, userId,JWTUtils.expire+1800, TimeUnit.SECONDS);
+    private void cacheToken(Long userId,String token){
+        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+userId,token,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
+        redisUtil.set(UserConstant.PREFIX_REFRESH_TOKEN+token, String.valueOf(userId),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
     }
 }

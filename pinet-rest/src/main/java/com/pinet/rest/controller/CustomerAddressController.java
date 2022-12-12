@@ -42,9 +42,9 @@ public class CustomerAddressController extends BaseController {
     @ApiOperation("列表")
     @RequestMapping("/list")
     public Result list(){
-        String userId = loginUser.currentUserId();
+        Long userId = loginUser.currentUserId();
         QueryWrapper<CustomerAddress> wrapper = new QueryWrapper<>();
-        wrapper.eq("customer_id",Long.valueOf(userId));
+        wrapper.eq("customer_id",userId);
         List<CustomerAddress> list = customerAddressService.list(wrapper);
         return Result.ok(list);
     }
