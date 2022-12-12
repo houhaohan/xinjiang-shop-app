@@ -2,6 +2,10 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.OrderDetailVo;
+import com.pinet.rest.entity.vo.OrderListVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IOrderService extends IService<Order> {
 
+    List<OrderListVo> orderList();
+
+    OrderDetailVo orderDetail(Long orderId);
 }

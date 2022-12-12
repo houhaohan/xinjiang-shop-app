@@ -4,26 +4,26 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Order">
-        <result column="id" property="id" />
-        <result column="create_by" property="createBy" />
-        <result column="create_time" property="createTime" />
-        <result column="update_by" property="updateBy" />
-        <result column="update_time" property="updateTime" />
-        <result column="del_flag" property="delFlag" />
-        <result column="order_no" property="orderNo" />
-        <result column="order_type" property="orderType" />
-        <result column="order_status" property="orderStatus" />
-        <result column="customer_id" property="customerId" />
-        <result column="shop_id" property="shopId" />
-        <result column="shop_name" property="shopName" />
-        <result column="order_price" property="orderPrice" />
-        <result column="order_prod_price" property="orderProdPrice" />
-        <result column="shipping_fee" property="shippingFee" />
-        <result column="estimate_arrival_start_time" property="estimateArrivalStartTime" />
-        <result column="estimate_arrival_end_time" property="estimateArrivalEndTime" />
-        <result column="actual_arrival_time" property="actualArrivalTime" />
-        <result column="order_distance" property="orderDistance" />
-        <result column="remark" property="remark" />
+        <result column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="order_type" property="orderType"/>
+        <result column="order_status" property="orderStatus"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="shop_name" property="shopName"/>
+        <result column="order_price" property="orderPrice"/>
+        <result column="order_prod_price" property="orderProdPrice"/>
+        <result column="shipping_fee" property="shippingFee"/>
+        <result column="estimate_arrival_start_time" property="estimateArrivalStartTime"/>
+        <result column="estimate_arrival_end_time" property="estimateArrivalEndTime"/>
+        <result column="actual_arrival_time" property="actualArrivalTime"/>
+        <result column="order_distance" property="orderDistance"/>
+        <result column="remark" property="remark"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -36,5 +36,35 @@
         del_flag,
         order_no, order_type, order_status, customer_id, shop_id, shop_name, order_price, order_prod_price, shipping_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark
     </sql>
+    <select id="selectOrderList" resultType="com.pinet.rest.entity.vo.OrderListVo" parameterType="java.lang.Long">
+        select o.id           orderId,
+               o.order_no     orderNo,
+               o.shop_name    shopName,
+               o.order_status orderStatus,
+               o.create_time  createTime,
+               o.order_price  orderPrice
+        from `order` o
+        where o.del_flag = 0
+          and o.customer_id = #{customerId}
+    </select>
+
+    <select id="selectOrderDetail" resultType="com.pinet.rest.entity.vo.OrderDetailVo" parameterType="java.lang.Long">
+        select o.id                          orderId,
+               o.order_no                    orderNo,
+               o.customer_id                 customerId,
+               o.order_status                orderStatus,
+               o.estimate_arrival_start_time estimateArrivalStartTime,
+               o.estimate_arrival_end_time   estimateArrivalEndTime,
+               o.shop_name                   shopName,
+               o.shop_id                     shopId,
+               o.order_prod_price            orderProdPrice,
+               o.shipping_fee                shippingFee,
+               o.order_price                 orderPrice,
+               o.create_time                 createTime,
+               o.remark
+        from `order` o
+        where o.del_flag = 0
+          and o.id = #{orderId}
+    </select>
 
 </mapper>

@@ -21,6 +21,9 @@
         <result column="lat" property="lat" />
         <result column="lng" property="lng" />
         <result column="address" property="address" />
+        <result column="name" property="name" />
+        <result column="tel" property="tel" />
+        <result column="sex" property="sex" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -31,7 +34,7 @@
         update_by,
         update_time,
         del_flag,
-        order_id, province_id, city_id, district_id, province, city, district, post_code, lat, lng, address
+        order_id, province_id, city_id, district_id, province, city, district, post_code, lat, lng, address,name,tel,sex
     </sql>
 
 </mapper>

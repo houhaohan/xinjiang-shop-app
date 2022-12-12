@@ -2,6 +2,10 @@ package com.pinet.rest.mapper;
 
 import com.pinet.rest.entity.OrderProduct;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.bo.OrderProductBo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface OrderProductMapper extends BaseMapper<OrderProduct> {
 
+    List<OrderProductBo> selectOrderProduct(@Param("orderId") Long orderId);
 }
