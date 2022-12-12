@@ -3,27 +3,26 @@ package com.pinet.inter;
 import com.alibaba.fastjson.JSON;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.UserConstant;
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.http.HttpResult;
+import com.pinet.core.util.JwtTokenUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.inter.annotation.NotTokenSign;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class BackendInterceptor implements HandlerInterceptor {
     private static Logger logger = LoggerFactory.getLogger(BackendInterceptor.class);
     private static final String ACCESS_TOKEN = "access_token";
-    @Value("${spring.application.name}")
-    private String applicationName;
 
     @Resource
     private RedisUtil redisUtil;
@@ -44,10 +43,23 @@ public class BackendInterceptor implements HandlerInterceptor {
             if(StringUtil.isEmpty(accessToken)){
                 return error(request,response);
             }
-            String tokenData = redisUtil.get(UserConstant.PREFIX_USER_TOKEN + accessToken);
-            if(StringUtil.isEmpty(tokenData)){
-                return error(request,response);
+
+            String userId = redisUtil.get(UserConstant.PREFIX_USER_TOKEN + accessToken);
+            if(StringUtil.isEmpty(userId)){
+                throw new PinetException("token过期，请重新登入");
             }
+
+            boolean validate = JwtTokenUtils.validateToken(accessToken, Long.valueOf(userId));
+            if(validate){
+                if(redisUtil.getExpire(UserConstant.PREFIX_USER_TOKEN + accessToken) < 10 * 60){
+                    redisUtil.expire(UserConstant.PREFIX_USER_TOKEN + accessToken,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
+                }
+            }else {
+                String newToken = JwtTokenUtils.generateToken(Long.valueOf(userId));
+                redisUtil.set(UserConstant.PREFIX_USER_TOKEN + newToken,userId,JwtTokenUtils.EXPIRE_TIME/1000,TimeUnit.SECONDS);
+                response.setHeader(ACCESS_TOKEN,newToken);
+            }
+
         }
         return true;
     }
