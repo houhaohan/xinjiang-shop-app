@@ -12,11 +12,11 @@ public class SmsSendRequest {
     /**
      * com.pinet.sms.enums.SmsTemplate
      */
-    @ApiModelProperty(value = "类型，login-登入")
+    @ApiModelProperty(value = "类型，login-登入",required = true)
     @NotBlank(message = "类型不能为空")
     private String type;
 
-    @ApiModelProperty(value = "手机号码")
+    @ApiModelProperty(value = "手机号码",required = true)
     @NotBlank(message = "手机号不能为空")
     private String phone;
 }

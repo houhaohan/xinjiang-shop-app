@@ -32,7 +32,6 @@ public class CustomerAddressController extends BaseController {
     @Autowired
     private ICustomerAddressService customerAddressService;
 
-
     @ApiOperation("列表")
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public Result list(){
@@ -77,6 +76,10 @@ public class CustomerAddressController extends BaseController {
     @ApiOperation("删除")
     @RequestMapping(value = "/deleteById",method = RequestMethod.DELETE)
     public Result deleteById(@RequestBody Long id){
+        Long userId = super.currentUserId();
+        if(userId == null){
+            return Result.error("用户没有登入，请先登入");
+        }
         boolean success = customerAddressService.removeById(id);
         if(success){
             return Result.ok("删除成功");
@@ -88,6 +91,10 @@ public class CustomerAddressController extends BaseController {
     @ApiOperation("设置默认地址")
     @RequestMapping(value = "/default",method = RequestMethod.POST)
     public Result save(@RequestBody Long id){
+        Long userId = super.currentUserId();
+        if(userId == null){
+            return Result.error("用户没有登入，请先登入");
+        }
         CustomerAddress entity = new CustomerAddress();
         entity.setId(id);
         entity.setStatus(1);

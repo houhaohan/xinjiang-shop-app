@@ -8,6 +8,7 @@ import com.pinet.rest.entity.vo.CartListVo;
 import com.pinet.rest.entity.vo.ShopVo;
 import com.pinet.rest.service.IShopService;
 import com.pinet.rest.service.impl.ShopServiceImpl;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +31,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/shop")
+@Api(tags = "店铺")
 public class ShopController extends BaseController {
     @Autowired
     private IShopService shopService;

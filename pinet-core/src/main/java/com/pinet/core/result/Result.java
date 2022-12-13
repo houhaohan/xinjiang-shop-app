@@ -50,7 +50,7 @@ public class Result<T> implements Serializable {
 	}
 
 	public Result(Integer code, String message, T data) {
-		if(!code.equals(200) ){
+		if(!code.equals(0) ){
 			this.success = false;
 		}
 		this.message = message;
