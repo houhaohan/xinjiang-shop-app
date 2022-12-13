@@ -57,7 +57,7 @@ public class Customer implements Serializable {
     @ApiModelProperty("昵称")
     private String nickname;
     /**
-    * 
+    *
     */
     @ApiModelProperty("")
     private String realname;
@@ -77,12 +77,12 @@ public class Customer implements Serializable {
     @ApiModelProperty("头像")
     private String avatar;
     /**
-    * 
+    *
     */
     @ApiModelProperty("")
     private String email;
     /**
-    * 
+    *
     */
     @ApiModelProperty("")
     private Long birthday;

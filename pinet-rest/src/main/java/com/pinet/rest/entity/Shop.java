@@ -1,7 +1,10 @@
 package com.pinet.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
+import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -64,5 +67,12 @@ public class Shop extends BaseEntity {
     @ApiModelProperty("店铺状态  1正常  2歇业")
     private Integer shopStatus;
 
+    @ApiModelProperty("开始营业时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date workTime;
+
+    @ApiModelProperty("结束营业时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date finishTime;
 
 }

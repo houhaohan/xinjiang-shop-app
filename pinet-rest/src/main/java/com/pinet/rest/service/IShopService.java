@@ -2,8 +2,11 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.dto.ShopListDto;
+import com.pinet.rest.entity.vo.ShopVo;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -23,4 +26,10 @@ public interface IShopService extends IService<Shop> {
      */
     public Shop getMinDistanceShop(BigDecimal lat, BigDecimal lng);
 
+    /**
+     * 根据距离，订单量查找店铺列表
+     * @param dto
+     * @return
+     */
+    List<ShopVo> shopList(ShopListDto dto);
 }
