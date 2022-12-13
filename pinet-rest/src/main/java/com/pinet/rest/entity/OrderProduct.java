@@ -55,5 +55,8 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("店铺商品样式name")
     private String prodSpecName;
 
+    @ApiModelProperty("商品图片")
+    private String prodImg;
+
 
 }

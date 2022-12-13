@@ -1,11 +1,3 @@
 spring:
   profiles:
     active: test
-
-
-pagehelper:
-  helper-dialect: mysql
-  # 启用reasonable，如果pageNum<1会查询第一页，如果pageNum>pages会查询最后一页；
-  #禁用合理化时，如果pageNum<1或pageNum>pages会返回空数据。 这里按之前的回传空数据
-  reasonable: false
-  params: count=countSql

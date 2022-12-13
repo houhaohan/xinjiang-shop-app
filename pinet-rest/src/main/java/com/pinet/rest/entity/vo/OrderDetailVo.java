@@ -1,6 +1,7 @@
 package com.pinet.rest.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.bo.OrderProductBo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -73,7 +74,7 @@ public class OrderDetailVo {
     @ApiModelProperty(value = "备注",name = "remark")
     private String remark;
 
-    @ApiModelProperty(value = "商品信息",name = "orderProductBoList")
-    private List<OrderProductBo> orderProductBoList;
+    @ApiModelProperty(value = "商品信息",name = "orderProducts")
+    private List<OrderProduct> orderProducts;
 
 }

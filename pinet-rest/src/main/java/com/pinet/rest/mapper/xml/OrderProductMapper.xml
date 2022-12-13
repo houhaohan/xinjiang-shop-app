@@ -20,6 +20,7 @@
         <result column="prod_sku_name" property="prodSkuName"/>
         <result column="shop_prod_spec_id" property="shopProdSpecId"/>
         <result column="prod_spec_name" property="prodSpecName"/>
+        <result column="prod_img" property="prodImg"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -30,7 +31,7 @@
         update_by,
         update_time,
         del_flag,
-        order_id, shop_prod_id, prod_name, prod_unit_price, prod_num, prod_price, prod_sku_id, prod_sku_name, shop_prod_spec_id, prod_spec_name
+        order_id, shop_prod_id, prod_name, prod_unit_price, prod_num, prod_price, prod_sku_id, prod_sku_name, shop_prod_spec_id, prod_spec_name,prod_img
     </sql>
     <select id="selectOrderProduct" resultType="com.pinet.rest.entity.bo.OrderProductBo" parameterType="java.lang.Long">
         select op.id             orderProductId,

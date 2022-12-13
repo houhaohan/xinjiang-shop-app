@@ -94,4 +94,11 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         cart.setUpdateBy(customerId);
         return updateById(cart);
     }
+
+    @Override
+    public List<Cart> getByUserIdAndShopId(Long userId, Long shopId) {
+        LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(BaseEntity::getDelFlag,0).eq(Cart::getCustomerId,userId).eq(Cart::getShopId,shopId);
+        return list(lambdaQueryWrapper);
+    }
 }

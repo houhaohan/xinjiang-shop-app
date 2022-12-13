@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.rest.entity.Order;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.ShopListDto;
@@ -11,10 +12,9 @@ import com.pinet.rest.entity.vo.ShopVo;
 import com.pinet.rest.mapper.OrderMapper;
 import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.service.IShopService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,12 +38,12 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
 
     @Override
     public Shop getMinDistanceShop(BigDecimal lat, BigDecimal lng) {
-        return shopMapper.getMinDistanceShop(lat,lng);
+        return shopMapper.getMinDistanceShop(lat, lng);
     }
 
     @Override
     public List<ShopVo> shopList(ShopListDto dto) {
-        if(dto.getLat() == null || dto.getLng() == null){
+        if (dto.getLat() == null || dto.getLng() == null) {
             throw new IllegalArgumentException("参数不能为空");
         }
         List<ShopVo> shopList = shopMapper.shopList();
@@ -71,5 +71,16 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             shopList.stream().sorted(Comparator.comparing(ShopVo::getDistance).reversed()).collect(Collectors.toList());
         }
         return shopList;
+    }
+
+    @Override
+    public Boolean checkShopStatus(Long shopId) {
+        Shop shop = getById(shopId);
+        if (shop.getShopStatus() == 2) {
+            return false;
+        }
+
+        Date now = DateUtil.parse(DateUtil.now(), "HH:mm:ss");
+        return com.pinet.core.util.DateUtil.isEffectiveDate(now, shop.getWorkTime(), shop.getFinishTime());
     }
 }

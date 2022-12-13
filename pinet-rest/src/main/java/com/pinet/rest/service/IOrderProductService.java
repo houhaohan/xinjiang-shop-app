@@ -2,7 +2,6 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.OrderProduct;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pinet.rest.entity.bo.OrderProductBo;
 
 import java.util.List;
 
@@ -21,6 +20,13 @@ public interface IOrderProductService extends IService<OrderProduct> {
      * @param orderId 订单id
      * @return List
      */
-    List<OrderProductBo> getOrderProduct(Long orderId);
+    List<OrderProduct> getByOrderId(Long orderId);
+
+    /**
+     * 根据店铺信息查询购物车商品 校验数据并构造List<OrderProduct>原始数据
+     * @param shopId 店铺id
+     * @return List
+     */
+    List<OrderProduct> getByCartAndShop(Long shopId);
 
 }

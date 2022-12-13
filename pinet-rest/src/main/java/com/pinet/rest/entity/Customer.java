@@ -29,7 +29,7 @@ public class Customer implements Serializable {
     * 用户id
     */
     @ApiModelProperty("用户id")
-    @TableId(value = "customerId",type = IdType.AUTO)
+    @TableId(value = "customer_id",type = IdType.AUTO)
     private Long customerId;
     /**
     * 微信小程序唯一标识

@@ -2,12 +2,18 @@ package com.pinet.rest.controller;
 
 
 import com.pinet.core.result.Result;
+import com.pinet.core.util.ThreadLocalUtil;
+import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.dto.OrderListDto;
+import com.pinet.rest.entity.dto.OrderSettlementDto;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
+import com.pinet.rest.entity.vo.OrderSettlementVo;
 import com.pinet.rest.service.IOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -42,10 +48,17 @@ public class OrderController extends BaseController {
 
     @PostMapping("/orderDetail")
     @ApiOperation("订单详情")
-    public Result<OrderDetailVo> orderDetail(Long orderId){
+    public Result<OrderDetailVo> orderDetail(Long orderId) {
         OrderDetailVo orderDetailVo = orderService.orderDetail(orderId);
         return Result.ok(orderDetailVo);
 
+    }
+
+    @PostMapping("/orderSettlement")
+    @ApiOperation("订单结算")
+    public Result<OrderSettlementVo> checkOrder(@Validated @RequestBody OrderSettlementDto dto) {
+        OrderSettlementVo orderSettlementVo = orderService.orderSettlement(dto);
+        return Result.ok(orderSettlementVo);
     }
 
 }

@@ -24,4 +24,12 @@ public interface ICartService extends IService<Cart> {
     Boolean addCart(AddCartDto dto);
 
     Boolean editCartProdNum(EditCartProdNumDto dto);
+
+    /**
+     * 根据userId和shopId获取购物车商品信息
+     * @param userId 用户id
+     * @param shopId 商品id
+     * @return List
+     */
+    List<Cart> getByUserIdAndShopId(Long userId,Long shopId);
 }

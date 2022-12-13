@@ -66,5 +66,12 @@
         where o.del_flag = 0
           and o.id = #{orderId}
     </select>
+    <select id="countShopOrderMakeNum" resultType="java.lang.Integer">
+        select ifnull(count(1), 0)
+        from `order`
+        where del_flag = 0
+          and shop_id = #{shopId}
+          and create_time > #{queryDate} and order_status = 30
+    </select>
 
 </mapper>

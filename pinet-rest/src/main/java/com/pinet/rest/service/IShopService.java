@@ -32,4 +32,12 @@ public interface IShopService extends IService<Shop> {
      * @return
      */
     List<ShopVo> shopList(ShopListDto dto);
+
+    /**
+     * 校验店铺营业状态
+     * @param shopId 店铺id
+     * @return true 正常  false 异常
+     */
+    Boolean checkShopStatus(Long shopId);
+
 }

@@ -1,5 +1,6 @@
 package com.pinet.rest.entity.dto;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
  * @create: 2022-12-08 11:42
  **/
 @Data
+@ApiModel(value = "AddCartDto",description = "添加购物车dto")
 public class AddCartDto {
     @NotNull(message = "店铺id不能为空")
     @ApiModelProperty(value = "店铺id",name = "shopId")
