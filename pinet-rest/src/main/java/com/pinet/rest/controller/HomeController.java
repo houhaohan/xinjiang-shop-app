@@ -7,7 +7,6 @@ import com.pinet.rest.entity.param.HomeProductParam;
 import com.pinet.rest.entity.vo.HotProductVo;
 import com.pinet.rest.entity.vo.RecommendProductVo;
 import com.pinet.rest.service.IShopProductService;
-import com.pinet.rest.util.LoginUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +21,6 @@ import java.util.List;
 public class HomeController extends BaseController {
     @Autowired
     private IShopProductService shopProductService;
-    @Autowired
-    private LoginUser loginUser;
 
     @ApiOperation("热卖排行版")
     @RequestMapping(value = "/hotSell/list",method = RequestMethod.GET)
@@ -42,7 +39,7 @@ public class HomeController extends BaseController {
     @RequestMapping(value = "/recommend/list",method = RequestMethod.GET)
     @NotTokenSign
     public Result<List<RecommendProductVo>> recommendList(){
-        Long userId = loginUser.currentUserId();
+        Long userId = super.currentUserId();
         List<RecommendProductVo> list = shopProductService.recommendList(userId);
         return Result.ok(list);
     }

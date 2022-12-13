@@ -6,17 +6,14 @@ import com.pinet.core.result.Result;
 import com.pinet.rest.entity.CustomerAddress;
 import com.pinet.rest.entity.dto.CustomerAddressDto;
 import com.pinet.rest.service.ICustomerAddressService;
-import com.pinet.rest.util.LoginUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
-
 import java.util.List;
 
 /**
@@ -35,14 +32,16 @@ public class CustomerAddressController extends BaseController {
     @Autowired
     private ICustomerAddressService customerAddressService;
 
-    @Autowired
-    private LoginUser loginUser;
+
 
 
     @ApiOperation("列表")
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public Result list(){
-        Long userId = loginUser.currentUserId();
+        Long userId = super.currentUserId();
+        if(userId == null){
+            return Result.ok();
+        }
         QueryWrapper<CustomerAddress> wrapper = new QueryWrapper<>();
         wrapper.eq("customer_id",userId);
         List<CustomerAddress> list = customerAddressService.list(wrapper);
@@ -52,7 +51,11 @@ public class CustomerAddressController extends BaseController {
     @ApiOperation("新增")
     @RequestMapping(value = "/save",method = RequestMethod.POST)
     public Result save(@RequestBody CustomerAddressDto customerAddressDto){
-        boolean success = customerAddressService.add(customerAddressDto);
+        Long userId = super.currentUserId();
+        if(userId == null){
+            return Result.error("用户没有登入，请先登入");
+        }
+        boolean success = customerAddressService.add(customerAddressDto,userId);
         if(success){
             return Result.ok("操作成功");
         }
@@ -62,7 +65,11 @@ public class CustomerAddressController extends BaseController {
     @ApiOperation("修改")
     @RequestMapping(value = "/updateById",method = RequestMethod.POST)
     public Result updateById(@RequestBody CustomerAddressDto customerAddressDto){
-        boolean success = customerAddressService.edit(customerAddressDto);
+        Long userId = super.currentUserId();
+        if(userId == null){
+            return Result.error("用户没有登入，请先登入");
+        }
+        boolean success = customerAddressService.edit(customerAddressDto,userId);
         if(success){
             return Result.ok("操作成功");
         }

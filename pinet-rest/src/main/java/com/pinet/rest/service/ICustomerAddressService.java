@@ -14,12 +14,14 @@ public interface ICustomerAddressService extends IService<CustomerAddress> {
     /**
      * 新增收货地址
      * @param customerAddressDto
+     * @param userId
      */
-    boolean add(CustomerAddressDto customerAddressDto);
+    boolean add(CustomerAddressDto customerAddressDto,Long userId);
 
     /**
      * 修改收货地址
      * @param customerAddressDto
+     * @param userId
      */
-    boolean edit(CustomerAddressDto customerAddressDto);
+    boolean edit(CustomerAddressDto customerAddressDto,Long userId);
 }

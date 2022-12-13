@@ -13,4 +13,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IProductGlanceOverService extends IService<ProductGlanceOver> {
 
+    /**
+     * 根据商品Id修改浏览记录
+     * @param prodId
+     * @return
+     */
+    void updateGlanceOverTimes(Long prodId);
+
 }

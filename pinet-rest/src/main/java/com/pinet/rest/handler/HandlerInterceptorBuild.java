@@ -71,7 +71,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
             customerTokenService.refreshToken(customerToken, appToken);
             response.setHeader("Authorization", "Bearer " + customerToken.getToken());
         }else {
-            throw new PinetException("token过期，请重新登入");
+//            throw new PinetException("token过期，请重新登入");
         }
         ThreadLocalUtil.setUserId(userId == null ? 0 : Long.valueOf(userId));
         return true;

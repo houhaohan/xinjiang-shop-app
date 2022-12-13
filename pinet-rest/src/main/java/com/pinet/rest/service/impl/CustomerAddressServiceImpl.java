@@ -1,7 +1,6 @@
 package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.CustomerAddress;
@@ -10,7 +9,6 @@ import com.pinet.rest.entity.vo.AddressIdVo;
 import com.pinet.rest.service.IAddressService;
 import com.pinet.rest.service.ICustomerAddressService;
 import com.pinet.rest.mapper.CustomerAddressMapper;
-import com.pinet.rest.util.LoginUser;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,11 +24,9 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
 
     @Autowired
     private IAddressService addressService;
-    @Autowired
-    private LoginUser loginUser;
 
     @Override
-    public boolean add(CustomerAddressDto customerAddressDto) {
+    public boolean add(CustomerAddressDto customerAddressDto,Long userId) {
         AddressIdVo addressIdVo = addressService.selectIdByName(customerAddressDto.getProvince(), customerAddressDto.getCity(), customerAddressDto.getDistrict());
         CustomerAddress entity = new CustomerAddress();
         BeanUtils.copyProperties(customerAddressDto,entity);
@@ -44,12 +40,12 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
                 .append(entity.getDistrict())
                 .append(customerAddressDto.getAddressName());
         entity.setAddress(sb.toString());
-        entity.setCustomerId(Long.valueOf(loginUser.currentUserId()));
+        entity.setCustomerId(userId);
         return this.save(entity);
     }
 
     @Override
-    public boolean edit(CustomerAddressDto customerAddressDto) {
+    public boolean edit(CustomerAddressDto customerAddressDto,Long userId) {
         CustomerAddress customerAddress = getById(customerAddressDto.getId());
 
         CustomerAddress entity = new CustomerAddress();
@@ -67,7 +63,7 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
                     .append(customerAddressDto.getAddressName());
             entity.setAddress(sb.toString());
         }
-        entity.setCustomerId(Long.valueOf(loginUser.currentUserId()));
+        entity.setCustomerId(userId);
         entity.setUpdateTime(System.currentTimeMillis());
         return this.updateById(entity);
     }

@@ -1,5 +1,7 @@
 package com.pinet.rest.service.impl;
 
+import com.pinet.core.util.ThreadLocalUtil;
+import com.pinet.rest.entity.ProductGlanceOver;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.param.HomeProductParam;
@@ -7,12 +9,14 @@ import com.pinet.rest.entity.vo.HotProductVo;
 import com.pinet.rest.entity.vo.RecommendProductVo;
 import com.pinet.rest.entity.vo.ShopProductVo;
 import com.pinet.rest.mapper.ShopProductMapper;
+import com.pinet.rest.service.IProductGlanceOverService;
 import com.pinet.rest.service.IShopProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.rest.service.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,6 +32,8 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Autowired
     private IShopService shopService;
+    @Autowired
+    private IProductGlanceOverService productGlanceOverService;
 
 
     @Override
@@ -57,8 +63,10 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public ShopProductVo getDetailById(Long id) {
-        //记录商品浏览表
+
         ShopProductVo shopProductVo = baseMapper.getDetailById(id);
+        //更新商品浏览次数
+        productGlanceOverService.updateGlanceOverTimes(id);
         return shopProductVo;
     }
 }

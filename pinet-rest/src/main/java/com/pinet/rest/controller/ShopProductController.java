@@ -6,6 +6,8 @@ import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.vo.ShopProductVo;
 import com.pinet.rest.service.IShopProductService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -24,6 +26,7 @@ import com.pinet.core.controller.BaseController;
  */
 @RestController
 @RequestMapping("/shop/product")
+@Api(tags = "商品")
 public class ShopProductController extends BaseController {
 
     @Autowired
@@ -36,6 +39,7 @@ public class ShopProductController extends BaseController {
      */
     @RequestMapping(value = "/getById",method = RequestMethod.GET)
     @NotTokenSign
+    @ApiOperation("商品详情")
     public Result<ShopProductVo> getById(@RequestParam Long id){
         ShopProductVo shopProductVo = shopProductService.getDetailById(id);
         return Result.ok(shopProductVo);

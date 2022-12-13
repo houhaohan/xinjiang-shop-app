@@ -91,7 +91,7 @@
     </select>
 
 
-    <select id="getDetailById" resultType="com.pinet.rest.entity.vo.ShopProductVo">
+    <select id="getDetailById" resultMap="ShopProductMap">
          select sp.id,
          sp.prod_id,
          sp.product_name,
