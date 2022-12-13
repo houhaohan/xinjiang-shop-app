@@ -1,5 +1,6 @@
 package com.pinet.rest.service;
 
+import com.pinet.core.entity.Token;
 import com.pinet.rest.entity.CustomerToken;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -19,6 +20,9 @@ public interface ICustomerTokenService extends IService<CustomerToken> {
      * @param terminal 终端，可判断多个终端是否同时在线
      * */
     Long validateAndReturnCustomerId(String token, int terminal);
+
+
+    boolean refreshToken(Token token, String oldToken);
 
 
 }

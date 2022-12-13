@@ -1,11 +1,14 @@
 package com.pinet.rest.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.pinet.core.entity.Token;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.http.HttpResult;
+import com.pinet.core.util.AppJwtTokenUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.rest.entity.CustomerToken;
 import com.pinet.rest.service.ICustomerTokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,10 +65,15 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
         }
 
         Long userId = customerTokenService.validateAndReturnCustomerId(appToken, terminal);
-        if(userId == null){
+        //如果token已过期，但是未加入黑名单也在保留范围内，则进行刷新token操作，在请求头内直接返回新的token
+        if(userId != null && AppJwtTokenUtil.isTokenExpired(appToken)){
+            Token customerToken = AppJwtTokenUtil.generateTokenObject(String.valueOf(userId) , request);
+            customerTokenService.refreshToken(customerToken, appToken);
+            response.setHeader("Authorization", "Bearer " + customerToken.getToken());
+        }else {
             throw new PinetException("token过期，请重新登入");
         }
-        ThreadLocalUtil.setUserId(Long.valueOf(userId));
+        ThreadLocalUtil.setUserId(userId == null ? 0 : Long.valueOf(userId));
         return true;
     }
 

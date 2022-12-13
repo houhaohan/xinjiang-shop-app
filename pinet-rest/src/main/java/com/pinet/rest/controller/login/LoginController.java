@@ -77,7 +77,7 @@ public class LoginController {
      * 退出登入
      * @return
      */
-    @RequestMapping("/logout")
+    @RequestMapping(value = "/logout",method = RequestMethod.GET)
     @ApiOperation("退出登入")
     public Result<?> logout(@RequestParam String token){
         try{

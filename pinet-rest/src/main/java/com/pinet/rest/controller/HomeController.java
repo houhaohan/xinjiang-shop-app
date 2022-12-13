@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class HomeController extends BaseController {
     private LoginUser loginUser;
 
     @ApiOperation("热卖排行版")
-    @RequestMapping("/hotSell/list")
+    @RequestMapping(value = "/hotSell/list",method = RequestMethod.GET)
     @NotTokenSign
     public Result<List<HotProductVo>> hotSell(HomeProductParam param){
         List<HotProductVo> list = shopProductService.hotSellList(param);
@@ -38,7 +39,7 @@ public class HomeController extends BaseController {
      * @return
      */
     @ApiOperation("推荐商品")
-    @RequestMapping("/recommend/list")
+    @RequestMapping(value = "/recommend/list",method = RequestMethod.GET)
     @NotTokenSign
     public Result<List<RecommendProductVo>> recommendList(){
         Long userId = loginUser.currentUserId();

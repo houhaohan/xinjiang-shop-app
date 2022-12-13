@@ -40,7 +40,7 @@ public class CustomerAddressController extends BaseController {
 
 
     @ApiOperation("列表")
-    @RequestMapping("/list")
+    @RequestMapping(value = "/list",method = RequestMethod.GET)
     public Result list(){
         Long userId = loginUser.currentUserId();
         QueryWrapper<CustomerAddress> wrapper = new QueryWrapper<>();

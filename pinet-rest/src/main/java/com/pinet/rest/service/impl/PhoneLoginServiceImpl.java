@@ -58,6 +58,7 @@ public class PhoneLoginServiceImpl implements ILoginService {
                     .lastLoginTime(System.currentTimeMillis())
                     .phone(smsLoginRequest.getPhone())
                     .active(1)
+                    .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
                     .build();
             customerService.save(customer);
         }

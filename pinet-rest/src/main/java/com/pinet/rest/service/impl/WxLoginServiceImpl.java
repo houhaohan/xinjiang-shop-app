@@ -76,6 +76,7 @@ public class WxLoginServiceImpl implements ILoginService {
                     .sex(Integer.valueOf(userInfo.getGender()))
                     .phone(wxMaPhoneNumberInfo.getPhoneNumber())
                     .active(1)
+                    .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
                     .build();
             customerService.save(customer);
         }

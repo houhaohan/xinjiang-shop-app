@@ -1,6 +1,7 @@
 package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.pinet.core.entity.Token;
 import com.pinet.core.util.DateUtil;
 import com.pinet.rest.entity.CustomerToken;
 import com.pinet.rest.mapper.CustomerTokenMapper;
@@ -34,4 +35,23 @@ public class CustomerTokenServiceImpl extends ServiceImpl<CustomerTokenMapper, C
         }
         return customerToken.getCustomerId();
     }
+
+    @Override
+    public boolean refreshToken(Token token, String oldToken){
+        if(token == null || token.getTerminal() == null){
+            return false;
+        }
+        return this.saveToken(token);
+    }
+
+    public boolean saveToken(Token token) {
+        if(token == null){
+            return false;
+        }
+
+        CustomerToken customerToken = new CustomerToken();
+        BeanUtils.copyProperties(token, customerToken);
+        return this.save(customerToken);
+    }
+
 }
