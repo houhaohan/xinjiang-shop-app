@@ -24,5 +24,5 @@ public class CartListDto {
 
 
     @ApiModelProperty(value = "用户id(内部封装参数，不需要传)",name = "customerId")
-    private Integer customerId;
+    private Long customerId;
 }

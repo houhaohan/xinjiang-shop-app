@@ -3,6 +3,7 @@ package com.pinet.rest.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.AddCartDto;
@@ -39,7 +40,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
-
         //判断店铺是否存在  店铺状态
         Shop shop = shopService.getById(dto.getShopId());
         if (shop == null || shop.getDelFlag() == 1) {
@@ -51,23 +51,25 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     @Override
     public Boolean addCart(AddCartDto dto) {
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+
         LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Cart::getCustomerId, 0L).eq(Cart::getShopId, dto.getShopId())
+        lambdaQueryWrapper.eq(Cart::getCustomerId, customerId).eq(Cart::getShopId, dto.getShopId())
                 .eq(Cart::getShopProdId, dto.getShopProdId()).eq(BaseEntity::getDelFlag, 0).eq(Cart::getShopProdSpecId, dto.getShopProdSpecId());
 
         Cart query = getOne(lambdaQueryWrapper);
-        if (query != null){
+        if (query != null) {
             throw new PinetException("购物车商品已存在");
         }
 
         Cart cart = new Cart();
         BeanUtils.copyProperties(dto, cart);
         cart.setCartStatus(1);
-        cart.setCustomerId(0L);
-        cart.setCreateBy(0L);
+        cart.setCustomerId(customerId);
+        cart.setCreateBy(customerId);
         Date now = new Date();
         cart.setCreateTime(now);
-        cart.setUpdateBy(0L);
+        cart.setUpdateBy(customerId);
         cart.setUpdateTime(now);
         cart.setDelFlag(0);
         return save(cart);
@@ -84,9 +86,12 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             return removeById(dto.getCartId());
         }
 
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+
+
         cart.setProdNum(dto.getProdNum());
         cart.setUpdateTime(new Date());
-        cart.setUpdateBy(0L);
+        cart.setUpdateBy(customerId);
         return updateById(cart);
     }
 }

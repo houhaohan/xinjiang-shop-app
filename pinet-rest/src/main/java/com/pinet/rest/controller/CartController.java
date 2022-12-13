@@ -39,6 +39,8 @@ public class CartController extends BaseController {
     @ApiOperation("购物车列表")
     @PostMapping("/cartList")
     public Result<List<CartListVo>> cartList(@Validated @RequestBody CartListDto dto){
+        Long customerId = currentUserId();
+        dto.setCustomerId(customerId);
         List<CartListVo> cartListVos = cartService.cartList(dto);
         return Result.ok(cartListVos);
     }

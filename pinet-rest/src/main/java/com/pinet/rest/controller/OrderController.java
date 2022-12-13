@@ -2,6 +2,7 @@ package com.pinet.rest.controller;
 
 
 import com.pinet.core.result.Result;
+import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.service.IOrderService;
@@ -33,8 +34,8 @@ public class OrderController extends BaseController {
 
     @PostMapping("/orderList")
     @ApiOperation("订单列表")
-    public Result<List<OrderListVo>> orderList() {
-        List<OrderListVo> orderListVos = orderService.orderList();
+    public Result<List<OrderListVo>> orderList(OrderListDto dto) {
+        List<OrderListVo> orderListVos = orderService.orderList(dto);
         return Result.ok(orderListVos);
     }
 
