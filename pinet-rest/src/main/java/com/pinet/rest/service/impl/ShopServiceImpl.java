@@ -1,5 +1,7 @@
 package com.pinet.rest.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.pinet.rest.entity.Order;
@@ -14,10 +16,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.pinet.core.util.LatAndLngUtils.getDistance;
@@ -48,19 +47,23 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             throw new IllegalArgumentException("参数不能为空");
         }
         List<ShopVo> shopList = shopMapper.shopList();
-        //查询店铺未完成订单数量
+        //查询店铺未完成订单数量限8小时内订单
+        Date date = new Date();
+        Date queryDate = DateUtil.offset(date, DateField.DAY_OF_MONTH,-8);
         List<Order> orderList = orderMapper.selectList(Wrappers.lambdaQuery(new Order())
                 .in(Order::getOrderStatus,20,30)
+                .ge(Order::getCreateTime,queryDate)
+                .le(Order::getCreateTime,date)
         );
         Map<Long, List<Order>> collect = orderList.stream().collect(Collectors.groupingBy(Order::getShopId));
-        //计算距离，加订单量
+        //计算距离,单位Km，加订单量
         if (ObjectUtil.isNotEmpty(shopList)){
             for (ShopVo shopVo : shopList) {
                 double distance = getDistance(dto.getLng().doubleValue(), dto.getLat().doubleValue(), Double.parseDouble(shopVo.getLng()), Double.parseDouble(shopVo.getLat()), 2);
                 shopVo.setDistance(distance);
-                for (long i = 0; i < collect.keySet().size(); i++) {
-                    if (shopVo.getId()==i){
-                        shopVo.setOrderNum(collect.get(i).size());
+                for (Long shopId : collect.keySet()) {
+                    if (shopVo.getId().equals(shopId)){
+                        shopVo.setOrderNum(collect.get(shopId).size());
                     }
                 }
             }

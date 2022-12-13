@@ -33,8 +33,6 @@ public class CustomerAddressController extends BaseController {
     private ICustomerAddressService customerAddressService;
 
 
-
-
     @ApiOperation("列表")
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public Result list(){
