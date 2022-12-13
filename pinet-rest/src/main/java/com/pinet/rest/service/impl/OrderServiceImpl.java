@@ -1,11 +1,14 @@
 package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.DesensitizedUtil;
+import com.github.pagehelper.PageHelper;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.Order;
 import com.pinet.rest.entity.OrderAddress;
 import com.pinet.rest.entity.bo.OrderProductBo;
+import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
@@ -40,8 +43,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private IOrderAddressService orderAddressService;
 
     @Override
-    public List<OrderListVo> orderList() {
-        List<OrderListVo> orderListVos = orderMapper.selectOrderList(0L);
+    public List<OrderListVo> orderList(OrderListDto dto) {
+        PageHelper.startPage(dto.getPageNum(),dto.getPageSize());
+
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+
+        List<OrderListVo> orderListVos = orderMapper.selectOrderList(customerId);
         orderListVos.forEach(k->{
             List<OrderProductBo> orderProductBoList = orderProductService.getOrderProduct(k.getOrderId());
             k.setOrderProductBoList(orderProductBoList);
