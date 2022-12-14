@@ -49,7 +49,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         List<ShopVo> shopList = shopMapper.shopList();
         //查询店铺未完成订单数量限8小时内订单
         Date date = new Date();
-        Date queryDate = DateUtil.offset(date, DateField.DAY_OF_MONTH,-8);
+        Date queryDate = DateUtil.offsetHour(date,-8);
         List<Order> orderList = orderMapper.selectList(Wrappers.lambdaQuery(new Order())
                 .in(Order::getOrderStatus,20,30)
                 .ge(Order::getCreateTime,queryDate)
