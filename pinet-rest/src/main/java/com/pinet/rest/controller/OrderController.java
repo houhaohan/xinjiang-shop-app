@@ -1,11 +1,14 @@
 package com.pinet.rest.controller;
 
 
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
+import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.OrderSettlementVo;
@@ -40,13 +43,13 @@ public class OrderController extends BaseController {
 
     @PostMapping("/orderList")
     @ApiOperation("订单列表")
-    public Result<List<OrderListVo>> orderList(OrderListDto dto) {
+    public Result<List<OrderListVo>> orderList(@RequestBody OrderListDto dto) {
         List<OrderListVo> orderListVos = orderService.orderList(dto);
         return Result.ok(orderListVos);
     }
 
 
-    @PostMapping("/orderDetail")
+    @RequestMapping("/orderDetail")
     @ApiOperation("订单详情")
     public Result<OrderDetailVo> orderDetail(Long orderId) {
         OrderDetailVo orderDetailVo = orderService.orderDetail(orderId);
@@ -57,8 +60,31 @@ public class OrderController extends BaseController {
     @PostMapping("/orderSettlement")
     @ApiOperation("订单结算")
     public Result<OrderSettlementVo> checkOrder(@Validated @RequestBody OrderSettlementDto dto) {
+        checkParam(dto);
         OrderSettlementVo orderSettlementVo = orderService.orderSettlement(dto);
         return Result.ok(orderSettlementVo);
+    }
+
+
+    @PostMapping("/createOrder")
+    @ApiOperation("创建订单")
+    public Result<CreateOrderVo> createOrder(CreateOrderDto dto) {
+        checkParam(dto);
+        if (dto.getOrderType() == 1 && dto.getCustomerAddressId() == null){
+            throw new PinetException("外卖订单收货地址id必传");
+        }
+        CreateOrderVo vo = orderService.createOrder(dto);
+        return Result.ok(vo);
+    }
+
+    private void checkParam(OrderSettlementDto dto){
+        /**
+         * 如果是直接购买  店铺商品id 和商品数量为必传
+         */
+        if (dto.getSettlementType() == 2 && (dto.getShopProdId() == null || dto.getProdNum() == null || dto.getShopProdSpecId() == null)) {
+            throw new PinetException("直接购买必传店铺商品id || 商品数量 || 商品样式id");
+        }
+
     }
 
 }

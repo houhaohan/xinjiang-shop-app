@@ -2,8 +2,10 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
+import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.OrderSettlementVo;
@@ -33,4 +35,6 @@ public interface IOrderService extends IService<Order> {
      * @return Long
      */
     Integer countShopOrderMakeNum(Long shopId);
+
+    CreateOrderVo createOrder(CreateOrderDto dto);
 }
