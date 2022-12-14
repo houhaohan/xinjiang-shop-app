@@ -114,7 +114,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public Integer countShopOrderMakeNum(Long shopId) {
         Date date = new Date();
-        Date queryDate = DateUtil.offset(date, DateField.DAY_OF_MONTH,-8);
+        Date queryDate = DateUtil.offsetHour(date,-8);
         return orderMapper.countShopOrderMakeNum(shopId,queryDate);
     }
 }
