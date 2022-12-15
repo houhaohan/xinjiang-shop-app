@@ -67,17 +67,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
-        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+//        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+        Long customerId = 12L;
         Page<OrderListVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
-        IPage<OrderListVo> orderListVos = orderMapper.selectOrderList(page, customerId);
-        orderListVos.getRecords().forEach(k -> {
-            List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
-            k.setOrderProducts(orderProducts);
-            k.setProdNum(orderProducts.size());
+        List<OrderListVo> orderListVos = orderMapper.selectOrderList(customerId);
+        orderListVos.forEach(k -> {
+//            List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
+//            k.setOrderProducts(orderProducts);
+            k.setProdNum(k.getOrderProducts().size());
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
         });
-        return orderListVos.getRecords();
+        return orderListVos;
     }
 
     @Override
