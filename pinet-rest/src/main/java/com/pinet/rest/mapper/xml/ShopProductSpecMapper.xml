@@ -29,5 +29,8 @@
         del_flag,
         shop_prod_id, prod_spec_id, spec_name, sku_id, price, market_price, stock
     </sql>
+    <update id="updateStock">
+        update shop_product_spec set stock = stock - #{num}  where id = #{shopProductSpecId} and stock >= #{num}
+    </update>
 
 </mapper>

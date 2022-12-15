@@ -1,16 +1,23 @@
 package com.pinet.rest.service;
 
-import com.pinet.rest.entity.ShopProductSpec;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.ShopProductSpec;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author wlbz
  * @since 2022-12-08
  */
 public interface IShopProductSpecService extends IService<ShopProductSpec> {
+    /**
+     * 减少库存
+     * @param shopProductSpecId 店铺商品样式表id
+     * @param num 扣减的数量
+     * @return 更新的记录条数
+     */
+    int reduceStock(Long shopProductSpecId, Integer num);
 
 }

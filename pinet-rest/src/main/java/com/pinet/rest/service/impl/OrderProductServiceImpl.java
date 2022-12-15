@@ -58,6 +58,9 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shopId);
         cartList.forEach(k -> {
+            if (k.getCartStatus() == 2){
+                throw new PinetException("购物车内有失效的商品,请删除后在结算");
+            }
             QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(),k.getProdNum(),k.getShopProdSpecId());
             OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
             orderProducts.add(orderProduct);

@@ -1,18 +1,18 @@
 package com.pinet.rest.service.impl;
 
-import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.DesensitizedUtil;
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.common.mq.config.QueueConstants;
+import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.rest.entity.Order;
-import com.pinet.rest.entity.OrderAddress;
-import com.pinet.rest.entity.OrderProduct;
-import com.pinet.rest.entity.Shop;
+import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
@@ -23,11 +23,9 @@ import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.OrderSettlementVo;
 import com.pinet.rest.mapper.OrderMapper;
-import com.pinet.rest.service.IOrderAddressService;
-import com.pinet.rest.service.IOrderProductService;
-import com.pinet.rest.service.IOrderService;
-import com.pinet.rest.service.IShopService;
+import com.pinet.rest.service.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -56,6 +54,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Resource
     private IShopService shopService;
+
+    @Resource
+    private ICartService cartService;
+
+    @Resource
+    private IShopProductSpecService shopProductSpecService;
+
+    @Resource
+    private JmsUtil jmsUtil;
 
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
@@ -131,6 +138,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public CreateOrderVo createOrder(CreateOrderDto dto) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
@@ -144,15 +152,97 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         BigDecimal shippingFee = getShippingFee(dto.getOrderType());
 
         //外卖订单 校验距离 10公里以内
-        double km =  LatAndLngUtils.getDistance(Double.parseDouble(dto.getLng()),Double.parseDouble(dto.getLat()),
-                Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()),2);
-        if (km > 10D){
+        double m =  LatAndLngUtils.getDistance(Double.parseDouble(dto.getLng()),Double.parseDouble(dto.getLat()),
+                Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()));
+        if (m > 10000D && dto.getOrderType() == 1){
             throw new PinetException("店铺距离过远,无法配送");
         }
 
+        List<OrderProduct> orderProducts = new ArrayList<>();
+        if (dto.getSettlementType() == 1) {
+            //购物车结算（通过店铺id 查找购物车进行结算）
+            orderProducts = orderProductService.getByCartAndShop(dto.getShopId());
+
+            //删除购物车已购商品
+            cartService.delCartByShopId(dto.getShopId(),userId);
+        } else {
+            //直接结算（通过具体的商品样式、商品数量进行结算）
+            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), dto.getShopProdSpecId());
+            OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
+            orderProducts.add(orderProduct);
+        }
+
+        //减少已购商品的库存(第一版暂不加锁 后期考虑加乐观锁或redis锁)
+        for (OrderProduct orderProduct : orderProducts) {
+            int res = shopProductSpecService.reduceStock(orderProduct.getShopProdSpecId(),orderProduct.getProdNum());
+            if (res != 1){
+                throw new PinetException("库存更新失败");
+            }
+        }
 
 
-        return null;
+       //计算订单总金额  和订单商品金额
+        BigDecimal orderPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(shippingFee, BigDecimal::add);
+        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        //创建订单基础信息
+        Order order = createOrder(dto,shippingFee,m,orderPrice,orderProdPrice,shop);
+        //插入订单
+        this.save(order);
+
+        //插入订单商品  并设置订单号
+        orderProducts.forEach(k->{
+            k.setOrderId(order.getId());
+        });
+        orderProductService.saveBatch(orderProducts);
+
+
+        //外卖订单插入订单地址表
+        if (dto.getOrderType() == 1){
+            OrderAddress orderAddress = orderAddressService.createByCustomerAddressId(dto.getCustomerAddressId());
+            orderAddressService.save(orderAddress);
+        }
+
+        //将订单放到mq中
+        jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_PAY_NAME,order.getId().toString(), (long) (15 * 60 * 1000));
+
+        CreateOrderVo createOrderVo = new CreateOrderVo();
+        createOrderVo.setOrderId(order.getId());
+        createOrderVo.setOrderNo(order.getOrderNo());
+        createOrderVo.setOrderPrice(orderPrice);
+
+        return createOrderVo;
+    }
+
+
+    private Order createOrder(CreateOrderDto dto,BigDecimal shippingFee,Double m,BigDecimal orderPrice,BigDecimal orderProdPrice,Shop shop){
+        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+        Date now = new Date();
+        Date estimateArrivalStartTime = DateUtil.offsetHour(now,1);
+        Date estimateArrivalEndTime = DateUtil.offsetMinute(now,90);
+
+        Order order = new Order();
+        Snowflake snowflake = IdUtil.getSnowflake();
+        order.setOrderNo(snowflake.nextId());
+        order.setOrderType(dto.getOrderType());
+        order.setOrderStatus(OrderStatusEnum.NOT_PAY.getCode());
+        order.setCustomerId(userId);
+        order.setShopId(shop.getId());
+        order.setShopName(shop.getShopName());
+        order.setOrderPrice(orderPrice);
+        order.setOrderProdPrice(orderProdPrice);
+        order.setShippingFee(shippingFee);
+        order.setEstimateArrivalStartTime(estimateArrivalStartTime);
+        order.setEstimateArrivalEndTime(estimateArrivalEndTime);
+        order.setOrderDistance(m.intValue());
+        order.setRemark(dto.getRemark());
+        order.setCreateBy(userId);
+        order.setCreateTime(now);
+        order.setUpdateBy(userId);
+        order.setUpdateTime(now);
+        order.setDelFlag(0);
+
+        return order;
     }
 
 

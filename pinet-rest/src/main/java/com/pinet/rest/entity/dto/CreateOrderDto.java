@@ -36,4 +36,7 @@ public class CreateOrderDto extends OrderSettlementDto{
     @ApiModelProperty(value = "lng",name = "lng")
     private String lng;
 
+    @ApiModelProperty(value = "备注",name = "remark")
+    private String remark;
+
 }

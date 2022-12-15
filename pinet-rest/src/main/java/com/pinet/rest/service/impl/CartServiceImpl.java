@@ -101,4 +101,11 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         lambdaQueryWrapper.eq(BaseEntity::getDelFlag,0).eq(Cart::getCustomerId,userId).eq(Cart::getShopId,shopId);
         return list(lambdaQueryWrapper);
     }
+
+    @Override
+    public void delCartByShopId(Long shopId, Long customerId) {
+        LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Cart::getShopId,shopId).eq(Cart::getCustomerId,customerId).eq(BaseEntity::getDelFlag,0);
+        remove(lambdaQueryWrapper);
+    }
 }

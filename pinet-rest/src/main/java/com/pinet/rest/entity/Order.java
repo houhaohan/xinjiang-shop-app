@@ -1,13 +1,13 @@
 package com.pinet.rest.entity;
 
 import com.pinet.core.entity.BaseEntity;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p>
@@ -52,13 +52,13 @@ public class Order extends BaseEntity {
     private BigDecimal shippingFee;
 
     @ApiModelProperty("预计送达开始时间（实际下单时间推迟1-1.5个小时）")
-    private LocalDateTime estimateArrivalStartTime;
+    private Date estimateArrivalStartTime;
 
     @ApiModelProperty("预计送达结束时间")
-    private LocalDateTime estimateArrivalEndTime;
+    private Date estimateArrivalEndTime;
 
     @ApiModelProperty("实际送达时间")
-    private LocalDateTime actualArrivalTime;
+    private Date actualArrivalTime;
 
     @ApiModelProperty("订单距离（单位:米）")
     private Integer orderDistance;
