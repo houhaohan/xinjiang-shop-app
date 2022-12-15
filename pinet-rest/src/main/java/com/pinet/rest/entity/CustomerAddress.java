@@ -14,6 +14,8 @@ import lombok.Data;
 @Data
 public class CustomerAddress implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     /**
     * 
     */
@@ -22,7 +24,7 @@ public class CustomerAddress implements Serializable {
     /**
     * 
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("用户ID")
     private Long customerId;
     /**
     * 省
@@ -51,24 +53,24 @@ public class CustomerAddress implements Serializable {
     @ApiModelProperty("1先生 2女士")
     private String sex;
     /**
-    * 
+    * 地址
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("地址")
     private String address;
     /**
-    * 
+    * 省份
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("省份")
     private String province;
     /**
-    * 
+    * 城市
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("城市")
     private String city;
     /**
     * 
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("地区")
     private String district;
     /**
     * 邮编
@@ -96,14 +98,14 @@ public class CustomerAddress implements Serializable {
     @ApiModelProperty("默认地址值为1")
     private Integer status;
     /**
-    * 
+    * 创建时间
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("创建时间")
     private Long createTime;
     /**
-    * 
+    * 修改时间
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("修改时间")
     private Long updateTime;
     /**
     * 经度

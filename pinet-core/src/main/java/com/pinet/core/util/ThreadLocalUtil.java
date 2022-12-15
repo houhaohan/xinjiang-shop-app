@@ -8,7 +8,8 @@ public class ThreadLocalUtil {
     private static ThreadLocal<UserLogin> USER_LOGIN = new ThreadLocal<UserLogin>();
 
     public static UserLogin getUserLogin() {
-        return USER_LOGIN.get();
+        UserLogin userLogin = USER_LOGIN.get();
+        return userLogin != null ? userLogin : new UserLogin(0L);
     }
 
     public static void setUserId(Long userId) {

@@ -13,6 +13,7 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     dynamic:
+      # 指定默认数据源
       primary: master
       druid:
         min-idle: 10

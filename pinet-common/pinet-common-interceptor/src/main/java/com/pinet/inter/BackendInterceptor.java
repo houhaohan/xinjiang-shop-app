@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -50,7 +51,8 @@ public class  BackendInterceptor implements HandlerInterceptor {
             }
 
             if(StringUtil.isEmpty(accessToken)){
-                return error(request,response);
+                return true;
+//                return error(request,response);
             }
 
             String userId = redisUtil.get(UserConstant.PREFIX_USER_TOKEN + accessToken);
@@ -75,7 +77,7 @@ public class  BackendInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        ThreadLocalUtil.clear();
+        ThreadLocalUtil.remove();
     }
 
     @Override

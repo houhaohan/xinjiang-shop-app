@@ -11,9 +11,7 @@ import java.math.BigDecimal;
 
 @Data
 @ApiModel(value = "CustomerAddressDto",description = "收获地址")
-public class CustomerAddressDto {
-    @ApiModelProperty("id")
-    private Long id;
+public class CustomerAddressDto  extends BaseDto{
 
     @ApiModelProperty("姓名")
     @NotBlank(message = "收货人姓名不能为空")

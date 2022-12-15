@@ -4,6 +4,7 @@ package com.pinet.rest.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.result.Result;
 import com.pinet.rest.entity.CustomerAddress;
+import com.pinet.rest.entity.dto.BaseDto;
 import com.pinet.rest.entity.dto.CustomerAddressDto;
 import com.pinet.rest.service.ICustomerAddressService;
 import io.swagger.annotations.Api;
@@ -34,20 +35,20 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("列表")
     @RequestMapping(value = "/list",method = RequestMethod.GET)
-    public Result list(){
+    public Result<List<CustomerAddress>> list(){
         Long userId = super.currentUserId();
         if(userId == null){
             return Result.ok();
         }
         QueryWrapper<CustomerAddress> wrapper = new QueryWrapper<>();
-        wrapper.eq("customer_id",userId);
+        wrapper.eq("customer_id",106);
         List<CustomerAddress> list = customerAddressService.list(wrapper);
         return Result.ok(list);
     }
 
     @ApiOperation("新增")
     @RequestMapping(value = "/save",method = RequestMethod.POST)
-    public Result save(@RequestBody CustomerAddressDto customerAddressDto){
+    public Result<String> save(@RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
         if(userId == null){
             return Result.error("用户没有登入，请先登入");
@@ -61,7 +62,7 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("修改")
     @RequestMapping(value = "/updateById",method = RequestMethod.POST)
-    public Result updateById(@RequestBody CustomerAddressDto customerAddressDto){
+    public Result<String> updateById(@RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
         if(userId == null){
             return Result.error("用户没有登入，请先登入");
@@ -75,12 +76,12 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("删除")
     @RequestMapping(value = "/deleteById",method = RequestMethod.DELETE)
-    public Result deleteById(@RequestBody Long id){
+    public Result<String> deleteById(@RequestBody BaseDto dto){
         Long userId = super.currentUserId();
         if(userId == null){
             return Result.error("用户没有登入，请先登入");
         }
-        boolean success = customerAddressService.removeById(id);
+        boolean success = customerAddressService.removeById(dto.getId());
         if(success){
             return Result.ok("删除成功");
         }
@@ -90,13 +91,13 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("设置默认地址")
     @RequestMapping(value = "/default",method = RequestMethod.POST)
-    public Result save(@RequestBody Long id){
+    public Result<String> updateDefault(@RequestBody BaseDto baseDto){
         Long userId = super.currentUserId();
         if(userId == null){
             return Result.error("用户没有登入，请先登入");
         }
         CustomerAddress entity = new CustomerAddress();
-        entity.setId(id);
+        entity.setId(baseDto.getId());
         entity.setStatus(1);
         boolean success = customerAddressService.updateById(entity);
         if(success){

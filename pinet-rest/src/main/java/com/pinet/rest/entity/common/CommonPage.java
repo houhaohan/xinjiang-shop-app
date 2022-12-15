@@ -1,6 +1,5 @@
 package com.pinet.rest.entity.common;
 
-import lombok.Data;
 
 /**
  * @program: xinjiang-shop-app
