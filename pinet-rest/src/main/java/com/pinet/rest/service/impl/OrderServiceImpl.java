@@ -185,6 +185,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         BigDecimal orderPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(shippingFee, BigDecimal::add);
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        //对比订单总金额和结算的总金额  如果不相同说明商品价格有调整
+        if (orderPrice.compareTo(dto.getOrderPrice()) != 0){
+            throw new PinetException("订单信息发生变化,请重新下单");
+        }
+
         //创建订单基础信息
         Order order = createOrder(dto,shippingFee,m,orderPrice,orderProdPrice,shop);
         //插入订单
