@@ -4,19 +4,19 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pinet.rest.entity.ShopProductSpec">
-        <result column="id" property="id" />
-        <result column="create_by" property="createBy" />
-        <result column="create_time" property="createTime" />
-        <result column="update_by" property="updateBy" />
-        <result column="update_time" property="updateTime" />
-        <result column="del_flag" property="delFlag" />
-        <result column="shop_prod_id" property="shopProdId" />
-        <result column="prod_spec_id" property="prodSpecId" />
-        <result column="spec_name" property="specName" />
-        <result column="sku_id" property="skuId" />
-        <result column="price" property="price" />
-        <result column="market_price" property="marketPrice" />
-        <result column="stock" property="stock" />
+        <result column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="shop_prod_id" property="shopProdId"/>
+        <result column="prod_spec_id" property="prodSpecId"/>
+        <result column="spec_name" property="specName"/>
+        <result column="sku_id" property="skuId"/>
+        <result column="price" property="price"/>
+        <result column="market_price" property="marketPrice"/>
+        <result column="stock" property="stock"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -29,8 +29,19 @@
         del_flag,
         shop_prod_id, prod_spec_id, spec_name, sku_id, price, market_price, stock
     </sql>
+
     <update id="updateStock">
-        update shop_product_spec set stock = stock - #{num}  where id = #{shopProductSpecId} and stock >= #{num}
+        update shop_product_spec
+        set stock = stock - #{num}
+        where id = #{shopProductSpecId}
+          and stock >= #{num}
+    </update>
+
+    <update id="addStock">
+        update shop_product_spec
+        set stock = stock + #{num}
+        where id = #{shopProductSpecId}
+
     </update>
 
 </mapper>

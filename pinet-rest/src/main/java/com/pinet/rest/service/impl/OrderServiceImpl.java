@@ -67,17 +67,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
-        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+//        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+        Long customerId = 12L;
         Page<OrderListVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
-        IPage<OrderListVo> orderListVos = orderMapper.selectOrderList(page, customerId);
-        orderListVos.getRecords().forEach(k -> {
-            List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
-            k.setOrderProducts(orderProducts);
-            k.setProdNum(orderProducts.size());
+        List<OrderListVo> orderListVos = orderMapper.selectOrderList(customerId);
+        orderListVos.forEach(k -> {
+//            List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
+//            k.setOrderProducts(orderProducts);
+            k.setProdNum(k.getOrderProducts().size());
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
         });
-        return orderListVos.getRecords();
+        return orderListVos;
     }
 
     @Override
@@ -184,6 +185,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
        //计算订单总金额  和订单商品金额
         BigDecimal orderPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(shippingFee, BigDecimal::add);
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        //对比订单总金额和结算的总金额  如果不相同说明商品价格有调整
+        if (orderPrice.compareTo(dto.getOrderPrice()) != 0){
+            throw new PinetException("订单信息发生变化,请重新下单");
+        }
 
         //创建订单基础信息
         Order order = createOrder(dto,shippingFee,m,orderPrice,orderProdPrice,shop);

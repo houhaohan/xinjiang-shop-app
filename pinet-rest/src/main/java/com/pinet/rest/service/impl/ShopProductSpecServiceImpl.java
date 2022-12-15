@@ -25,4 +25,9 @@ public class ShopProductSpecServiceImpl extends ServiceImpl<ShopProductSpecMappe
     public int reduceStock(Long shopProductSpecId, Integer num) {
         return shopProductSpecMapper.updateStock(shopProductSpecId,num);
     }
+
+    @Override
+    public int addStock(Long shopProductSpecId, Integer num) {
+        return shopProductSpecMapper.addStock(shopProductSpecId,num);
+    }
 }

@@ -36,16 +36,47 @@
         del_flag,
         order_no, order_type, order_status, customer_id, shop_id, shop_name, order_price, order_prod_price, shipping_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark
     </sql>
-    <select id="selectOrderList" resultType="com.pinet.rest.entity.vo.OrderListVo" parameterType="java.lang.Long">
-        select o.id           orderId,
-               o.order_no     orderNo,
-               o.shop_name    shopName,
-               o.order_status orderStatus,
-               o.create_time  createTime,
-               o.order_price  orderPrice
+
+    <resultMap id="selectOrderListResultMap" type="com.pinet.rest.entity.vo.OrderListVo">
+        <result column="o_id" property="orderId"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="shop_name" property="shopName"/>
+        <result column="order_status" property="orderStatus"/>
+        <result column="o_createTime" property="createTime"/>
+        <result column="order_price" property="orderPrice"/>
+<!--        <collection property="orderProducts" resultMap="orderProductsResultMap"/>-->
+    </resultMap>
+
+    <resultMap id="orderProductsResultMap" type="com.pinet.rest.entity.OrderProduct">
+        <result column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="order_id" property="orderId"/>
+        <result column="shop_prod_id" property="shopProdId"/>
+        <result column="prod_name" property="prodName"/>
+        <result column="prod_unit_price" property="prodUnitPrice"/>
+        <result column="prod_num" property="prodNum"/>
+        <result column="prod_price" property="prodPrice"/>
+        <result column="prod_sku_id" property="prodSkuId"/>
+        <result column="prod_sku_name" property="prodSkuName"/>
+        <result column="shop_prod_spec_id" property="shopProdSpecId"/>
+        <result column="prod_spec_name" property="prodSpecName"/>
+        <result column="prod_img" property="prodImg"/>
+    </resultMap>
+
+    <select id="selectOrderList" resultMap="selectOrderListResultMap" parameterType="java.lang.Long">
+        select o.id o_id,
+               o.order_no,
+               o.shop_name,
+               o.order_status,
+               o.create_time o_createTime,
+               o.order_price
         from `order` o
         where o.del_flag = 0
-          and o.customer_id = #{customerId}
+          and o.customer_id = #{customerId,jdbcType=BIGINT}
     </select>
 
     <select id="selectOrderDetail" resultType="com.pinet.rest.entity.vo.OrderDetailVo" parameterType="java.lang.Long">
@@ -71,7 +102,8 @@
         from `order`
         where del_flag = 0
           and shop_id = #{shopId}
-          and create_time > #{queryDate} and order_status = 30
+          and create_time > #{queryDate}
+          and order_status = 30
     </select>
 
 </mapper>

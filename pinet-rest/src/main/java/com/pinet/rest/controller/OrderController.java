@@ -68,7 +68,7 @@ public class OrderController extends BaseController {
 
     @PostMapping("/createOrder")
     @ApiOperation("创建订单")
-    public Result<CreateOrderVo> createOrder(CreateOrderDto dto) {
+    public Result<CreateOrderVo> createOrder(@Validated @RequestBody CreateOrderDto dto) {
         checkParam(dto);
         if (dto.getOrderType() == 1 && dto.getCustomerAddressId() == null){
             throw new PinetException("外卖订单收货地址id必传");

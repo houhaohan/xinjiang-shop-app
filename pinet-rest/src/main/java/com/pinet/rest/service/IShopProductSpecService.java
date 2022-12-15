@@ -20,4 +20,12 @@ public interface IShopProductSpecService extends IService<ShopProductSpec> {
      */
     int reduceStock(Long shopProductSpecId, Integer num);
 
+    /**
+     * 添加库存
+     * @param shopProductSpecId 店铺商品样式表id
+     * @param num 增加的数量
+     * @return 更新的记录条数
+     */
+    int addStock(Long shopProductSpecId, Integer num);
+
 }
