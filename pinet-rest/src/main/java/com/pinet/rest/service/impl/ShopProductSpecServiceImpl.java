@@ -6,9 +6,11 @@ import com.pinet.rest.service.IShopProductSpecService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author wlbz
@@ -16,5 +18,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ShopProductSpecServiceImpl extends ServiceImpl<ShopProductSpecMapper, ShopProductSpec> implements IShopProductSpecService {
+    @Resource
+    private ShopProductSpecMapper shopProductSpecMapper;
 
+    @Override
+    public int reduceStock(Long shopProductSpecId, Integer num) {
+        return shopProductSpecMapper.updateStock(shopProductSpecId,num);
+    }
 }

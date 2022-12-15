@@ -23,4 +23,25 @@ public class OrderSettlementDto {
     @ApiModelProperty(value = "订单类型( 1外卖  2自提)",name = "orderType")
     private Integer orderType;
 
+    @NotNull(message = "结算方式不能为空")
+    @ApiModelProperty(value = "结算类型( 1购物车结算  2直接购买)",name = "settlementType")
+    private Integer settlementType;
+
+    /**
+     * 店铺商品id
+     */
+    @ApiModelProperty(value = "店铺商品id(结算类型为直接购买必传)",name = "shopProdId")
+    private Long shopProdId;
+
+    /**
+     * 商品数量
+     */
+    @ApiModelProperty(value = "商品数量(结算类型为直接购买必传)",name = "prodNum")
+    private Integer prodNum;
+
+    @ApiModelProperty(value = "商品样式id(结算类型为直接购买必传)",name = "shopProdSpecId")
+    private Long shopProdSpecId;
+
+
+
 }

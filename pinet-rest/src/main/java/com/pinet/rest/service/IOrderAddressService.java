@@ -20,4 +20,10 @@ public interface IOrderAddressService extends IService<OrderAddress> {
     OrderAddress getOrderAddress(Long orderId);
 
 
+    /**
+     * 根据用户收货地址表构造订单收货地址信息
+     * @param customerAddressId 用户收货地址表id
+     * @return OrderAddress
+     */
+    OrderAddress createByCustomerAddressId(Long customerAddressId);
 }

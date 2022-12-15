@@ -32,4 +32,11 @@ public interface ICartService extends IService<Cart> {
      * @return List
      */
     List<Cart> getByUserIdAndShopId(Long userId,Long shopId);
+
+    /**
+     * 根据用户id和店铺id删除购物车
+     * @param shopId
+     * @param customerId
+     */
+    void delCartByShopId(Long shopId,Long customerId);
 }

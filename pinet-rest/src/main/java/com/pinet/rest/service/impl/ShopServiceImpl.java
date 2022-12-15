@@ -49,20 +49,20 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         List<ShopVo> shopList = shopMapper.shopList();
         //查询店铺未完成订单数量限8小时内订单
         Date date = new Date();
-        Date queryDate = DateUtil.offsetHour(date,-8);
+        Date queryDate = DateUtil.offsetHour(date, -8);
         List<Order> orderList = orderMapper.selectList(Wrappers.lambdaQuery(new Order())
-                .in(Order::getOrderStatus,20,30)
-                .ge(Order::getCreateTime,queryDate)
-                .le(Order::getCreateTime,date)
+                .in(Order::getOrderStatus, 20, 30)
+                .ge(Order::getCreateTime, queryDate)
+                .le(Order::getCreateTime, date)
         );
         Map<Long, List<Order>> collect = orderList.stream().collect(Collectors.groupingBy(Order::getShopId));
         //计算距离,单位Km，加订单量
-        if (ObjectUtil.isNotEmpty(shopList)){
+        if (ObjectUtil.isNotEmpty(shopList)) {
             for (ShopVo shopVo : shopList) {
                 double distance = getDistance(dto.getLng().doubleValue(), dto.getLat().doubleValue(), Double.parseDouble(shopVo.getLng()), Double.parseDouble(shopVo.getLat()), 2);
                 shopVo.setDistance(distance);
                 for (Long shopId : collect.keySet()) {
-                    if (shopVo.getId().equals(shopId)){
+                    if (shopVo.getId().equals(shopId)) {
                         shopVo.setOrderNum(collect.get(shopId).size());
                     }
                 }
@@ -76,6 +76,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Override
     public Boolean checkShopStatus(Long shopId) {
         Shop shop = getById(shopId);
+        return checkShopStatus(shop);
+    }
+
+    @Override
+    public Boolean checkShopStatus(Shop shop) {
         if (shop.getShopStatus() == 2) {
             return false;
         }

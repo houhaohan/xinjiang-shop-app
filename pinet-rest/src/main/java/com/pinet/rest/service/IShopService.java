@@ -40,4 +40,11 @@ public interface IShopService extends IService<Shop> {
      */
     Boolean checkShopStatus(Long shopId);
 
+    /**
+     * 校验店铺营业状态
+     * @param shop 店铺信息
+     * @return true 正常  false 异常
+     */
+    Boolean checkShopStatus(Shop shop);
+
 }

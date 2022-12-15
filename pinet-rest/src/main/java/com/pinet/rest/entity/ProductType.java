@@ -27,5 +27,8 @@ public class ProductType extends BaseEntity {
     @ApiModelProperty("商品类型名称")
     private String typeName;
 
+    @ApiModelProperty("是否启用 0启用 1禁用")
+    private Integer typeState;
+
 
 }
