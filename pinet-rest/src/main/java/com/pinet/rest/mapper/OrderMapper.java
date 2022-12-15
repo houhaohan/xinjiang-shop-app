@@ -21,7 +21,7 @@ import java.util.List;
  */
 public interface OrderMapper extends BaseMapper<Order> {
 
-    List<OrderListVo> selectOrderList(@Param("customerId") Long customerId);
+    Page<OrderListVo> selectOrderList(Page<OrderListVo> page , @Param("customerId") Long customerId);
 
     OrderDetailVo selectOrderDetail(@Param("orderId") Long orderId);
 
