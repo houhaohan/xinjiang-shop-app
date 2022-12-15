@@ -22,4 +22,12 @@ public interface ShopProductSpecMapper extends BaseMapper<ShopProductSpec> {
      * @return 更新成功返回1  扣减库存条数 > 剩余库存 返回0
      */
     int updateStock(@Param("shopProductSpecId") Long shopProductSpecId, @Param("num") Integer num);
+
+    /**
+     * 增加库存
+     * @param shopProductSpecId  id
+     * @param num 数量
+     * @return 更新条数
+     */
+    int addStock(@Param("shopProductSpecId") Long shopProductSpecId,@Param("num") Integer num);
 }

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 @Data
 @ApiModel(value = "CreateOrderDto",description = "创建订单dto")
 public class CreateOrderDto extends OrderSettlementDto{
+    @ApiModelProperty(value = "收货地址id(外卖订单必传)",name = "customerAddressId")
     private Long customerAddressId;
 
     /**
