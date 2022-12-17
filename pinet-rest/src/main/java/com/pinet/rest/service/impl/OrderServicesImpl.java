@@ -194,9 +194,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         this.save(order);
 
         //插入订单商品  并设置订单号
-        orderProducts.forEach(k->{
-            k.setOrderId(order.getId());
-        });
+        orderProducts.forEach(k-> k.setOrderId(order.getId()));
         orderProductService.saveBatch(orderProducts);
 
 
