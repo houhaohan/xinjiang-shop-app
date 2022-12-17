@@ -22,7 +22,7 @@ import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.OrderSettlementVo;
-import com.pinet.rest.mapper.OrderMapper;
+import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,9 +42,9 @@ import java.util.List;
  * @since 2022-12-06
  */
 @Service
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements IOrderService {
+public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> implements IOrdersService {
     @Resource
-    private OrderMapper orderMapper;
+    private OrdersMapper orderMapper;
 
     @Resource
     private IOrderProductService orderProductService;
@@ -189,7 +189,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
 
         //创建订单基础信息
-        Order order = createOrder(dto,shippingFee,m,orderPrice,orderProdPrice,shop);
+        Orders order = createOrder(dto,shippingFee,m,orderPrice,orderProdPrice,shop);
         //插入订单
         this.save(order);
 
@@ -218,13 +218,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
 
-    private Order createOrder(CreateOrderDto dto,BigDecimal shippingFee,Double m,BigDecimal orderPrice,BigDecimal orderProdPrice,Shop shop){
+    private Orders createOrder(CreateOrderDto dto,BigDecimal shippingFee,Double m,BigDecimal orderPrice,BigDecimal orderProdPrice,Shop shop){
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Date now = new Date();
         Date estimateArrivalStartTime = DateUtil.offsetHour(now,1);
         Date estimateArrivalEndTime = DateUtil.offsetMinute(now,90);
 
-        Order order = new Order();
+        Orders order = new Orders();
         Snowflake snowflake = IdUtil.getSnowflake();
         order.setOrderNo(snowflake.nextId());
         order.setOrderType(dto.getOrderType());

@@ -1,13 +1,15 @@
 package com.pinet.rest.entity;
 
 import com.pinet.core.entity.BaseEntity;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * <p>
@@ -15,12 +17,12 @@ import java.util.Date;
  * </p>
  *
  * @author wlbz
- * @since 2022-12-06
+ * @since 2022-12-17
  */
 @Getter
 @Setter
-@ApiModel(value = "Order对象", description = "订单表")
-public class Order extends BaseEntity {
+@ApiModel(value = "Orders对象", description = "订单表")
+public class Orders extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,7 +50,7 @@ public class Order extends BaseEntity {
     @ApiModelProperty("订单商品金额")
     private BigDecimal orderProdPrice;
 
-    @ApiModelProperty("配送费")
+    @ApiModelProperty("配送费(初版固定为3元)")
     private BigDecimal shippingFee;
 
     @ApiModelProperty("预计送达开始时间（实际下单时间推迟1-1.5个小时）")

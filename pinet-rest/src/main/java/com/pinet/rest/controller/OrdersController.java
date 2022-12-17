@@ -3,8 +3,6 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
-import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
@@ -12,7 +10,7 @@ import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.OrderSettlementVo;
-import com.pinet.rest.service.IOrderService;
+import com.pinet.rest.service.IOrdersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -35,11 +33,11 @@ import java.util.List;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/orders")
 @Api(tags = "订单模块")
-public class OrderController extends BaseController {
+public class OrdersController extends BaseController {
     @Resource
-    private IOrderService orderService;
+    private IOrdersService orderService;
 
     @PostMapping("/orderList")
     @ApiOperation("订单列表")

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.pinet.rest.mapper.OrderMapper">
+<mapper namespace="com.pinet.rest.mapper.OrdersMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Order">
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Orders">
         <result column="id" property="id"/>
         <result column="create_by" property="createBy"/>
         <result column="create_time" property="createTime"/>
@@ -75,7 +75,7 @@
                o.create_time o_createTime,
                o.order_price,
                op.*
-        from `order` o
+        from `orders` o
             left join qingshi.order_product op on op.order_id = o.id
         where o.del_flag = 0
           and o.customer_id = #{customerId,jdbcType=BIGINT}
@@ -95,13 +95,13 @@
                o.order_price                 orderPrice,
                o.create_time                 createTime,
                o.remark
-        from `order` o
+        from `orders` o
         where o.del_flag = 0
           and o.id = #{orderId}
     </select>
     <select id="countShopOrderMakeNum" resultType="java.lang.Integer">
         select ifnull(count(1), 0)
-        from `order`
+        from `orders`
         where del_flag = 0
           and shop_id = #{shopId}
           and create_time > #{queryDate}
