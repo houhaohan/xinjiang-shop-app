@@ -1,13 +1,11 @@
 package com.pinet.rest.service.impl;
 
-import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.rest.entity.ProductGlanceOver;
+
+import com.pinet.core.exception.PinetException;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.param.HomeProductParam;
-import com.pinet.rest.entity.vo.HotProductVo;
-import com.pinet.rest.entity.vo.RecommendProductVo;
-import com.pinet.rest.entity.vo.ShopProductVo;
+import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.ShopProductMapper;
 import com.pinet.rest.service.IProductGlanceOverService;
 import com.pinet.rest.service.IShopProductService;
@@ -15,9 +13,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.rest.service.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -65,8 +66,12 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     public ShopProductVo getDetailById(Long id) {
 
         ShopProductVo shopProductVo = baseMapper.getDetailById(id);
+        if(shopProductVo == null){
+            throw new PinetException("商品不存在");
+        }
+
         //更新商品浏览次数
-        productGlanceOverService.updateGlanceOverTimes(id);
+//        productGlanceOverService.updateGlanceOverTimes(id);
         return shopProductVo;
     }
 }

@@ -20,6 +20,11 @@ import java.util.List;
 public interface ShopProductMapper extends BaseMapper<ShopProduct> {
 
 
+    /**
+     * 首页热卖排行版
+     * @param shopId
+     * @return
+     */
     public List<HotProductVo> getProductByShopId(@Param("shopId") Long shopId);
 
     /**

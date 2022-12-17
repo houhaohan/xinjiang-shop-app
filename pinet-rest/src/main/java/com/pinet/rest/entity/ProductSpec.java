@@ -3,6 +3,8 @@ package com.pinet.rest.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
+import java.math.BigDecimal;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -32,6 +34,9 @@ public class ProductSpec extends BaseEntity {
 
     @ApiModelProperty("商品id")
     private Long productId;
+
+    @ApiModelProperty("市场价")
+    private BigDecimal marketPrice;
 
 
 }
