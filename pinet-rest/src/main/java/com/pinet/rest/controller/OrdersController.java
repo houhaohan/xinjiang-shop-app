@@ -3,8 +3,6 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
-import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
@@ -12,7 +10,7 @@ import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.OrderSettlementVo;
-import com.pinet.rest.service.IOrderService;
+import com.pinet.rest.service.IOrdersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -35,16 +33,16 @@ import java.util.List;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/orders")
 @Api(tags = "订单模块")
-public class OrderController extends BaseController {
+public class OrdersController extends BaseController {
     @Resource
-    private IOrderService orderService;
+    private IOrdersService ordersService;
 
     @PostMapping("/orderList")
     @ApiOperation("订单列表")
     public Result<List<OrderListVo>> orderList(@RequestBody OrderListDto dto) {
-        List<OrderListVo> orderListVos = orderService.orderList(dto);
+        List<OrderListVo> orderListVos = ordersService.orderList(dto);
         return Result.ok(orderListVos);
     }
 
@@ -52,7 +50,7 @@ public class OrderController extends BaseController {
     @RequestMapping("/orderDetail")
     @ApiOperation("订单详情")
     public Result<OrderDetailVo> orderDetail(Long orderId) {
-        OrderDetailVo orderDetailVo = orderService.orderDetail(orderId);
+        OrderDetailVo orderDetailVo = ordersService.orderDetail(orderId);
         return Result.ok(orderDetailVo);
 
     }
@@ -61,7 +59,7 @@ public class OrderController extends BaseController {
     @ApiOperation("订单结算")
     public Result<OrderSettlementVo> checkOrder(@Validated @RequestBody OrderSettlementDto dto) {
         checkParam(dto);
-        OrderSettlementVo orderSettlementVo = orderService.orderSettlement(dto);
+        OrderSettlementVo orderSettlementVo = ordersService.orderSettlement(dto);
         return Result.ok(orderSettlementVo);
     }
 
@@ -73,7 +71,7 @@ public class OrderController extends BaseController {
         if (dto.getOrderType() == 1 && dto.getCustomerAddressId() == null){
             throw new PinetException("外卖订单收货地址id必传");
         }
-        CreateOrderVo vo = orderService.createOrder(dto);
+        CreateOrderVo vo = ordersService.createOrder(dto);
         return Result.ok(vo);
     }
 

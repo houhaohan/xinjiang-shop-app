@@ -8,14 +8,14 @@ import java.math.BigDecimal;
 
 /**
  * <p>
- * 
+ *  商品样式
  * </p>
  *
  * @author chengshuanghui
  * @since 2022-12-09
  */
 @Data
-@ApiModel(value = "ShopProductSpecVo对象", description = "sku 规格")
+@ApiModel(value = "ShopProductSpecVo对象", description = "sku 样式")
 public class ShopProductSpecVo{
 
     @ApiModelProperty("规格Id")

@@ -33,7 +33,7 @@ public class ShopProductVo {
     private Long productTypeId;
 
     @ApiModelProperty(value = "商品分类名称")
-    private Long productType;
+    private String productType;
 
     @ApiModelProperty(value = "商品售价")
     private BigDecimal price;

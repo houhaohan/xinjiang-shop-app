@@ -61,7 +61,7 @@ public class Customer implements Serializable {
     /**
     *
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("姓名")
     private String realname;
     /**
     * 手机号
@@ -81,12 +81,12 @@ public class Customer implements Serializable {
     /**
     *
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("邮箱")
     private String email;
     /**
     *
     */
-    @ApiModelProperty("")
+    @ApiModelProperty("生日")
     private Long birthday;
     /**
     * 0为未认证，1为审核中，2为已认证

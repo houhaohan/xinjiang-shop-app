@@ -1,12 +1,11 @@
 package com.pinet.rest.mq.consumer;
 
-import cn.hutool.core.date.DateUtil;
 import com.pinet.common.mq.config.QueueConstants;
-import com.pinet.rest.entity.Order;
 import com.pinet.rest.entity.OrderProduct;
+import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.service.IOrderProductService;
-import com.pinet.rest.service.IOrderService;
+import com.pinet.rest.service.IOrdersService;
 import com.pinet.rest.service.IShopProductSpecService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -27,7 +26,7 @@ import java.util.List;
 @Slf4j
 public class OrderListener {
     @Resource
-    private IOrderService orderService;
+    private IOrdersService ordersService;
 
     @Resource
     private IOrderProductService orderProductService;
@@ -43,12 +42,12 @@ public class OrderListener {
     @JmsListener(destination = QueueConstants.QING_SHI_ORDER_PAY_NAME, containerFactory = "queueListener")
     @Transactional(rollbackFor = Exception.class)
     public void orderConsumer(String message) {
-        Order order = orderService.getById(Long.parseLong(message));
+        Orders order = ordersService.getById(Long.parseLong(message));
         //如果是待付款  更改状态为已取消
         if (order.getOrderStatus().equals(OrderStatusEnum.NOT_PAY.getCode())) {
             order.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
             order.setUpdateTime(new Date());
-            orderService.updateById(order);
+            ordersService.updateById(order);
 
             //库存回滚
             List<OrderProduct> orderProductList = orderProductService.getByOrderId(order.getId());

@@ -1,7 +1,7 @@
 package com.pinet.rest.service;
 
-import com.pinet.rest.entity.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
@@ -20,7 +20,7 @@ import java.util.List;
  * @author wlbz
  * @since 2022-12-06
  */
-public interface IOrderService extends IService<Order> {
+public interface IOrdersService extends IService<Orders> {
 
     List<OrderListVo> orderList(OrderListDto dto);
 

@@ -42,7 +42,7 @@ public class ShopProductController extends BaseController {
     @ApiOperation("商品详情")
     public Result<ShopProductVo> getById(@RequestParam Long id){
         ShopProductVo shopProductVo = shopProductService.getDetailById(id);
-        return Result.ok(new ShopProductVo());
+        return Result.ok(shopProductVo);
     }
 
 }

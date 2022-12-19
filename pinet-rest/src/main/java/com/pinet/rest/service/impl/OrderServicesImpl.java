@@ -22,7 +22,7 @@ import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.OrderSettlementVo;
-import com.pinet.rest.mapper.OrderMapper;
+import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,9 +42,9 @@ import java.util.List;
  * @since 2022-12-06
  */
 @Service
-public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements IOrderService {
+public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> implements IOrdersService {
     @Resource
-    private OrderMapper orderMapper;
+    private OrdersMapper ordersMapper;
 
     @Resource
     private IOrderProductService orderProductService;
@@ -70,7 +70,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         Page<OrderListVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
-        IPage<OrderListVo> orderListVos = orderMapper.selectOrderList(page,customerId);
+        IPage<OrderListVo> orderListVos = ordersMapper.selectOrderList(page,customerId);
         orderListVos.getRecords().forEach(k -> {
             k.setProdNum(k.getOrderProducts().size());
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
@@ -80,7 +80,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public OrderDetailVo orderDetail(Long orderId) {
-        OrderDetailVo orderDetailVo = orderMapper.selectOrderDetail(orderId);
+        OrderDetailVo orderDetailVo = ordersMapper.selectOrderDetail(orderId);
         if (orderDetailVo == null) {
             throw new PinetException("订单不存在");
         }
@@ -132,7 +132,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Integer countShopOrderMakeNum(Long shopId) {
         Date date = new Date();
         Date queryDate = DateUtil.offsetHour(date, -8);
-        return orderMapper.countShopOrderMakeNum(shopId, queryDate);
+        return ordersMapper.countShopOrderMakeNum(shopId, queryDate);
     }
 
     @Override
@@ -189,14 +189,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
 
         //创建订单基础信息
-        Order order = createOrder(dto,shippingFee,m,orderPrice,orderProdPrice,shop);
+        Orders order = createOrder(dto,shippingFee,m,orderPrice,orderProdPrice,shop);
         //插入订单
         this.save(order);
 
         //插入订单商品  并设置订单号
-        orderProducts.forEach(k->{
-            k.setOrderId(order.getId());
-        });
+        orderProducts.forEach(k-> k.setOrderId(order.getId()));
         orderProductService.saveBatch(orderProducts);
 
 
@@ -218,13 +216,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
 
-    private Order createOrder(CreateOrderDto dto,BigDecimal shippingFee,Double m,BigDecimal orderPrice,BigDecimal orderProdPrice,Shop shop){
+    private Orders createOrder(CreateOrderDto dto,BigDecimal shippingFee,Double m,BigDecimal orderPrice,BigDecimal orderProdPrice,Shop shop){
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Date now = new Date();
         Date estimateArrivalStartTime = DateUtil.offsetHour(now,1);
         Date estimateArrivalEndTime = DateUtil.offsetMinute(now,90);
 
-        Order order = new Order();
+        Orders order = new Orders();
         Snowflake snowflake = IdUtil.getSnowflake();
         order.setOrderNo(snowflake.nextId());
         order.setOrderType(dto.getOrderType());

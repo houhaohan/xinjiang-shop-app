@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@ApiModel("sku")
+@ApiModel(value = "ShopProductSkuVo对象", description = "SKU 规格")
 public class ShopProductSkuVo {
 
     @ApiModelProperty("skuId")

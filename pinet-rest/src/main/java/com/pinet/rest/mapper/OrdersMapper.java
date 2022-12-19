@@ -1,15 +1,13 @@
 package com.pinet.rest.mapper;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.pinet.rest.entity.Order;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * <p>
@@ -19,7 +17,7 @@ import java.util.List;
  * @author wlbz
  * @since 2022-12-06
  */
-public interface OrderMapper extends BaseMapper<Order> {
+public interface OrdersMapper extends BaseMapper<Orders> {
 
     Page<OrderListVo> selectOrderList(Page<OrderListVo> page , @Param("customerId") Long customerId);
 

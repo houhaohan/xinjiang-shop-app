@@ -15,7 +15,6 @@
         <result column="spec_name" property="specName"/>
         <result column="sku_id" property="skuId"/>
         <result column="price" property="price"/>
-        <result column="market_price" property="marketPrice"/>
         <result column="stock" property="stock"/>
     </resultMap>
 
@@ -27,7 +26,7 @@
         update_by,
         update_time,
         del_flag,
-        shop_prod_id, prod_spec_id, spec_name, sku_id, price, market_price, stock
+        shop_prod_id, prod_spec_id, spec_name, sku_id, price, stock
     </sql>
 
     <update id="updateStock">
@@ -41,7 +40,6 @@
         update shop_product_spec
         set stock = stock + #{num}
         where id = #{shopProductSpecId}
-
     </update>
 
 </mapper>
