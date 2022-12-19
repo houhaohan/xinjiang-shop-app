@@ -11,6 +11,7 @@
         <result column="update_time" property="updateTime" />
         <result column="del_flag" property="delFlag" />
         <result column="img_url" property="imgUrl" />
+        <result column="sort" property="sort" />
         <result column="status" property="status" />
     </resultMap>
 
@@ -22,7 +23,7 @@
         update_by,
         update_time,
         del_flag,
-        img_url, status
+        img_url, status,sort
     </sql>
 
 </mapper>

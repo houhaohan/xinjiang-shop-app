@@ -31,6 +31,9 @@ public class Shop extends BaseEntity {
     @ApiModelProperty("店铺头像")
     private String avatar;
 
+    @ApiModelProperty("店铺等级")
+    private Integer shopLevelId;
+
     @ApiModelProperty("省")
     private String province;
 

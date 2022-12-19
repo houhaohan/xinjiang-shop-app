@@ -44,13 +44,6 @@ public class HomeController extends BaseController {
         return Result.ok(list);
     }
 
-
-    @ApiOperation("首页banner图")
-    @RequestMapping("/bannerList")
-    @NotTokenSign
-    public Result<List<RecommendProductVo>> bannerList(){
-        return Result.ok();
-    }
 }
 
 

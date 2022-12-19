@@ -4,6 +4,7 @@ package com.pinet.rest.controller;
 import com.pinet.core.result.Result;
 import com.pinet.rest.entity.Banner;
 import com.pinet.rest.service.IBannerService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/banner")
+@Api(tags = "banner")
 public class BannerController extends BaseController {
     @Autowired
     private IBannerService bannerService;

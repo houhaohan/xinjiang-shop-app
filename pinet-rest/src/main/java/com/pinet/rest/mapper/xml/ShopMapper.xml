@@ -24,6 +24,8 @@
         <result column="linkman" property="linkman" />
         <result column="shop_phone" property="shopPhone" />
         <result column="shop_status" property="shopStatus" />
+        <result column="work_time" property="workTime" />
+        <result column="finish_time" property="finishTime" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -34,7 +36,7 @@
         update_by,
         update_time,
         del_flag,
-        shop_name, avatar, province, city, district, province_id, city_id, district_id, address, lng, lat, linkman, shop_phone, shop_status
+        shop_name, avatar, province, city, district, province_id, city_id, district_id, address, lng, lat, linkman, shop_phone, shop_status,work_time,finish_time
     </sql>
 
     <select id="getMinDistanceShop" resultMap="BaseResultMap">

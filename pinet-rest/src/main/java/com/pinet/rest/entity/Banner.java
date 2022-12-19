@@ -25,6 +25,9 @@ public class Banner extends BaseEntity {
     @ApiModelProperty("图片路径")
     private String imgUrl;
 
+    @ApiModelProperty("排序")
+    private Integer sort;
+
     @ApiModelProperty("0启用 1禁用")
     private String status;
 
