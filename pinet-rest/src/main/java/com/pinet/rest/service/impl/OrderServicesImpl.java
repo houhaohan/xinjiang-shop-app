@@ -16,12 +16,10 @@ import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
+import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
-import com.pinet.rest.entity.vo.CreateOrderVo;
-import com.pinet.rest.entity.vo.OrderDetailVo;
-import com.pinet.rest.entity.vo.OrderListVo;
-import com.pinet.rest.entity.vo.OrderSettlementVo;
+import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import org.springframework.stereotype.Service;
@@ -213,6 +211,27 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         createOrderVo.setOrderPrice(orderPrice);
 
         return createOrderVo;
+    }
+
+    @Override
+    public OrderPayVo orderPay(OrderPayDto dto) {
+        Orders orders = getById(dto.getOrderId());
+        if (orders == null){
+            throw new PinetException("订单不存在");
+        }
+
+        if (orders.getOrderPrice().compareTo(dto.getOrderPrice()) != 0){
+            throw new PinetException("支付金额异常,请重新支付");
+        }
+
+
+
+
+
+
+
+
+        return null;
     }
 
 

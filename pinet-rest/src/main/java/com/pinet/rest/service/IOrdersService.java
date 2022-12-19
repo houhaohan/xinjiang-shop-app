@@ -4,11 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
+import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
-import com.pinet.rest.entity.vo.CreateOrderVo;
-import com.pinet.rest.entity.vo.OrderDetailVo;
-import com.pinet.rest.entity.vo.OrderListVo;
-import com.pinet.rest.entity.vo.OrderSettlementVo;
+import com.pinet.rest.entity.vo.*;
 
 import java.util.List;
 
@@ -37,4 +35,6 @@ public interface IOrdersService extends IService<Orders> {
     Integer countShopOrderMakeNum(Long shopId);
 
     CreateOrderVo createOrder(CreateOrderDto dto);
+
+    OrderPayVo orderPay(OrderPayDto dto);
 }

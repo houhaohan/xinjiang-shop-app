@@ -5,11 +5,9 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
+import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
-import com.pinet.rest.entity.vo.CreateOrderVo;
-import com.pinet.rest.entity.vo.OrderDetailVo;
-import com.pinet.rest.entity.vo.OrderListVo;
-import com.pinet.rest.entity.vo.OrderSettlementVo;
+import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.service.IOrdersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -76,13 +74,22 @@ public class OrdersController extends BaseController {
     }
 
     private void checkParam(OrderSettlementDto dto){
-        /**
-         * 如果是直接购买  店铺商品id 和商品数量为必传
-         */
+        //如果是直接购买  店铺商品id 和商品数量为必传
         if (dto.getSettlementType() == 2 && (dto.getShopProdId() == null || dto.getProdNum() == null || dto.getShopProdSpecId() == null)) {
             throw new PinetException("直接购买必传店铺商品id || 商品数量 || 商品样式id");
         }
 
     }
+
+
+
+    @PostMapping("/orderPay")
+    @ApiOperation("订单支付")
+    public Result<OrderPayVo> orderPay(@Validated OrderPayDto dto){
+        OrderPayVo orderPayVo = ordersService.orderPay(dto);
+        return Result.ok(orderPayVo);
+    }
+
+
 
 }
