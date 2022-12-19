@@ -21,7 +21,7 @@ public interface HttpStatus {
     // --- 2xx Success ---
 
     /** {@code 200 OK} (HTTP/1.0 - RFC 1945) */
-    public static final int SC_OK = 200;
+    public static final int SC_OK = 0;
     /** {@code 201 Created} (HTTP/1.0 - RFC 1945) */
     public static final int SC_CREATED = 201;
     /** {@code 202 Accepted} (HTTP/1.0 - RFC 1945) */

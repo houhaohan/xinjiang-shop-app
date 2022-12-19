@@ -2,6 +2,7 @@ package com.pinet.rest.controller;
 
 
 import com.pinet.core.result.Result;
+import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.Banner;
 import com.pinet.rest.service.IBannerService;
 import io.swagger.annotations.Api;
@@ -33,6 +34,7 @@ public class BannerController extends BaseController {
 
     @ApiOperation("轮播图列表")
     @GetMapping("/bannerList")
+    @NotTokenSign
     public Result<List<Banner>> bannerList(){
         List<Banner> bannerList = bannerService.bannerList();
         return Result.ok(bannerList);
