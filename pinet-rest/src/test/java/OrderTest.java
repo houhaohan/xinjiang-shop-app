@@ -16,11 +16,11 @@ import javax.annotation.Resource;
 @SpringBootTest(classes = PinetApplication.class)
 public class OrderTest {
     @Resource
-    private IOrdersService orderService;
+    private IOrdersService ordersService;
 
     @Test
     public void test() {
-        Orders order = orderService.getById(1);
+        Orders order = ordersService.getById(1);
         System.out.println(JSONObject.toJSONString(order));
     }
 }

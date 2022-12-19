@@ -37,12 +37,12 @@ import java.util.List;
 @Api(tags = "订单模块")
 public class OrdersController extends BaseController {
     @Resource
-    private IOrdersService orderService;
+    private IOrdersService ordersService;
 
     @PostMapping("/orderList")
     @ApiOperation("订单列表")
     public Result<List<OrderListVo>> orderList(@RequestBody OrderListDto dto) {
-        List<OrderListVo> orderListVos = orderService.orderList(dto);
+        List<OrderListVo> orderListVos = ordersService.orderList(dto);
         return Result.ok(orderListVos);
     }
 
@@ -50,7 +50,7 @@ public class OrdersController extends BaseController {
     @RequestMapping("/orderDetail")
     @ApiOperation("订单详情")
     public Result<OrderDetailVo> orderDetail(Long orderId) {
-        OrderDetailVo orderDetailVo = orderService.orderDetail(orderId);
+        OrderDetailVo orderDetailVo = ordersService.orderDetail(orderId);
         return Result.ok(orderDetailVo);
 
     }
@@ -59,7 +59,7 @@ public class OrdersController extends BaseController {
     @ApiOperation("订单结算")
     public Result<OrderSettlementVo> checkOrder(@Validated @RequestBody OrderSettlementDto dto) {
         checkParam(dto);
-        OrderSettlementVo orderSettlementVo = orderService.orderSettlement(dto);
+        OrderSettlementVo orderSettlementVo = ordersService.orderSettlement(dto);
         return Result.ok(orderSettlementVo);
     }
 
@@ -71,7 +71,7 @@ public class OrdersController extends BaseController {
         if (dto.getOrderType() == 1 && dto.getCustomerAddressId() == null){
             throw new PinetException("外卖订单收货地址id必传");
         }
-        CreateOrderVo vo = orderService.createOrder(dto);
+        CreateOrderVo vo = ordersService.createOrder(dto);
         return Result.ok(vo);
     }
 

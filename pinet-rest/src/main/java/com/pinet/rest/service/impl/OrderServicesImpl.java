@@ -44,7 +44,7 @@ import java.util.List;
 @Service
 public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> implements IOrdersService {
     @Resource
-    private OrdersMapper orderMapper;
+    private OrdersMapper ordersMapper;
 
     @Resource
     private IOrderProductService orderProductService;
@@ -70,7 +70,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         Page<OrderListVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
-        IPage<OrderListVo> orderListVos = orderMapper.selectOrderList(page,customerId);
+        IPage<OrderListVo> orderListVos = ordersMapper.selectOrderList(page,customerId);
         orderListVos.getRecords().forEach(k -> {
             k.setProdNum(k.getOrderProducts().size());
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
@@ -80,7 +80,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     public OrderDetailVo orderDetail(Long orderId) {
-        OrderDetailVo orderDetailVo = orderMapper.selectOrderDetail(orderId);
+        OrderDetailVo orderDetailVo = ordersMapper.selectOrderDetail(orderId);
         if (orderDetailVo == null) {
             throw new PinetException("订单不存在");
         }
@@ -132,7 +132,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     public Integer countShopOrderMakeNum(Long shopId) {
         Date date = new Date();
         Date queryDate = DateUtil.offsetHour(date, -8);
-        return orderMapper.countShopOrderMakeNum(shopId, queryDate);
+        return ordersMapper.countShopOrderMakeNum(shopId, queryDate);
     }
 
     @Override

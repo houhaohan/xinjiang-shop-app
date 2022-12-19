@@ -26,7 +26,7 @@ import java.util.List;
 @Slf4j
 public class OrderListener {
     @Resource
-    private IOrdersService orderService;
+    private IOrdersService ordersService;
 
     @Resource
     private IOrderProductService orderProductService;
@@ -42,12 +42,12 @@ public class OrderListener {
     @JmsListener(destination = QueueConstants.QING_SHI_ORDER_PAY_NAME, containerFactory = "queueListener")
     @Transactional(rollbackFor = Exception.class)
     public void orderConsumer(String message) {
-        Orders order = orderService.getById(Long.parseLong(message));
+        Orders order = ordersService.getById(Long.parseLong(message));
         //如果是待付款  更改状态为已取消
         if (order.getOrderStatus().equals(OrderStatusEnum.NOT_PAY.getCode())) {
             order.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
             order.setUpdateTime(new Date());
-            orderService.updateById(order);
+            ordersService.updateById(order);
 
             //库存回滚
             List<OrderProduct> orderProductList = orderProductService.getByOrderId(order.getId());
