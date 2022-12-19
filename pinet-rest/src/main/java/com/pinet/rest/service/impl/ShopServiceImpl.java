@@ -10,7 +10,6 @@ import com.pinet.rest.entity.dto.ShopListDto;
 import com.pinet.rest.entity.vo.ShopVo;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mapper.ShopMapper;
-import com.pinet.rest.service.IOrdersService;
 import com.pinet.rest.service.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Autowired
     private ShopMapper shopMapper;
     @Autowired
-    private IOrdersService ordersService;
+    private OrdersMapper orderMapper;
 
     @Override
     public Shop getMinDistanceShop(BigDecimal lat, BigDecimal lng) {
@@ -50,7 +49,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         //查询店铺未完成订单数量限8小时内订单
         Date date = new Date();
         Date queryDate = DateUtil.offsetHour(date, -8);
-        List<Orders> orderList = ordersService.list(Wrappers.lambdaQuery(new Orders())
+        List<Orders> orderList = orderMapper.selectList(Wrappers.lambdaQuery(new Orders())
                 .in(Orders::getOrderStatus, 20, 30)
                 .ge(Orders::getCreateTime, queryDate)
                 .le(Orders::getCreateTime, date)
