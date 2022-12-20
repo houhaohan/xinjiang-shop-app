@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
+import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderPayDto;
@@ -31,7 +32,7 @@ import java.util.List;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/{version}/orders")
 @Api(tags = "订单模块")
 public class OrdersController extends BaseController {
     @Resource
@@ -39,6 +40,7 @@ public class OrdersController extends BaseController {
 
     @PostMapping("/orderList")
     @ApiOperation("订单列表")
+    @ApiVersion(1)
     public Result<List<OrderListVo>> orderList(@RequestBody OrderListDto dto) {
         List<OrderListVo> orderListVos = ordersService.orderList(dto);
         return Result.ok(orderListVos);
@@ -47,6 +49,7 @@ public class OrdersController extends BaseController {
 
     @RequestMapping("/orderDetail")
     @ApiOperation("订单详情")
+    @ApiVersion(1)
     public Result<OrderDetailVo> orderDetail(Long orderId) {
         OrderDetailVo orderDetailVo = ordersService.orderDetail(orderId);
         return Result.ok(orderDetailVo);
@@ -55,6 +58,7 @@ public class OrdersController extends BaseController {
 
     @PostMapping("/orderSettlement")
     @ApiOperation("订单结算")
+    @ApiVersion(1)
     public Result<OrderSettlementVo> checkOrder(@Validated @RequestBody OrderSettlementDto dto) {
         checkParam(dto);
         OrderSettlementVo orderSettlementVo = ordersService.orderSettlement(dto);
@@ -64,6 +68,7 @@ public class OrdersController extends BaseController {
 
     @PostMapping("/createOrder")
     @ApiOperation("创建订单")
+    @ApiVersion(1)
     public Result<CreateOrderVo> createOrder(@Validated @RequestBody CreateOrderDto dto) {
         checkParam(dto);
         if (dto.getOrderType() == 1 && dto.getCustomerAddressId() == null){
@@ -85,6 +90,7 @@ public class OrdersController extends BaseController {
 
     @PostMapping("/orderPay")
     @ApiOperation("订单支付")
+    @ApiVersion(1)
     public Result<?> orderPay(@Validated OrderPayDto dto){
         Object pay = ordersService.orderPay(dto);
         return Result.ok(pay);

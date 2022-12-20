@@ -2,6 +2,7 @@ package com.pinet.rest.controller;
 
 
 import com.pinet.core.result.Result;
+import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
@@ -30,7 +31,7 @@ import java.util.List;
  * @since 2022-12-08
  */
 @RestController
-@RequestMapping("/cart")
+@RequestMapping("/{version}/cart")
 @Api(tags = "购物车模块")
 public class CartController extends BaseController {
     @Resource
@@ -38,6 +39,7 @@ public class CartController extends BaseController {
 
     @ApiOperation("购物车列表")
     @PostMapping("/cartList")
+    @ApiVersion(1)
     public Result<List<CartListVo>> cartList(@Validated @RequestBody CartListDto dto){
         Long customerId = currentUserId();
         dto.setCustomerId(customerId);
@@ -48,6 +50,7 @@ public class CartController extends BaseController {
 
     @ApiOperation("添加购物车")
     @PostMapping("/addCart")
+    @ApiVersion(1)
     public Result<Boolean> addCart(@Validated @RequestBody AddCartDto dto){
         Boolean res = cartService.addCart(dto);
         if (!res){
@@ -59,6 +62,7 @@ public class CartController extends BaseController {
 
     @ApiOperation("购物车数量修改")
     @PostMapping("/editCartProdNum")
+    @ApiVersion(1)
     public Result<Boolean> editCartProdNum(@Validated @RequestBody EditCartProdNumDto dto){
         Boolean res = cartService.editCartProdNum(dto);
         if (!res){
