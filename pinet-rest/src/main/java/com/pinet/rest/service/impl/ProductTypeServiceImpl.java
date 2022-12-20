@@ -44,11 +44,11 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
                 .eq(ShopProduct::getShopId, dto.getShopId())
         );
         //根据商品类型分类
-        Map<String, List<ShopProduct>> typeProductMap = null;
+        Map<Long, List<ShopProduct>> typeProductMap = null;
         if (ObjectUtil.isNotEmpty(shopProductList)){
-            typeProductMap = shopProductList.stream().collect(Collectors.groupingBy(ShopProduct::getProductType));
+            typeProductMap = shopProductList.stream().collect(Collectors.groupingBy(ShopProduct::getProductTypeId));
         }
-        Set<String> typeNames = typeProductMap.keySet();
+        Set<Long> typeIds = typeProductMap.keySet();
         //查询商品类型
         List<ProductType> productTypeList = productTypeMapper.selectList(Wrappers.lambdaQuery(new ProductType())
                 .eq(ProductType::getDelFlag, 0)
@@ -62,9 +62,9 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
         }).collect(Collectors.toList());
 
         for (ProductTypeVo productTypeVo : productTypeVoList) {
-            for (String string : typeNames) {
-                if (string.equals(productTypeVo.getTypeName())){
-                    productTypeVo.setShopList(typeProductMap.get("string"));
+            for (Long id : typeIds) {
+                if (id.equals(productTypeVo.getId())){
+                    productTypeVo.setShopList(typeProductMap.get(id));
                 }
             }
         }
