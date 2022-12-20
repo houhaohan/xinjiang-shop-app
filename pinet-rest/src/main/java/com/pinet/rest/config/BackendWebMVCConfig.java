@@ -2,9 +2,11 @@ package com.pinet.rest.config;
 
 import com.pinet.inter.BackendInterceptor;
 import com.pinet.rest.handler.HandlerInterceptorBuild;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.annotation.Resource;
 
@@ -36,4 +38,6 @@ public class BackendWebMVCConfig implements WebMvcConfigurer {
                 // 登入接口
                 .excludePathPatterns("/login/**");
     }
+
+
 }
