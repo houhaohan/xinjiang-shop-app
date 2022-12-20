@@ -117,7 +117,7 @@ social:
       notify_url: http://xinjiangapi.ypxlbz.com/qingshi/
       key: ZHANGSHUOwudi1234567891011121314
       p12url: /usr/project/jars/apiclient_cert.p12
-    wxmini:
+    mini:
       appid: wx89ad3dd778a3e6ff
       secret: 4e0c7a50e7c358eb290cc994ee03766d
       mch_id: 1502776411

@@ -1,10 +1,12 @@
 package com.pinet.rest.config;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
 import com.pinet.rest.config.properties.WeiXinAppProperties;
 import com.pinet.rest.config.properties.WeiXinMiniProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +20,7 @@ import javax.annotation.Resource;
  * @create: 2022-12-19 16:12
  **/
 @Configuration
+@Slf4j
 public class WxConfiguration {
     @Resource
     private WeiXinMiniProperties weiXinMiniProperties;
@@ -27,6 +30,7 @@ public class WxConfiguration {
 
     @Bean(name = "miniPayService")
     public WxPayService wxMiniPayService() {
+        log.info("微信小程序支付参数初始化{}", JSONObject.toJSON(weiXinMiniProperties));
 
         //实例payConfig 设置固定参数
         WxPayConfig payConfig = new WxPayConfig();
@@ -46,6 +50,7 @@ public class WxConfiguration {
 
     @Bean(name = "appPayService")
     public WxPayService wxAppPayService(){
+        log.info("微信app支付参数初始化{}", JSONObject.toJSON(weiXinAppProperties));
 
         //实例payConfig 设置固定参数
         WxPayConfig payConfig = new WxPayConfig();
