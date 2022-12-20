@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.result.Result;
+import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.ProductType;
 import com.pinet.rest.entity.ShopProduct;
@@ -31,7 +32,7 @@ import java.util.Map;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/productType")
+@RequestMapping("/api/{version}/productType")
 @Api(tags = "店铺商品列表")
 public class ProductTypeController extends BaseController {
     @Autowired
@@ -45,6 +46,7 @@ public class ProductTypeController extends BaseController {
     @ApiOperation("店铺分类及分类商品列表")
     @RequestMapping(value = "/productTypeProdList",method = RequestMethod.GET)
     @NotTokenSign
+    @ApiVersion(1)
     public Result<List<ProductTypeVo>> productType(ProductTypeDto dto){
         List<ProductTypeVo> productTypeMap = productTypeService.productType(dto);
         return Result.ok(productTypeMap);
