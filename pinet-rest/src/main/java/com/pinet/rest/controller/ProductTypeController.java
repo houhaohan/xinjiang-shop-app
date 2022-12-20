@@ -3,11 +3,14 @@ package com.pinet.rest.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.result.Result;
+import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.ProductType;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.ProductTypeDto;
 import com.pinet.rest.entity.vo.OrderListVo;
+import com.pinet.rest.entity.vo.ProductTypeVo;
 import com.pinet.rest.service.IProductTypeService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +32,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/productType")
+@Api(tags = "店铺商品列表")
 public class ProductTypeController extends BaseController {
     @Autowired
     private IProductTypeService productTypeService;
@@ -40,8 +44,9 @@ public class ProductTypeController extends BaseController {
      */
     @ApiOperation("店铺分类及分类商品列表")
     @RequestMapping(value = "/productTypeProdList",method = RequestMethod.GET)
-    public Result<Map<String,List<ShopProduct>>> productType(ProductTypeDto dto){
-        Map<String, List<ShopProduct>> productTypeMap = productTypeService.productType(dto);
+    @NotTokenSign
+    public Result<List<ProductTypeVo>> productType(ProductTypeDto dto){
+        List<ProductTypeVo> productTypeMap = productTypeService.productType(dto);
         return Result.ok(productTypeMap);
     }
 

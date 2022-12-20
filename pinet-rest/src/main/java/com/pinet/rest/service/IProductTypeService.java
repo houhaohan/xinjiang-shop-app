@@ -4,6 +4,7 @@ import com.pinet.rest.entity.ProductType;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.ProductTypeDto;
+import com.pinet.rest.entity.vo.ProductTypeVo;
 
 import java.util.List;
 import java.util.Map;
@@ -18,5 +19,5 @@ import java.util.Map;
  */
 public interface IProductTypeService extends IService<ProductType> {
 
-    Map<String, List<ShopProduct>> productType(ProductTypeDto dto);
+    List<ProductTypeVo> productType(ProductTypeDto dto);
 }
