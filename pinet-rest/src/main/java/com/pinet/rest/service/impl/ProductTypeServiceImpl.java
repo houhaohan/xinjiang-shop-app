@@ -2,6 +2,7 @@ package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.rest.entity.ProductType;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.ProductTypeDto;
