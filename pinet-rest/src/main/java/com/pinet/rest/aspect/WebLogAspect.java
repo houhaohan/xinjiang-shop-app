@@ -83,6 +83,5 @@ public class WebLogAspect {
             parameterMap.put("imgPath", list);
         }
         return parameterMap;
-
     }
 }

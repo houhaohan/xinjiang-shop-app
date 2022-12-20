@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 
-@Data
 @ApiModel(value="接口返回对象", description="接口返回对象")
 public class Result<T> implements Serializable {
 
@@ -137,4 +136,35 @@ public class Result<T> implements Serializable {
 		return error(errorCodeEnum.getCode(), errorCodeEnum.getMessage());
 	}
 
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public Integer getCode() {
+		return code;
+	}
+
+	public void setCode(Integer code) {
+		this.code = code;
+	}
+
+	public T getData() {
+		return data;
+	}
+
+	public void setData(T data) {
+		this.data = data;
+	}
 }

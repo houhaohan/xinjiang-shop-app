@@ -3,6 +3,7 @@ package com.pinet.rest.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import io.swagger.annotations.ApiModel;

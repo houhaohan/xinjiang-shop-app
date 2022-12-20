@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public abstract class CodeGeneration {
-    public static String author = "wlbz";
+    public static String author = "chengshuanghui";
     public static String packagePath = "com.pinet.rest";
     public static String[] superEntityColumns = {"id","create_by","create_time","update_by","update_time","del_flag"};
     public static String projectPath = System.getProperty("user.dir");

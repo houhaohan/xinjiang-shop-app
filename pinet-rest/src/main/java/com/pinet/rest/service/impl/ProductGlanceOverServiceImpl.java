@@ -23,7 +23,7 @@ public class ProductGlanceOverServiceImpl extends ServiceImpl<ProductGlanceOverM
     @Override
     public void updateGlanceOverTimes(Long prodId) {
         ThreadLocalUtil.UserLogin userLogin = ThreadLocalUtil.getUserLogin();
-        if(userLogin == null){
+        if(userLogin == null || userLogin.getUserId() == null || userLogin.getUserId() == 0){
             return;
         }
         QueryWrapper<ProductGlanceOver> wrapper = new QueryWrapper<>();

@@ -1,8 +1,10 @@
 package com.pinet.rest.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.controller.BaseController;
 import com.pinet.core.result.Result;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
 import com.pinet.rest.entity.vo.HotProductVo;
 import com.pinet.rest.entity.vo.RecommendProductVo;
@@ -38,10 +40,10 @@ public class HomeController extends BaseController {
     @ApiOperation("推荐商品")
     @RequestMapping(value = "/recommend/list",method = RequestMethod.GET)
     @NotTokenSign
-    public Result<List<RecommendProductVo>> recommendList(){
+    public Result<Page<RecommendProductVo>> recommendList(CommonPage param){
         Long userId = super.currentUserId();
-        List<RecommendProductVo> list = shopProductService.recommendList(userId);
-        return Result.ok(list);
+        Page<RecommendProductVo> pageList = shopProductService.recommendList(userId,param);
+        return Result.ok(pageList);
     }
 
 }

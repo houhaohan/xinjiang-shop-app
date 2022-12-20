@@ -69,7 +69,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
         if(userId != null && AppJwtTokenUtil.isTokenExpired(appToken)){
             Token customerToken = AppJwtTokenUtil.generateTokenObject(String.valueOf(userId) , request);
             customerTokenService.refreshToken(customerToken, appToken);
-            response.setHeader("Authorization", "Bearer " + customerToken.getToken());
+            response.setHeader(APP_ACCESS_TOKEN, "Bearer " + customerToken.getToken());
         }else {
 //            throw new PinetException("token过期，请重新登入");
         }
@@ -84,7 +84,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        ThreadLocalUtil.clear();
+        ThreadLocalUtil.remove();
     }
 
     private boolean error(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -1,9 +1,11 @@
 package com.pinet.rest.service.impl;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.exception.PinetException;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
+import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.ShopProductMapper;
@@ -54,12 +56,13 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     }
 
     @Override
-    public List<RecommendProductVo> recommendList(Long userId) {
-        if(userId == null){
+    public Page<RecommendProductVo> recommendList(Long userId, CommonPage param) {
+        Page<RecommendProductVo> page = new Page<>(param.getPageNum(),param.getPageSize());
+        if(userId == null || userId == 0){
             //随机查找8条数据
-            return baseMapper.selectRecommendList();
+            return baseMapper.selectRecommendList(page);
         }
-        return baseMapper.selectRecommendListByUserId(userId);
+        return baseMapper.selectRecommendListByUserId(page,userId);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         }
 
         //更新商品浏览次数
-//        productGlanceOverService.updateGlanceOverTimes(id);
+        productGlanceOverService.updateGlanceOverTimes(id);
         return shopProductVo;
     }
 }
