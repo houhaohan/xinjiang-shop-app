@@ -55,7 +55,7 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
         }
         //查点店铺商品
         List<ShopProduct> shopProductList = shopProductMapper.selectList(Wrappers.lambdaQuery(new ShopProduct())
-                .eq(ShopProduct::getShopId, shop.getId())
+                .eq(ShopProduct::getShopId, dto.getShopId())
         );
         //根据商品类型分类
         Map<Long, List<ShopProduct>> typeProductMap = null;
@@ -84,4 +84,7 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
         }
         return productTypeVoList;
     }
+
+
+
 }

@@ -3,9 +3,13 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.result.Result;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
+import com.pinet.rest.entity.vo.ProdTypeVo;
+import com.pinet.rest.entity.vo.ProductTypeVo;
 import com.pinet.rest.entity.vo.ShopProductVo;
 import com.pinet.rest.service.IShopProductService;
+import com.pinet.rest.service.IShopService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -31,6 +38,38 @@ public class ShopProductController extends BaseController {
 
     @Autowired
     private IShopProductService shopProductService;
+    @Autowired
+    private IShopService shopService;
+
+
+    /**
+     * 商品列表
+     * @param shopId 店铺Id
+     * @return
+     */
+    @RequestMapping(value = "/list",method = RequestMethod.GET)
+    @NotTokenSign
+    @ApiOperation("商品列表")
+    public Result<List<ProdTypeVo>> list(@RequestParam(value = "shopId",required = false) Long shopId,
+                                         @RequestParam(value = "lat",required = false) BigDecimal lat,
+                                         @RequestParam(value = "lng",required = false) BigDecimal lng){
+        if(shopId == null && lat == null && lng == null){
+            return Result.error("参数不能为空");
+        }
+
+        if(shopId == null){
+            Shop shop = shopService.getMinDistanceShop(lat, lng);
+            if(shop == null){
+                return Result.ok();
+            }
+            shopId = shop.getId();
+
+        }
+        List<ProdTypeVo> list = shopProductService.productListByShopId(shopId);
+        return Result.ok(list);
+    }
+
+
 
     /**
      * 商品详情

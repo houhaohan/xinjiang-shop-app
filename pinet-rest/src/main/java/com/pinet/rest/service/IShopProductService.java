@@ -5,11 +5,11 @@ import com.pinet.rest.entity.ShopProduct;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
-import com.pinet.rest.entity.vo.HotProductVo;
-import com.pinet.rest.entity.vo.RecommendProductVo;
-import com.pinet.rest.entity.vo.ShopProductVo;
+import com.pinet.rest.entity.vo.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -40,4 +40,9 @@ public interface IShopProductService extends IService<ShopProduct> {
      * @return
      */
     ShopProductVo getDetailById(Long id);
+
+    /**
+     * 店铺商品列表
+     */
+    List<ProdTypeVo> productListByShopId(Long shopId);
 }
