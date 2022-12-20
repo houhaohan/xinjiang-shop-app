@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2022-12-08
  */
 @RestController
-@RequestMapping("/product/glanceOver")
+@RequestMapping("/{version}/product/glanceOver")
 public class ProductGlanceOverController extends BaseController {
 
 }

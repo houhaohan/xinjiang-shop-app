@@ -9,10 +9,9 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class WebConfig implements WebMvcRegistrations {
 
 
-    // 注册自定义RequestMappingHandlerMapping
+    // 注册自定义 RequestMappingHandlerMapping
     @Override
-    public RequestMappingHandlerMapping getRequestMappingHandlerMapping()
-    {
+    public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
         return new CustomRequestMappingHandlerMapping();
     }
 

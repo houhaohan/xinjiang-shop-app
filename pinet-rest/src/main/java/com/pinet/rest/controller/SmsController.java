@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.enums.ErrorCodeEnum;
 import com.pinet.core.result.Result;
+import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.request.SmsSendRequest;
 import com.pinet.rest.entity.response.SmsSendResponse;
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/sms")
+@RequestMapping("/{version}/sms")
 @Api(tags = "短信模块")
 public class SmsController {
     @Autowired
@@ -23,6 +24,7 @@ public class SmsController {
     @ApiOperation("发送短息验证码")
     @RequestMapping(value = "/sendCode",method = RequestMethod.POST)
     @NotTokenSign
+    @ApiVersion(1)
     public Result sendSmsCode(@RequestBody SmsSendRequest request){
         SmsTemplate smsTemplate = SmsTemplate.getTemplateByName(request.getType());
         if(smsTemplate == null){

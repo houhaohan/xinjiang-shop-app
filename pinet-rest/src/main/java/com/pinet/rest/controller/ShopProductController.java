@@ -29,7 +29,7 @@ import java.util.List;
  * @since 2022-12-08
  */
 @RestController
-@RequestMapping("/api/{version}/shop/product")
+@RequestMapping("/{version}/shop/product")
 @Api(tags = "商品")
 public class ShopProductController extends BaseController {
 
@@ -49,6 +49,7 @@ public class ShopProductController extends BaseController {
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     @NotTokenSign
     @ApiOperation("商品列表")
+    @ApiVersion(1)
     public Result<List<ProdTypeVo>> list(@RequestParam(value = "shopId",required = false) Long shopId,
                                          @RequestParam(value = "lat",required = false) BigDecimal lat,
                                          @RequestParam(value = "lng",required = false) BigDecimal lng){
@@ -80,20 +81,6 @@ public class ShopProductController extends BaseController {
     public Result<ShopProductVo> getById(@RequestParam Long id){
         ShopProductVo shopProductVo = shopProductService.getDetailById(id);
         return Result.ok(shopProductVo);
-    }
-
-    /**
-     * 商品详情
-     * @param id 商品ID
-     * @return
-     */
-    @RequestMapping(value = "/getById",method = RequestMethod.GET)
-    @NotTokenSign
-    @ApiOperation("商品详情")
-    @ApiVersion(2)
-    public Result<String> getById2(@RequestParam Long id){
-
-        return Result.ok("test");
     }
 
 }

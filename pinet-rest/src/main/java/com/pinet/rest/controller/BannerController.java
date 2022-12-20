@@ -27,7 +27,7 @@ import java.util.List;
  * @since 2022-12-14
  */
 @RestController
-@RequestMapping("/api/{version}/banner")
+@RequestMapping("/{version}/banner")
 @Api(tags = "banner")
 public class BannerController extends BaseController {
     @Autowired

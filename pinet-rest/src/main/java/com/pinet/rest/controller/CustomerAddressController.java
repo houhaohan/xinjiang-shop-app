@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.result.Result;
+import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.CustomerAddress;
 import com.pinet.rest.entity.dto.BaseDto;
 import com.pinet.rest.entity.dto.CustomerAddressDto;
@@ -26,7 +27,7 @@ import java.util.List;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/customer/address")
+@RequestMapping("/{version}/customer/address")
 @Api(tags = "收获地址")
 public class CustomerAddressController extends BaseController {
 
@@ -35,6 +36,7 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("列表")
     @RequestMapping(value = "/list",method = RequestMethod.GET)
+    @ApiVersion(1)
     public Result<List<CustomerAddress>> list(){
         Long userId = super.currentUserId();
         if(userId == null || userId == 0){
@@ -48,6 +50,7 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("新增")
     @RequestMapping(value = "/save",method = RequestMethod.POST)
+    @ApiVersion(1)
     public Result<String> save(@RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
         if(userId == null || userId == 0){
@@ -62,6 +65,7 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("修改")
     @RequestMapping(value = "/updateById",method = RequestMethod.POST)
+    @ApiVersion(1)
     public Result<String> updateById(@RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
         if(userId == null || userId == 0){
@@ -76,6 +80,7 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("删除")
     @RequestMapping(value = "/deleteById",method = RequestMethod.DELETE)
+    @ApiVersion(1)
     public Result<String> deleteById(@RequestBody BaseDto dto){
         Long userId = super.currentUserId();
         if(userId == null || userId == 0){
@@ -91,6 +96,7 @@ public class CustomerAddressController extends BaseController {
 
     @ApiOperation("设置默认地址")
     @RequestMapping(value = "/default",method = RequestMethod.POST)
+    @ApiVersion(1)
     public Result<String> updateDefault(@RequestBody BaseDto baseDto){
         Long userId = super.currentUserId();
         if(userId == null || userId == 0){

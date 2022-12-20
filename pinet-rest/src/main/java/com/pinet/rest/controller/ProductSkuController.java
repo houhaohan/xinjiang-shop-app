@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/product-sku")
+@RequestMapping("/{version}/productSku")
 public class ProductSkuController extends BaseController {
 
 }

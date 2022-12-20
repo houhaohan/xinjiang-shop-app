@@ -1,14 +1,10 @@
 package com.pinet.rest.controller;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
-import com.pinet.rest.entity.ProductType;
-import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.ProductTypeDto;
-import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.ProductTypeVo;
 import com.pinet.rest.service.IProductTypeService;
 import io.swagger.annotations.Api;
@@ -21,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -32,7 +27,7 @@ import java.util.Map;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/api/{version}/productType")
+@RequestMapping("/{version}/productType")
 @Api(tags = "店铺商品列表")
 public class ProductTypeController extends BaseController {
     @Autowired

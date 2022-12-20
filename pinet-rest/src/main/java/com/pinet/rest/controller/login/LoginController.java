@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.OkHttpUtil;
 import com.pinet.core.util.SpringContextUtils;
+import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.request.SmsLoginRequest;
 import com.pinet.rest.entity.request.WxLoginRequest;
 import com.pinet.rest.entity.vo.UserInfo;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/{version}/login")
 @Api(tags = "登入")
 @Slf4j
 public class LoginController {
@@ -38,6 +39,7 @@ public class LoginController {
      */
     @PostMapping("/wx")
     @ApiOperation("微信登入")
+    @ApiVersion(1)
     public Result<UserInfo> wxLogin(@RequestBody WxLoginRequest request){
         try{
             ILoginService loginService = SpringContextUtils.getBean("wxLoginService", ILoginService.class);
@@ -61,6 +63,7 @@ public class LoginController {
      */
     @PostMapping("/sms_code")
     @ApiOperation("手机验证码登入")
+    @ApiVersion(1)
     public Result<?> smsLogin(@RequestBody SmsLoginRequest request){
         try{
             ILoginService loginService = SpringContextUtils.getBean("phoneLoginService", ILoginService.class);
@@ -79,6 +82,7 @@ public class LoginController {
      */
     @RequestMapping(value = "/logout",method = RequestMethod.GET)
     @ApiOperation("退出登入")
+    @ApiVersion(1)
     public Result<?> logout(@RequestParam String token){
         try{
             ILoginService loginService = SpringContextUtils.getBean("phoneLoginService", ILoginService.class);

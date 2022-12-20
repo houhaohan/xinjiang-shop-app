@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.controller.BaseController;
 import com.pinet.core.result.Result;
+import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/home")
+@RequestMapping("/{version}/home")
 @Api(tags = "首页")
 public class HomeController extends BaseController {
     @Autowired
@@ -27,6 +28,7 @@ public class HomeController extends BaseController {
     @ApiOperation("热卖排行版")
     @RequestMapping(value = "/hotSell/list",method = RequestMethod.GET)
     @NotTokenSign
+    @ApiVersion(1)
     public Result<List<HotProductVo>> hotSell(HomeProductParam param){
         List<HotProductVo> list = shopProductService.hotSellList(param);
         return Result.ok(list);
@@ -40,6 +42,7 @@ public class HomeController extends BaseController {
     @ApiOperation("推荐商品")
     @RequestMapping(value = "/recommend/list",method = RequestMethod.GET)
     @NotTokenSign
+    @ApiVersion(1)
     public Result<Page<RecommendProductVo>> recommendList(CommonPage param){
         Long userId = super.currentUserId();
         Page<RecommendProductVo> pageList = shopProductService.recommendList(userId,param);

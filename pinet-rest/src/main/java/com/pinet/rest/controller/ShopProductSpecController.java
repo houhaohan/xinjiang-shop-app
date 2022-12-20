@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2022-12-08
  */
 @RestController
-@RequestMapping("/shop-product-spec")
+@RequestMapping("/{version}/shopProductSpec")
 public class ShopProductSpecController extends BaseController {
 
 }
