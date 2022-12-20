@@ -2,7 +2,6 @@ package com.pinet.rest.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.pinet.core.entity.BaseEntity;
-import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -29,6 +28,4 @@ public class ProductType extends BaseEntity {
 
     @ApiModelProperty("是否启用 0启用 1禁用")
     private Integer typeState;
-
-
 }

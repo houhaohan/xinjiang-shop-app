@@ -3,9 +3,7 @@ package com.pinet.rest.mapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.rest.entity.ShopProduct;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.pinet.rest.entity.vo.HotProductVo;
-import com.pinet.rest.entity.vo.RecommendProductVo;
-import com.pinet.rest.entity.vo.ShopProductVo;
+import com.pinet.rest.entity.vo.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -47,5 +45,13 @@ public interface ShopProductMapper extends BaseMapper<ShopProduct> {
      * @return
      */
     ShopProductVo getDetailById(@Param("id") Long id);
+
+
+    /**
+     * 根据店铺ID 查找商品列表
+     * @param shopId
+     * @return
+     */
+    List<ProdTypeVo> getProductListByShopId(@Param("shopId") Long shopId);
 
 }

@@ -29,6 +29,9 @@ public class SmsController {
             return Result.error(ErrorCodeEnum.FAILED);
         }
         SmsSendResponse result = smsService.send(request.getPhone(), smsTemplate);
-        return Result.ok(result);
+        if("0".equals(result.getCode())){
+            return Result.ok(result);
+        }
+        return Result.error(result.getErrorMsg());
     }
 }

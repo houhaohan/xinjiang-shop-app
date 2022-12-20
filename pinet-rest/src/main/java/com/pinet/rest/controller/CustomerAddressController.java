@@ -37,11 +37,11 @@ public class CustomerAddressController extends BaseController {
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public Result<List<CustomerAddress>> list(){
         Long userId = super.currentUserId();
-        if(userId == null){
+        if(userId == null || userId == 0){
             return Result.ok();
         }
         QueryWrapper<CustomerAddress> wrapper = new QueryWrapper<>();
-        wrapper.eq("customer_id",106);
+        wrapper.eq("customer_id",userId);
         List<CustomerAddress> list = customerAddressService.list(wrapper);
         return Result.ok(list);
     }
@@ -50,7 +50,7 @@ public class CustomerAddressController extends BaseController {
     @RequestMapping(value = "/save",method = RequestMethod.POST)
     public Result<String> save(@RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
-        if(userId == null){
+        if(userId == null || userId == 0){
             return Result.error("用户没有登入，请先登入");
         }
         boolean success = customerAddressService.add(customerAddressDto,userId);
@@ -64,7 +64,7 @@ public class CustomerAddressController extends BaseController {
     @RequestMapping(value = "/updateById",method = RequestMethod.POST)
     public Result<String> updateById(@RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
-        if(userId == null){
+        if(userId == null || userId == 0){
             return Result.error("用户没有登入，请先登入");
         }
         boolean success = customerAddressService.edit(customerAddressDto,userId);
@@ -78,7 +78,7 @@ public class CustomerAddressController extends BaseController {
     @RequestMapping(value = "/deleteById",method = RequestMethod.DELETE)
     public Result<String> deleteById(@RequestBody BaseDto dto){
         Long userId = super.currentUserId();
-        if(userId == null){
+        if(userId == null || userId == 0){
             return Result.error("用户没有登入，请先登入");
         }
         boolean success = customerAddressService.removeById(dto.getId());
@@ -93,7 +93,7 @@ public class CustomerAddressController extends BaseController {
     @RequestMapping(value = "/default",method = RequestMethod.POST)
     public Result<String> updateDefault(@RequestBody BaseDto baseDto){
         Long userId = super.currentUserId();
-        if(userId == null){
+        if(userId == null || userId == 0){
             return Result.error("用户没有登入，请先登入");
         }
         CustomerAddress entity = new CustomerAddress();

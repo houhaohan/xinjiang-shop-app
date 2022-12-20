@@ -49,6 +49,12 @@
         <result column="spsMarketPrice" property="marketPrice" />
     </resultMap>
 
+    <resultMap id="ProductMap" type="com.pinet.rest.entity.vo.ProdTypeVo">
+        <result column="product_type_id" property="productTypeId" />
+        <result column="product_type" property="productType" />
+        <collection property="productList" resultMap="ShopProductMap" />
+    </resultMap>
+
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id,
@@ -105,13 +111,14 @@
                 select sp.shop_id,sp.prod_id,sp.product_name,sp.product_img, min(ps.market_price) as market_price,min(sps.price) as price
                 from shop_product sp
                 left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-                inner join shop_product_spec sps on sps.prod_spec_id = ps.id
+                left join shop_product_spec sps on sps.prod_spec_id = ps.id
                 where sp.shop_prod_status = 1
                 and sp.del_flag= 0
                 group by ps.sku_id
                 order by RAND()
                 limit 8
             ) temp
+            group by temp.prod_id
         ) t
     </select>
 
@@ -137,6 +144,7 @@
                 order by pgo.times desc
                 limit 8
             ) temp
+            group by temp.prod_id
         ) t
     </select>
 
@@ -171,4 +179,28 @@
          where sp.id = #{id}
     </select>
 
+
+    <select id="getProductListByShopId" resultMap="ProductMap">
+        select
+        temp.id,
+        temp.shop_id,
+        temp.prod_id,
+        temp.product_name,
+        temp.product_img,
+        temp.product_type_id,
+        temp.product_type,
+        sum(market_price) as market_price ,
+        sum(price) as price
+        from
+        (
+            select sp.id,sp.shop_id,sp.prod_id,sp.product_name,sp.product_img,sp.product_type_id,sp.product_type, min(ps.market_price) as market_price,min(sps.price) as price
+            from shop_product sp
+            left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+            left join shop_product_spec sps on sps.prod_spec_id = ps.id
+            where sp.shop_id = #{shopId} and sp.shop_prod_status = 1
+            and sp.del_flag= 0
+            group by ps.sku_id
+        ) temp
+        group by temp.id
+    </select>
 </mapper>

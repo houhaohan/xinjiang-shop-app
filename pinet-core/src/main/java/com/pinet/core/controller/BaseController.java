@@ -14,8 +14,18 @@ public class BaseController {
      * @return
      */
     protected Long currentUserId(){
-        return ThreadLocalUtil.getUserLogin().getUserId();
+        ThreadLocalUtil.UserLogin userLogin = currentUser();
+        if(userLogin == null){
+            return 0L;
+        }
+        return userLogin.getUserId();
     }
 
-
+    /**
+     * 获取当前用户ID
+     * @return
+     */
+    protected ThreadLocalUtil.UserLogin currentUser(){
+        return ThreadLocalUtil.getUserLogin();
+    }
 }

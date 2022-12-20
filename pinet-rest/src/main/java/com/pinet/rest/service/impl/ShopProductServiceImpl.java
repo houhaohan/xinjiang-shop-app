@@ -15,12 +15,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.rest.service.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+
 
 /**
  * <p>
@@ -37,6 +34,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     private IShopService shopService;
     @Autowired
     private IProductGlanceOverService productGlanceOverService;
+
 
 
     @Override
@@ -76,5 +74,10 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         //更新商品浏览次数
         productGlanceOverService.updateGlanceOverTimes(id);
         return shopProductVo;
+    }
+
+    @Override
+    public List<ProdTypeVo> productListByShopId(Long shopId) {
+        return baseMapper.getProductListByShopId(shopId);
     }
 }
