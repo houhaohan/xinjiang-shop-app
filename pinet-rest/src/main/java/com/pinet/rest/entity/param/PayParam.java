@@ -1,0 +1,35 @@
+package com.pinet.rest.entity.param;
+
+import lombok.Data;
+
+import java.math.BigDecimal;
+
+/**
+ * @program: xinjiang-shop-app
+ * @description: 支付相关参数
+ * @author: hhh
+ * @create: 2022-12-20 14:15
+ **/
+@Data
+public class PayParam {
+    /**
+     * openId
+     */
+    private String openId;
+
+    /**
+     * 订单号
+     */
+    private String orderNo;
+
+    /**
+     * 支付金额
+     */
+    private BigDecimal payPrice;
+
+    /**
+     * 支付描述
+     */
+    private String payDesc;
+
+}

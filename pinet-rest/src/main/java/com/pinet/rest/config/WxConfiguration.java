@@ -25,7 +25,7 @@ public class WxConfiguration {
     @Resource
     private WeiXinAppProperties weiXinAppProperties;
 
-    @Bean(name = "wxMiniPayService")
+    @Bean(name = "miniPayService")
     public WxPayService wxMiniPayService() {
 
         //实例payConfig 设置固定参数
@@ -44,7 +44,7 @@ public class WxConfiguration {
     }
 
 
-    @Bean(name = "wxAppPayService")
+    @Bean(name = "appPayService")
     public WxPayService wxAppPayService(){
 
         //实例payConfig 设置固定参数

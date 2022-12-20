@@ -85,9 +85,9 @@ public class OrdersController extends BaseController {
 
     @PostMapping("/orderPay")
     @ApiOperation("订单支付")
-    public Result<OrderPayVo> orderPay(@Validated OrderPayDto dto){
-        OrderPayVo orderPayVo = ordersService.orderPay(dto);
-        return Result.ok(orderPayVo);
+    public Result<?> orderPay(@Validated OrderPayDto dto){
+        Object pay = ordersService.orderPay(dto);
+        return Result.ok(pay);
     }
 
 

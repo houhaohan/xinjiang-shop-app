@@ -1,4 +1,5 @@
 package com.pinet.rest.service.impl;
+import java.time.LocalDateTime;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
@@ -10,7 +11,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.common.mq.config.QueueConstants;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.LatAndLngUtils;
+import com.pinet.core.util.SpringContextUtils;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
@@ -19,6 +22,7 @@ import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
+import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
@@ -61,6 +65,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Resource
     private JmsUtil jmsUtil;
+
+    @Resource
+    private IOrderPayService orderPayService;
 
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
@@ -214,7 +221,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    public OrderPayVo orderPay(OrderPayDto dto) {
+    @Transactional(rollbackFor = Exception.class)
+    public Object orderPay(OrderPayDto dto) {
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+
         Orders orders = getById(dto.getOrderId());
         if (orders == null){
             throw new PinetException("订单不存在");
@@ -224,14 +234,37 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new PinetException("支付金额异常,请重新支付");
         }
 
+        //根据不同支付渠道获取调用不同支付方法
+        IPayService payService = SpringContextUtils.getBean(dto.getChannelId()+"_"+"service",IPayService.class);
+
+        //构造orderPay
+        OrderPay orderPay = new OrderPay();
+        orderPay.setOrderId(orders.getId());
+        orderPay.setOrderNo(orders.getOrderNo());
+        orderPay.setCustomerId(customerId);
+        orderPay.setPayStatus(1);
+        orderPay.setOrderPrice(orders.getOrderPrice());
+        orderPay.setPayPrice(dto.getOrderPrice());
+        orderPay.setOpenId(dto.getOpenId());
+        orderPay.setChannelId(dto.getChannelId());
+        orderPay.setPayName(payService.getPayName());
+        orderPay.setIp(IPUtils.getIpAddr());
+        orderPay.setCreateBy(customerId);
+        orderPay.setCreateTime(new Date());
+        orderPay.setUpdateBy(customerId);
+        orderPay.setUpdateTime(new Date());
+        orderPay.setDelFlag(0);
+
+        orderPayService.save(orderPay);
 
 
+        //封装PayParam
+        PayParam param = new PayParam();
+        param.setOpenId(dto.getOpenId());
+        param.setOrderNo(orders.getOrderNo().toString());
+        param.setPayPrice(dto.getOrderPrice());
 
-
-
-
-
-        return null;
+        return payService.pay(param);
     }
 
 

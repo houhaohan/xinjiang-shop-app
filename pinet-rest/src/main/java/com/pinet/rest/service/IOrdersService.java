@@ -36,5 +36,5 @@ public interface IOrdersService extends IService<Orders> {
 
     CreateOrderVo createOrder(CreateOrderDto dto);
 
-    OrderPayVo orderPay(OrderPayDto dto);
+    Object orderPay(OrderPayDto dto);
 }
