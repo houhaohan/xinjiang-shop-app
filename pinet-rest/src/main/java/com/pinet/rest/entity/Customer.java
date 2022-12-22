@@ -3,9 +3,13 @@ package com.pinet.rest.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -37,6 +41,7 @@ public class Customer implements Serializable {
     * 微信小程序唯一标识
     */
     @ApiModelProperty("微信小程序唯一标识")
+    @JsonIgnore
     private String openId;
     /**
     * 邀请码
@@ -226,6 +231,7 @@ public class Customer implements Serializable {
     private Long updateTime;
 
     @ApiModelProperty("轻食openID")
+    @JsonProperty(value = "openId")
     private String qsOpenId;
 
 }

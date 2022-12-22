@@ -1,8 +1,6 @@
 package com.pinet.rest.controller;
 
-
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
 
@@ -15,7 +13,9 @@ import com.pinet.core.controller.BaseController;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/{version}/customer")
 public class CustomerController extends BaseController {
+
+
 
 }

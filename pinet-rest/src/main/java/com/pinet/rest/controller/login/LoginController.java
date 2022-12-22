@@ -14,6 +14,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -40,7 +41,7 @@ public class LoginController {
     @PostMapping("/wx")
     @ApiOperation("微信登入")
     @ApiVersion(1)
-    public Result<UserInfo> wxLogin(@RequestBody WxLoginRequest request){
+    public Result<UserInfo> wxLogin(@Validated @RequestBody WxLoginRequest request){
         try{
             ILoginService loginService = SpringContextUtils.getBean("wxLoginService", ILoginService.class);
             UserInfo userInfo = loginService.login(request);
@@ -64,7 +65,7 @@ public class LoginController {
     @PostMapping("/sms_code")
     @ApiOperation("手机验证码登入")
     @ApiVersion(1)
-    public Result<?> smsLogin(@RequestBody SmsLoginRequest request){
+    public Result<?> smsLogin(@Validated @RequestBody SmsLoginRequest request){
         try{
             ILoginService loginService = SpringContextUtils.getBean("phoneLoginService", ILoginService.class);
             UserInfo response = loginService.login(request);

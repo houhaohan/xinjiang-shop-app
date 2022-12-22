@@ -13,6 +13,9 @@ public class HotProductVo {
     @ApiModelProperty(value = "店铺ID")
     private Long shopId;
 
+    @ApiModelProperty(value = "店铺名称")
+    private String shopName;
+
     @ApiModelProperty(value = "商品ID")
     private Long prodId;
 
@@ -23,7 +26,7 @@ public class HotProductVo {
     private String productImg;
 
     @ApiModelProperty(value = "商品销售价格")
-    private BigDecimal price;
+    private BigDecimal price ;
 
     @ApiModelProperty(value = "商品市场价")
     private BigDecimal marketPrice;

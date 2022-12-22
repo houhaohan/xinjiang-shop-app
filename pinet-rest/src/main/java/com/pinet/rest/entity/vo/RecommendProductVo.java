@@ -12,6 +12,9 @@ public class RecommendProductVo {
     @ApiModelProperty(value = "店铺ID")
     private Long shopId;
 
+    @ApiModelProperty(value = "店铺名称")
+    private String shopName;
+
     @ApiModelProperty(value = "商品ID")
     private Long prodId;
 

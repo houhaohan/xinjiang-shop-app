@@ -36,7 +36,6 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     private IProductGlanceOverService productGlanceOverService;
 
 
-
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
         if(param.getLat() == null && param.getLng() == null && param.getShopId() == null){

@@ -2,13 +2,11 @@ package com.pinet.rest.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.pinet.core.entity.Token;
-import com.pinet.core.exception.PinetException;
 import com.pinet.core.http.HttpResult;
 import com.pinet.core.util.AppJwtTokenUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.inter.annotation.NotTokenSign;
-import com.pinet.rest.entity.CustomerToken;
 import com.pinet.rest.service.ICustomerTokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

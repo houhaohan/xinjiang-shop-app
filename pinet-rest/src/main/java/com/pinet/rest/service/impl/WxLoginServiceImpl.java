@@ -103,6 +103,5 @@ public class WxLoginServiceImpl implements ILoginService {
      */
     private void cacheToken(Long userId,String token){
         redisUtil.set(UserConstant.PREFIX_USER_TOKEN+userId,token,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
-        redisUtil.set(UserConstant.PREFIX_REFRESH_TOKEN+token, String.valueOf(userId),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
     }
 }

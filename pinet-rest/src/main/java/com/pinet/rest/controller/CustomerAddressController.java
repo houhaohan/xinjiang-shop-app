@@ -28,7 +28,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/{version}/customer/address")
-@Api(tags = "收获地址")
+@Api(tags = "收货地址")
 public class CustomerAddressController extends BaseController {
 
     @Autowired
@@ -79,7 +79,7 @@ public class CustomerAddressController extends BaseController {
     }
 
     @ApiOperation("删除")
-    @RequestMapping(value = "/deleteById",method = RequestMethod.DELETE)
+    @RequestMapping(value = "/deleteById",method = {RequestMethod.DELETE})
     @ApiVersion(1)
     public Result<String> deleteById(@RequestBody BaseDto dto){
         Long userId = super.currentUserId();
@@ -97,13 +97,13 @@ public class CustomerAddressController extends BaseController {
     @ApiOperation("设置默认地址")
     @RequestMapping(value = "/default",method = RequestMethod.POST)
     @ApiVersion(1)
-    public Result<String> updateDefault(@RequestBody BaseDto baseDto){
+    public Result<String> updateDefault(@RequestBody BaseDto dto){
         Long userId = super.currentUserId();
         if(userId == null || userId == 0){
             return Result.error("用户没有登入，请先登入");
         }
         CustomerAddress entity = new CustomerAddress();
-        entity.setId(baseDto.getId());
+        entity.setId(dto.getId());
         entity.setStatus(1);
         boolean success = customerAddressService.updateById(entity);
         if(success){

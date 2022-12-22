@@ -47,11 +47,15 @@
         <result column="sku_id" property="skuId" />
         <result column="spsPrice" property="price" />
         <result column="spsMarketPrice" property="marketPrice" />
+        <result column="stock" property="stock" />
     </resultMap>
 
     <resultMap id="ProductMap" type="com.pinet.rest.entity.vo.ProdTypeVo">
         <result column="product_type_id" property="productTypeId" />
         <result column="product_type" property="productType" />
+        <result column="shop_id" property="shopId" />
+        <result column="shop_name" property="shopName" />
+        <result column="address" property="address" />
         <collection property="productList" resultMap="ShopProductMap" />
     </resultMap>
 
@@ -67,29 +71,20 @@
     </sql>
 
     <select id="getProductByShopId" resultType="com.pinet.rest.entity.vo.HotProductVo">
-        <!--
-        select sp.shop_id,sp.prod_id,sp.product_name,sp.product_img, sp.price, sp.market_price, sum(op.prod_num) sellnum
-        from shop_product sp
-        left join order_product op on sp.prod_id = op.shop_prod_id and op.del_flag = 0
-        where sp.shop_id = #{shopId} and sp.shop_prod_status = 1 and sp.del_flag = 0
-        group by sp.prod_id
-        order by sellnum
-        limit 16
-        -->
-
-
-        select temp.shop_id,temp.prod_id,temp.product_name,temp.product_img,
+        select temp.shop_id,temp.shop_name,temp.prod_id,temp.product_name,temp.product_img,
         sum(temp.market_price) market_price,
         sum(temp.price) price,
         ifnull(sum(op.prod_num),0) sellnum
         from (
-            select sp.shop_id,sp.prod_id,sp.product_name,sp.product_img,
-            min(ps.market_price) as market_price,
-            min(sps.price) as price from shop_product sp
+            select sp.shop_id,s.shop_name,sp.prod_id,sp.product_name,sp.product_img,
+            ifnull(min(ps.market_price),0) as market_price,
+            ifnull(min(sps.price),0) as price from shop_product sp
             left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
             left join shop_product_spec sps on sps.prod_spec_id = ps.id
+            left join shop s on s.id = sp.shop_id
             where sp.shop_id = #{shopId}
             group by ps.sku_id
+            limit 80
         ) temp
         left join order_product op on temp.prod_id = op.shop_prod_id and op.del_flag = 0
         group by temp.prod_id
@@ -101,6 +96,7 @@
         select * from (
             select
             temp.shop_id,
+            temp.shop_name,
             temp.prod_id,
             temp.product_name,
             temp.product_img,
@@ -108,15 +104,16 @@
             sum(price) as price
             from
             (
-                select sp.shop_id,sp.prod_id,sp.product_name,sp.product_img, min(ps.market_price) as market_price,min(sps.price) as price
+                select sp.shop_id,s.shop_name,sp.prod_id,sp.product_name,sp.product_img, ifnull(min(ps.market_price),0) as market_price,ifnull(min(sps.price),0) as price
                 from shop_product sp
                 left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
                 left join shop_product_spec sps on sps.prod_spec_id = ps.id
+                left join shop s on s.id = sp.shop_id
                 where sp.shop_prod_status = 1
                 and sp.del_flag= 0
-                group by ps.sku_id
+                group by ps.sku_id,sp.shop_id
                 order by RAND()
-                limit 8
+                limit 50
             ) temp
             group by temp.prod_id
         ) t
@@ -133,16 +130,16 @@
             sum(temp.price) as price
             from
             (
-                select sp.shop_id,sp.prod_id,sp.product_name,sp.product_img, min(ps.market_price) as market_price,min(sps.price) as price
+                select sp.shop_id,sp.prod_id,sp.product_name,sp.product_img, ifnull(min(ps.market_price),0) as market_price,ifnull(min(sps.price),0) as price
                 from shop_product sp
                 left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
                 left join shop_product_spec sps on sps.prod_spec_id = ps.id
                 left join product_glance_over pgo on sp.prod_id = pgo.prod_id and pgo.del_flag = 0
                 where pgo.customer_id = #{userId} and sp.shop_prod_status = 1
                 and sp.del_flag= 0
-                group by ps.sku_id
+                group by ps.sku_id,sp.shop_id
                 order by pgo.times desc
-                limit 8
+                limit 50
             ) temp
             group by temp.prod_id
         ) t
@@ -164,6 +161,7 @@
          sps.prod_spec_id,
          sps.spec_name,
          sps.sku_id,
+         sps.stock,
          psp.market_price as spsMarketPrice
         <!-- (select sum(market_price)  from (
 			select product_id, min(market_price) as market_price  from product_spec where product_id = #{id} and del_flag = 0 group by sku_id
@@ -184,6 +182,8 @@
         select
         temp.id,
         temp.shop_id,
+        temp.shop_name,
+        temp.address,
         temp.prod_id,
         temp.product_name,
         temp.product_img,
@@ -193,10 +193,12 @@
         sum(price) as price
         from
         (
-            select sp.id,sp.shop_id,sp.prod_id,sp.product_name,sp.product_img,sp.product_type_id,sp.product_type, min(ps.market_price) as market_price,min(sps.price) as price
+            select sp.id,sp.shop_id,s.shop_name,concat(s.province,s.city,s.district,s.address) as address,
+            sp.prod_id,sp.product_name,sp.product_img,sp.product_type_id,sp.product_type, min(ps.market_price) as market_price,min(sps.price) as price
             from shop_product sp
             inner join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
             inner join shop_product_spec sps on sps.prod_spec_id = ps.id
+            inner join shop s on s.id = sp.shop_id
             where sp.shop_id = #{shopId} and sp.shop_prod_status = 1
             and sp.del_flag= 0
             group by ps.sku_id

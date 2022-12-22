@@ -30,9 +30,6 @@ public class PhoneLoginServiceImpl implements ILoginService {
     @Override
     public UserInfo login(LoginRequest loginRequest) {
         SmsLoginRequest smsLoginRequest = (SmsLoginRequest)loginRequest;
-        if(StringUtil.isEmpty(smsLoginRequest.getCode())){
-            throw new LoginException(ErrorCodeEnum.SMS_EMPTY);
-        }
         String code = redisUtil.get(CommonConstant.SMS_CODE_LOGIN + smsLoginRequest.getPhone());
         if(StringUtil.isEmpty(code)){
             throw new LoginException(ErrorCodeEnum.SMS_EXPIRED);
@@ -77,15 +74,11 @@ public class PhoneLoginServiceImpl implements ILoginService {
 
     @Override
     public void logout(String token) {
-        redisUtil.delete(UserConstant.PREFIX_REFRESH_TOKEN+token);
-
         Long userId = JwtTokenUtils.getUserIdFromToken(token);
         if(userId == null){
             return;
         }
         redisUtil.delete(UserConstant.PREFIX_USER_TOKEN+userId);
-
-
     }
 
     /**
@@ -95,6 +88,5 @@ public class PhoneLoginServiceImpl implements ILoginService {
      */
     private void cacheToken(String userId,String token){
         redisUtil.set(UserConstant.PREFIX_USER_TOKEN+userId,token,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
-        redisUtil.set(UserConstant.PREFIX_REFRESH_TOKEN+token, userId,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
     }
 }

@@ -33,4 +33,7 @@ public class ShopProductSpecVo{
     @ApiModelProperty("市场价")
     private BigDecimal marketPrice;
 
+    @ApiModelProperty("库存")
+    private Integer stock;
+
 }

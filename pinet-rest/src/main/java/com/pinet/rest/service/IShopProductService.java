@@ -7,9 +7,7 @@ import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
 import com.pinet.rest.entity.vo.*;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -33,7 +31,6 @@ public interface IShopProductService extends IService<ShopProduct> {
      */
     Page<RecommendProductVo> recommendList(Long userId, CommonPage param);
 
-
     /**
      * 商品详情
      * @param id
@@ -45,4 +42,5 @@ public interface IShopProductService extends IService<ShopProduct> {
      * 店铺商品列表
      */
     List<ProdTypeVo> productListByShopId(Long shopId);
+
 }
