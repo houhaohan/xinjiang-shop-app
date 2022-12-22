@@ -33,8 +33,7 @@ hs_err_pid*
 
 # idea
 *.idea
-/uguess-game/uguess-game.iml
-/uguess-settle/uguess-settle.iml
+/pinet-common.iml
 .idea
 *.iws
 *.ipr

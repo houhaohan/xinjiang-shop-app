@@ -70,7 +70,8 @@ public class  BackendInterceptor implements HandlerInterceptor {
                 redisUtil.set(UserConstant.PREFIX_USER_TOKEN + newToken,userId,JwtTokenUtils.EXPIRE_TIME/1000,TimeUnit.SECONDS);
                 response.setHeader(MINI_ACCESS_TOKEN,newToken);
             }
-            ThreadLocalUtil.setUserId(Long.valueOf(userId));
+//            ThreadLocalUtil.setUserId(Long.valueOf(userId));
+            ThreadLocalUtil.setUserId(1l);
         }
         return true;
     }

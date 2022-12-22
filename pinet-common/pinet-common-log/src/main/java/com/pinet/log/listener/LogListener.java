@@ -14,12 +14,13 @@ public class LogListener {
     @Async
     @EventListener(OperationLogEvent.class)
     public void saveOperateLog(OperationLogEvent logEvent) {
-        Object obj = logEvent.getSource();
-        if (obj == null) return;
-        if (obj instanceof OperationLog) {
-            OperationLog operationLog = (OperationLog) obj;
-            operateLogService.save(operationLog);
-        }
+        System.err.println("日志事件测试 1111111111111111111111111111111111111122");
+//        Object obj = logEvent.getSource();
+//        if (obj == null) return;
+//        if (obj instanceof OperationLog) {
+//            OperationLog operationLog = (OperationLog) obj;
+//            operateLogService.save(operationLog);
+//        }
 
     }
 }

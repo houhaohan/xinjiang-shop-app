@@ -28,6 +28,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
 
     private static final String APP_ACCESS_TOKEN = "Authorization";
     private static final String MINI_ACCESS_TOKEN = "access_token";
+    private static final String TOKEN_HEAD_PREFIX = "Bearer ";
 
     @Autowired
     private ICustomerTokenService customerTokenService;
@@ -38,7 +39,6 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
             return true;
         }
         String appToken = request.getHeader(APP_ACCESS_TOKEN);
-
         if (handler != null && handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             NotTokenSign notTokenSign = handlerMethod.getMethodAnnotation(NotTokenSign.class);
@@ -62,12 +62,12 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
             }
         }
 
-        Long userId = customerTokenService.validateAndReturnCustomerId(appToken, terminal);
+        Long userId = customerTokenService.validateAndReturnCustomerId(appToken.substring(TOKEN_HEAD_PREFIX.length()), terminal);
         //如果token已过期，但是未加入黑名单也在保留范围内，则进行刷新token操作，在请求头内直接返回新的token
         if(userId != null && AppJwtTokenUtil.isTokenExpired(appToken)){
             Token customerToken = AppJwtTokenUtil.generateTokenObject(String.valueOf(userId) , request);
             customerTokenService.refreshToken(customerToken, appToken);
-            response.setHeader(APP_ACCESS_TOKEN, "Bearer " + customerToken.getToken());
+            response.setHeader(APP_ACCESS_TOKEN, TOKEN_HEAD_PREFIX + customerToken.getToken());
         }else {
 //            throw new PinetException("token过期，请重新登入");
         }
