@@ -1,6 +1,8 @@
 package com.pinet.rest.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -11,6 +13,7 @@ import java.util.Date;
  * @create: 2022/12/12 14:28
  */
 @Data
+@ApiModel(value = "ShopVo",description = "用户信息")
 public class ShopVo {
 
     @ApiModelProperty("店铺id")
@@ -20,7 +23,11 @@ public class ShopVo {
     private String shopName;
 
     @ApiModelProperty("订单数量")
-    private Integer orderNum;
+    private Integer orderNum = 0;
+
+    //todo 这个值待确认
+    @ApiModelProperty(name = "最大数量",notes= "比例超过30% 爆红")
+    private Integer maxNum = 100;
 
     @ApiModelProperty("省")
     private String province;
@@ -44,10 +51,12 @@ public class ShopVo {
     private Double distance;
 
     @ApiModelProperty("开始营业时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm")
+    @JsonProperty("startTime")
     private Date workTime;
 
     @ApiModelProperty("结束营业时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm")
+    @JsonProperty("endTime")
     private Date finishTime;
 }

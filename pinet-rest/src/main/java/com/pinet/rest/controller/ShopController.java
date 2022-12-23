@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
+import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.dto.ShopListDto;
 import com.pinet.rest.entity.vo.ShopVo;
 import com.pinet.rest.service.IShopService;
@@ -35,7 +36,8 @@ public class ShopController extends BaseController {
     @ApiOperation("店铺列表")
     @PostMapping("/shopList")
     @ApiVersion(1)
-    public Result<List<ShopVo>> cartList(@Validated @RequestBody ShopListDto dto){
+    @NotTokenSign
+    public Result<List<ShopVo>> shopList(@Validated @RequestBody ShopListDto dto){
         List<ShopVo> shopVoList = shopService.shopList(dto);
         return Result.ok(shopVoList);
     }

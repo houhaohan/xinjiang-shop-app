@@ -40,7 +40,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     }
 
     @Override
-    public List<ShopVo> shopList(ShopListDto dto) {
+    public List<ShopVo>  shopList(ShopListDto dto) {
         if (dto.getLat() == null || dto.getLng() == null) {
             throw new IllegalArgumentException("参数不能为空");
         }

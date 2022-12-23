@@ -160,7 +160,7 @@ public class Result<T> implements Serializable {
 		this.code = code;
 	}
 
-	public Object getData() {
+	public T getData() {
 		return data;
 	}
 

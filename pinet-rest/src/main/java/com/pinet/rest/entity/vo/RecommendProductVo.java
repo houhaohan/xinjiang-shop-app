@@ -29,4 +29,5 @@ public class RecommendProductVo {
 
     @ApiModelProperty(value = "商品市场价")
     private BigDecimal marketPrice;
+
 }
