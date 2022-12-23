@@ -26,7 +26,7 @@ public interface ShopMapper extends BaseMapper<Shop> {
      * @param lng
      * @return
      */
-    public Shop getMinDistanceShop(@Param("lat") BigDecimal lat,@Param("lng") BigDecimal lng) ;
+    public Long getMinDistanceShop(@Param("lat") BigDecimal lat,@Param("lng") BigDecimal lng) ;
 
     /**
      * 查找店铺列表

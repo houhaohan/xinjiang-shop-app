@@ -51,6 +51,6 @@ public interface ShopProductMapper extends BaseMapper<ShopProduct> {
      * @param shopId
      * @return
      */
-    List<ProdTypeVo> getProductListByShopId(@Param("shopId") Long shopId);
+    ShopProductListVo getProductListByShopId(@Param("shopId") Long shopId);
 
 }

@@ -39,23 +39,26 @@
         shop_name, avatar, province, city, district, province_id, city_id, district_id, address, lng, lat, linkman, shop_phone, shop_status,work_time,finish_time
     </sql>
 
-    <select id="getMinDistanceShop" resultMap="BaseResultMap">
-        SELECT
-        <include refid="Base_Column_List"/>,
-        6378.138 * 2 * ASIN(
-        SQRT(
-        POW( SIN( ( 82.051809 * PI( ) / 180 - lat * PI( ) / 180 ) / 2 ), 2 ) + COS( 82.051809 * PI( ) / 180 ) * COS( lat * PI( ) / 180 ) * POW( SIN( ( 44.898093 * PI( ) / 180 - lng * PI( ) / 180 ) / 2 ), 2 )
-        )
-        ) AS distance
-        FROM
-        shop
-        ORDER BY
-        distance ASC
-        limit 1
+    <select id="getMinDistanceShop" resultType="Long">
+        SELECT id FROM (
+            SELECT id,
+            ROUND(
+                6378.138 * 2 * ASIN(
+                    SQRT(
+                        POW( SIN( ( #{lat}* PI() / 180- lat * PI() / 180 ) / 2 ), 2 ) + COS( #{lat} * PI() / 180 ) * COS( lat * PI() / 180 ) * POW( SIN( ( #{lng} * PI() / 180- lng * PI() / 180 ) / 2 ), 2 )
+                    )
+                ) * 1000
+            ) AS distance
+            FROM shop
+            WHERE del_flag = 0
+            ORDER BY
+            distance ASC
+            LIMIT 1
+        ) t
     </select>
 
     <select id="shopList" resultType="com.pinet.rest.entity.vo.ShopVo">
-        select * from shop where shop_status = 1 and del_flag = 0
+        select <include refid="Base_Column_List"/> from shop where shop_status = 1 and del_flag = 0
     </select>
 
 </mapper>

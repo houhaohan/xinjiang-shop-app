@@ -27,7 +27,6 @@
         <result column="product_name" property="productName" />
         <result column="product_img" property="productImg" />
         <result column="product_desc" property="productDesc" />
-        <result column="shop_id" property="shopId" />
         <result column="product_type_id" property="productTypeId" />
         <result column="product_type" property="productType" />
         <result column="price" property="price" />
@@ -50,12 +49,19 @@
         <result column="stock" property="stock" />
     </resultMap>
 
-    <resultMap id="ProductMap" type="com.pinet.rest.entity.vo.ProdTypeVo">
-        <result column="product_type_id" property="productTypeId" />
-        <result column="product_type" property="productType" />
+    <resultMap id="ShopProductListMap" type="com.pinet.rest.entity.vo.ShopProductListVo">
         <result column="shop_id" property="shopId" />
         <result column="shop_name" property="shopName" />
         <result column="address" property="address" />
+        <result column="lat" property="lat" />
+        <result column="lng" property="lng" />
+        <result column="distance" property="distance" />
+        <collection property="typeList" resultMap="ProdTypeMap" />
+    </resultMap>
+
+    <resultMap id="ProdTypeMap" type="com.pinet.rest.entity.vo.ProdTypeVo">
+        <result column="product_type_id" property="productTypeId" />
+        <result column="product_type" property="productType" />
         <collection property="productList" resultMap="ShopProductMap" />
     </resultMap>
 
@@ -178,7 +184,7 @@
     </select>
 
 
-    <select id="getProductListByShopId" resultMap="ProductMap">
+    <select id="getProductListByShopId" resultMap="ShopProductListMap">
         select
         temp.id,
         temp.shop_id,
@@ -189,18 +195,19 @@
         temp.product_img,
         temp.product_type_id,
         temp.product_type,
+        temp.lng,
+        temp.lat,
         sum(market_price) as market_price ,
         sum(price) as price
         from
         (
-            select sp.id,sp.shop_id,s.shop_name,concat(s.province,s.city,s.district,s.address) as address,
+            select sp.id,s.lat,s.lng,s.id as shop_id,s.shop_name,concat(s.province,s.city,s.district,s.address) as address,
             sp.prod_id,sp.product_name,sp.product_img,sp.product_type_id,sp.product_type, min(ps.market_price) as market_price,min(sps.price) as price
-            from shop_product sp
-            inner join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-            inner join shop_product_spec sps on sps.prod_spec_id = ps.id
-            inner join shop s on s.id = sp.shop_id
-            where sp.shop_id = #{shopId} and sp.shop_prod_status = 1
-            and sp.del_flag= 0
+            from shop s
+            left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
+            left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+            left join shop_product_spec sps on sps.prod_spec_id = ps.id
+            where s.id = #{shopId} and s.del_flag = 0
             group by ps.sku_id
         ) temp
         group by temp.id

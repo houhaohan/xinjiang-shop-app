@@ -13,7 +13,6 @@ import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.service.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,8 +35,8 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     private OrdersMapper orderMapper;
 
     @Override
-    public Shop getMinDistanceShop(BigDecimal lat, BigDecimal lng) {
-        return shopMapper.getMinDistanceShop(lat, lng);
+    public Long getMinDistanceShop(BigDecimal lat, BigDecimal lng) {
+        return shopMapper.getMinDistanceShop(lat,lng);
     }
 
     @Override

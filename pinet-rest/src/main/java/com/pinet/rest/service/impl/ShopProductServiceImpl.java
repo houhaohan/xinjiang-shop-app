@@ -2,7 +2,6 @@ package com.pinet.rest.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.exception.PinetException;
-import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
@@ -34,7 +33,6 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Autowired
     private IProductGlanceOverService productGlanceOverService;
 
-
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
         if(param.getLat() == null && param.getLng() == null && param.getShopId() == null){
@@ -42,11 +40,11 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         }
         //根据经纬度获取最近的店铺ID
         if(param.getLat() != null && param.getLng() != null){
-            Shop shop = shopService.getMinDistanceShop(param.getLat(), param.getLng());
-            if(shop == null){
+            Long shopId = shopService.getMinDistanceShop(param.getLat(), param.getLng());
+            if(shopId == null){
                 return Collections.emptyList();
             }
-            param.setShopId(shop.getId());
+            param.setShopId(shopId);
         }
         return baseMapper.getProductByShopId(param.getShopId());
     }
@@ -75,7 +73,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     }
 
     @Override
-    public List<ProdTypeVo> productListByShopId(Long shopId) {
+    public ShopProductListVo productListByShopId(Long shopId) {
         return baseMapper.getProductListByShopId(shopId);
     }
 }

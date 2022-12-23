@@ -41,6 +41,6 @@ public interface IShopProductService extends IService<ShopProduct> {
     /**
      * 店铺商品列表
      */
-    List<ProdTypeVo> productListByShopId(Long shopId);
+    ShopProductListVo productListByShopId(Long shopId);
 
 }

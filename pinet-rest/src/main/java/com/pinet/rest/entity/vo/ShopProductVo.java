@@ -26,9 +26,6 @@ public class ShopProductVo {
     @ApiModelProperty(value = "商品描述，富文本")
     private String productDesc;
 
-    @ApiModelProperty(value = "店铺ID")
-    private Long shopId;
-
     @ApiModelProperty(value = "商品分类ID")
     private Long productTypeId;
 

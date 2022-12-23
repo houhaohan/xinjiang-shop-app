@@ -55,6 +55,6 @@ public class LatAndLngUtils {
         if (accurate < 0) {
             throw new RuntimeException("精确度必须是正整数或零");
         }
-        return new BigDecimal(distance).divide(new BigDecimal(1000),accurate, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return BigDecimal.valueOf(distance).divide(new BigDecimal(1000),accurate, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 }

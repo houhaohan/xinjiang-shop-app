@@ -2,9 +2,7 @@ package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.rest.entity.ProductType;
-import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.ProductTypeDto;
 import com.pinet.rest.entity.vo.ProductTypeVo;
@@ -16,7 +14,6 @@ import com.pinet.rest.service.IShopService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +46,8 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
             throw new IllegalArgumentException("参数不能为空");
         }
         //根据经纬度获取最近的店铺ID
-        Shop shop = shopService.getMinDistanceShop(dto.getLat(), dto.getLng());
-        if(shop == null){
+        Long shopId = shopService.getMinDistanceShop(dto.getLat(), dto.getLng());
+        if(shopId == null){
             return Collections.emptyList();
         }
         //查点店铺商品

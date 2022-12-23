@@ -62,7 +62,12 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
             }
         }
 
-        Long userId = customerTokenService.validateAndReturnCustomerId(appToken.substring(TOKEN_HEAD_PREFIX.length()), terminal);
+        if(StringUtil.isEmpty(appToken)){
+            appToken = "";
+        }else {
+            appToken = appToken.substring(TOKEN_HEAD_PREFIX.length());
+        }
+        Long userId = customerTokenService.validateAndReturnCustomerId(appToken, terminal);
         //如果token已过期，但是未加入黑名单也在保留范围内，则进行刷新token操作，在请求头内直接返回新的token
         if(userId != null && AppJwtTokenUtil.isTokenExpired(appToken)){
             Token customerToken = AppJwtTokenUtil.generateTokenObject(String.valueOf(userId) , request);

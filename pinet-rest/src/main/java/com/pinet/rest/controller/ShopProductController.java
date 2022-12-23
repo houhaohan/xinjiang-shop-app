@@ -2,10 +2,11 @@ package com.pinet.rest.controller;
 
 
 import com.pinet.core.result.Result;
+import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.Shop;
-import com.pinet.rest.entity.vo.ProdTypeVo;
+import com.pinet.rest.entity.vo.ShopProductListVo;
 import com.pinet.rest.entity.vo.ShopProductVo;
 import com.pinet.rest.service.IShopProductService;
 import com.pinet.rest.service.IShopService;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
 import java.math.BigDecimal;
-import java.util.List;
+
 
 /**
  * <p>
@@ -50,21 +51,26 @@ public class ShopProductController extends BaseController {
     @NotTokenSign
     @ApiOperation("商品列表")
     @ApiVersion(1)
-    public Result<List<ProdTypeVo>> list(@RequestParam(value = "shopId",required = false) Long shopId,
-                                         @RequestParam(value = "lat",required = false) BigDecimal lat,
-                                         @RequestParam(value = "lng",required = false) BigDecimal lng){
+    public Result<ShopProductListVo> list(@RequestParam(value = "shopId",required = false) Long shopId,
+                                                @RequestParam(value = "lat",defaultValue = "30") BigDecimal lat,
+                                                @RequestParam(value = "lng",defaultValue = "120") BigDecimal lng){
         if(shopId == null && lat == null && lng == null){
             return Result.error("参数不能为空");
         }
         if(shopId == null){
-            Shop shop = shopService.getMinDistanceShop(lat, lng);
-            if(shop == null){
+            shopId = shopService.getMinDistanceShop(lat, lng);
+            if(shopId == null){
                 return Result.ok();
             }
-            shopId = shop.getId();
         }
-        List<ProdTypeVo> list = shopProductService.productListByShopId(shopId);
-        return Result.ok(list);
+        Shop shop = shopService.getById(shopId);
+        ShopProductListVo result = shopProductService.productListByShopId(shopId);
+        if(result != null){
+            double distance =  LatAndLngUtils.getDistance(lng.doubleValue(),lat.doubleValue(),
+                    Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()));
+            result.setDistance(BigDecimal.valueOf(distance));
+        }
+        return Result.ok(result);
     }
 
 

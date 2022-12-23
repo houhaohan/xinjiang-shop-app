@@ -24,7 +24,7 @@ public interface IShopService extends IService<Shop> {
      * @param lng
      * @return
      */
-    public Shop getMinDistanceShop(BigDecimal lat, BigDecimal lng);
+    public Long getMinDistanceShop(BigDecimal lat, BigDecimal lng);
 
     /**
      * 根据距离，订单量查找店铺列表

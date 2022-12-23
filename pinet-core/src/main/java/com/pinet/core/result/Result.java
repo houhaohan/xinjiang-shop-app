@@ -136,7 +136,7 @@ public class Result<T> implements Serializable {
 		return error(errorCodeEnum.getCode(), errorCodeEnum.getMessage());
 	}
 
-	public boolean isSuccess() {
+	public boolean getSuccess() {
 		return success;
 	}
 
@@ -160,7 +160,7 @@ public class Result<T> implements Serializable {
 		this.code = code;
 	}
 
-	public T getData() {
+	public Object getData() {
 		return data;
 	}
 
