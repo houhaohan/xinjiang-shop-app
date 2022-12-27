@@ -236,6 +236,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //根据不同支付渠道获取调用不同支付方法
         IPayService payService = SpringContextUtils.getBean(dto.getChannelId()+"_"+"service",IPayService.class);
+        //封装PayParam
+        PayParam param = new PayParam();
+        param.setOpenId(dto.getOpenId());
+        param.setOrderNo(orders.getOrderNo().toString());
+        param.setPayPrice(dto.getOrderPrice());
+        Object res = payService.pay(param);
+
 
         //构造orderPay
         OrderPay orderPay = new OrderPay();
@@ -257,14 +264,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         orderPayService.save(orderPay);
 
-
-        //封装PayParam
-        PayParam param = new PayParam();
-        param.setOpenId(dto.getOpenId());
-        param.setOrderNo(orders.getOrderNo().toString());
-        param.setPayPrice(dto.getOrderPrice());
-
-        return payService.pay(param);
+        return res;
     }
 
 
