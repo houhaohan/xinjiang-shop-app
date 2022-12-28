@@ -2,9 +2,12 @@ package com.pinet.rest.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.LatAndLngUtils;
+import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
+import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.ShopProductMapper;
 import com.pinet.rest.service.IProductGlanceOverService;
@@ -13,6 +16,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.rest.service.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -75,5 +80,25 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Override
     public ShopProductListVo productListByShopId(Long shopId) {
         return baseMapper.getProductListByShopId(shopId);
+    }
+
+    @Override
+    public List<ShopProductVo> search(ShopProductParam param) {
+        if(param.getShopId() == null || StringUtil.isEmpty(param.getProductName())){
+            return Collections.EMPTY_LIST;
+        }
+        List<ShopProductVo> list = baseMapper.search(param);
+//        pageList.getRecords().forEach(item->{
+//            //距离
+//            double distance = LatAndLngUtils.getDistance(param.getLng().doubleValue(), param.getLat().doubleValue(), Double.valueOf(item.getLng()), Double.valueOf(item.getLat()));
+//            item.setDistance(BigDecimal.valueOf(distance));
+//        });
+        return list;
+    }
+
+    @Override
+    public List<String> sellwell(Long shopId) {
+        if(shopId == null) return Collections.EMPTY_LIST;
+        return baseMapper.sellwell(shopId);
     }
 }

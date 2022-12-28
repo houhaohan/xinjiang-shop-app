@@ -212,4 +212,43 @@
         ) temp
         group by temp.id
     </select>
+
+    <select id="search" resultMap="ShopProductMap">
+        select temp.id,
+        temp.shopId,
+        temp.shop_name,
+        temp.prod_id,
+        temp.product_name,
+        temp.product_img,
+        temp.lat,
+        temp.lng,
+        temp.product_type_id,
+        temp.product_type,
+        sum(market_price) as market_price,
+        sum(price) as price
+        from (
+            select s.id as shopId,s.shop_name,sp.id,sp.prod_id,sp.product_name,sp.product_img,s.lng,s.lat,sp.product_type_id,sp.product_type,
+            min(ps.market_price) as market_price,min(sps.price) as price
+            from shop s
+            left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
+            left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+            left join shop_product_spec sps on sps.prod_spec_id = ps.id and sps.del_flag= 0
+            where s.id = #{shopId} and sp.product_name like concat('%',#{productName},'%')
+            and s.del_flag = 0
+            group by ps.sku_id
+        ) temp
+        group by temp.id
+    </select>
+
+    <select id="sellwell" resultType="String">
+        select sp.product_name
+        from shop_product sp
+        inner join  orders o on o.shop_id = sp.shop_id and o.del_flag =  0
+        where o.shop_id = #{shopId}
+        and o.order_status = 100
+        and sp.del_flag = 0
+        group by o.id
+        order by count(1) desc
+        limit 10
+    </select>
 </mapper>

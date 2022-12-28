@@ -1,11 +1,13 @@
 package com.pinet.rest.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.Shop;
+import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.ShopProductListVo;
 import com.pinet.rest.entity.vo.ShopProductVo;
 import com.pinet.rest.service.IShopProductService;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
 import java.math.BigDecimal;
+import java.util.List;
 
 
 /**
@@ -71,6 +74,27 @@ public class ShopProductController extends BaseController {
             result.setDistance(BigDecimal.valueOf(distance));
         }
         return Result.ok(result);
+    }
+
+
+    @RequestMapping(value = "/search",method = RequestMethod.GET)
+    @NotTokenSign
+    @ApiOperation(("店铺商品搜索"))
+    @ApiVersion(1)
+    public Result<List<ShopProductVo>> search(ShopProductParam param){
+        List<ShopProductVo> page = shopProductService.search(param);
+        return Result.ok(page);
+    }
+
+
+
+    @RequestMapping(value = "/sellwell",method = RequestMethod.GET)
+    @NotTokenSign
+    @ApiOperation("店铺畅销商品")
+    @ApiVersion(1)
+    public Result<List<String>> sellwell(@RequestParam Long shopId){
+        List<String> list = shopProductService.sellwell(shopId);
+        return Result.ok(list);
     }
 
 
