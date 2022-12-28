@@ -39,15 +39,17 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
             return true;
         }
         String appToken = request.getHeader(APP_ACCESS_TOKEN);
-        if (handler != null && handler instanceof HandlerMethod) {
-            HandlerMethod handlerMethod = (HandlerMethod) handler;
-            NotTokenSign notTokenSign = handlerMethod.getMethodAnnotation(NotTokenSign.class);
-            // 过滤登入校验
-            if (null != notTokenSign) {
-                return true;
-            }
-            if(StringUtil.isEmpty(appToken)){
-                return error(request,response);
+        if(StringUtil.isEmpty(appToken)){
+            if (handler != null && handler instanceof HandlerMethod) {
+                HandlerMethod handlerMethod = (HandlerMethod) handler;
+                NotTokenSign notTokenSign = handlerMethod.getMethodAnnotation(NotTokenSign.class);
+                // 过滤登入校验
+                if (null != notTokenSign) {
+                    return true;
+                }
+                if(StringUtil.isEmpty(appToken)){
+                    return error(request,response);
+                }
             }
         }
 

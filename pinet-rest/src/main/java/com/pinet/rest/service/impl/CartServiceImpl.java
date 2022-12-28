@@ -9,6 +9,7 @@ import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.vo.CartListVo;
+import com.pinet.rest.entity.vo.CartVo;
 import com.pinet.rest.mapper.CartMapper;
 import com.pinet.rest.service.ICartProductSpecService;
 import com.pinet.rest.service.ICartService;
@@ -149,5 +150,10 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Cart::getShopId,shopId).eq(Cart::getCustomerId,customerId).eq(BaseEntity::getDelFlag,0);
         remove(lambdaQueryWrapper);
+    }
+
+    @Override
+    public CartVo getCartByUserIdAndShopId(Long shopId, Long customerId) {
+        return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
     }
 }

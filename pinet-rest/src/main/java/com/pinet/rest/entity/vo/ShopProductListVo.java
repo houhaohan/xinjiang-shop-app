@@ -30,6 +30,12 @@ public class ShopProductListVo {
     @ApiModelProperty("经度")
     private String lng;
 
+    @ApiModelProperty("购物车价格")
+    private BigDecimal totalPrice = BigDecimal.ZERO;
+
+    @ApiModelProperty("购物车商品数量")
+    private Integer prodNum = 0;
+
     @ApiModelProperty("商品类型")
     private List<ProdTypeVo> typeList = new ArrayList<>();
 }

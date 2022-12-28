@@ -6,6 +6,7 @@ import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.vo.CartListVo;
+import com.pinet.rest.entity.vo.CartVo;
 
 import java.util.List;
 
@@ -39,4 +40,12 @@ public interface ICartService extends IService<Cart> {
      * @param customerId
      */
     void delCartByShopId(Long shopId,Long customerId);
+
+    /**
+     * 根据用户ID 和 店铺Id 查询购物车商品数量和总价格
+     * @param shopId
+     * @param customerId
+     * @return
+     */
+    CartVo getCartByUserIdAndShopId(Long shopId, Long customerId);
 }

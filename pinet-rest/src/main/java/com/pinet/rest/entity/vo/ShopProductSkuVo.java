@@ -17,6 +17,6 @@ public class ShopProductSkuVo {
     @ApiModelProperty("sku名称")
     private String skuName;
 
-    @ApiModelProperty("sku规格")
+    @ApiModelProperty("sku样式")
     private List<ShopProductSpecVo> skuSpecs = new ArrayList<>();
 }

@@ -26,7 +26,7 @@ public class ShopVo {
     private Integer orderNum = 0;
 
     //todo 这个值待确认
-    @ApiModelProperty(name = "最大数量",notes= "比例超过30% 爆红")
+    @ApiModelProperty(value = "最大数量",notes= "比例超过30% 爆红")
     private Integer maxNum = 100;
 
     @ApiModelProperty("省")

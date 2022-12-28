@@ -1,15 +1,16 @@
 package com.pinet.rest.controller;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.param.ShopProductParam;
+import com.pinet.rest.entity.vo.CartVo;
 import com.pinet.rest.entity.vo.ShopProductListVo;
 import com.pinet.rest.entity.vo.ShopProductVo;
+import com.pinet.rest.service.ICartService;
 import com.pinet.rest.service.IShopProductService;
 import com.pinet.rest.service.IShopService;
 import io.swagger.annotations.Api;
@@ -41,7 +42,8 @@ public class ShopProductController extends BaseController {
     private IShopProductService shopProductService;
     @Autowired
     private IShopService shopService;
-
+    @Autowired
+    private ICartService cartService;
 
     /**
      * 商品列表
@@ -72,6 +74,13 @@ public class ShopProductController extends BaseController {
             double distance =  LatAndLngUtils.getDistance(lng.doubleValue(),lat.doubleValue(),
                     Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()));
             result.setDistance(BigDecimal.valueOf(distance));
+            //当前用户在这个而店铺加的购物车
+            Long userId = super.currentUserId();
+            if(userId != null && userId != 0){
+                CartVo cartVo = cartService.getCartByUserIdAndShopId(shopId, userId);
+                result.setTotalPrice(cartVo.getPrice());
+                result.setProdNum(cartVo.getProdNum());
+            }
         }
         return Result.ok(result);
     }

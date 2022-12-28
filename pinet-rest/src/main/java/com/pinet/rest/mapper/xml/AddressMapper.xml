@@ -37,10 +37,10 @@
                 and p.name = #{province}
             </if>
             <if test="city != null and city != ''">
-                and p.name = #{city}
+                and c.name = #{city}
             </if>
             <if test="district != null and district != ''">
-                and p.name = #{district}
+                and d.name = #{district}
             </if>
         </where>
     </select>
