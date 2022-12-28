@@ -42,13 +42,17 @@
     </select>
 
     <select id="getCartByUserIdAndShopId" resultType="com.pinet.rest.entity.vo.CartVo">
-        select ifnull(sum(c.prod_num),0) as prodNum  ,
-        (select ifnull(sum(price),0) from cart_product_spec cps
-        left join shop_product_spec sps on sps.id = cps.shop_prod_spec_id) as price
-        from cart c
-        where c.shop_id = #{shopId} and c.customer_id = #{customerId}
-        and c.cart_status = 1
-        and c.del_flag = 0
+        select ifnull(sum(prod_num),0) as prodNum,ifnull(sum(price),0) as price from (
+            select c.prod_num,
+            (select ifnull(sum(price),0) from cart_product_spec cps
+            left join shop_product_spec sps on sps.id = cps.shop_prod_spec_id and sps.del_flag = 0
+            where c.id = cps.cart_id and cps.del_flag = 0
+            ) as price
+            from cart c
+            where c.shop_id = #{shopId} and c.customer_id = #{customerId}
+            and c.cart_status = 1
+            and c.del_flag = 0
+        ) t
     </select>
 
 </mapper>
