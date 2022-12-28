@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class CartListVo {
 
     @ApiModelProperty(value = "购物车id",name = "cartId")
-    private Integer cartId;
+    private Long cartId;
 
     @ApiModelProperty(value = "商品名称",name = "prodName")
     private String prodName;
@@ -30,9 +30,6 @@ public class CartListVo {
 
     @ApiModelProperty(value = "商品单价",name = "prodPrice")
     private BigDecimal prodPrice;
-
-    @ApiModelProperty(value = "商品规格",name = "prodSkuName")
-    private String prodSkuName;
 
     @ApiModelProperty(value = "商品样式",name = "prodSpecName")
     private String prodSpecName;

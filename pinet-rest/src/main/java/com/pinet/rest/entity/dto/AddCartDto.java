@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -29,9 +30,9 @@ public class AddCartDto {
     @ApiModelProperty(value = "商品数量",name = "prodNum")
     private Integer prodNum;
 
-    @NotNull(message = "店铺商品样式id不能为空")
-    @ApiModelProperty(value = "商品样式id",name = "shopProdSpecId")
-    private Integer shopProdSpecId;
+    @NotBlank(message = "店铺商品样式id不能为空")
+    @ApiModelProperty(value = "商品样式id(多个逗号分割)",name = "shopProdSpecId")
+    private String shopProdSpecIds;
 
 
 }

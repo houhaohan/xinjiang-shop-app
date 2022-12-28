@@ -34,9 +34,6 @@ public class Cart extends BaseEntity {
     @ApiModelProperty("商品数量")
     private Integer prodNum;
 
-    @ApiModelProperty("店铺商品样式id")
-    private Long shopProdSpecId;
-
     @ApiModelProperty("购物车状态  1正常  2失效")
     private Integer cartStatus;
 

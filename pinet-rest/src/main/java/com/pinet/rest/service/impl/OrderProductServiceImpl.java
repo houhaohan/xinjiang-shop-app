@@ -61,9 +61,9 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
             if (k.getCartStatus() == 2){
                 throw new PinetException("购物车内有失效的商品,请删除后在结算");
             }
-            QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(),k.getProdNum(),k.getShopProdSpecId());
-            OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
-            orderProducts.add(orderProduct);
+//            QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(),k.getProdNum(),k.getShopProdSpecId());
+//            OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
+//            orderProducts.add(orderProduct);
         });
         return orderProducts;
     }

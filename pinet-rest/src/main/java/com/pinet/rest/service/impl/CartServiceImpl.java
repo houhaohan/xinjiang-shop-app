@@ -4,22 +4,27 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.rest.entity.Cart;
-import com.pinet.rest.entity.Shop;
+import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.vo.CartListVo;
 import com.pinet.rest.mapper.CartMapper;
+import com.pinet.rest.service.ICartProductSpecService;
 import com.pinet.rest.service.ICartService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.rest.service.IShopProductSpecService;
 import com.pinet.rest.service.IShopService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -38,6 +43,12 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Resource
     private IShopService shopService;
 
+    @Resource
+    private ICartProductSpecService cartProductSpecService;
+
+    @Resource
+    private IShopProductSpecService shopProductSpecService;
+
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
         //判断店铺是否存在  店铺状态
@@ -46,21 +57,21 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             throw new PinetException("店铺不存在");
         }
         List<CartListVo> cartListVos = cartMapper.selectCartList(dto);
+        cartListVos.forEach(k->{
+            List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getCartId());
+            String prodSpecName = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecName).collect(Collectors.joining(","));
+            k.setProdSpecName(prodSpecName);
+            BigDecimal price = cartProductSpecs.stream().map(CartProductSpec::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+            k.setProdPrice(price);
+        });
+
         return cartListVos;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addCart(AddCartDto dto) {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
-
-        LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Cart::getCustomerId, customerId).eq(Cart::getShopId, dto.getShopId())
-                .eq(Cart::getShopProdId, dto.getShopProdId()).eq(BaseEntity::getDelFlag, 0).eq(Cart::getShopProdSpecId, dto.getShopProdSpecId());
-
-        Cart query = getOne(lambdaQueryWrapper);
-        if (query != null) {
-            throw new PinetException("购物车商品已存在");
-        }
 
         Cart cart = new Cart();
         BeanUtils.copyProperties(dto, cart);
@@ -72,7 +83,38 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         cart.setUpdateBy(customerId);
         cart.setUpdateTime(now);
         cart.setDelFlag(0);
-        return save(cart);
+        Boolean res =  save(cart);
+
+        //添加购物车选中的样式
+        String[] shopProdSpecIds = dto.getShopProdSpecIds().split(",");
+        //如果添加的商品样式在购物车已存在 num+1   如果num=shopProdSpecIds.length说明改商品样式已存在购物车;
+        int num = 0;
+        for (String shopProdSpecId : shopProdSpecIds) {
+
+            CartProductSpec query = cartProductSpecService.getByUserIdAndSpecId(customerId,Long.valueOf(shopProdSpecId));
+            if (query != null){
+                num += 1;
+            }
+
+            CartProductSpec cartProductSpec = new CartProductSpec();
+            cartProductSpec.setCartId(cart.getId());
+            cartProductSpec.setShopProdSpecId(Long.valueOf(shopProdSpecId));
+            ShopProductSpec shopProductSpec =  shopProductSpecService.getById(Long.valueOf(shopProdSpecId));
+            if (shopProductSpec == null){
+                throw new PinetException("样式不存在");
+            }
+            cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
+            cartProductSpec.setCreateBy(customerId);
+            cartProductSpec.setCreateTime(now);
+            cartProductSpec.setUpdateBy(customerId);
+            cartProductSpec.setUpdateTime(now);
+            cartProductSpec.setDelFlag(0);
+        }
+
+        if (num == shopProdSpecIds.length){
+            throw new PinetException("购物车已存在改商品");
+        }
+        return res;
     }
 
     @Override
