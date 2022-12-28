@@ -36,7 +36,7 @@
         select cps.*
         from qingshi.cart c
                  left join cart_product_spec cps on c.id = cps.cart_id
-        where c.del_flag = 0 and c.customer_id = #{userId} and cps.shop_prod_spec_id = #{shopProdSpecId}
+        where c.del_flag = 0 and c.customer_id = #{userId} and cps.shop_prod_spec_id = #{shopProdSpecId} limit 1
     </select>
 
 </mapper>
