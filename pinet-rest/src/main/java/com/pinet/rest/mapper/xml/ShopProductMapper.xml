@@ -4,65 +4,66 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pinet.rest.entity.ShopProduct">
-        <result column="id" property="id" />
-        <result column="create_by" property="createBy" />
-        <result column="create_time" property="createTime" />
-        <result column="update_by" property="updateBy" />
-        <result column="update_time" property="updateTime" />
-        <result column="del_flag" property="delFlag" />
-        <result column="shop_id" property="shopId" />
-        <result column="prod_id" property="prodId" />
-        <result column="product_name" property="productName" />
-        <result column="product_img" property="productImg" />
-        <result column="product_desc" property="productDesc" />
-        <result column="product_type_id" property="productTypeId" />
-        <result column="product_type" property="productType" />
-        <result column="shop_prod_status" property="shopProdStatus" />
+        <result column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="prod_id" property="prodId"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_img" property="productImg"/>
+        <result column="product_desc" property="productDesc"/>
+        <result column="product_type_id" property="productTypeId"/>
+        <result column="product_type" property="productType"/>
+        <result column="shop_prod_status" property="shopProdStatus"/>
     </resultMap>
 
 
     <resultMap id="ShopProductMap" type="com.pinet.rest.entity.vo.ShopProductVo">
-        <id column="id" property="id" />
-        <result column="prod_id" property="prodId" />
-        <result column="product_name" property="productName" />
-        <result column="product_img" property="productImg" />
-        <result column="product_desc" property="productDesc" />
-        <result column="product_type_id" property="productTypeId" />
-        <result column="product_type" property="productType" />
-        <result column="price" property="price" />
-        <result column="market_price" property="marketPrice" />
-        <collection property="skuList" resultMap="SkuMap" />
+        <id column="id" property="id"/>
+        <result column="prod_id" property="prodId"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_img" property="productImg"/>
+        <result column="product_desc" property="productDesc"/>
+        <result column="product_type_id" property="productTypeId"/>
+        <result column="product_type" property="productType"/>
+        <result column="price" property="price"/>
+        <result column="market_price" property="marketPrice"/>
+        <collection property="skuList" resultMap="SkuMap"/>
     </resultMap>
 
     <resultMap id="SkuMap" type="com.pinet.rest.entity.vo.ShopProductSkuVo">
-        <result column="skuId" property="skuId" />
-        <result column="skuName" property="skuName" />
-        <collection property="skuSpecs" resultMap="SkuSpecsMap" />
+        <result column="skuId" property="skuId"/>
+        <result column="skuName" property="skuName"/>
+        <collection property="skuSpecs" resultMap="SkuSpecsMap"/>
     </resultMap>
 
     <resultMap id="SkuSpecsMap" type="com.pinet.rest.entity.vo.ShopProductSpecVo">
-        <result column="prod_spec_id" property="prodSpecId" />
-        <result column="spec_name" property="specName" />
-        <result column="sku_id" property="skuId" />
-        <result column="spsPrice" property="price" />
-        <result column="spsMarketPrice" property="marketPrice" />
-        <result column="stock" property="stock" />
+        <result column="prod_spec_id" property="prodSpecId"/>
+        <result column="shop_prod_spec_id" property="shopProdSpecId"/>
+        <result column="spec_name" property="specName"/>
+        <result column="sku_id" property="skuId"/>
+        <result column="spsPrice" property="price"/>
+        <result column="spsMarketPrice" property="marketPrice"/>
+        <result column="stock" property="stock"/>
     </resultMap>
 
     <resultMap id="ShopProductListMap" type="com.pinet.rest.entity.vo.ShopProductListVo">
-        <result column="shop_id" property="shopId" />
-        <result column="shop_name" property="shopName" />
-        <result column="address" property="address" />
-        <result column="lat" property="lat" />
-        <result column="lng" property="lng" />
-        <result column="distance" property="distance" />
-        <collection property="typeList" resultMap="ProdTypeMap" />
+        <result column="shop_id" property="shopId"/>
+        <result column="shop_name" property="shopName"/>
+        <result column="address" property="address"/>
+        <result column="lat" property="lat"/>
+        <result column="lng" property="lng"/>
+        <result column="distance" property="distance"/>
+        <collection property="typeList" resultMap="ProdTypeMap"/>
     </resultMap>
 
     <resultMap id="ProdTypeMap" type="com.pinet.rest.entity.vo.ProdTypeVo">
-        <result column="product_type_id" property="productTypeId" />
-        <result column="product_type" property="productType" />
-        <collection property="productList" resultMap="ShopProductMap" />
+        <result column="product_type_id" property="productTypeId"/>
+        <result column="product_type" property="productType"/>
+        <collection property="productList" resultMap="ShopProductMap"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -77,98 +78,118 @@
     </sql>
 
     <select id="getProductByShopId" resultType="com.pinet.rest.entity.vo.HotProductVo">
-        select temp.shop_id,temp.shop_name,temp.prod_id,temp.product_name,temp.product_img,
-        sum(temp.market_price) market_price,
-        sum(temp.price) price,
-        ifnull(sum(op.prod_num),0) sellnum
+        select temp.shop_id,
+               temp.shop_name,
+               temp.prod_id,
+               temp.product_name,
+               temp.product_img,
+               sum(temp.market_price)      market_price,
+               sum(temp.price)             price,
+               ifnull(sum(op.prod_num), 0) sellnum
         from (
-            select sp.shop_id,s.shop_name,sp.prod_id,sp.product_name,sp.product_img,
-            ifnull(min(ps.market_price),0) as market_price,
-            ifnull(min(sps.price),0) as price from shop_product sp
-            left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-            left join shop_product_spec sps on sps.prod_spec_id = ps.id
-            left join shop s on s.id = sp.shop_id
-            where sp.shop_id = #{shopId}
-            group by ps.sku_id
-            limit 80
-        ) temp
-        left join order_product op on temp.prod_id = op.shop_prod_id and op.del_flag = 0
+                 select sp.shop_id,
+                        s.shop_name,
+                        sp.prod_id,
+                        sp.product_name,
+                        sp.product_img,
+                        ifnull(min(ps.market_price), 0) as market_price,
+                        ifnull(min(sps.price), 0)       as price
+                 from shop_product sp
+                          left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+                          left join shop_product_spec sps on sps.prod_spec_id = ps.id
+                          left join shop s on s.id = sp.shop_id
+                 where sp.shop_id = #{shopId}
+                 group by ps.sku_id
+                 limit 80
+             ) temp
+                 left join order_product op on temp.prod_id = op.shop_prod_id and op.del_flag = 0
         group by temp.prod_id
         order by sellnum desc
         limit 16
     </select>
 
     <select id="selectRecommendList" resultType="com.pinet.rest.entity.vo.RecommendProductVo">
-        select * from (
-            select
-            temp.shop_id,
-            temp.shop_name,
-            temp.prod_id,
-            temp.product_name,
-            temp.product_img,
-            sum(market_price) as market_price ,
-            sum(price) as price
-            from
-            (
-                select sp.shop_id,s.shop_name,sp.prod_id,sp.product_name,sp.product_img, ifnull(min(ps.market_price),0) as market_price,ifnull(min(sps.price),0) as price
-                from shop_product sp
-                left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-                left join shop_product_spec sps on sps.prod_spec_id = ps.id
-                left join shop s on s.id = sp.shop_id
-                where sp.shop_prod_status = 1
-                and sp.del_flag= 0
-                group by ps.sku_id,sp.shop_id
-                order by RAND()
-                limit 50
-            ) temp
-            group by temp.prod_id
-        ) t
+        select *
+        from (
+                 select temp.shop_id,
+                        temp.shop_name,
+                        temp.prod_id,
+                        temp.product_name,
+                        temp.product_img,
+                        sum(market_price) as market_price,
+                        sum(price)        as price
+                 from (
+                          select sp.shop_id,
+                                 s.shop_name,
+                                 sp.prod_id,
+                                 sp.product_name,
+                                 sp.product_img,
+                                 ifnull(min(ps.market_price), 0) as market_price,
+                                 ifnull(min(sps.price), 0)       as price
+                          from shop_product sp
+                                   left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+                                   left join shop_product_spec sps on sps.prod_spec_id = ps.id
+                                   left join shop s on s.id = sp.shop_id
+                          where sp.shop_prod_status = 1
+                            and sp.del_flag = 0
+                          group by ps.sku_id, sp.shop_id
+                          order by RAND()
+                          limit 50
+                      ) temp
+                 group by temp.prod_id
+             ) t
     </select>
 
     <select id="selectRecommendListByUserId" resultType="com.pinet.rest.entity.vo.RecommendProductVo">
-        select * from (
-            select
-            temp.shop_id,
-            temp.prod_id,
-            temp.product_name,
-            temp.product_img,
-            sum(temp.market_price) as market_price ,
-            sum(temp.price) as price
-            from
-            (
-                select sp.shop_id,sp.prod_id,sp.product_name,sp.product_img, ifnull(min(ps.market_price),0) as market_price,ifnull(min(sps.price),0) as price
-                from shop_product sp
-                left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-                left join shop_product_spec sps on sps.prod_spec_id = ps.id
-                left join product_glance_over pgo on sp.prod_id = pgo.prod_id and pgo.del_flag = 0
-                where pgo.customer_id = #{userId} and sp.shop_prod_status = 1
-                and sp.del_flag= 0
-                group by ps.sku_id,sp.shop_id
-                order by pgo.times desc
-                limit 50
-            ) temp
-            group by temp.prod_id
-        ) t
+        select *
+        from (
+                 select temp.shop_id,
+                        temp.prod_id,
+                        temp.product_name,
+                        temp.product_img,
+                        sum(temp.market_price) as market_price,
+                        sum(temp.price)        as price
+                 from (
+                          select sp.shop_id,
+                                 sp.prod_id,
+                                 sp.product_name,
+                                 sp.product_img,
+                                 ifnull(min(ps.market_price), 0) as market_price,
+                                 ifnull(min(sps.price), 0)       as price
+                          from shop_product sp
+                                   left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+                                   left join shop_product_spec sps on sps.prod_spec_id = ps.id
+                                   left join product_glance_over pgo on sp.prod_id = pgo.prod_id and pgo.del_flag = 0
+                          where pgo.customer_id = #{userId}
+                            and sp.shop_prod_status = 1
+                            and sp.del_flag = 0
+                          group by ps.sku_id, sp.shop_id
+                          order by pgo.times desc
+                          limit 50
+                      ) temp
+                 group by temp.prod_id
+             ) t
     </select>
 
 
     <select id="getDetailById" resultMap="ShopProductMap">
         select sp.id,
-         sp.prod_id,
-         sp.product_name,
-         sp.product_img,
-         sp.product_desc,
-         sp.shop_id,
-         sp.product_type_id,
-         sp.product_type,
-         sps.price as spsPrice,
-         ps.id as skuId,
-         ps.sku_name as skuName,
-         sps.prod_spec_id,
-         sps.spec_name,
-         sps.sku_id,
-         sps.stock,
-         psp.market_price as spsMarketPrice
+        sp.prod_id,
+        sp.product_name,
+        sp.product_img,
+        sp.product_desc,
+        sp.shop_id,
+        sp.product_type_id,
+        sp.product_type,
+        sps.price as spsPrice,
+        ps.id as skuId,
+        ps.sku_name as skuName,
+        sps.prod_spec_id,
+        sps.id as shop_prod_spec_id,
+        sps.spec_name,
+        sps.sku_id,
+        sps.stock,
+        psp.market_price as spsMarketPrice
         <!-- (select sum(market_price)  from (
 			select product_id, min(market_price) as market_price  from product_spec where product_id = #{id} and del_flag = 0 group by sku_id
 		) t1) as market_price,
@@ -176,77 +197,98 @@
 		( select sum(price) as price  from (
 			select shop_prod_id,min(price) as price from shop_product_spec where shop_prod_id = #{id} and del_flag = 0 GROUP BY sku_id
 		) t2) as price-->
-         from shop_product sp
-         left join shop_product_spec sps on sps.shop_prod_id = sp.prod_id and sps.del_flag = 0
-         left join product_sku ps on ps.id = sps.sku_id and ps.del_flag = 0
-         left join product_spec psp on psp.id = sps.prod_spec_id and psp.del_flag = 0
-         where sp.id = #{id}
+        from shop_product sp
+        left join shop_product_spec sps on sps.shop_prod_id = sp.prod_id and sps.del_flag = 0
+        left join product_sku ps on ps.id = sps.sku_id and ps.del_flag = 0
+        left join product_spec psp on psp.id = sps.prod_spec_id and psp.del_flag = 0
+        where sp.id = #{id}
     </select>
 
 
     <select id="getProductListByShopId" resultMap="ShopProductListMap">
-        select
-        temp.id,
-        temp.shop_id,
-        temp.shop_name,
-        temp.address,
-        temp.prod_id,
-        temp.product_name,
-        temp.product_img,
-        temp.product_type_id,
-        temp.product_type,
-        temp.lng,
-        temp.lat,
-        sum(market_price) as market_price ,
-        sum(price) as price
-        from
-        (
-            select sp.id,s.lat,s.lng,s.id as shop_id,s.shop_name,concat(s.province,s.city,s.district,s.address) as address,
-            sp.prod_id,sp.product_name,sp.product_img,sp.product_type_id,sp.product_type, min(ps.market_price) as market_price,min(sps.price) as price
-            from shop s
-            left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
-            left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-            left join shop_product_spec sps on sps.prod_spec_id = ps.id
-            where s.id = #{shopId} and s.del_flag = 0
-            group by ps.sku_id
-        ) temp
+        select temp.id,
+               temp.shop_id,
+               temp.shop_name,
+               temp.address,
+               temp.prod_id,
+               temp.product_name,
+               temp.product_img,
+               temp.product_type_id,
+               temp.product_type,
+               temp.lng,
+               temp.lat,
+               sum(market_price) as market_price,
+               sum(price)        as price
+        from (
+                 select sp.id,
+                        s.lat,
+                        s.lng,
+                        s.id                                              as shop_id,
+                        s.shop_name,
+                        concat(s.province, s.city, s.district, s.address) as address,
+                        sp.prod_id,
+                        sp.product_name,
+                        sp.product_img,
+                        sp.product_type_id,
+                        sp.product_type,
+                        min(ps.market_price)                              as market_price,
+                        min(sps.price)                                    as price
+                 from shop s
+                          left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
+                          left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+                          left join shop_product_spec sps on sps.prod_spec_id = ps.id
+                 where s.id = #{shopId}
+                   and s.del_flag = 0
+                 group by ps.sku_id
+             ) temp
         group by temp.id
     </select>
 
     <select id="search" resultMap="ShopProductMap">
         select temp.id,
-        temp.shopId,
-        temp.shop_name,
-        temp.prod_id,
-        temp.product_name,
-        temp.product_img,
-        temp.lat,
-        temp.lng,
-        temp.product_type_id,
-        temp.product_type,
-        sum(market_price) as market_price,
-        sum(price) as price
+               temp.shopId,
+               temp.shop_name,
+               temp.prod_id,
+               temp.product_name,
+               temp.product_img,
+               temp.lat,
+               temp.lng,
+               temp.product_type_id,
+               temp.product_type,
+               sum(market_price) as market_price,
+               sum(price)        as price
         from (
-            select s.id as shopId,s.shop_name,sp.id,sp.prod_id,sp.product_name,sp.product_img,s.lng,s.lat,sp.product_type_id,sp.product_type,
-            min(ps.market_price) as market_price,min(sps.price) as price
-            from shop s
-            left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
-            left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-            left join shop_product_spec sps on sps.prod_spec_id = ps.id and sps.del_flag= 0
-            where s.id = #{shopId} and sp.product_name like concat('%',#{productName},'%')
-            and s.del_flag = 0
-            group by ps.sku_id
-        ) temp
+                 select s.id                 as shopId,
+                        s.shop_name,
+                        sp.id,
+                        sp.prod_id,
+                        sp.product_name,
+                        sp.product_img,
+                        s.lng,
+                        s.lat,
+                        sp.product_type_id,
+                        sp.product_type,
+                        min(ps.market_price) as market_price,
+                        min(sps.price)       as price
+                 from shop s
+                          left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
+                          left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+                          left join shop_product_spec sps on sps.prod_spec_id = ps.id and sps.del_flag = 0
+                 where s.id = #{shopId}
+                   and sp.product_name like concat('%', #{productName}, '%')
+                   and s.del_flag = 0
+                 group by ps.sku_id
+             ) temp
         group by temp.id
     </select>
 
     <select id="sellwell" resultType="String">
         select sp.product_name
         from shop_product sp
-        inner join  orders o on o.shop_id = sp.shop_id and o.del_flag =  0
+                 inner join orders o on o.shop_id = sp.shop_id and o.del_flag = 0
         where o.shop_id = #{shopId}
-        and o.order_status = 100
-        and sp.del_flag = 0
+          and o.order_status = 100
+          and sp.del_flag = 0
         group by o.id
         order by count(1) desc
         limit 10

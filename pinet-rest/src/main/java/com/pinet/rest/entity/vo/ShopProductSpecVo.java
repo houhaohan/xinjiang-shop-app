@@ -36,4 +36,7 @@ public class ShopProductSpecVo{
     @ApiModelProperty("库存")
     private Integer stock;
 
+    @ApiModelProperty("店铺商品样式id")
+    private Integer shopProdSpecId;
+
 }

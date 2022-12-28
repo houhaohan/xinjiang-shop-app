@@ -3,11 +3,12 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
-import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
+import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.entity.vo.CartListVo;
+import com.pinet.rest.entity.vo.CartVo;
 import com.pinet.rest.service.ICartService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +41,7 @@ public class CartController extends BaseController {
     @ApiOperation("购物车列表")
     @PostMapping("/cartList")
     @ApiVersion(1)
-    public Result<List<CartListVo>> cartList(@Validated @RequestBody CartListDto dto){
+    public Result<List<CartListVo>> cartList(@Validated @RequestBody CartListDto dto) {
         Long customerId = currentUserId();
         dto.setCustomerId(customerId);
         List<CartListVo> cartListVos = cartService.cartList(dto);
@@ -51,32 +52,31 @@ public class CartController extends BaseController {
     @ApiOperation("添加购物车")
     @PostMapping("/addCart")
     @ApiVersion(1)
-    public Result<Boolean> addCart(@Validated @RequestBody AddCartDto dto){
-        Boolean res = cartService.addCart(dto);
-        if (!res){
-            return Result.error("添加失败");
-        }
-        return Result.ok();
+    public Result<AddCartVo> addCart(@Validated @RequestBody AddCartDto dto) {
+        AddCartVo addCartVo = cartService.addCart(dto);
+        return Result.ok(addCartVo);
+    }
+
+
+    @ApiOperation("获取购物车总价")
+    @PostMapping("/getCartTotalPrice")
+    @ApiVersion(1)
+    public Result<CartVo> getCartPrice(@Validated @RequestBody CartListDto dto) {
+        CartVo getCartTotalPriceVo = cartService.getCartByUserIdAndShopId(dto.getShopId(),currentUserId());
+        return Result.ok(getCartTotalPriceVo);
     }
 
 
     @ApiOperation("购物车数量修改")
     @PostMapping("/editCartProdNum")
     @ApiVersion(1)
-    public Result<Boolean> editCartProdNum(@Validated @RequestBody EditCartProdNumDto dto){
+    public Result<Boolean> editCartProdNum(@Validated @RequestBody EditCartProdNumDto dto) {
         Boolean res = cartService.editCartProdNum(dto);
-        if (!res){
+        if (!res) {
             return Result.error("添加失败");
         }
         return Result.ok();
     }
-
-
-
-
-
-
-
 
 
 }

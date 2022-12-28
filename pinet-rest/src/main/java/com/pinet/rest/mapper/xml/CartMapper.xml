@@ -38,7 +38,7 @@
                  left join shop_product sp on sp.id = c.shop_prod_id
         where c.del_flag = 0
           and c.shop_id = #{shopId} and c.customer_id = #{customerId}
-        order by c.cart_status, create_time desc
+        order by c.cart_status, c.create_time desc
     </select>
 
     <select id="getCartByUserIdAndShopId" resultType="com.pinet.rest.entity.vo.CartVo">

@@ -1,22 +1,26 @@
 package com.pinet.rest.aspect;
 
-import com.alibaba.fastjson.JSONObject;
-import com.pinet.core.util.MD5Util;
+import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson.JSON;
+import com.pinet.core.util.IPUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
+import org.apache.http.protocol.RequestDate;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Objects;
+
 
 /**
  * @program: xinjiang-shop-app
@@ -29,59 +33,39 @@ import java.util.Map;
 @Slf4j
 @Order(-5)
 public class WebLogAspect {
+
+    static ThreadLocal<Long> localVar = new ThreadLocal<>();
+
+
     //定义切点
     @Pointcut("execution(public * com.pinet.rest.controller..*.*(..))")
     public void exec() {
     }
 
-    @Around("exec()")
-    public Object aroundLog(ProceedingJoinPoint point) throws Throwable {
-
+    @Before("exec()")
+    public void doBefore(JoinPoint joinPoint) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        Map<String, String[]> stringMap = md5ImgParam(new HashMap(request.getParameterMap()));
-        Object[] args = point.getArgs();
-        Object retVal = point.proceed(args);
-
-        log.info("\n\t请求IP: {}\n\t请求路径: {}\n\t请求方式: {}\n\t请求参数: {}\n\t返回值: {}",
-                request.getRemoteAddr(), request.getRequestURL(), request.getMethod()
-                , JSONObject.toJSONString(stringMap), JSONObject.toJSONString(retVal));
-
-        return retVal;
+        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        localVar.set(System.currentTimeMillis());
+        log.info("==> 请求者IP：" + IPUtils.getIpAddr() + "\n"
+                + "==> 请求时间：" + DateUtil.now() + "\n"
+                + "==> 请求接口：" + request.getMethod() + " " + request.getRequestURL() + "\n"
+                + "==> 请求方法：" + joinPoint.getTarget().getClass().getName() + "." + method.getName() + "\n"
+                + "==> 参数内容：" + Arrays.toString(joinPoint.getArgs()) + "\n");
     }
 
-    /**
-     *    处理base64图片
-     */
-    private Map<String, String[]> md5ImgParam(Map<String, String[]> parameterMap) {
-        String[] imgpaths = parameterMap.get("imgPath");
-
-        String[] list = new String[0];
-        if (null != imgpaths && imgpaths.length != 0) {
-            List<String> imgpathFinal = new ArrayList<>();
-            //获取第一个字符串
-            String imgPathStr = imgpaths[0];
-            if (imgPathStr.contains("分")) {
-                String[] split = imgPathStr.split("分");
-                for (String s : split) {
-                    String s1 = MD5Util.md5(s);
-                    imgpathFinal.add(s1);
-                }
-                list = imgpathFinal.toArray(new String[split.length]);
-            } else if (imgPathStr.contains("|")) {
-                String[] split = imgPathStr.split("\\|");
-                for (String s : split) {
-                    String s1 = MD5Util.md5(s);
-                    imgpathFinal.add(s1);
-                }
-                list = imgpathFinal.toArray(new String[split.length]);
-            } else {
-                list = new String[1];
-                list[0] = MD5Util.md5(imgPathStr);
-            }
-        }
-        if (list.length > 0) {
-            parameterMap.put("imgPath", list);
-        }
-        return parameterMap;
+    @AfterReturning(pointcut = "exec()", returning = "object")
+    public void afterReturning(Object object) {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        Long startTime = localVar.get();
+        Long endTime = System.currentTimeMillis();
+        long cost = endTime - startTime;
+        log.info("==> 返回时间：" + DateUtil.now() + "\n"
+                + "==> 请求接口：" + request.getMethod() + " " + request.getRequestURL() + "\n"
+                + "==> 返回结果：" + JSON.toJSONString(object) + "\n"
+                + "==> 耗时：" + cost + " ms\n"
+                + "=============================================================================== end\n"
+        );
+        localVar.remove();
     }
 }

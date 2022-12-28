@@ -31,6 +31,9 @@ public class CartListVo {
     @ApiModelProperty(value = "商品单价",name = "prodPrice")
     private BigDecimal prodPrice;
 
+    @ApiModelProperty(value = "商品总价(商品单价*商品数量)",name = "allPrice")
+    private BigDecimal allPrice;
+
     @ApiModelProperty(value = "商品样式",name = "prodSpecName")
     private String prodSpecName;
 

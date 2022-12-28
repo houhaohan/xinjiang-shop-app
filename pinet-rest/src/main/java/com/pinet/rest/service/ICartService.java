@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
+import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.entity.vo.CartListVo;
 import com.pinet.rest.entity.vo.CartVo;
 
@@ -22,7 +23,7 @@ public interface ICartService extends IService<Cart> {
 
     List<CartListVo> cartList(CartListDto dto);
 
-    Boolean addCart(AddCartDto dto);
+    AddCartVo addCart(AddCartDto dto);
 
     Boolean editCartProdNum(EditCartProdNumDto dto);
 
