@@ -82,7 +82,7 @@
                temp.shop_name,
                temp.prod_id,
                temp.product_name,
-               temp.product_img,
+               temp.product_img
                sum(temp.market_price)      market_price,
                sum(temp.price)             price,
                ifnull(sum(op.prod_num), 0) sellnum
@@ -217,6 +217,8 @@
                temp.product_type,
                temp.lng,
                temp.lat,
+               '' as productDesc,
+               temp.shopProdSpecId,
                sum(market_price) as market_price,
                sum(price)        as price
         from (
@@ -231,6 +233,7 @@
                         sp.product_img,
                         sp.product_type_id,
                         sp.product_type,
+                        sps.id as shopProdSpecId,
                         min(ps.market_price)                              as market_price,
                         min(sps.price)                                    as price
                  from shop s

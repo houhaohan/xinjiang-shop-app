@@ -47,9 +47,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
                 if (null != notTokenSign) {
                     return true;
                 }
-                if(StringUtil.isEmpty(appToken)){
-                    return error(request,response);
-                }
+                return error(request,response);
             }
         }
 

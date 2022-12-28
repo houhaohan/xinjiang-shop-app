@@ -46,7 +46,7 @@ public class ShopProductController extends BaseController {
     private ICartService cartService;
 
     /**
-     * 商品列表
+     * 商品列表，经纬度默认是杭州滨江的经纬度
      * @param shopId 店铺Id
      * @param lat 纬度
      * @param lng 经度
@@ -57,8 +57,8 @@ public class ShopProductController extends BaseController {
     @ApiOperation("商品列表")
     @ApiVersion(1)
     public Result<ShopProductListVo> list(@RequestParam(value = "shopId",required = false) Long shopId,
-                                                @RequestParam(value = "lat",defaultValue = "30") BigDecimal lat,
-                                                @RequestParam(value = "lng",defaultValue = "120") BigDecimal lng){
+                                          @RequestParam(value = "lat",defaultValue = "30.20835") BigDecimal lat,
+                                          @RequestParam(value = "lng",defaultValue = "120.21194") BigDecimal lng){
         if(shopId == null && lat == null && lng == null){
             return Result.error("参数不能为空");
         }
@@ -74,7 +74,7 @@ public class ShopProductController extends BaseController {
             double distance =  LatAndLngUtils.getDistance(lng.doubleValue(),lat.doubleValue(),
                     Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()));
             result.setDistance(BigDecimal.valueOf(distance));
-            //当前用户在这个而店铺加的购物车
+            //当前用户在这个店铺加的购物车
             Long userId = super.currentUserId();
             if(userId != null && userId != 0){
                 CartVo cartVo = cartService.getCartByUserIdAndShopId(shopId, userId);

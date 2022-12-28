@@ -24,7 +24,7 @@ public class ShopProductVo {
     private String productImg;
 
     @ApiModelProperty(value = "商品描述，富文本")
-    private String productDesc;
+    private String productDesc = "";
 
     @ApiModelProperty(value = "商品分类ID")
     private Long productTypeId;
@@ -33,13 +33,13 @@ public class ShopProductVo {
     private String productType;
 
     @ApiModelProperty(value = "商品售价")
-    private BigDecimal price;
+    private BigDecimal price = BigDecimal.ZERO;
 
     @ApiModelProperty(value = "商品市场价格")
-    private BigDecimal marketPrice;
+    private BigDecimal marketPrice = BigDecimal.ZERO;
 
     @ApiModelProperty(value = "店铺商品样式id")
-    private Integer shopProdSpecId;
+    private Integer shopProdSpecId = 0;
 
     @ApiModelProperty(value = "sku")
     private List<ShopProductSkuVo> skuList = new ArrayList<>();

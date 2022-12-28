@@ -21,7 +21,7 @@ public class ShopProductListVo {
     @ApiModelProperty("店铺地址")
     private String address;
 
-    @ApiModelProperty("距离")
+    @ApiModelProperty("距离，单位米")
     private BigDecimal distance;
 
     @ApiModelProperty("纬度")
