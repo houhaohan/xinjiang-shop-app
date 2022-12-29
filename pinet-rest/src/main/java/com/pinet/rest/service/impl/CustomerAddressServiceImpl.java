@@ -1,6 +1,7 @@
 package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.CustomerAddress;
@@ -66,6 +67,13 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
         entity.setCustomerId(userId);
         entity.setUpdateTime(System.currentTimeMillis());
         return this.updateById(entity);
+    }
+
+    @Override
+    public CustomerAddress getDefaultAddress(Long customerId) {
+        QueryWrapper<CustomerAddress> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("customer_id",customerId).eq("status",1);
+        return getOne(queryWrapper);
     }
 
     private boolean equals(CustomerAddressDto customerAddressDto,CustomerAddress customerAddress){

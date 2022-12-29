@@ -1,5 +1,7 @@
 package com.pinet.rest.entity.vo;
 
+import com.pinet.rest.entity.CustomerAddress;
+import com.pinet.rest.entity.DefaultAddress;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -38,4 +40,7 @@ public class ShopProductListVo {
 
     @ApiModelProperty("商品类型")
     private List<ProdTypeVo> typeList = new ArrayList<>();
+
+    @ApiModelProperty("默认地址")
+    private CustomerAddress defaultAddress;
 }
