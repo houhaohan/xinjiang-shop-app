@@ -53,5 +53,9 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("订单商品样式信息")
     private List<OrderProductSpec> orderProductSpecs;
 
+    @TableField(exist=false)
+    @ApiModelProperty("订单商品样式信息字符串")
+    private String orderProductSpecStr;
+
 
 }

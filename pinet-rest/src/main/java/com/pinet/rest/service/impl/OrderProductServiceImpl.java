@@ -53,7 +53,9 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
 
     @Override
     public List<OrderProduct> getByOrderId(Long orderId) {
-        return orderProductMapper.selectByOrderId(orderId);
+        List<OrderProduct> orderProducts = orderProductMapper.selectByOrderId(orderId);
+        orderProducts.forEach(k -> k.setOrderProductSpecStr(k.getOrderProductSpecs().stream().map(OrderProductSpec::getProdSpecName).collect(Collectors.joining(","))));
+        return orderProducts;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
             //查询购物车商品样式
             List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
             List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-            QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(),k.getProdNum(),shopProdSpecIds);
+            QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds);
             OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
             orderProducts.add(orderProduct);
         });
@@ -121,7 +123,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
 
         orderProduct.setOrderProductSpecs(orderProductSpecs);
 
-
+        orderProduct.setOrderProductSpecStr(orderProductSpecs.stream().map(OrderProductSpec::getProdSpecName).collect(Collectors.joining(",")));
 
         orderProduct.setProdUnitPrice(prodUnitPrice);
         //计算总价
