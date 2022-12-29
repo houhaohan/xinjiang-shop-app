@@ -29,4 +29,7 @@ public class OrderSettlementVo {
 
     @ApiModelProperty(value = "订单商品信息",name = "orderProductBoList")
     private List<OrderProduct> orderProductBoList;
+
+    @ApiModelProperty(value = "预计送达时间",name = "estimateArrivalTime")
+    private String estimateArrivalTime;
 }

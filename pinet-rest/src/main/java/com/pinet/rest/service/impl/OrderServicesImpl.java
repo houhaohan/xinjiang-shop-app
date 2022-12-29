@@ -143,6 +143,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //计算总金额
         BigDecimal orderPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(shippingFee, BigDecimal::add);
         vo.setOrderPrice(orderPrice);
+
+        //返回预计送达时间
+        Date now = new Date();
+        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetHour(now, 1),"HH:mm");
+        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 90),"HH:mm");
+
+        vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
         return vo;
     }
 
