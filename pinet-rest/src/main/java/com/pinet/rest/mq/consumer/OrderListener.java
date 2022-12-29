@@ -2,9 +2,11 @@ package com.pinet.rest.mq.consumer;
 
 import com.pinet.common.mq.config.QueueConstants;
 import com.pinet.rest.entity.OrderProduct;
+import com.pinet.rest.entity.OrderProductSpec;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.service.IOrderProductService;
+import com.pinet.rest.service.IOrderProductSpecService;
 import com.pinet.rest.service.IOrdersService;
 import com.pinet.rest.service.IShopProductSpecService;
 import lombok.extern.slf4j.Slf4j;
@@ -52,10 +54,13 @@ public class OrderListener {
             //库存回滚
             List<OrderProduct> orderProductList = orderProductService.getByOrderId(order.getId());
             for (OrderProduct orderProduct : orderProductList) {
-                int res = shopProductSpecService.addStock(orderProduct.getShopProdSpecId(), orderProduct.getProdNum());
-                if (res != 1){
-                    log.error("订单id："+order.getId()+"----订单商品："+orderProduct.getProdName() + "库存回滚失败");
+                for (OrderProductSpec orderProductSpec : orderProduct.getOrderProductSpecs()) {
+                    int res = shopProductSpecService.addStock(orderProductSpec.getShopProdSpecId(), orderProduct.getProdNum());
+                    if (res != 1){
+                        log.error("订单id："+order.getId()+"----订单商品："+orderProduct.getProdName() + "库存回滚失败");
+                    }
                 }
+
             }
         }
     }

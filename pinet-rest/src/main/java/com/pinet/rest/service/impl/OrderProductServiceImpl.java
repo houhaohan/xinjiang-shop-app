@@ -10,6 +10,7 @@ import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.mapper.OrderProductMapper;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.rest.service.common.CommonService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -43,13 +45,15 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
     @Resource
     private IProductSkuService productSkuService;
 
+    @Resource
+    private CommonService commonService;
+
+    @Resource
+    private ICartProductSpecService cartProductSpecService;
+
     @Override
     public List<OrderProduct> getByOrderId(Long orderId) {
-        LambdaQueryWrapper<OrderProduct> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(BaseEntity::getDelFlag, 0).eq(OrderProduct::getOrderId, orderId);
-
-        List<OrderProduct> orderProducts = list(queryWrapper);
-        return orderProducts;
+        return orderProductMapper.selectByOrderId(orderId);
     }
 
     @Override
@@ -58,12 +62,15 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shopId);
         cartList.forEach(k -> {
-            if (k.getCartStatus() == 2){
+            if (k.getCartStatus() == 2) {
                 throw new PinetException("购物车内有失效的商品,请删除后在结算");
             }
-//            QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(),k.getProdNum(),k.getShopProdSpecId());
-//            OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
-//            orderProducts.add(orderProduct);
+            //查询购物车商品样式
+            List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
+            List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
+            QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(),k.getProdNum(),shopProdSpecIds);
+            OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
+            orderProducts.add(orderProduct);
         });
         return orderProducts;
     }
@@ -74,12 +81,12 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         ShopProduct shopProduct = shopProductService.getById(queryOrderProductBo.getShopProdId());
 
         //判断店铺商品是否下架
-        if (shopProduct.getShopProdStatus() == 2){
+        if (shopProduct.getShopProdStatus() == 2) {
             throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
         }
 
         //判断店铺商品是否删除
-        if (shopProduct.getDelFlag() == 1){
+        if (shopProduct.getDelFlag() == 1) {
             throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
         }
 
@@ -88,23 +95,43 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         orderProduct.setProdName(shopProduct.getProductName());
         orderProduct.setProdNum(queryOrderProductBo.getProdNum());
 
-        //查询具体的样式并且校验
-        ShopProductSpec shopProductSpec = shopProductSpecService.getById(queryOrderProductBo.getShopProdSpecId());
-        if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
-            throw new PinetException(shopProduct.getProductName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
+
+        List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
+
+        //单价
+        BigDecimal prodUnitPrice = BigDecimal.ZERO;
+        for (Long shopProdSpecId : queryOrderProductBo.getShopProdSpecIds()) {
+            //查询具体的样式并且校验
+            ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
+            if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
+                throw new PinetException(shopProduct.getProductName() + ":" + shopProductSpec.getSpecName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
+            }
+            prodUnitPrice = prodUnitPrice.add(shopProductSpec.getPrice());
+
+            ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
+
+            OrderProductSpec orderProductSpec = new OrderProductSpec();
+            orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
+            orderProductSpec.setProdSkuName(productSku.getSkuName());
+            orderProductSpec.setShopProdSpecId(shopProdSpecId);
+            orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
+            commonService.setDefInsert(orderProductSpec);
+            orderProductSpecs.add(orderProductSpec);
         }
 
-        orderProduct.setProdSkuId(shopProductSpec.getSkuId());
-        orderProduct.setProdUnitPrice(shopProductSpec.getPrice());
+        orderProduct.setOrderProductSpecs(orderProductSpecs);
+
+
+
+        orderProduct.setProdUnitPrice(prodUnitPrice);
         //计算总价
-        BigDecimal prodPrice = shopProductSpec.getPrice().multiply(new BigDecimal(queryOrderProductBo.getProdNum())).setScale(2, RoundingMode.DOWN);
+        BigDecimal prodPrice = prodUnitPrice.multiply(new BigDecimal(queryOrderProductBo.getProdNum())).setScale(2, RoundingMode.DOWN);
         orderProduct.setProdPrice(prodPrice);
 
-        ProductSku productSku =  productSkuService.getById(shopProductSpec.getSkuId());
-        orderProduct.setProdSkuName(productSku.getSkuName());
-        orderProduct.setShopProdSpecId(queryOrderProductBo.getShopProdSpecId());
-        orderProduct.setProdSpecName(shopProductSpec.getSpecName());
         orderProduct.setProdImg(shopProduct.getProductImg());
+
+        commonService.setDefInsert(orderProduct);
+
         return orderProduct;
     }
 

@@ -3,6 +3,8 @@ package com.pinet.rest.entity.bo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @program: xinjiang-shop-app
  * @description: 查询OrderProductbo
@@ -25,7 +27,7 @@ public class QueryOrderProductBo {
     /**
      * 商品样式id
      */
-    private Long shopProdSpecId;
+    private List<Long> shopProdSpecIds;
 
 
 }

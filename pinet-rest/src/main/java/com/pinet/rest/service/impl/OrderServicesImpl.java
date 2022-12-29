@@ -1,4 +1,5 @@
 package com.pinet.rest.service.impl;
+
 import java.time.LocalDateTime;
 
 import cn.hutool.core.date.DateUtil;
@@ -26,14 +27,17 @@ import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
+import com.pinet.rest.service.common.CommonService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -69,16 +73,24 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Resource
     private IOrderPayService orderPayService;
 
+    @Resource
+    private CommonService commonService;
+
+    @Resource
+    private IOrderProductSpecService orderProductSpecService;
+
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         Page<OrderListVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
-        IPage<OrderListVo> orderListVos = ordersMapper.selectOrderList(page,customerId);
+        IPage<OrderListVo> orderListVos = ordersMapper.selectOrderList(page, customerId);
         orderListVos.getRecords().forEach(k -> {
             k.setProdNum(k.getOrderProducts().size());
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
+            List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
+            k.setOrderProducts(orderProducts);
         });
         return orderListVos.getRecords();
     }
@@ -114,7 +126,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderProducts = orderProductService.getByCartAndShop(dto.getShopId());
         } else {
             //直接结算（通过具体的商品样式、商品数量进行结算）
-            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), dto.getShopProdSpecId());
+            List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
+            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds);
             OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
             orderProducts.add(orderProduct);
         }
@@ -155,9 +168,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         BigDecimal shippingFee = getShippingFee(dto.getOrderType());
 
         //外卖订单 校验距离 10公里以内
-        double m =  LatAndLngUtils.getDistance(Double.parseDouble(dto.getLng()),Double.parseDouble(dto.getLat()),
-                Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()));
-        if (m > 10000D && dto.getOrderType() == 1){
+        double m = LatAndLngUtils.getDistance(Double.parseDouble(dto.getLng()), Double.parseDouble(dto.getLat()),
+                Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
+        if (m > 10000D && dto.getOrderType() == 1) {
             throw new PinetException("店铺距离过远,无法配送");
         }
 
@@ -167,50 +180,60 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderProducts = orderProductService.getByCartAndShop(dto.getShopId());
 
             //删除购物车已购商品
-            cartService.delCartByShopId(dto.getShopId(),userId);
+            cartService.delCartByShopId(dto.getShopId(), userId);
         } else {
             //直接结算（通过具体的商品样式、商品数量进行结算）
-            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), dto.getShopProdSpecId());
+            List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
+            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds);
             OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
             orderProducts.add(orderProduct);
         }
 
         //减少已购商品的库存(第一版暂不加锁 后期考虑加乐观锁或redis锁)
         for (OrderProduct orderProduct : orderProducts) {
-            int res = shopProductSpecService.reduceStock(orderProduct.getShopProdSpecId(),orderProduct.getProdNum());
-            if (res != 1){
-                throw new PinetException("库存更新失败");
+            for (OrderProductSpec orderProductSpec : orderProduct.getOrderProductSpecs()) {
+                int res = shopProductSpecService.reduceStock(orderProductSpec.getShopProdSpecId(), orderProduct.getProdNum());
+                if (res != 1) {
+                    throw new PinetException("库存更新失败");
+                }
             }
         }
 
 
-       //计算订单总金额  和订单商品金额
+        //计算订单总金额  和订单商品金额
         BigDecimal orderPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(shippingFee, BigDecimal::add);
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         //对比订单总金额和结算的总金额  如果不相同说明商品价格有调整
-        if (orderPrice.compareTo(dto.getOrderPrice()) != 0){
+        if (orderPrice.compareTo(dto.getOrderPrice()) != 0) {
             throw new PinetException("订单信息发生变化,请重新下单");
         }
 
         //创建订单基础信息
-        Orders order = createOrder(dto,shippingFee,m,orderPrice,orderProdPrice,shop);
+        Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, shop);
         //插入订单
         this.save(order);
 
         //插入订单商品  并设置订单号
-        orderProducts.forEach(k-> k.setOrderId(order.getId()));
-        orderProductService.saveBatch(orderProducts);
+        orderProducts.forEach(k -> {
+            k.setOrderId(order.getId());
+            //保存订单商品表
+            orderProductService.save(k);
+
+            //保存订单商品样式表
+            k.getOrderProductSpecs().forEach(k1 -> k1.setOrderProdId(k.getId()));
+            orderProductSpecService.saveBatch(k.getOrderProductSpecs());
+        });
 
 
         //外卖订单插入订单地址表
-        if (dto.getOrderType() == 1){
+        if (dto.getOrderType() == 1) {
             OrderAddress orderAddress = orderAddressService.createByCustomerAddressId(dto.getCustomerAddressId());
             orderAddressService.save(orderAddress);
         }
 
         //将订单放到mq中
-        jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_PAY_NAME,order.getId().toString(), (long) (15 * 60 * 1000));
+        jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_PAY_NAME, order.getId().toString(), (long) (15 * 60 * 1000));
 
         CreateOrderVo createOrderVo = new CreateOrderVo();
         createOrderVo.setOrderId(order.getId());
@@ -226,16 +249,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
 
         Orders orders = getById(dto.getOrderId());
-        if (orders == null){
+        if (orders == null) {
             throw new PinetException("订单不存在");
         }
 
-        if (orders.getOrderPrice().compareTo(dto.getOrderPrice()) != 0){
+        if (orders.getOrderPrice().compareTo(dto.getOrderPrice()) != 0) {
             throw new PinetException("支付金额异常,请重新支付");
         }
 
         //根据不同支付渠道获取调用不同支付方法
-        IPayService payService = SpringContextUtils.getBean(dto.getChannelId()+"_"+"service",IPayService.class);
+        IPayService payService = SpringContextUtils.getBean(dto.getChannelId() + "_" + "service", IPayService.class);
         //封装PayParam
         PayParam param = new PayParam();
         param.setOpenId(dto.getOpenId());
@@ -256,11 +279,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPay.setChannelId(dto.getChannelId());
         orderPay.setPayName(payService.getPayName());
         orderPay.setIp(IPUtils.getIpAddr());
-        orderPay.setCreateBy(customerId);
-        orderPay.setCreateTime(new Date());
-        orderPay.setUpdateBy(customerId);
-        orderPay.setUpdateTime(new Date());
-        orderPay.setDelFlag(0);
+        commonService.setDefInsert(orderPay);
 
         orderPayService.save(orderPay);
 
@@ -268,11 +287,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
 
-    private Orders createOrder(CreateOrderDto dto,BigDecimal shippingFee,Double m,BigDecimal orderPrice,BigDecimal orderProdPrice,Shop shop){
+    private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, Shop shop) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Date now = new Date();
-        Date estimateArrivalStartTime = DateUtil.offsetHour(now,1);
-        Date estimateArrivalEndTime = DateUtil.offsetMinute(now,90);
+        Date estimateArrivalStartTime = DateUtil.offsetHour(now, 1);
+        Date estimateArrivalEndTime = DateUtil.offsetMinute(now, 90);
 
         Orders order = new Orders();
         Snowflake snowflake = IdUtil.getSnowflake();
@@ -289,11 +308,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         order.setEstimateArrivalEndTime(estimateArrivalEndTime);
         order.setOrderDistance(m.intValue());
         order.setRemark(dto.getRemark());
-        order.setCreateBy(userId);
-        order.setCreateTime(now);
-        order.setUpdateBy(userId);
-        order.setUpdateTime(now);
-        order.setDelFlag(0);
+        commonService.setDefInsert(order);
 
         return order;
     }
@@ -301,14 +316,25 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 获取配送费
+     *
      * @param orderType 订单类型( 1外卖  2自提)
      * @return BigDecimal
      */
-    private BigDecimal getShippingFee(Integer orderType){
+    private BigDecimal getShippingFee(Integer orderType) {
         if (orderType == 1) {
             return new BigDecimal("4");
         } else {
-            return   new BigDecimal("0");
+            return new BigDecimal("0");
         }
+    }
+
+    /**
+     * 分割商品样式id
+     */
+    private List<Long> splitShopProdSpecIds(String shopProdSpecIds) {
+        String[] idArray = shopProdSpecIds.split(",");
+
+        return Arrays.stream(idArray)
+                .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
     }
 }

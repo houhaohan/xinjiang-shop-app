@@ -16,10 +16,6 @@
         <result column="prod_unit_price" property="prodUnitPrice"/>
         <result column="prod_num" property="prodNum"/>
         <result column="prod_price" property="prodPrice"/>
-        <result column="prod_sku_id" property="prodSkuId"/>
-        <result column="prod_sku_name" property="prodSkuName"/>
-        <result column="shop_prod_spec_id" property="shopProdSpecId"/>
-        <result column="prod_spec_name" property="prodSpecName"/>
         <result column="prod_img" property="prodImg"/>
     </resultMap>
 
@@ -45,6 +41,50 @@
                  left join qingshi.shop_product sp on sp.id = op.shop_prod_id
         where op.del_flag = 0
           and op.order_id = #{orderId}
+    </select>
+
+
+    <resultMap id="selectByOrderIdResultMap" type="com.pinet.rest.entity.OrderProduct">
+        <result column="order_product_id" property="id"/>
+        <result column="op_order_id" property="orderId"/>
+        <result column="shop_prod_id" property="shopProdId"/>
+        <result column="prod_name" property="prodName"/>
+        <result column="prod_unit_price" property="prodUnitPrice"/>
+        <result column="prod_num" property="prodNum"/>
+        <result column="prod_price" property="prodPrice"/>
+        <result column="prod_img" property="prodImg"/>
+        <collection property="orderProductSpecs" resultMap="orderProdSpecResultMap"/>
+    </resultMap>
+
+    <resultMap id="orderProdSpecResultMap" type="com.pinet.rest.entity.OrderProductSpec">
+        <result column="order_product_spec_id" property="id"/>
+        <result column="ops_order_id" property="orderId"/>
+        <result column="order_prod_id" property="orderProdId"/>
+        <result column="prod_sku_name" property="prodSkuName"/>
+        <result column="prod_sku_id" property="prodSkuId"/>
+        <result column="prod_spec_name" property="prodSpecName"/>
+        <result column="shop_prod_spec_id" property="shopProdSpecId"/>
+    </resultMap>
+
+    <select id="selectByOrderId" resultMap="selectByOrderIdResultMap">
+        select op.id order_product_id,
+               op.order_id op_order_id,
+               op.shop_prod_id,
+               op.prod_name,
+               op.prod_unit_price,
+               op.prod_num,
+               op.prod_price,
+               op.prod_img,
+               ops.id order_product_spec_id,
+               ops.order_id ops_order_id,
+               ops.order_prod_id,
+               ops.prod_sku_name,
+               ops.prod_sku_id,
+               ops.prod_spec_name,
+               ops.shop_prod_spec_id
+        from qingshi.order_product op
+                 left join order_product_spec ops on op.id = ops.order_prod_id
+        where op.order_id = #{orderId} and op.del_flag = 0
     </select>
 
 </mapper>

@@ -1,9 +1,12 @@
 package com.pinet.rest.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -43,20 +46,12 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("商品总价(商品单价*商品数量)")
     private BigDecimal prodPrice;
 
-    @ApiModelProperty("商品sku   id")
-    private Long prodSkuId;
-
-    @ApiModelProperty("商品sku名称")
-    private String prodSkuName;
-
-    @ApiModelProperty("店铺商品样式id")
-    private Long shopProdSpecId;
-
-    @ApiModelProperty("店铺商品样式name")
-    private String prodSpecName;
-
     @ApiModelProperty("商品图片")
     private String prodImg;
+
+    @TableField(exist=false)
+    @ApiModelProperty("订单商品样式信息")
+    private List<OrderProductSpec> orderProductSpecs;
 
 
 }
