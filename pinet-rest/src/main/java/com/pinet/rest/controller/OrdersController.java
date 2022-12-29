@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
+import com.pinet.core.util.StringUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
@@ -80,7 +81,7 @@ public class OrdersController extends BaseController {
 
     private void checkParam(OrderSettlementDto dto){
         //如果是直接购买  店铺商品id 和商品数量为必传
-        if (dto.getSettlementType() == 2 && (dto.getShopProdId() == null || dto.getProdNum() == null || dto.getShopProdSpecId() == null)) {
+        if (dto.getSettlementType() == 2 && (dto.getShopProdId() == null || dto.getProdNum() == null || StringUtil.isBlank(dto.getShopProdSpecIds()))) {
             throw new PinetException("直接购买必传店铺商品id || 商品数量 || 商品样式id");
         }
 
