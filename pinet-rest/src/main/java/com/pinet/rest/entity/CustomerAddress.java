@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -25,21 +26,25 @@ public class CustomerAddress implements Serializable {
     * 
     */
     @ApiModelProperty("用户ID")
+    @JsonProperty("customer_id")
     private Long customerId;
     /**
     * 省
     */
     @ApiModelProperty("省")
+    @JsonProperty("province_id")
     private Integer provinceId;
     /**
     * 市
     */
     @ApiModelProperty("市")
+    @JsonProperty("city_id")
     private Integer cityId;
     /**
     * 区
     */
     @ApiModelProperty("区")
+    @JsonProperty("district_id")
     private Integer districtId;
     /**
     * 姓名
@@ -96,11 +101,13 @@ public class CustomerAddress implements Serializable {
     * 创建时间
     */
     @ApiModelProperty("创建时间")
+    @JsonProperty("create_time")
     private Long createTime;
     /**
     * 修改时间
     */
     @ApiModelProperty("修改时间")
+    @JsonProperty("update_time")
     private Long updateTime;
     /**
     * 经度
@@ -116,11 +123,13 @@ public class CustomerAddress implements Serializable {
     * 门牌号
     */
     @ApiModelProperty("门牌号")
+    @JsonProperty("house_number")
     private String houseNumber;
     /**
     * 地点名
     */
     @ApiModelProperty("地点名")
+    @JsonProperty("address_name")
     private String addressName;
 
 }

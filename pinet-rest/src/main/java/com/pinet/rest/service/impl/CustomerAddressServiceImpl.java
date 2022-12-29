@@ -72,7 +72,7 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
     @Override
     public CustomerAddress getDefaultAddress(Long customerId) {
         QueryWrapper<CustomerAddress> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("customer_id",customerId).eq("status",1);
+        queryWrapper.eq("customer_id",customerId).eq("status",1).orderByDesc("id").last("limit 1");
         return getOne(queryWrapper);
     }
 
