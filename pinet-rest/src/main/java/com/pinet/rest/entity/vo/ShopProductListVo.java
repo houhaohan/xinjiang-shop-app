@@ -1,7 +1,6 @@
 package com.pinet.rest.entity.vo;
 
 import com.pinet.rest.entity.CustomerAddress;
-import com.pinet.rest.entity.DefaultAddress;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

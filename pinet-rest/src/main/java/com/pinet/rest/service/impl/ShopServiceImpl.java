@@ -82,8 +82,9 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         if (shop.getShopStatus() == 2) {
             return false;
         }
-
-        Date now = DateUtil.parse(DateUtil.now(), "HH:mm:ss");
-        return com.pinet.core.util.DateUtil.isEffectiveDate(now, shop.getWorkTime(), shop.getFinishTime());
+        Date now = new Date();
+        Date startTime = DateUtil.parseTimeToday(DateUtil.format(shop.getWorkTime(),"HH:mm:ss"));
+        Date endTime = DateUtil.parseTimeToday(DateUtil.format(shop.getFinishTime(),"HH:mm:ss"));
+        return com.pinet.core.util.DateUtil.isEffectiveDate(now, startTime, endTime);
     }
 }
