@@ -17,7 +17,7 @@ import java.util.Date;
 public class CommonService {
 
     /**
-     * 给属性（createTime,createBy,updateTime,updateBy）设置默认值
+     * 给属性（createTime,createBy,updateTime,updateBy,delFlag）设置默认值
      */
     public void setDefInsert(BaseEntity baseEntity){
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
@@ -33,6 +33,9 @@ public class CommonService {
     }
 
 
+    /**
+     * 给对象设置updateTime,updateBy默认值
+     */
     public void setDefUpdate(BaseEntity baseEntity){
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         if (customerId == null){

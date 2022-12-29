@@ -39,7 +39,7 @@ public class OrderSettlementDto {
     @ApiModelProperty(value = "商品数量(结算类型为直接购买必传)",name = "prodNum")
     private Integer prodNum;
 
-    @ApiModelProperty(value = "商品样式id(结算类型为直接购买必传)",name = "shopProdSpecId")
+    @ApiModelProperty(value = "商品样式id(结算类型为直接购买必传)",name = "shopProdSpecIds")
     private String shopProdSpecIds;
 
 
