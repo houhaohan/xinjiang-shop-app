@@ -3,6 +3,7 @@ package com.pinet.rest.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.service.ICustomerService;
 import com.pinet.rest.mapper.CustomerMapper;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2022-12-06 16:54:47
 */
 @Service
-@DS("slave")
+@DS(DB.SLAVE)
 public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> implements ICustomerService {
 
     @Override

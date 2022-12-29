@@ -48,11 +48,6 @@ public class CustomerAddress implements Serializable {
     private String name;
 
     /**
-     * 1先生 2女士
-     */
-    @ApiModelProperty("1先生 2女士")
-    private String sex;
-    /**
     * 地址
     */
     @ApiModelProperty("地址")

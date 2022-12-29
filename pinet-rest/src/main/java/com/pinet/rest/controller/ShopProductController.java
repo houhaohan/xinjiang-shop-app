@@ -5,12 +5,14 @@ import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.rest.entity.CustomerAddress;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.CartVo;
 import com.pinet.rest.entity.vo.ShopProductListVo;
 import com.pinet.rest.entity.vo.ShopProductVo;
 import com.pinet.rest.service.ICartService;
+import com.pinet.rest.service.ICustomerAddressService;
 import com.pinet.rest.service.IShopProductService;
 import com.pinet.rest.service.IShopService;
 import io.swagger.annotations.Api;
@@ -44,6 +46,8 @@ public class ShopProductController extends BaseController {
     private IShopService shopService;
     @Autowired
     private ICartService cartService;
+    @Autowired
+    private ICustomerAddressService customerAddressService;
 
     /**
      * 商品列表，经纬度默认是杭州滨江的经纬度
@@ -69,18 +73,20 @@ public class ShopProductController extends BaseController {
             }
         }
         Shop shop = shopService.getById(shopId);
+        Long userId = super.currentUserId();
         ShopProductListVo result = shopProductService.productListByShopId(shopId);
         if(result != null){
             double distance =  LatAndLngUtils.getDistance(lng.doubleValue(),lat.doubleValue(),
                     Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()));
             result.setDistance(BigDecimal.valueOf(distance));
             //当前用户在这个店铺加的购物车
-            Long userId = super.currentUserId();
             if(userId != null && userId != 0){
                 CartVo cartVo = cartService.getCartByUserIdAndShopId(shopId, userId);
                 result.setTotalPrice(cartVo.getPrice());
                 result.setProdNum(cartVo.getProdNum());
             }
+            CustomerAddress defaultAddress = customerAddressService.getDefaultAddress(userId);
+            result.setDefaultAddress(defaultAddress);
         }
         return Result.ok(result);
     }
@@ -91,8 +97,8 @@ public class ShopProductController extends BaseController {
     @ApiOperation(("店铺商品搜索"))
     @ApiVersion(1)
     public Result<List<ShopProductVo>> search(ShopProductParam param){
-        List<ShopProductVo> page = shopProductService.search(param);
-        return Result.ok(page);
+        List<ShopProductVo> list = shopProductService.search(param);
+        return Result.ok(list);
     }
 
 

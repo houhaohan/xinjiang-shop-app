@@ -24,4 +24,10 @@ public interface ICustomerAddressService extends IService<CustomerAddress> {
      * @param userId
      */
     boolean edit(CustomerAddressDto customerAddressDto,Long userId);
+
+    /**
+     * 获取默认地址
+     * @return
+     */
+    CustomerAddress getDefaultAddress(Long customerId);
 }
