@@ -8,14 +8,9 @@ import com.pinet.rest.entity.Banner;
 import com.pinet.rest.service.IBannerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.pinet.core.controller.BaseController;
-
 import java.util.List;
 
 /**
@@ -41,4 +36,5 @@ public class BannerController extends BaseController {
         List<Banner> bannerList = bannerService.bannerList();
         return Result.ok(bannerList);
     }
+
 }

@@ -72,11 +72,11 @@ public class Shop extends BaseEntity {
     private Integer shopStatus;
 
     @ApiModelProperty("开始营业时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     private Date workTime;
 
     @ApiModelProperty("结束营业时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     private Date finishTime;
 
 }

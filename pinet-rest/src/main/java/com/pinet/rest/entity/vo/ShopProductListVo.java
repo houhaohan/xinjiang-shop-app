@@ -1,6 +1,7 @@
 package com.pinet.rest.entity.vo;
 
 import com.pinet.rest.entity.CustomerAddress;
+import com.pinet.rest.entity.Shop;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -42,4 +43,7 @@ public class ShopProductListVo {
 
     @ApiModelProperty("默认地址")
     private CustomerAddress defaultAddress;
+
+    @ApiModelProperty("店铺信息")
+    private Shop shopInfo;
 }
