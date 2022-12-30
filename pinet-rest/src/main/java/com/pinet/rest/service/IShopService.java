@@ -1,5 +1,7 @@
 package com.pinet.rest.service;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.ShopListDto;
@@ -16,6 +18,7 @@ import java.util.List;
  * @author wlbz
  * @since 2022-12-06
  */
+@DS(DB.MASTER)
 public interface IShopService extends IService<Shop> {
 
     /**

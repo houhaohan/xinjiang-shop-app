@@ -2,8 +2,10 @@ package com.pinet.rest.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.ShopListDto;
@@ -28,6 +30,7 @@ import static com.pinet.core.util.LatAndLngUtils.getDistance;
  * @since 2022-12-06
  */
 @Service
+@DS(DB.MASTER)
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
     @Autowired
     private ShopMapper shopMapper;

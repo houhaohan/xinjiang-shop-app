@@ -1,6 +1,8 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.ThreadLocalUtil;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
  * @since 2022-12-08
  */
 @Service
+@DS(DB.MASTER)
 public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements ICartService {
 
     @Resource

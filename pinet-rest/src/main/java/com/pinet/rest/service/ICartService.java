@@ -1,5 +1,7 @@
 package com.pinet.rest.service;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.Cart;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.AddCartDto;
@@ -19,6 +21,7 @@ import java.util.List;
  * @author wlbz
  * @since 2022-12-08
  */
+@DS(DB.MASTER)
 public interface ICartService extends IService<Cart> {
 
     List<CartListVo> cartList(CartListDto dto);

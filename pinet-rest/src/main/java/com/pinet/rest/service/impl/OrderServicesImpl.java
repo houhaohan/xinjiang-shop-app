@@ -6,12 +6,14 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.common.mq.config.QueueConstants;
 import com.pinet.common.mq.util.JmsUtil;
+import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.LatAndLngUtils;
@@ -50,6 +52,7 @@ import java.util.stream.Collectors;
  * @since 2022-12-06
  */
 @Service
+@DS(DB.MASTER)
 public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> implements IOrdersService {
     @Resource
     private OrdersMapper ordersMapper;
@@ -164,7 +167,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     @DSTransactional
-    @Transactional
     public CreateOrderVo createOrder(CreateOrderDto dto) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
@@ -241,7 +243,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             });
             orderProductSpecService.saveBatch(k.getOrderProductSpecs());
         });
-
 
         //外卖订单插入订单地址表
         if (dto.getOrderType() == 1) {
