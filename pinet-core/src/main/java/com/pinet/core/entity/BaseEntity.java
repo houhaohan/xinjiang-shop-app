@@ -40,7 +40,7 @@ public class BaseEntity implements Serializable {
     @TableField(value = "update_time",fill = FieldFill.UPDATE)
     private Date updateTime;
     @ApiModelProperty(value = "是否删除  0正常  1删除")
-    private Integer delFlag;
+    private Integer delFlag = 0;
 
 
 }
