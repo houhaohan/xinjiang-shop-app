@@ -22,7 +22,7 @@ public class BaseController {
     }
 
     /**
-     * 获取当前用户ID
+     * 获取当前用户
      * @return
      */
     protected ThreadLocalUtil.UserLogin currentUser(){

@@ -2,6 +2,7 @@ package com.pinet.rest.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pinet.core.constants.CommonConstant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,11 +24,10 @@ public class ShopVo {
     private String shopName;
 
     @ApiModelProperty("订单数量")
-    private Integer orderNum = 0;
+    private int orderNum;
 
-    //todo 这个值待确认
-    @ApiModelProperty(value = "最大数量",notes= "比例超过30% 爆红")
-    private Integer maxNum = 100;
+    @ApiModelProperty(value = "最大数量",notes= "比例超过50% 爆红")
+    private Integer maxNum = CommonConstant.MAX_ORDER_NUM;
 
     @ApiModelProperty("省")
     private String province;
@@ -51,12 +51,12 @@ public class ShopVo {
     private Double distance;
 
     @ApiModelProperty("开始营业时间")
-    @JsonFormat(pattern = "HH:mm")
+    @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     @JsonProperty("startTime")
     private Date workTime;
 
     @ApiModelProperty("结束营业时间")
-    @JsonFormat(pattern = "HH:mm")
+    @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     @JsonProperty("endTime")
     private Date finishTime;
 }
