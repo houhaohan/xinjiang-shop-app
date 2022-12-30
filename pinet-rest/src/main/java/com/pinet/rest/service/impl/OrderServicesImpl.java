@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -29,6 +30,7 @@ import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import com.pinet.rest.service.common.CommonService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -161,7 +163,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
+    @Transactional
     public CreateOrderVo createOrder(CreateOrderDto dto) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
@@ -174,12 +177,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //配送费
         BigDecimal shippingFee = getShippingFee(dto.getOrderType());
 
-        //外卖订单 校验距离 10公里以内
-        double m = LatAndLngUtils.getDistance(Double.parseDouble(dto.getLng()), Double.parseDouble(dto.getLat()),
-                Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
-        if (m > 10000D && dto.getOrderType() == 1) {
-            throw new PinetException("店铺距离过远,无法配送");
+        //自提订单默认距离是0  外卖订单 校验距离 10公里以内
+        double m = 0D;
+        if (dto.getOrderType() == 1){
+            m = LatAndLngUtils.getDistance(Double.parseDouble(dto.getLng()), Double.parseDouble(dto.getLat()),
+                    Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
+            if (m > 10000D) {
+                throw new PinetException("店铺距离过远,无法配送");
+            }
         }
+
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         if (dto.getSettlementType() == 1) {
@@ -228,7 +235,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderProductService.save(k);
 
             //保存订单商品样式表
-            k.getOrderProductSpecs().forEach(k1 -> k1.setOrderProdId(k.getId()));
+            k.getOrderProductSpecs().forEach(k1 -> {
+                k1.setOrderProdId(k.getId());
+                k1.setOrderId(order.getId());
+            });
             orderProductSpecService.saveBatch(k.getOrderProductSpecs());
         });
 

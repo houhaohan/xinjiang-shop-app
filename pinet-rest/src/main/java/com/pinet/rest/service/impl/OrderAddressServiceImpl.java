@@ -1,7 +1,9 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.CustomerAddress;
@@ -11,6 +13,8 @@ import com.pinet.rest.service.ICustomerAddressService;
 import com.pinet.rest.service.IOrderAddressService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -39,6 +43,7 @@ public class OrderAddressServiceImpl extends ServiceImpl<OrderAddressMapper, Ord
     }
 
     @Override
+    @DS(DB.SLAVE)
     public OrderAddress createByCustomerAddressId(Long customerAddressId) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Date now = new Date();

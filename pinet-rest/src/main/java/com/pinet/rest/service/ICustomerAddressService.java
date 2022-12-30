@@ -1,5 +1,7 @@
 package com.pinet.rest.service;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.CustomerAddress;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.CustomerAddressDto;
@@ -9,6 +11,7 @@ import com.pinet.rest.entity.dto.CustomerAddressDto;
 * @description 针对表【customer_address(地址管理表)】的数据库操作Service
 * @createDate 2022-12-06 16:58:34
 */
+@DS(DB.SLAVE)
 public interface ICustomerAddressService extends IService<CustomerAddress> {
 
     /**

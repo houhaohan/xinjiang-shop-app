@@ -29,11 +29,9 @@ public class CreateOrderDto extends OrderSettlementDto{
     @ApiModelProperty(value = "订单总金额",name = "orderPrice")
     private BigDecimal orderPrice;
 
-    @NotBlank(message = "lat不能为空")
     @ApiModelProperty(value = "lat",name = "lat")
     private String lat;
 
-    @NotBlank(message = "lng不能为空")
     @ApiModelProperty(value = "lng",name = "lng")
     private String lng;
 

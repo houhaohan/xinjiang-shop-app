@@ -27,6 +27,9 @@ public class OrderSettlementVo {
     @ApiModelProperty(value = "制作中数量",name = "orderMakeCount")
     private Integer orderMakeCount;
 
+    @ApiModelProperty(value = "最大制作数量",name = "orderMaxNum")
+    private Integer orderMaxNum = 100;
+
     @ApiModelProperty(value = "订单商品信息",name = "orderProductBoList")
     private List<OrderProduct> orderProductBoList;
 
