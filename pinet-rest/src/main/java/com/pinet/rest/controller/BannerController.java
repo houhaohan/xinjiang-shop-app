@@ -2,6 +2,7 @@ package com.pinet.rest.controller;
 
 
 import com.pinet.core.result.Result;
+import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.Banner;

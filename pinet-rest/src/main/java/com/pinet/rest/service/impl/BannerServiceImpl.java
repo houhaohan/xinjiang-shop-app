@@ -28,7 +28,6 @@ public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> impleme
     public List<Banner> bannerList() {
         List<Banner> bannerList = bannerMapper.selectList(Wrappers.lambdaQuery(new Banner())
                 .eq(Banner::getStatus, 0)
-                .eq(BaseEntity::getDelFlag, 0)
         );
         return bannerList;
     }

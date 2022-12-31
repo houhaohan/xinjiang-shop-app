@@ -33,9 +33,9 @@ public class JwtTokenUtils implements Serializable {
     private static final String SECRET = "a9fd38419340ee10";
 
     /**
-     * 有效期2小时
+     * 有效期7天
      */
-    public static final long EXPIRE_TIME = 2 * 60 * 60 * 1000;
+    public static final long EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000;
 
 
     /**
@@ -99,7 +99,7 @@ public class JwtTokenUtils implements Serializable {
 	 * 验证令牌
 	 * @param token
 	 * @param userId
-	 * @return
+	 * @return false 失效， true 未失效
 	 */
 	public static boolean validateToken(String token, Long userId) {
 	    Long userid = getUserIdFromToken(token);
@@ -139,5 +139,11 @@ public class JwtTokenUtils implements Serializable {
             return false;
         }
     }
+
+	public static void main(String[] args) {
+		String token = generateToken(3967L);
+		System.out.println(token);
+
+	}
 
 }

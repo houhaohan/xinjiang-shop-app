@@ -1,5 +1,9 @@
 package com.pinet.rest.config;
 
+import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
+import cn.binarywang.wx.miniapp.config.WxMaConfig;
+import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl;
 import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -61,5 +65,16 @@ public class WxConfiguration {
         WxPayService wxPayService = new WxPayServiceImpl();
         wxPayService.setConfig(payConfig);
         return wxPayService;
+    }
+
+    @Bean
+    public WxMaService wxMaService() {
+        WxMaConfig wxMaConfig = new WxMaDefaultConfigImpl();
+        ((WxMaDefaultConfigImpl) wxMaConfig).setAppid(StringUtils.trimToNull("wx89ad3dd778a3e6ff"));
+        ((WxMaDefaultConfigImpl) wxMaConfig).setSecret(StringUtils.trimToNull("4e0c7a50e7c358eb290cc994ee03766d"));
+        WxMaService wxMaService = new WxMaServiceImpl();
+        //设置配置文件
+        wxMaService.setWxMaConfig(wxMaConfig);
+        return wxMaService;
     }
 }

@@ -20,4 +20,16 @@ public class WxLoginRequest extends LoginRequest {
     @NotBlank(message = "参数iv不能为空")
     @ApiModelProperty(value = "iv",required = true)
     private String iv;
+
+    @ApiModelProperty("用户名")
+    private String nickname;
+
+    @ApiModelProperty("头像")
+    private String avatar;
+
+    @ApiModelProperty("性别： 0：未知、1：男、2：女")
+    private String gender;
+
+    @ApiModelProperty("手机号")
+    private String phone;
 }

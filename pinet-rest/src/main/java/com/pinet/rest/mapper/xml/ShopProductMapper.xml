@@ -31,6 +31,7 @@
         <result column="product_type" property="productType"/>
         <result column="price" property="price"/>
         <result column="market_price" property="marketPrice"/>
+        <result column="shop_id" property="shopId"/>
         <collection property="skuList" resultMap="SkuMap"/>
     </resultMap>
 

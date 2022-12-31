@@ -94,8 +94,8 @@ sms:
 # 微信开发配置
 wx:
   miniapp:
-    appid: wx7d9b680a3e2a4d95
-    secret: 2e63c469aad961ca3a5ae63733575b6f
+    appid: wx89ad3dd778a3e6ff
+    secret: 4e0c7a50e7c358eb290cc994ee03766d
 
 #oss配置
 oss:

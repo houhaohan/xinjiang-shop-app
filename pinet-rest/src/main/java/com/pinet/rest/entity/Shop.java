@@ -1,5 +1,6 @@
 package com.pinet.rest.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
@@ -78,5 +79,9 @@ public class Shop extends BaseEntity {
     @ApiModelProperty("结束营业时间")
     @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     private Date finishTime;
+
+    @ApiModelProperty("距离")
+    @TableField(exist = false)
+    private Double distance;
 
 }

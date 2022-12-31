@@ -3,14 +3,11 @@ package com.pinet.rest.service.impl;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.api.WxMaUserService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
-import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
-import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.UserConstant;
 import com.pinet.core.exception.LoginException;
 import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.JwtTokenUtils;
-import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
 import com.pinet.rest.entity.request.WxLoginRequest;
@@ -38,6 +35,7 @@ public class WxLoginServiceImpl implements ILoginService {
         WxLoginRequest wxLoginRequest = (WxLoginRequest)loginRequest;
         WxMaUserService userService = wxMaService.getUserService();
         WxMaJscode2SessionResult sessionInfo = userService.getSessionInfo(wxLoginRequest.getCode());
+
         Customer customer = customerService.getByQsOpenId(sessionInfo.getOpenid());
         if(customer != null){
             if(customer.getActive() == 0){
@@ -56,14 +54,6 @@ public class WxLoginServiceImpl implements ILoginService {
                 throw new LoginException("获取openid失败");
             }
 
-            //获取用户信息
-            WxMaUserInfo userInfo = userService.getUserInfo(sessionInfo.getSessionKey(), wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
-
-            //获取手机号
-            WxMaPhoneNumberInfo wxMaPhoneNumberInfo = userService.getPhoneNoInfo(sessionInfo.getSessionKey(), wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
-            if(wxMaPhoneNumberInfo == null || StringUtil.isEmpty(wxMaPhoneNumberInfo.getPhoneNumber())){
-                throw new LoginException("获取手机号失败");
-            }
             String ip = IPUtils.getIpAddr();
             customer = Customer.builder()
                     .createTime(System.currentTimeMillis())
@@ -71,10 +61,10 @@ public class WxLoginServiceImpl implements ILoginService {
                     .lastLoginIp(ip)
                     .lastLoginTime(System.currentTimeMillis())
                     .qsOpenId(sessionInfo.getOpenid())
-                    .nickname(userInfo.getNickName())
-                    .avatar(userInfo.getAvatarUrl())
-                    .sex(Integer.valueOf(userInfo.getGender()))
-                    .phone(wxMaPhoneNumberInfo.getPhoneNumber())
+                    .nickname(wxLoginRequest.getNickname())
+                    .avatar(wxLoginRequest.getAvatar())
+                    .sex(Integer.valueOf(wxLoginRequest.getGender()))
+                    .phone(wxLoginRequest.getPhone())
                     .active(1)
                     .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
                     .build();
@@ -91,10 +81,6 @@ public class WxLoginServiceImpl implements ILoginService {
         return userInfo;
     }
 
-    @Override
-    public void logout(String token) {
-
-    }
 
     /**
      * 缓存token
@@ -102,6 +88,6 @@ public class WxLoginServiceImpl implements ILoginService {
      * @param token
      */
     private void cacheToken(Long userId,String token){
-        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+userId,token,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
+        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,String.valueOf(userId),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
     }
 }

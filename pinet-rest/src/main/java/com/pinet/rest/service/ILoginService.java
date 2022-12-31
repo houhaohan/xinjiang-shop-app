@@ -14,11 +14,5 @@ public interface ILoginService {
      */
     public UserInfo login(LoginRequest request) throws WxErrorException;
 
-    /**
-     * 退出登入
-     * @param token
-     * @return
-     */
-    public void logout(String token);
 
 }

@@ -87,6 +87,7 @@ public class ShopProductController extends BaseController {
             }
             CustomerAddress defaultAddress = customerAddressService.getDefaultAddress(userId);
             result.setDefaultAddress(defaultAddress);
+            shop.setDistance(distance);
             result.setShopInfo(shop);
         }
         return Result.ok(result);

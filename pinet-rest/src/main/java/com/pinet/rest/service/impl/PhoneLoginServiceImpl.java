@@ -72,14 +72,6 @@ public class PhoneLoginServiceImpl implements ILoginService {
         return userInfo;
     }
 
-    @Override
-    public void logout(String token) {
-        Long userId = JwtTokenUtils.getUserIdFromToken(token);
-        if(userId == null){
-            return;
-        }
-        redisUtil.delete(UserConstant.PREFIX_USER_TOKEN+userId);
-    }
 
     /**
      * 缓存token
@@ -87,6 +79,6 @@ public class PhoneLoginServiceImpl implements ILoginService {
      * @param token
      */
     private void cacheToken(String userId,String token){
-        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+userId,token,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
+        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,userId,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
     }
 }

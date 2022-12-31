@@ -62,7 +62,7 @@ public class  BackendInterceptor implements HandlerInterceptor {
 
             boolean validate = JwtTokenUtils.validateToken(accessToken, Long.valueOf(userId));
             if(validate){
-                if(redisUtil.getExpire(UserConstant.PREFIX_USER_TOKEN + accessToken) < 10 * 60){
+                if(redisUtil.getExpire(UserConstant.PREFIX_USER_TOKEN + accessToken) < 30 * 60){
                     redisUtil.expire(UserConstant.PREFIX_USER_TOKEN + accessToken,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
                 }
             }else {
@@ -70,8 +70,7 @@ public class  BackendInterceptor implements HandlerInterceptor {
                 redisUtil.set(UserConstant.PREFIX_USER_TOKEN + newToken,userId,JwtTokenUtils.EXPIRE_TIME/1000,TimeUnit.SECONDS);
                 response.setHeader(MINI_ACCESS_TOKEN,newToken);
             }
-//            ThreadLocalUtil.setUserId(Long.valueOf(userId));
-            ThreadLocalUtil.setUserId(1l);
+            ThreadLocalUtil.setUserId(Long.valueOf(userId));
         }
         return true;
     }

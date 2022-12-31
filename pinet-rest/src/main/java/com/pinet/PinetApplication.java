@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jms.annotation.EnableJms;
 
 /**
@@ -12,6 +13,7 @@ import org.springframework.jms.annotation.EnableJms;
  */
 
 @SpringBootApplication
+@ComponentScan(basePackages = {"cn.binarywang","com.pinet"})
 @MapperScan("com.pinet.rest.mapper")
 @Slf4j
 @EnableJms

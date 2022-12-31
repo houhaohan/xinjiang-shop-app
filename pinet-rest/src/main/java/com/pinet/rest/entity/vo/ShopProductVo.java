@@ -38,6 +38,9 @@ public class ShopProductVo {
     @ApiModelProperty(value = "商品市场价格")
     private BigDecimal marketPrice = BigDecimal.ZERO;
 
+    @ApiModelProperty(value = "店铺ID")
+    private Long shopId;
+
     @ApiModelProperty(value = "sku")
     private List<ShopProductSkuVo> skuList = new ArrayList<>();
 
