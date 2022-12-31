@@ -19,7 +19,6 @@ import com.pinet.rest.service.ICartService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.rest.service.IShopProductSpecService;
 import com.pinet.rest.service.IShopService;
-import com.pinet.rest.service.common.CommonService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,9 +55,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Resource
     private IShopProductSpecService shopProductSpecService;
 
-    @Resource
-    private CommonService commonService;
-
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
         //判断店铺是否存在  店铺状态
@@ -90,7 +86,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         BeanUtils.copyProperties(dto, cart);
         cart.setCartStatus(1);
         cart.setCustomerId(customerId);
-        commonService.setDefInsert(cart);
 
         //添加购物车选中的样式
         String[] shopProdSpecIds = dto.getShopProdSpecIds().split(",");
@@ -112,7 +107,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                 throw new PinetException("样式不存在");
             }
             cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
-            commonService.setDefInsert(cartProductSpec);
             cartProductSpecs.add(cartProductSpec);
         }
 
@@ -122,7 +116,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         if (num == shopProdSpecIds.length) {
             Cart cartQuery = getById(cartId);
             cartQuery.setProdNum(cartQuery.getProdNum() + dto.getProdNum());
-            commonService.setDefUpdate(cartQuery);
             updateById(cartQuery);
             addCartVo.setProdNum(cartQuery.getProdNum());
 
@@ -150,11 +143,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             return removeById(dto.getCartId());
         }
 
-        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
-
-
         cart.setProdNum(dto.getProdNum());
-        commonService.setDefUpdate(cart);
         return updateById(cart);
     }
 

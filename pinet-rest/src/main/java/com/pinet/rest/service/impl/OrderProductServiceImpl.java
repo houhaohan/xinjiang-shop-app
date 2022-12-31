@@ -1,16 +1,12 @@
 package com.pinet.rest.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.pinet.core.entity.BaseEntity;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
-import com.pinet.rest.entity.bo.OrderProductBo;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.mapper.OrderProductMapper;
 import com.pinet.rest.service.*;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pinet.rest.service.common.CommonService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -44,9 +40,6 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
 
     @Resource
     private IProductSkuService productSkuService;
-
-    @Resource
-    private CommonService commonService;
 
     @Resource
     private ICartProductSpecService cartProductSpecService;
@@ -117,7 +110,6 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
             orderProductSpec.setProdSkuName(productSku.getSkuName());
             orderProductSpec.setShopProdSpecId(shopProdSpecId);
             orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
-            commonService.setDefInsert(orderProductSpec);
             orderProductSpecs.add(orderProductSpec);
         }
 
@@ -131,8 +123,6 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         orderProduct.setProdPrice(prodPrice);
 
         orderProduct.setProdImg(shopProduct.getProductImg());
-
-        commonService.setDefInsert(orderProduct);
 
         return orderProduct;
     }

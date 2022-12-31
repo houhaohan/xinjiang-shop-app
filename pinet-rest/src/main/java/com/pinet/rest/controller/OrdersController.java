@@ -5,10 +5,7 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.version.ApiVersion;
-import com.pinet.rest.entity.dto.CreateOrderDto;
-import com.pinet.rest.entity.dto.OrderListDto;
-import com.pinet.rest.entity.dto.OrderPayDto;
-import com.pinet.rest.entity.dto.OrderSettlementDto;
+import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.service.IOrdersService;
 import io.swagger.annotations.Api;
@@ -95,6 +92,15 @@ public class OrdersController extends BaseController {
     public Result<?> orderPay(@Validated OrderPayDto dto){
         Object pay = ordersService.orderPay(dto);
         return Result.ok(pay);
+    }
+
+
+    @PostMapping("/orderListAll")
+    @ApiVersion(1)
+    @ApiOperation("app订单列表(包含仓超订单和轻食订单)")
+    public Result<?> orderListAll(OrderListAllDto dto){
+        
+        return Result.ok();
     }
 
 

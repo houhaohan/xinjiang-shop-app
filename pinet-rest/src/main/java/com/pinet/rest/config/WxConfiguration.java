@@ -30,8 +30,6 @@ public class WxConfiguration {
 
     @Bean(name = "miniPayService")
     public WxPayService wxMiniPayService() {
-        log.info("微信小程序支付参数初始化{}", JSONObject.toJSON(weiXinMiniProperties));
-
         //实例payConfig 设置固定参数
         WxPayConfig payConfig = new WxPayConfig();
         payConfig.setAppId(StringUtils.trimToNull(this.weiXinMiniProperties.getAppid()));
@@ -50,8 +48,6 @@ public class WxConfiguration {
 
     @Bean(name = "appPayService")
     public WxPayService wxAppPayService(){
-        log.info("微信app支付参数初始化{}", JSONObject.toJSON(weiXinAppProperties));
-
         //实例payConfig 设置固定参数
         WxPayConfig payConfig = new WxPayConfig();
         payConfig.setAppId(StringUtils.trimToNull(this.weiXinAppProperties.getAppid()));

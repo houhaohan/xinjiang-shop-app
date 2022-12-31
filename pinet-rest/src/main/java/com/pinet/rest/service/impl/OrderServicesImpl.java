@@ -30,9 +30,7 @@ import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
-import com.pinet.rest.service.common.CommonService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -77,9 +75,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Resource
     private IOrderPayService orderPayService;
-
-    @Resource
-    private CommonService commonService;
 
     @Resource
     private IOrderProductSpecService orderProductSpecService;
@@ -247,6 +242,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //外卖订单插入订单地址表
         if (dto.getOrderType() == 1) {
             OrderAddress orderAddress = orderAddressService.createByCustomerAddressId(dto.getCustomerAddressId());
+            orderAddress.setOrderId(order.getId());
             orderAddressService.save(orderAddress);
         }
 
@@ -297,7 +293,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPay.setChannelId(dto.getChannelId());
         orderPay.setPayName(payService.getPayName());
         orderPay.setIp(IPUtils.getIpAddr());
-        commonService.setDefInsert(orderPay);
 
         orderPayService.save(orderPay);
 
@@ -326,7 +321,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         order.setEstimateArrivalEndTime(estimateArrivalEndTime);
         order.setOrderDistance(m.intValue());
         order.setRemark(dto.getRemark());
-        commonService.setDefInsert(order);
 
         return order;
     }
