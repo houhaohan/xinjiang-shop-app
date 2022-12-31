@@ -89,20 +89,9 @@ public class OrdersController extends BaseController {
     @PostMapping("/orderPay")
     @ApiOperation("订单支付")
     @ApiVersion(1)
-    public Result<?> orderPay(@Validated OrderPayDto dto){
+    public Result<?> orderPay(@RequestBody @Validated OrderPayDto dto){
         Object pay = ordersService.orderPay(dto);
         return Result.ok(pay);
     }
-
-
-    @PostMapping("/orderListAll")
-    @ApiVersion(1)
-    @ApiOperation("app订单列表(包含仓超订单和轻食订单)")
-    public Result<?> orderListAll(OrderListAllDto dto){
-        
-        return Result.ok();
-    }
-
-
 
 }

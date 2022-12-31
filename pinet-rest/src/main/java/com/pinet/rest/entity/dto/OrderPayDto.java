@@ -26,7 +26,7 @@ public class OrderPayDto {
     private Long orderId;
 
     @ApiModelProperty(value = "订单金额(支付金额)",name = "orderPrice")
-    @NotBlank(message = "订单支付金额不能为空")
+    @NotNull(message = "订单支付金额不能为空")
     private BigDecimal orderPrice;
 
     @ApiModelProperty(value = "openId(小程序支付必传)",name = "openId")

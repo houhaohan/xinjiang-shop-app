@@ -278,6 +278,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         param.setOpenId(dto.getOpenId());
         param.setOrderNo(orders.getOrderNo().toString());
         param.setPayPrice(dto.getOrderPrice());
+        param.setPayDesc("轻食订单下单");
         Object res = payService.pay(param);
 
 
