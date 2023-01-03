@@ -44,7 +44,7 @@ public class OssUtil {
 
     public String upload(MultipartFile file) {
         try {
-            return upload(file.getInputStream(), FileUtil.getSuffix(file.getName()));
+            return upload(file.getInputStream(), FileUtil.getSuffix(file.getOriginalFilename()));
         } catch (Exception e) {
             log.error("文件上传失败{}", e);
             return null;

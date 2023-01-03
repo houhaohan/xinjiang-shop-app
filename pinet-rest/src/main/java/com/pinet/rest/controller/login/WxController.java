@@ -27,6 +27,12 @@ public class WxController {
     @Autowired
     private WxMaService wxMaService;
 
+    /**
+     * TODO 获取手机号的code 和 登入的code 不是同一个code
+     * 获取微信手机号
+     * @param request
+     * @return
+     */
     @RequestMapping(value = "/getPhoneNumber",method = RequestMethod.POST)
     @ApiOperation("获取微信手机号")
     @NotTokenSign
