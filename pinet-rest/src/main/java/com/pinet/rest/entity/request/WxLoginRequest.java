@@ -14,11 +14,11 @@ public class WxLoginRequest extends LoginRequest {
     private String code;
 
     @NotBlank(message = "参数encryptedData不能为空")
-    @ApiModelProperty(value = "encryptedData",required = true)
+    @ApiModelProperty(value = "encryptedData",required = true,notes = "获取手机号得到的encryptedData")
     private String encryptedData;
 
     @NotBlank(message = "参数iv不能为空")
-    @ApiModelProperty(value = "iv",required = true)
+    @ApiModelProperty(value = "iv",required = true,notes = "获取手机号的iv")
     private String iv;
 
     @ApiModelProperty("用户名")
@@ -29,7 +29,4 @@ public class WxLoginRequest extends LoginRequest {
 
     @ApiModelProperty("性别： 0：未知、1：男、2：女")
     private String gender;
-
-    @ApiModelProperty("手机号")
-    private String phone;
 }

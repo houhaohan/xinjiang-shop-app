@@ -3,6 +3,8 @@ package com.pinet.rest.service.impl;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.api.WxMaUserService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
+import com.alibaba.fastjson.JSONObject;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.UserConstant;
 import com.pinet.core.exception.LoginException;
@@ -35,7 +37,6 @@ public class WxLoginServiceImpl implements ILoginService {
         WxLoginRequest wxLoginRequest = (WxLoginRequest)loginRequest;
         WxMaUserService userService = wxMaService.getUserService();
         WxMaJscode2SessionResult sessionInfo = userService.getSessionInfo(wxLoginRequest.getCode());
-
         Customer customer = customerService.getByQsOpenId(sessionInfo.getOpenid());
         if(customer != null){
             if(customer.getActive() == 0){
@@ -54,6 +55,8 @@ public class WxLoginServiceImpl implements ILoginService {
                 throw new LoginException("获取openid失败");
             }
 
+            WxMaPhoneNumberInfo phoneNoInfo = userService.getPhoneNoInfo(sessionInfo.getSessionKey(), wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
+
             String ip = IPUtils.getIpAddr();
             customer = Customer.builder()
                     .createTime(System.currentTimeMillis())
@@ -64,7 +67,7 @@ public class WxLoginServiceImpl implements ILoginService {
                     .nickname(wxLoginRequest.getNickname())
                     .avatar(wxLoginRequest.getAvatar())
                     .sex(Integer.valueOf(wxLoginRequest.getGender()))
-                    .phone(wxLoginRequest.getPhone())
+                    .phone(phoneNoInfo.getPhoneNumber())
                     .active(1)
                     .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
                     .build();
@@ -72,22 +75,12 @@ public class WxLoginServiceImpl implements ILoginService {
         }
 
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());
-        cacheToken(customer.getCustomerId(),token);
+        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,String.valueOf(customer.getCustomerId()),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
 
         UserInfo userInfo = new UserInfo();
         userInfo.setAccess_token(token);
         userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JwtTokenUtils.EXPIRE_TIME/1000));
         userInfo.setUser(customer);
         return userInfo;
-    }
-
-
-    /**
-     * 缓存token
-     * @param userId
-     * @param token
-     */
-    private void cacheToken(Long userId,String token){
-        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,String.valueOf(userId),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
     }
 }
