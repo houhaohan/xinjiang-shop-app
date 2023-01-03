@@ -8,6 +8,7 @@ import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
+import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.vo.*;
 
 import java.util.List;
@@ -39,4 +40,10 @@ public interface IOrdersService extends IService<Orders> {
     CreateOrderVo createOrder(CreateOrderDto dto);
 
     Object orderPay(OrderPayDto dto);
+
+    /**
+     * 订单支付回调
+     * @return
+     */
+    Boolean orderPayNotify(OrderPayNotifyParam param);
 }

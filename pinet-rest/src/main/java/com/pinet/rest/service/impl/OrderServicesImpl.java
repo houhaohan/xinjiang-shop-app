@@ -8,12 +8,14 @@ import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.common.mq.config.QueueConstants;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.DB;
+import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.LatAndLngUtils;
@@ -26,6 +28,7 @@ import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
+import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.OrdersMapper;
@@ -298,6 +301,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPayService.save(orderPay);
 
         return res;
+    }
+
+    @Override
+    public Boolean orderPayNotify(OrderPayNotifyParam param) {
+        LambdaQueryWrapper<Orders> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Orders::getOrderNo,param.getOrderNo()).eq(BaseEntity::getDelFlag,0);
+        Orders orders = getOne(lambdaQueryWrapper);
+        if (orders == null){
+            log.error("微信支付回调出现异常,订单号不存在:"+param.getOutTradeNo());
+            return false;
+        }
+
+        return null;
     }
 
 

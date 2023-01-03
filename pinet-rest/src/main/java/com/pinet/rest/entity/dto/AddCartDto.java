@@ -34,5 +34,8 @@ public class AddCartDto {
     @ApiModelProperty(value = "商品样式id(多个逗号分割)",name = "shopProdSpecId")
     private String shopProdSpecIds;
 
+    @ApiModelProperty(value = "内部参数不需要传",name = "customerId")
+    private Long customerId;
+
 
 }

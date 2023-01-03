@@ -2,6 +2,7 @@ package com.pinet.rest.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.pinet.core.entity.Token;
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.http.HttpResult;
 import com.pinet.core.util.AppJwtTokenUtil;
 import com.pinet.core.util.StringUtil;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * APP token的拦截器
@@ -30,6 +32,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
     private static final String MINI_ACCESS_TOKEN = "access_token";
     private static final String TOKEN_HEAD_PREFIX = "Bearer ";
 
+
     @Autowired
     private ICustomerTokenService customerTokenService;
 
@@ -38,7 +41,9 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
         if(StringUtil.isNotEmpty(request.getHeader(MINI_ACCESS_TOKEN))){
             return true;
         }
+
         String appToken = request.getHeader(APP_ACCESS_TOKEN);
+        logger.info("appToken为:{}",appToken);
         if(StringUtil.isEmpty(appToken)){
             if (handler != null && handler instanceof HandlerMethod) {
                 HandlerMethod handlerMethod = (HandlerMethod) handler;
@@ -65,7 +70,9 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
         if(StringUtil.isEmpty(appToken)){
             appToken = "";
         }else {
-            appToken = appToken.substring(TOKEN_HEAD_PREFIX.length());
+            if (appToken.startsWith(TOKEN_HEAD_PREFIX)){
+                appToken = appToken.substring(TOKEN_HEAD_PREFIX.length());
+            }
         }
         Long userId = customerTokenService.validateAndReturnCustomerId(appToken, terminal);
         //如果token已过期，但是未加入黑名单也在保留范围内，则进行刷新token操作，在请求头内直接返回新的token
@@ -75,6 +82,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
             response.setHeader(APP_ACCESS_TOKEN, TOKEN_HEAD_PREFIX + customerToken.getToken());
         }else {
 //            throw new PinetException("token过期，请重新登入");
+            logger.error("登录认证失败,token{}",appToken);
         }
         ThreadLocalUtil.setUserId(userId == null ? 0 : Long.valueOf(userId));
         return true;

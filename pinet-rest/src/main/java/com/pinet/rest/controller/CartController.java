@@ -53,6 +53,7 @@ public class CartController extends BaseController {
     @PostMapping("/addCart")
     @ApiVersion(1)
     public Result<AddCartVo> addCart(@Validated @RequestBody AddCartDto dto) {
+        dto.setCustomerId(currentUserId());
         AddCartVo addCartVo = cartService.addCart(dto);
         return Result.ok(addCartVo);
     }

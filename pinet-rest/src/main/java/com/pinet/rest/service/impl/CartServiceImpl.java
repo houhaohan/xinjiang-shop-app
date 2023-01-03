@@ -80,7 +80,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Override
     @Transactional(rollbackFor = Exception.class)
     public AddCartVo addCart(AddCartDto dto) {
-        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+        Long customerId = dto.getCustomerId();
 
         Cart cart = new Cart();
         BeanUtils.copyProperties(dto, cart);
