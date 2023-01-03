@@ -1,7 +1,9 @@
 package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.CustomerAddress;
@@ -13,6 +15,10 @@ import com.pinet.rest.mapper.CustomerAddressMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
 
 /**
 * @author Administrator
@@ -42,6 +48,7 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
                 .append(customerAddressDto.getAddressName());
         entity.setAddress(sb.toString());
         entity.setCustomerId(userId);
+        entity.setUpdateTime(System.currentTimeMillis());
         return this.save(entity);
     }
 
@@ -67,6 +74,22 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
         entity.setCustomerId(userId);
         entity.setUpdateTime(System.currentTimeMillis());
         return this.updateById(entity);
+    }
+
+    @Override
+    @Transactional
+    public boolean updateDefaultAddress(Long id,Long userId) {
+
+        CustomerAddress entity = new CustomerAddress();
+        entity.setId(id);
+        entity.setStatus(1);
+        updateById(entity);
+
+        UpdateWrapper<CustomerAddress> wrapper = new UpdateWrapper<>();
+        wrapper.eq("customer_id",userId).ne("id",id);
+        CustomerAddress item = new CustomerAddress();item.setStatus(0);
+        update(item,wrapper);
+        return true;
     }
 
     @Override

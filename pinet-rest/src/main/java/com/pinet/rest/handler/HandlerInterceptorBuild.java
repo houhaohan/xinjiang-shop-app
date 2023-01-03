@@ -29,7 +29,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
     private static Logger logger = LoggerFactory.getLogger(HandlerInterceptorBuild.class);
 
     private static final String APP_ACCESS_TOKEN = "Authorization";
-    private static final String MINI_ACCESS_TOKEN = "access_token";
+    private static final String MINI_ACCESS_TOKEN = "accessToken";
     private static final String TOKEN_HEAD_PREFIX = "Bearer ";
 
 

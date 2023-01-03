@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
+import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.CustomerAddress;
@@ -73,13 +74,14 @@ public class ShopProductController extends BaseController {
             }
         }
         Shop shop = shopService.getById(shopId);
-        Long userId = super.currentUserId();
+        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         ShopProductListVo result = shopProductService.productListByShopId(shopId);
         if(result != null){
             double distance =  LatAndLngUtils.getDistance(lng.doubleValue(),lat.doubleValue(),
                     Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()));
             result.setDistance(BigDecimal.valueOf(distance));
             //当前用户在这个店铺加的购物车
+
             if(userId != null && userId != 0){
                 CartVo cartVo = cartService.getCartByUserIdAndShopId(shopId, userId);
                 result.setTotalPrice(cartVo.getPrice());

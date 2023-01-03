@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class  BackendInterceptor implements HandlerInterceptor {
     private static Logger logger = LoggerFactory.getLogger(BackendInterceptor.class);
-    private static final String MINI_ACCESS_TOKEN = "access_token";
+    private static final String MINI_ACCESS_TOKEN = "accessToken";
     private static final String APP_ACCESS_TOKEN = "Authorization";
 
     @Resource
@@ -34,6 +34,7 @@ public class  BackendInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+
         //app token 存在情况下,让它走 app token 的拦截器
         String appToken = request.getHeader(APP_ACCESS_TOKEN);
         if(StringUtil.isNotEmpty(appToken)){

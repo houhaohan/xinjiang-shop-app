@@ -102,10 +102,7 @@ public class CustomerAddressController extends BaseController {
         if(userId == null || userId == 0){
             return Result.error("用户没有登入，请先登入");
         }
-        CustomerAddress entity = new CustomerAddress();
-        entity.setId(dto.getId());
-        entity.setStatus(1);
-        boolean success = customerAddressService.updateById(entity);
+        boolean success = customerAddressService.updateDefaultAddress(dto.getId(),userId);
         if(success){
             return Result.ok("操作成功");
         }
