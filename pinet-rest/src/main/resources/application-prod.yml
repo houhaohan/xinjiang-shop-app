@@ -114,14 +114,14 @@ social:
       grant_type: client_credential
       secret: 8599ea2219b5653ea14a530d830f272a
       mch_id: 1502776411
-      notify_url: http://xinjiangapi.ypxlbz.com/qingshi/
+      notify_url: http://xinjiangapi.ypxlbz.com/qingshi/api/notify/order/wxApp/pay
       key: ZHANGSHUOwudi1234567891011121314
       p12url: /usr/project/jars/apiclient_cert.p12
     mini:
       appid: wx89ad3dd778a3e6ff
       secret: 4e0c7a50e7c358eb290cc994ee03766d
       mch_id: 1502776411
-      notify_url: http://xinjiangapi.ypxlbz.com/qingshi/
+      notify_url: http://xinjiangapi.ypxlbz.com/qingshi/api/notify/order/wxMini/pay
       key: ZHANGSHUOwudi1234567891011121314
       p12url: /usr/project/jars/apiclient_cert.p12
   alipay:
@@ -132,7 +132,7 @@ social:
       public-key-alipay: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApHFPsVhtcsTLN2bYwpW0LiwVmHLSUfZUm0R98yNEtmrWsW/bud+sdSwZDksQA1QUVQVVTHT+ghUiwb8Qs5cswTkVNSYnTy1sKHzr/ziLc6VQ4dZxR6inTd0VKGeA8aOFpuJT0BCSy8utHq67jVzc748Uy2UbBUI30FjqvDelsVz1V1oqPw7/IGPD0oUPRifmD8pQJRvhBiNJoVIR88ya3KoOm8eRZWSLv2swVxkTckh7wGE29Cgdwb/KuMGyN7y02BzkszTpZZgRztULTr9ZXPt+Nm6bNqiCoOgYvabra6gsZY6Ezg/wLPA+qjNXkvZZsHh85vuBiioJQHxkXjLu4QIDAQAB
       sellerid: 13399722222@163.com
       partnerid: 2088031797087204
-      notify-url: http://xinjiangapi.ypxlbz.com/qingshi/
+      notify-url: http://xinjiangapi.ypxlbz.com/qingshi/api/notify/order/aliApp/pay
       private-key1: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC8b8ugKQk7nzYON4+kER42Q8QMBdQCABf1DiAOzjOkZneX5z4iWVD3ceOMLUxLBGp+1vorO9KqtOtPsZsi2v0mXxGS/2m2j8/EgrIHrI0M2ED2YsOaVsQikq+gyFsKNKsS7DJHv6Gszxs+g/x5x8FSMgEioekSLgFdQZQtMwJbe+Yg3ORlF+FMmzwDL+X1/E5GkHNNXHgwC8tZAEB7UGWTiboYJ72V3l3H8MaMkRTV7XKy6OgXjS0nvV1pYN5LW+06V3BhXP2/OmwBOW//1pRX/8OL9JQL6OvHD+jOj/3yMoBB4kp+Uoltv43fosPhMZLS6QjUjEQMiWRVrbQfwBaRAgMBAAECggEBALjIQDu8QeuPgqiKX3cZujCoXzUS+gVEJjoOMe2S0x1hxeDVyB5Sy4z6x5KMUQY3PF9JXGTM8xam9yFdHq4dZKUeENO/VuDJQYqIRyAzWtW/smRqETnl38uvYD4gevYVE7UonV2yU05sgWDaeNjKw45grrBRaYaESp4yUqXIIYWm2P1Sq2XYrOZWy9eslZRnWcCSYnrmG4lg62jkPqZ3bVEHyAVSdoRzNH0hJIEMn8P6atBW5Bj89NZVyalW9IOScqkectDSqJhg2iplviU5v/ULzsqk5ujEEuFW9qrGjGTEe1lv3YdOLBwLURGlc2Tyw21TCxSW0z7xhbmi4voUxAECgYEA37rm6gUf7dH+v2MMv+9gceB/htULswFLgcl/XHWRm39USgyxsXJwcq/6ytvxrsgJML5pt5BolSokCZOAT7kCXgw+EHi8zGyNmQe0Tp1AAE6DM5QWHZ1WKZdz6ugsCDe/APAhhhCAejWnUrt3apH3QnTwjOS317Xgt7H3EE48rOECgYEA15203qfw7eXpGH7t+wI3IowltINvWG2+VRLOoB4p2WnTEwTc1DD3WfOV5V+47eUwJaVMlxH4QC6yRZYPWNdEfnGAplCitF28Pu/dUlqMzmAaf6RszwyHYhuOq89ovD/9F85PeWyOFJBk2iP98wuAKoYlUfX06a62vcF3oqS3b7ECgYBIh5DggPTO5msNpJC3kGTVxg/RqDN4voy58JbHZJ3lqSusLd1VR2JI6+AD77W0EclY8gHXrosZAGZabGUGc1XfI1zjfiDGrNJir+q2Kahb8Rf7mqBozV7ncN/1YXsU1u2m4jIcAjGEbOxnl7qo49UiyEJLisJGvgGxy5HqyVJGQQKBgQCXfNEgAoRu0LKlqEBRs+vC1Q6EtjebvHcWVIFh0+95NjW7ThZM6x5OT6rIHinS0syyFmIqXdC6X1SXOWgM9inEYMCPmWXHLXheC67G9qGpObJEbeSYz+eqkUv7AF1IrfiHKkeCOzfT0ONatCDvCuyAdAFyhUkOidcQmQYR+oJ68QKBgC0ZQpPyS4PZRqrA//CqfQz1AwckMNnqSebdtWssXSjkMeWqSGv0SJ94bYYXAYFdKZGCeeLQ/XEPeekErVlUBlnMJmIUHbq/0xO8fe42LfmAwmxK1oFiQ6jxlKp9865MtbLKwbRD0pnShoxk3JlHd1i6zora23DZF6JfaAK129nc
       app-cert-url: /usr/project/jars/appCertPublicKey_2021002115689210.crt
       root-cert-url: /usr/project/jars/alipayRootCert.crt

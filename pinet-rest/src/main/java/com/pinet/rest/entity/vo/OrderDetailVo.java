@@ -2,6 +2,7 @@ package com.pinet.rest.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.rest.entity.OrderProduct;
+import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.bo.OrderProductBo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,6 +27,9 @@ public class OrderDetailVo {
     @ApiModelProperty(value = "订单号",name = "orderNo")
     private Long orderNo;
 
+    @ApiModelProperty(value = "订单状态  1外卖  2自提",name = "orderType")
+    private Integer orderType;
+
     @ApiModelProperty(value = "用户id",name = "customerId")
     private Long customerId;
 
@@ -39,6 +43,9 @@ public class OrderDetailVo {
     @ApiModelProperty(value = "预计送达结束时间",name = "estimateArrivalEndTime")
     @JsonFormat(pattern = "HH:mm")
     private Date estimateArrivalEndTime;
+
+    @ApiModelProperty(value = "预计送达时间",name = "estimateArrivalTime")
+    private String estimateArrivalTime;
 
     @ApiModelProperty(value = "店铺名称",name = "shopName")
     private String shopName;
@@ -59,6 +66,9 @@ public class OrderDetailVo {
     @JsonFormat(pattern = "MM-dd HH:mm:ss")
     private Date createTime;
 
+    @ApiModelProperty(value = "订单过期时间",name = "createTime")
+    private Long expireTime;
+
     @ApiModelProperty(value = "配送地址",name = "address")
     private String address;
 
@@ -76,5 +86,13 @@ public class OrderDetailVo {
 
     @ApiModelProperty(value = "商品信息",name = "orderProducts")
     private List<OrderProduct> orderProducts;
+
+    @ApiModelProperty(value = "商品总数量",name = "prodTotalNum")
+    private Integer prodTotalNum;
+
+    @ApiModelProperty(value = "店铺信息",name = "shop")
+    private Shop shop;
+
+
 
 }

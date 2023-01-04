@@ -12,5 +12,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-12-20
  */
 public interface IOrderPayService extends IService<OrderPay> {
+    OrderPay getByOrderIdAndChannelId(Long orderId,String channelId);
 
 }

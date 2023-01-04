@@ -2,6 +2,7 @@ package com.pinet.rest.mapper;
 
 import com.pinet.rest.entity.OrderPay;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface OrderPayMapper extends BaseMapper<OrderPay> {
 
+    OrderPay selectByOrderIdAndChannelId(@Param("orderId") Long orderId,@Param("channelId") String channelId);
 }

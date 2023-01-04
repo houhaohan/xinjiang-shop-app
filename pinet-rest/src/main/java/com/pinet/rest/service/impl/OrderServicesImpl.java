@@ -30,6 +30,7 @@ import com.pinet.rest.entity.dto.OrderSettlementDto;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
+import com.pinet.rest.entity.param.RefundParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
@@ -82,6 +83,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Resource
     private IOrderProductSpecService orderProductSpecService;
 
+    @Resource
+    private IOrderRefundService orderRefundService;
+
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
@@ -105,13 +109,32 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new PinetException("订单不存在");
         }
         orderDetailVo.setOrderProducts(orderProductService.getByOrderId(orderId));
+        //判断是自提还是外卖
+        if (orderDetailVo.getOrderType() == 1){
+            OrderAddress orderAddress = orderAddressService.getOrderAddress(orderId);
+            orderDetailVo.setAddress(orderAddress.getAddress());
+            //脱敏
+            orderDetailVo.setName(DesensitizedUtil.chineseName(orderAddress.getName()));
+            orderDetailVo.setTel(DesensitizedUtil.mobilePhone(orderAddress.getTel()));
+        }
 
-        OrderAddress orderAddress = orderAddressService.getOrderAddress(orderId);
+        Shop shop = shopService.getById(orderDetailVo.getShopId());
+        orderDetailVo.setShop(shop);
 
-        orderDetailVo.setAddress(orderAddress.getAddress());
-        //脱敏
-        orderDetailVo.setName(DesensitizedUtil.chineseName(orderAddress.getName()));
-        orderDetailVo.setTel(DesensitizedUtil.mobilePhone(orderAddress.getTel()));
+
+        //处理下预计送达时间
+        String estimateArrivalStartTime = DateUtil.format(orderDetailVo.getEstimateArrivalStartTime(),"yyyy/MM/dd HH:mm");
+        String estimateArrivalEndTime = DateUtil.format(orderDetailVo.getEstimateArrivalEndTime(),"HH:mm");
+
+        orderDetailVo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
+
+
+        //订单过期时间
+        Date expireTime =  DateUtil.offsetMinute(orderDetailVo.getCreateTime(), 15);
+        orderDetailVo.setExpireTime(expireTime.getTime());
+
+        Integer prodTotalNum = orderDetailVo.getOrderProducts().stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
+        orderDetailVo.setProdTotalNum(prodTotalNum);
         return orderDetailVo;
     }
 
@@ -304,22 +327,52 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean orderPayNotify(OrderPayNotifyParam param) {
         LambdaQueryWrapper<Orders> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Orders::getOrderNo,param.getOrderNo()).eq(BaseEntity::getDelFlag,0);
         Orders orders = getOne(lambdaQueryWrapper);
         if (orders == null){
-            log.error("微信支付回调出现异常,订单号不存在:"+param.getOutTradeNo());
+            log.error("微信支付回调出现异常,订单号不存在:"+param.getOrderNo());
             return false;
         }
+
+
+        OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(),param.getChannelId());
+        orderPay.setPayStatus(2);
+        Date payTime = DateUtil.parse(param.getPayTime(),"yyyyMMddHHmmss");
+        orderPay.setPayTime(payTime);
+        orderPay.setOutTradeNo(param.getOutTradeNo());
+        orderPayService.updateById(orderPay);
+
         //判断订单状态  如果订单状态是已取消  就退款
         if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())){
 
+            IPayService payService = SpringContextUtils.getBean(orderPay.getChannelId() + "_" + "service", IPayService.class);
+            //构造退款记录
+            Snowflake snowflake = IdUtil.getSnowflake();
+
+            OrderRefund orderRefund = new OrderRefund();
+            orderRefund.setRefundNo(snowflake.nextId());
+            orderRefund.setOrderId(orders.getId());
+            orderRefund.setOrderPayId(orderPay.getId());
+            orderRefund.setRefundPrice(orders.getOrderPrice());
+            orderRefund.setOrderPrice(orders.getOrderPrice());
+            orderRefund.setIsAllRefund(true);
+            orderRefund.setRefundDesc("订单超时支付,系统默认退款");
+            orderRefund.setRefundStatus(1);
+            orderRefundService.save(orderRefund);
+
+            //调用退款方法
+            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(),orders.getOrderNo().toString(),orderRefund.getRefundNo().toString(),orders.getOrderPrice().toString(),orderRefund.getId());
+            payService.refund(refundParam);
+            orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
+            return updateById(orders);
+        }else {
+            //更新总订单状态
+            orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
+            return updateById(orders);
         }
-
-
-
-        return null;
     }
 
     @Override

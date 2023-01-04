@@ -11,11 +11,8 @@ import com.pinet.rest.service.IOrdersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
 
 import javax.annotation.Resource;
@@ -96,7 +93,7 @@ public class OrdersController extends BaseController {
 
 
 
-    @RequestMapping("/cancelOrder")
+    @GetMapping("/cancelOrder")
     @ApiOperation("取消订单")
     @ApiVersion(1)
     public Result<?> cancelOrder(Long orderId){

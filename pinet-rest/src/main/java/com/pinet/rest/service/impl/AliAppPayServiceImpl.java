@@ -3,10 +3,16 @@ package com.pinet.rest.service.impl;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.domain.AlipayTradeRefundApplyModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.pinet.rest.config.properties.AliAppProperties;
+import com.pinet.rest.entity.OrderRefund;
 import com.pinet.rest.entity.param.PayParam;
+import com.pinet.rest.entity.param.RefundParam;
+import com.pinet.rest.service.IOrderRefundService;
 import com.pinet.rest.service.IPayService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +31,9 @@ public class AliAppPayServiceImpl implements IPayService {
     @Resource
     private AliAppProperties aliAppProperties;
 
+    @Resource
+    private IOrderRefundService orderRefundService;
+
     /**
      * 支付宝网关
      */
@@ -32,10 +41,10 @@ public class AliAppPayServiceImpl implements IPayService {
 
     @Override
     public Object pay(PayParam param) {
-        String orderStr="";
+        String orderStr = "";
         try {
             //实例化客户端
-            AlipayClient alipayClient = new DefaultAlipayClient(REFUND_URL,aliAppProperties.getAppid(),
+            AlipayClient alipayClient = new DefaultAlipayClient(REFUND_URL, aliAppProperties.getAppid(),
                     aliAppProperties.getPrivateKey(), "json", "UTF-8",
                     aliAppProperties.getPublicKeyAlipay(), "RSA2");
             //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
@@ -67,5 +76,38 @@ public class AliAppPayServiceImpl implements IPayService {
     @Override
     public String getPayName() {
         return "支付宝支付";
+    }
+
+    @Override
+    public void refund(RefundParam param) {
+        try {
+            //实例化客户端
+            AlipayClient alipayClient = new DefaultAlipayClient(REFUND_URL, aliAppProperties.getAppid(),
+                    aliAppProperties.getPrivateKey(), "json", "UTF-8",
+                    aliAppProperties.getPublicKeyAlipay(), "RSA2");
+            //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+            AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+            AlipayTradeRefundApplyModel model = new AlipayTradeRefundApplyModel();
+            //描述信息 添加附加数据
+            //订单编号
+            model.setOutTradeNo(param.getOrderNo());
+            //退款金额
+            model.setRefundAmount(param.getRefundFee());
+            model.setOutRequestNo(param.getOutRefundNo());
+            model.setRefundReason("商品退款");
+            request.setBizModel(model);
+            AlipayTradeRefundResponse response = alipayClient.execute(request);
+            //判断是否退款成功 更新退款记录状态
+            if (response.isSuccess()){
+                //更新退款记录状态为已到账
+                OrderRefund orderRefund = orderRefundService.getById(param.getOrderRefundId());
+                orderRefund.setRefundStatus(2);
+                orderRefundService.updateById(orderRefund);
+            }
+        } catch (Exception e) {
+            log.error("支付宝退款出现异常{}",e);
+        }
+
+
     }
 }

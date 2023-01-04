@@ -1,6 +1,7 @@
 package com.pinet.rest.service;
 
 import com.pinet.rest.entity.param.PayParam;
+import com.pinet.rest.entity.param.RefundParam;
 
 /**
  * @program: xinjiang-shop-app
@@ -21,4 +22,10 @@ public interface IPayService {
      * @return 渠道名称
      */
     String getPayName();
+
+    /**
+     * 退款
+     * @param param 退款需要的参数
+     */
+    void refund(RefundParam param);
 }

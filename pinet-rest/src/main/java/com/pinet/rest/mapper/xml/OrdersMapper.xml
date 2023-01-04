@@ -53,6 +53,7 @@
     <select id="selectOrderDetail" resultType="com.pinet.rest.entity.vo.OrderDetailVo" parameterType="java.lang.Long">
         select o.id                          orderId,
                o.order_no                    orderNo,
+               o.order_type                  orderType,
                o.customer_id                 customerId,
                o.order_status                orderStatus,
                o.estimate_arrival_start_time estimateArrivalStartTime,
