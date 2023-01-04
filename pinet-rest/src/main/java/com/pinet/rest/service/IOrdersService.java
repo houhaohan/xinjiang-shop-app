@@ -46,4 +46,6 @@ public interface IOrdersService extends IService<Orders> {
      * @return
      */
     Boolean orderPayNotify(OrderPayNotifyParam param);
+
+    Boolean cancelOrder(Long orderId);
 }

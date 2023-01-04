@@ -312,8 +312,28 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             log.error("微信支付回调出现异常,订单号不存在:"+param.getOutTradeNo());
             return false;
         }
+        //判断订单状态  如果订单状态是已取消  就退款
+        if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())){
+
+        }
+
+
 
         return null;
+    }
+
+    @Override
+    public Boolean cancelOrder(Long orderId) {
+        Orders orders = getById(orderId);
+        if (orders == null){
+            throw new PinetException("订单不存在");
+        }
+        //判断订单状态  是否可以取消  只有待付款状态可以取消
+        if (!orders.getOrderStatus().equals(OrderStatusEnum.NOT_PAY.getCode())){
+            throw new PinetException("只有待付款状态下才可以取消");
+        }
+        orders.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
+        return updateById(orders);
     }
 
 

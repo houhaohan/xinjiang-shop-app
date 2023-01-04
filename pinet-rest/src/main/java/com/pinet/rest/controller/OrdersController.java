@@ -94,4 +94,17 @@ public class OrdersController extends BaseController {
         return Result.ok(pay);
     }
 
+
+
+    @RequestMapping("/cancelOrder")
+    @ApiOperation("取消订单")
+    @ApiVersion(1)
+    public Result<?> cancelOrder(Long orderId){
+        Boolean res = ordersService.cancelOrder(orderId);
+        if (!res){
+            return Result.error("操作失败");
+        }
+        return Result.ok();
+    }
+
 }
