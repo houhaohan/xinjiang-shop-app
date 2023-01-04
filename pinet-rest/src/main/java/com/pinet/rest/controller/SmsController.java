@@ -12,6 +12,7 @@ import com.pinet.sms.enums.SmsTemplate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,7 +26,7 @@ public class SmsController {
     @RequestMapping(value = "/sendCode",method = RequestMethod.POST)
     @NotTokenSign
     @ApiVersion(1)
-    public Result sendSmsCode(@RequestBody SmsSendRequest request){
+    public Result sendSmsCode(@Validated @RequestBody SmsSendRequest request){
         SmsTemplate smsTemplate = SmsTemplate.getTemplateByName(request.getType());
         if(smsTemplate == null){
             return Result.error(ErrorCodeEnum.FAILED);

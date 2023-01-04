@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.controller.BaseController;
 import com.pinet.core.result.Result;
+import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.common.CommonPage;
@@ -44,7 +45,7 @@ public class HomeController extends BaseController {
     @NotTokenSign
     @ApiVersion(1)
     public Result<Page<RecommendProductVo>> recommendList(CommonPage param){
-        Long userId = super.currentUserId();
+        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Page<RecommendProductVo> pageList = shopProductService.recommendList(userId,param);
         return Result.ok(pageList);
     }

@@ -45,10 +45,6 @@ public class CustomerTokenServiceImpl extends ServiceImpl<CustomerTokenMapper, C
     }
 
     public boolean saveToken(Token token) {
-        if(token == null){
-            return false;
-        }
-
         CustomerToken customerToken = new CustomerToken();
         BeanUtils.copyProperties(token, customerToken);
         return this.save(customerToken);
