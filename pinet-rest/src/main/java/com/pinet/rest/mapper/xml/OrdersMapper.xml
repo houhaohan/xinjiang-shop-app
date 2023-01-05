@@ -48,7 +48,7 @@
                o.order_type   orderType
         from `orders` o
         where o.del_flag = 0
-          and o.customer_id = #{customerId,jdbcType=BIGINT}
+          and o.customer_id = #{customerId,jdbcType=BIGINT} order by o.create_time desc
     </select>
 
     <select id="selectOrderDetail" resultType="com.pinet.rest.entity.vo.OrderDetailVo" parameterType="java.lang.Long">
