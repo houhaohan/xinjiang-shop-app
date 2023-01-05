@@ -38,7 +38,7 @@ public class WxMiniPayServiceImpl implements IPayService {
         WxPayUnifiedOrderRequest wxPayUnifiedOrderRequest = WxPayUnifiedOrderRequest.newBuilder()
                 .openid(param.getOpenId())
                 .outTradeNo(param.getOrderNo())
-                .tradeType(WxPayConstants.TradeType.APP)
+                .tradeType(WxPayConstants.TradeType.JSAPI)
                 .totalFee(BaseWxPayRequest.yuanToFen(param.getPayPrice().toString()))
                 .body(param.getPayDesc())
                 .spbillCreateIp(IPUtils.getIpAddr())
@@ -71,7 +71,7 @@ public class WxMiniPayServiceImpl implements IPayService {
                 //退款金额(分)
                 .refundFee(BaseWxPayRequest.yuanToFen(param.getRefundFee()))
                 //回调接口
-                .notifyUrl("微信退款成功后的回调接口")
+                .notifyUrl(weiXinMiniProperties.getRefundNotifyUrl())
                 .build();
         try {
             miniPayService.refund(wxPayRefundRequest);

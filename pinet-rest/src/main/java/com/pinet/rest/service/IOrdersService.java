@@ -1,15 +1,17 @@
 package com.pinet.rest.service;
 
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
-import com.pinet.rest.entity.vo.*;
+import com.pinet.rest.entity.param.OrderRefundNotifyParam;
+import com.pinet.rest.entity.vo.CreateOrderVo;
+import com.pinet.rest.entity.vo.OrderDetailVo;
+import com.pinet.rest.entity.vo.OrderListVo;
+import com.pinet.rest.entity.vo.OrderSettlementVo;
 
 import java.util.List;
 
@@ -43,9 +45,22 @@ public interface IOrdersService extends IService<Orders> {
 
     /**
      * 订单支付回调
-     * @return
+     * @param param 回调需要的参数
+     * @return Boolean
      */
     Boolean orderPayNotify(OrderPayNotifyParam param);
 
+    /**
+     * 取消订单
+     * @param orderId 订单id
+     * @return Boolean
+     */
     Boolean cancelOrder(Long orderId);
+
+    /**
+     * 订单退款回调
+     * @param param 退款回调参数
+     * @return Boolean
+     */
+    Boolean orderRefundNotify(OrderRefundNotifyParam param);
 }

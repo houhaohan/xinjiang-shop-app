@@ -113,14 +113,16 @@ social:
       mch_id: 1502776411
       notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxApp/pay
       key: ZHANGSHUOwudi1234567891011121314
-      p12url: /www/apiclient_cert.p12
+      p12url: /www/cert/apiclient_cert.p12
+      refund_notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxApp/refund
     mini:
       appid: wx89ad3dd778a3e6ff
       secret: 4e0c7a50e7c358eb290cc994ee03766d
       mch_id: 1502776411
       notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxMini/pay
       key: ZHANGSHUOwudi1234567891011121314
-      p12url: /www/apiclient_cert.p12
+      p12url: /www/cert/apiclient_cert.p12
+      refund_notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxMini/refund
   alipay:
     app:
       appid: 2018042302596042

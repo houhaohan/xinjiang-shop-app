@@ -27,6 +27,9 @@ public class OrderListVo {
     @ApiModelProperty(value = "订单编号",name = "orderNo")
     private Long orderNo;
 
+    @ApiModelProperty(value = "订单类型(1外卖  2自提)",name = "orderType")
+    private Integer orderType;
+
     @ApiModelProperty(value = "商铺名称",name = "shopName")
     private String shopName;
 

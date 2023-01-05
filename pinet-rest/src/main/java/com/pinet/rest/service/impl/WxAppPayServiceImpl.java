@@ -72,7 +72,7 @@ public class WxAppPayServiceImpl implements IPayService {
                 //退款金额(分)
                 .refundFee(BaseWxPayRequest.yuanToFen(param.getRefundFee()))
                 //回调接口
-                .notifyUrl("微信退款成功后的回调接口")
+                .notifyUrl(weiXinAppProperties.getRefundNotifyUrl())
                 .build();
 
         try {

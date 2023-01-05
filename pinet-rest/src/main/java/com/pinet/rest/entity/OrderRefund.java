@@ -28,6 +28,9 @@ public class OrderRefund extends BaseEntity {
     @ApiModelProperty("退款编号")
     private Long refundNo;
 
+    @ApiModelProperty("退款商户编号")
+    private String outTradeNo;
+
     @ApiModelProperty("订单id")
     private Long orderId;
 

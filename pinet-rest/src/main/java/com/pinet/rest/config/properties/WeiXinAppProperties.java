@@ -24,6 +24,8 @@ public class WeiXinAppProperties {
 
     private String p12url;
 
+    private String refundNotifyUrl;
+
     public String getAppid() {
         return appid;
     }
@@ -70,5 +72,13 @@ public class WeiXinAppProperties {
 
     public void setP12url(String p12url) {
         this.p12url = p12url;
+    }
+
+    public String getRefundNotifyUrl() {
+        return refundNotifyUrl;
+    }
+
+    public void setRefundNotifyUrl(String refundNotifyUrl) {
+        this.refundNotifyUrl = refundNotifyUrl;
     }
 }

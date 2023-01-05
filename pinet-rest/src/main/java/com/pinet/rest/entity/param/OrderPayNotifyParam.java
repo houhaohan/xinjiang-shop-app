@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 /**
  * @program: xinjiang-shop-app
  * @description: 订单支付回调参数
@@ -22,7 +24,7 @@ public class OrderPayNotifyParam {
     /**
      * 支付时间
      */
-    private String payTime;
+    private Date payTime;
 
     /**
      * 三方订单号

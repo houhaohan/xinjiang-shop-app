@@ -29,6 +29,7 @@ import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
+import com.pinet.rest.entity.param.OrderRefundNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.param.RefundParam;
 import com.pinet.rest.entity.vo.*;
@@ -94,10 +95,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         IPage<OrderListVo> orderListVos = ordersMapper.selectOrderList(page, customerId);
         orderListVos.getRecords().forEach(k -> {
-            k.setProdNum(k.getOrderProducts().size());
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
             List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
             k.setOrderProducts(orderProducts);
+            k.setProdNum(orderProducts.size());
         });
         return orderListVos.getRecords();
     }
@@ -340,8 +341,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(),param.getChannelId());
         orderPay.setPayStatus(2);
-        Date payTime = DateUtil.parse(param.getPayTime(),"yyyyMMddHHmmss");
-        orderPay.setPayTime(payTime);
+        orderPay.setPayTime(param.getPayTime());
         orderPay.setOutTradeNo(param.getOutTradeNo());
         orderPayService.updateById(orderPay);
 
@@ -387,6 +387,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         orders.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
         return updateById(orders);
+    }
+
+    @Override
+    public Boolean orderRefundNotify(OrderRefundNotifyParam param) {
+        LambdaQueryWrapper<OrderRefund> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(OrderRefund::getRefundNo,param.getRefundNo()).eq(BaseEntity::getDelFlag,0);
+        OrderRefund orderRefund = orderRefundService.getOne(lambdaQueryWrapper);
+        if (orderRefund == null){
+            log.error("微信退款回调失败，退款单号不存在"+param.getRefundNo());
+            throw new PinetException("退款单号不存在");
+        }
+        orderRefund.setRefundStatus(2);
+        orderRefund.setOutTradeNo(param.getOutTradeNo());
+        return orderRefundService.updateById(orderRefund);
     }
 
 
