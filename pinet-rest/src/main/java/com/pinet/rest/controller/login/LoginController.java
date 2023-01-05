@@ -75,8 +75,9 @@ public class LoginController {
             return Result.ok(response);
         }catch (LoginException e){
             return Result.error(500,e.getMsg());
-        }
-        catch (Exception e){
+        }catch (WxErrorException e){
+            log.error("手机验证码登入失败，失败原因=======》{}",e.getMessage());
+        }catch (Exception e){
             log.error("手机验证码登入失败，失败原因=======》{}",e.getMessage());
         }
         return Result.error(500,"登入失败");

@@ -2,6 +2,7 @@ package com.pinet.rest.service.impl;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.UserConstant;
@@ -51,13 +52,13 @@ public class PhoneLoginServiceImpl implements ILoginService {
             customer.setLastLoginIp(IPUtils.getIpAddr());
             customer.setLastLoginTime(System.currentTimeMillis());
             if(StringUtil.isBlank(customer.getQsOpenId())){
-                WxMaJscode2SessionResult sessionInfo = wxMaService.getUserService().getSessionInfo("");
+                WxMaJscode2SessionResult sessionInfo = wxMaService.getUserService().getSessionInfo(smsLoginRequest.getWxCode());
                 String openid = sessionInfo.getOpenid();
                 customer.setQsOpenId(openid);
             }
             customerService.updateById(customer);
         }else {
-            WxMaJscode2SessionResult sessionInfo = wxMaService.getUserService().getSessionInfo("");
+            WxMaJscode2SessionResult sessionInfo = wxMaService.getUserService().getSessionInfo(smsLoginRequest.getWxCode());
             String openid = sessionInfo.getOpenid();
             String ip = IPUtils.getIpAddr();
             customer = Customer.builder()
@@ -73,10 +74,9 @@ public class PhoneLoginServiceImpl implements ILoginService {
             customerService.save(customer);
         }
 
-        //汇编
         String userId = "" + customer.getCustomerId();
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());
-        cacheToken(userId,token);
+        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,userId,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
 
         //todo 登入日志
         UserInfo userInfo = new UserInfo();
@@ -84,15 +84,5 @@ public class PhoneLoginServiceImpl implements ILoginService {
         userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JwtTokenUtils.EXPIRE_TIME/1000));
         userInfo.setUser(customer);
         return userInfo;
-    }
-
-
-    /**
-     * 缓存token
-     * @param userId
-     * @param token
-     */
-    private void cacheToken(String userId,String token){
-        redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,userId,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
     }
 }
