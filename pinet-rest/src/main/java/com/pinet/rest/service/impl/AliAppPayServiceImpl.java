@@ -102,6 +102,7 @@ public class AliAppPayServiceImpl implements IPayService {
                 //更新退款记录状态为已到账
                 OrderRefund orderRefund = orderRefundService.getById(param.getOrderRefundId());
                 orderRefund.setRefundStatus(2);
+                orderRefund.setOutTradeNo(response.getTradeNo());
                 orderRefundService.updateById(orderRefund);
             }
         } catch (Exception e) {

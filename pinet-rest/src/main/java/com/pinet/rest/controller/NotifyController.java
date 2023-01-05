@@ -66,7 +66,7 @@ public class NotifyController extends BaseController {
             return WxPayNotifyResponse.success("成功");
         } catch (Exception e) {
             log.error("微信回调结果异常,异常原因{}", e);
-            return WxPayNotifyResponse.success("code:" + 9999 + "微信回调结果异常,异常原因:" + e.getMessage());
+            return WxPayNotifyResponse.fail("code:" + 9999 + "微信回调结果异常,异常原因:" + e.getMessage());
         }
 
     }
@@ -87,7 +87,7 @@ public class NotifyController extends BaseController {
             return WxPayNotifyResponse.success("成功");
         }catch (Exception e){
             log.error("微信回调结果异常,异常原因{}", e);
-            return WxPayNotifyResponse.success("code:" + 9999 + "微信回调结果异常,异常原因:" + e.getMessage());
+            return WxPayNotifyResponse.fail("code:" + 9999 + "微信回调结果异常,异常原因:" + e.getMessage());
         }
     }
 
@@ -117,12 +117,7 @@ public class NotifyController extends BaseController {
             String gmtPayment = params.get("gmt_payment");
             //支付宝交易号
             String tradeNo = params.get("trade_no");
-            //3.校验通知中的 seller_id是否为 out_trade_no 这笔单据的对应的操作方
-            String sellerId = params.get("seller_id");
-            if (!sellerId.equals(aliAppProperties.getSellerid())) {
-                log.error("商家PID校验失败");
-                return result;
-            }
+
             //4.验证 app_id 是否为该商家本身
             String appId = params.get("app_id");
             if (!appId.equals(aliAppProperties.getAppid())){
@@ -136,7 +131,7 @@ public class NotifyController extends BaseController {
                 return result;
             }
 
-            OrderPayNotifyParam param = new OrderPayNotifyParam(Long.valueOf(outTradeNo), DateUtil.parse(gmtPayment,"yyyy-MM-dd HH:mm:ss"),tradeNo,"weixin_mini");
+            OrderPayNotifyParam param = new OrderPayNotifyParam(Long.valueOf(outTradeNo), DateUtil.parse(gmtPayment,"yyyy-MM-dd HH:mm:ss"),tradeNo,"alipay_app");
             ordersService.orderPayNotify(param);
             result = "success";
         }catch (Exception e){
@@ -172,7 +167,7 @@ public class NotifyController extends BaseController {
             return WxPayNotifyResponse.success("成功");
         } catch (Exception e) {
             log.error("微信退款回调结果异常,异常原因{}", e.getMessage());
-            return WxPayNotifyResponse.success("code:"+9999+"微信回调结果异常,异常原因:"+e.getMessage());
+            return WxPayNotifyResponse.fail("code:"+9999+"微信回调结果异常,异常原因:"+e.getMessage());
         }
     }
 
@@ -202,7 +197,7 @@ public class NotifyController extends BaseController {
             return WxPayNotifyResponse.success("成功");
         } catch (Exception e) {
             log.error("微信退款回调结果异常,异常原因{}", e.getMessage());
-            return WxPayNotifyResponse.success("code:"+9999+"微信回调结果异常,异常原因:"+e.getMessage());
+            return WxPayNotifyResponse.fail("code:"+9999+"微信回调结果异常,异常原因:"+e.getMessage());
         }
     }
 
