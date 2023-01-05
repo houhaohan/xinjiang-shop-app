@@ -13,9 +13,12 @@ public class SmsLoginRequest extends LoginRequest{
     @NotBlank(message = "手机号不能为空")
     private String phone;
 
-    @ApiModelProperty(value = "验证码",required = true)
+    @ApiModelProperty(value = "手机验证码",required = true)
     @NotBlank(message = "验证码不能为空")
     private String code;
 
+    @ApiModelProperty(value = "微信登入临时code",required = true)
+    @NotBlank(message = "wxCode不能为空")
+    private String wxCode;
 
 }

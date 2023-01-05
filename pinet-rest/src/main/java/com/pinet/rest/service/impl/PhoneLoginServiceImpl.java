@@ -1,5 +1,7 @@
 package com.pinet.rest.service.impl;
 
+import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.UserConstant;
@@ -15,6 +17,7 @@ import com.pinet.rest.entity.vo.UserInfo;
 import com.pinet.rest.service.ICustomerService;
 import com.pinet.rest.service.ILoginService;
 import lombok.RequiredArgsConstructor;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
@@ -27,8 +30,10 @@ public class PhoneLoginServiceImpl implements ILoginService {
 
     private final RedisUtil redisUtil;
 
+    private final WxMaService wxMaService;
+
     @Override
-    public UserInfo login(LoginRequest loginRequest) {
+    public UserInfo login(LoginRequest loginRequest) throws WxErrorException {
         SmsLoginRequest smsLoginRequest = (SmsLoginRequest)loginRequest;
         String code = redisUtil.get(CommonConstant.SMS_CODE_LOGIN + smsLoginRequest.getPhone());
         if(StringUtil.isEmpty(code)){
@@ -45,8 +50,15 @@ public class PhoneLoginServiceImpl implements ILoginService {
             }
             customer.setLastLoginIp(IPUtils.getIpAddr());
             customer.setLastLoginTime(System.currentTimeMillis());
+            if(StringUtil.isBlank(customer.getQsOpenId())){
+                WxMaJscode2SessionResult sessionInfo = wxMaService.getUserService().getSessionInfo("");
+                String openid = sessionInfo.getOpenid();
+                customer.setQsOpenId(openid);
+            }
             customerService.updateById(customer);
         }else {
+            WxMaJscode2SessionResult sessionInfo = wxMaService.getUserService().getSessionInfo("");
+            String openid = sessionInfo.getOpenid();
             String ip = IPUtils.getIpAddr();
             customer = Customer.builder()
                     .createTime(System.currentTimeMillis())
@@ -54,12 +66,14 @@ public class PhoneLoginServiceImpl implements ILoginService {
                     .lastLoginIp(ip)
                     .lastLoginTime(System.currentTimeMillis())
                     .phone(smsLoginRequest.getPhone())
+                    .qsOpenId(openid)
                     .active(1)
                     .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
                     .build();
             customerService.save(customer);
         }
 
+        //汇编
         String userId = "" + customer.getCustomerId();
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());
         cacheToken(userId,token);
