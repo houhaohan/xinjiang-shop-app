@@ -69,7 +69,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
                 }
             }
             //根据距离排序
-            shopList.stream().sorted(Comparator.comparing(ShopVo::getDistance)).collect(Collectors.toList());
+            shopList = shopList.stream().sorted(Comparator.comparing(ShopVo::getDistance)).collect(Collectors.toList());
         }
         return shopList;
     }
