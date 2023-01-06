@@ -56,6 +56,9 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         List<OrderProduct> orderProducts = new ArrayList<>();
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shopId);
+        if (cartList == null ||  cartList.size() == 0){
+            throw new PinetException("购物车内没有需要结算的商品");
+        }
         cartList.forEach(k -> {
             if (k.getCartStatus() == 2) {
                 throw new PinetException("购物车内有失效的商品,请删除后在结算");
