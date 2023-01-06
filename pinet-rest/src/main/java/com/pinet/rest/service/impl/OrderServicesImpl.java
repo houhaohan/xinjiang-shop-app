@@ -125,7 +125,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //处理下预计送达时间
-        String estimateArrivalStartTime = DateUtil.format(orderDetailVo.getEstimateArrivalStartTime(),"yyyy/MM/dd HH:mm");
+        String estimateArrivalStartTime = DateUtil.format(orderDetailVo.getEstimateArrivalStartTime(),"HH:mm");
         String estimateArrivalEndTime = DateUtil.format(orderDetailVo.getEstimateArrivalEndTime(),"HH:mm");
 
         orderDetailVo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
