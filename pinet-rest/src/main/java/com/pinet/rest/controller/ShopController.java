@@ -10,7 +10,6 @@ import com.pinet.rest.service.IShopService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +36,7 @@ public class ShopController extends BaseController {
     @PostMapping("/shopList")
     @ApiVersion(1)
     @NotTokenSign
-    public Result<List<ShopVo>> shopList(@Validated @RequestBody ShopListDto dto){
+    public Result<List<ShopVo>> shopList(@RequestBody ShopListDto dto){
         List<ShopVo> shopVoList = shopService.shopList(dto);
         return Result.ok(shopVoList);
     }

@@ -28,7 +28,7 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
     @Override
     public Customer getByPhone(String phone) {
         QueryWrapper<Customer> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("phone",phone).ne("qs_open_id","");
+        queryWrapper.eq("phone",phone);
         return getOne(queryWrapper);
     }
 
