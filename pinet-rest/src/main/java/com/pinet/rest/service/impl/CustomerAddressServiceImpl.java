@@ -87,7 +87,8 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
 
         UpdateWrapper<CustomerAddress> wrapper = new UpdateWrapper<>();
         wrapper.eq("customer_id",userId).ne("id",id);
-        CustomerAddress item = new CustomerAddress();item.setStatus(0);
+        CustomerAddress item = new CustomerAddress();
+        item.setStatus(0);
         update(item,wrapper);
         return true;
     }

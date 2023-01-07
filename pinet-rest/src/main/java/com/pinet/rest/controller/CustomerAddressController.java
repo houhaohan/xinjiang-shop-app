@@ -53,9 +53,6 @@ public class CustomerAddressController extends BaseController {
     @ApiVersion(1)
     public Result<String> save(@RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
-        if(userId == null || userId == 0){
-            return Result.error("用户没有登入，请先登入");
-        }
         boolean success = customerAddressService.add(customerAddressDto,userId);
         if(success){
             return Result.ok("操作成功");
@@ -68,9 +65,6 @@ public class CustomerAddressController extends BaseController {
     @ApiVersion(1)
     public Result<String> updateById(@RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
-        if(userId == null || userId == 0){
-            return Result.error("用户没有登入，请先登入");
-        }
         boolean success = customerAddressService.edit(customerAddressDto,userId);
         if(success){
             return Result.ok("操作成功");
@@ -82,10 +76,6 @@ public class CustomerAddressController extends BaseController {
     @RequestMapping(value = "/deleteById",method = {RequestMethod.DELETE})
     @ApiVersion(1)
     public Result<String> deleteById(@RequestBody BaseDto dto){
-        Long userId = super.currentUserId();
-        if(userId == null || userId == 0){
-            return Result.error("用户没有登入，请先登入");
-        }
         boolean success = customerAddressService.removeById(dto.getId());
         if(success){
             return Result.ok("删除成功");
@@ -99,9 +89,6 @@ public class CustomerAddressController extends BaseController {
     @ApiVersion(1)
     public Result<String> updateDefault(@RequestBody BaseDto dto){
         Long userId = super.currentUserId();
-        if(userId == null || userId == 0){
-            return Result.error("用户没有登入，请先登入");
-        }
         boolean success = customerAddressService.updateDefaultAddress(dto.getId(),userId);
         if(success){
             return Result.ok("操作成功");
