@@ -22,11 +22,11 @@ public class WxLoginRequest extends LoginRequest {
     private String iv;
 
     @ApiModelProperty("用户名")
-    private String nickname;
+    private String nickName;
 
     @ApiModelProperty("头像")
-    private String avatar;
+    private String avatarUrl;
 
     @ApiModelProperty("性别： 0：未知、1：男、2：女")
-    private String gender;
+    private Integer gender;
 }

@@ -70,8 +70,8 @@ public class WxConfiguration {
     @Bean
     public WxMaService wxMaService() {
         WxMaConfig wxMaConfig = new WxMaDefaultConfigImpl();
-        ((WxMaDefaultConfigImpl) wxMaConfig).setAppid("wx89ad3dd778a3e6ff");
-        ((WxMaDefaultConfigImpl) wxMaConfig).setSecret("4e0c7a50e7c358eb290cc994ee03766d");
+        ((WxMaDefaultConfigImpl) wxMaConfig).setAppid(weiXinMiniProperties.getAppid());
+        ((WxMaDefaultConfigImpl) wxMaConfig).setSecret(weiXinMiniProperties.getSecret());
         WxMaService wxMaService = new WxMaServiceImpl();
         //设置配置文件
         wxMaService.setWxMaConfig(wxMaConfig);

@@ -1,5 +1,6 @@
 package com.pinet.rest.entity.vo;
 
+import com.pinet.core.constants.CommonConstant;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.bo.OrderProductBo;
 import io.swagger.annotations.ApiModel;
@@ -28,7 +29,7 @@ public class OrderSettlementVo {
     private Integer orderMakeCount;
 
     @ApiModelProperty(value = "最大制作数量",name = "orderMaxNum")
-    private Integer orderMaxNum = 100;
+    private Integer orderMaxNum = CommonConstant.MAX_ORDER_NUM;
 
     @ApiModelProperty(value = "订单商品信息",name = "orderProductBoList")
     private List<OrderProduct> orderProductBoList;

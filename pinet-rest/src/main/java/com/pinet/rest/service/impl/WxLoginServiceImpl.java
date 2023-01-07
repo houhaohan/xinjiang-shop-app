@@ -10,6 +10,7 @@ import com.pinet.core.constants.UserConstant;
 import com.pinet.core.exception.LoginException;
 import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.JwtTokenUtils;
+import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
 import com.pinet.rest.entity.request.WxLoginRequest;
@@ -37,7 +38,12 @@ public class WxLoginServiceImpl implements ILoginService {
         WxLoginRequest wxLoginRequest = (WxLoginRequest)loginRequest;
         WxMaUserService userService = wxMaService.getUserService();
         WxMaJscode2SessionResult sessionInfo = userService.getSessionInfo(wxLoginRequest.getCode());
-        Customer customer = customerService.getByQsOpenId(sessionInfo.getOpenid());
+        WxMaPhoneNumberInfo phoneNoInfo = userService.getPhoneNoInfo(sessionInfo.getSessionKey(), wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
+        if(phoneNoInfo == null || StringUtil.isBlank(phoneNoInfo.getPhoneNumber())){
+            throw new LoginException("获取手机号失败");
+        }
+
+        Customer customer = customerService.getByPhone(phoneNoInfo.getPhoneNumber());
         if(customer != null){
             if(customer.getActive() == 0){
                 throw new LoginException("该用户已禁用");
@@ -45,6 +51,9 @@ public class WxLoginServiceImpl implements ILoginService {
             customer.setLastLoginIp(IPUtils.getIpAddr());
             customer.setLastLoginTime(System.currentTimeMillis());
             customer.setQsOpenId(sessionInfo.getOpenid());
+            customer.setNickname(wxLoginRequest.getNickName());
+            customer.setSex(wxLoginRequest.getGender());
+            customer.setAvatar(wxLoginRequest.getAvatarUrl());
             customerService.updateById(customer);
         }else {
             //创建新用户
@@ -55,8 +64,6 @@ public class WxLoginServiceImpl implements ILoginService {
                 throw new LoginException("获取openid失败");
             }
 
-            WxMaPhoneNumberInfo phoneNoInfo = userService.getPhoneNoInfo(sessionInfo.getSessionKey(), wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
-
             String ip = IPUtils.getIpAddr();
             customer = Customer.builder()
                     .createTime(System.currentTimeMillis())
@@ -64,9 +71,9 @@ public class WxLoginServiceImpl implements ILoginService {
                     .lastLoginIp(ip)
                     .lastLoginTime(System.currentTimeMillis())
                     .qsOpenId(sessionInfo.getOpenid())
-                    .nickname(wxLoginRequest.getNickname())
-                    .avatar(wxLoginRequest.getAvatar())
-                    .sex(Integer.valueOf(wxLoginRequest.getGender()))
+                    .nickname(wxLoginRequest.getNickName())
+                    .avatar(wxLoginRequest.getAvatarUrl())
+                    .sex(wxLoginRequest.getGender())
                     .phone(phoneNoInfo.getPhoneNumber())
                     .active(1)
                     .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
