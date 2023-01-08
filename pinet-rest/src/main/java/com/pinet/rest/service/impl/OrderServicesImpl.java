@@ -21,10 +21,7 @@ import com.pinet.core.util.SpringContextUtils;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
-import com.pinet.rest.entity.dto.CreateOrderDto;
-import com.pinet.rest.entity.dto.OrderListDto;
-import com.pinet.rest.entity.dto.OrderPayDto;
-import com.pinet.rest.entity.dto.OrderSettlementDto;
+import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.OrderRefundNotifyParam;
@@ -179,6 +176,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 90),"HH:mm");
 
         vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
+
+
+        Integer orderProductNum = orderProducts.stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
+        vo.setOrderProductNum(orderProductNum);
+
+
         return vo;
     }
 
@@ -411,6 +414,25 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderRefund.setRefundStatus(2);
         orderRefund.setOutTradeNo(param.getOutTradeNo());
         return orderRefundService.updateById(orderRefund);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void recurOrder(Long orderId) {
+        Orders order = getById(orderId);
+        if (order == null){
+            throw new PinetException("订单不存在");
+        }
+        List<OrderProduct> orderProducts = orderProductService.getByOrderId(orderId);
+        orderProducts.forEach(k->{
+            AddCartDto addCartDto = new AddCartDto();
+            addCartDto.setShopId(order.getShopId());
+            addCartDto.setShopProdId(k.getShopProdId());
+            addCartDto.setProdNum(k.getProdNum());
+            String shopProdSpecIds = k.getOrderProductSpecs().stream().map(OrderProductSpec::getShopProdSpecId).map(String::valueOf).collect(Collectors.joining(","));
+            addCartDto.setShopProdSpecIds(shopProdSpecIds);
+            cartService.addCart(addCartDto);
+        });
     }
 
 

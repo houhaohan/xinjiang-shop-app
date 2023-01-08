@@ -63,4 +63,10 @@ public interface IOrdersService extends IService<Orders> {
      * @return Boolean
      */
     Boolean orderRefundNotify(OrderRefundNotifyParam param);
+
+    /**
+     * 再来一单
+     * @param orderId
+     */
+    void recurOrder(Long orderId);
 }
