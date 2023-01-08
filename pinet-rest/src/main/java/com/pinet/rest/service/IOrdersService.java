@@ -68,5 +68,5 @@ public interface IOrdersService extends IService<Orders> {
      * 再来一单
      * @param orderId
      */
-    void recurOrder(Long orderId);
+    void recurOrder(Long orderId,Long customerId);
 }

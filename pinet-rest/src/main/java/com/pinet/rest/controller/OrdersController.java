@@ -110,7 +110,7 @@ public class OrdersController extends BaseController {
     @ApiOperation("再来一单")
     @ApiVersion(1)
     public Result<?> recurOrder(@Param("orderId") Long orderId){
-        ordersService.recurOrder(orderId);
+        ordersService.recurOrder(orderId,currentUserId());
         return Result.ok();
     }
 

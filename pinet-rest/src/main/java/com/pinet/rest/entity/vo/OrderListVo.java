@@ -33,6 +33,9 @@ public class OrderListVo {
     @ApiModelProperty(value = "商铺名称",name = "shopName")
     private String shopName;
 
+    @ApiModelProperty(value = "商铺id",name = "shopId")
+    private Long shopId;
+
     @ApiModelProperty(value = "订单状态",name = "orderStatus")
     private Integer orderStatus;
 

@@ -45,7 +45,8 @@
                o.order_status orderStatus,
                o.create_time  createTime,
                o.order_price  orderPrice,
-               o.order_type   orderType
+               o.order_type   orderType,
+               o.shop_id      shopId
         from `orders` o
         where o.del_flag = 0
           and o.customer_id = #{customerId,jdbcType=BIGINT} order by o.create_time desc

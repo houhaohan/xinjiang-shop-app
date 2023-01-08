@@ -418,7 +418,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void recurOrder(Long orderId) {
+    public void recurOrder(Long orderId,Long customerId) {
         Orders order = getById(orderId);
         if (order == null){
             throw new PinetException("订单不存在");
@@ -429,6 +429,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             addCartDto.setShopId(order.getShopId());
             addCartDto.setShopProdId(k.getShopProdId());
             addCartDto.setProdNum(k.getProdNum());
+            addCartDto.setCustomerId(customerId);
             String shopProdSpecIds = k.getOrderProductSpecs().stream().map(OrderProductSpec::getShopProdSpecId).map(String::valueOf).collect(Collectors.joining(","));
             addCartDto.setShopProdSpecIds(shopProdSpecIds);
             cartService.addCart(addCartDto);
