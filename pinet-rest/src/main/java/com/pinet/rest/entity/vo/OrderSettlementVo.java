@@ -36,4 +36,7 @@ public class OrderSettlementVo {
 
     @ApiModelProperty(value = "预计送达时间",name = "estimateArrivalTime")
     private String estimateArrivalTime;
+
+    @ApiModelProperty(value = "店铺名称",name = "shopName")
+    private String shopName;
 }

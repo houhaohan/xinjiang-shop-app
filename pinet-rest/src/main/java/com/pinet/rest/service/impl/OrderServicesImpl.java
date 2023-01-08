@@ -132,8 +132,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //订单过期时间
-        Date expireTime =  DateUtil.offsetMinute(orderDetailVo.getCreateTime(), 15);
-        orderDetailVo.setExpireTime(expireTime.getTime());
+        orderDetailVo.setExpireTime(getExpireTime(orderDetailVo.getCreateTime()));
 
         Integer prodTotalNum = orderDetailVo.getOrderProducts().stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
         orderDetailVo.setProdTotalNum(prodTotalNum);
@@ -142,7 +141,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     public OrderSettlementVo orderSettlement(OrderSettlementDto dto) {
+        Shop shop = shopService.getById(dto.getShopId());
         OrderSettlementVo vo = new OrderSettlementVo();
+        vo.setShopName(shop.getShopName());
         //配送费默认4元 自提没有配送费
         BigDecimal shippingFee = getShippingFee(dto.getOrderType());
 
@@ -163,7 +164,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setOrderProductBoList(orderProducts);
 
         //判断店铺是否营业
-        if (!shopService.checkShopStatus(dto.getShopId())) {
+        if (!shopService.checkShopStatus(shop)) {
             throw new PinetException("店铺已经打烊了~");
         }
 
@@ -281,8 +282,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         createOrderVo.setOrderId(order.getId());
         createOrderVo.setOrderNo(order.getOrderNo());
         createOrderVo.setOrderPrice(orderPrice);
+        //返回订单过期时间
+        createOrderVo.setExpireTime(getExpireTime(order.getCreateTime()));
 
         return createOrderVo;
+    }
+
+
+    private Long getExpireTime(Date createTime){
+        Date expireTime =  DateUtil.offsetMinute(createTime, 15);
+        return expireTime.getTime();
     }
 
     @Override

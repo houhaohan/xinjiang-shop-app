@@ -24,6 +24,9 @@ public class CreateOrderVo {
     @ApiModelProperty(value = "订单金额",name = "orderPrice")
     private BigDecimal orderPrice;
 
+    @ApiModelProperty(value = "过期时间",name = "expireTime")
+    private Long expireTime;
+
 
 
 }
