@@ -55,7 +55,7 @@ public class OrdersController extends BaseController {
     @PostMapping("/orderSettlement")
     @ApiOperation("订单结算")
     @ApiVersion(1)
-    public Result<OrderSettlementVo> checkOrder(@Validated @RequestBody OrderSettlementDto dto) {
+    public Result<OrderSettlementVo> orderSettlement(@Validated @RequestBody OrderSettlementDto dto) {
         checkParam(dto);
         OrderSettlementVo orderSettlementVo = ordersService.orderSettlement(dto);
         return Result.ok(orderSettlementVo);
