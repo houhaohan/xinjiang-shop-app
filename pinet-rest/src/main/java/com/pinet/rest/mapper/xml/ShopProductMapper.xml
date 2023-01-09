@@ -84,6 +84,7 @@
                temp.prod_id,
                temp.product_name,
                temp.product_img,
+               temp.product_type_id,
                sum(temp.market_price)      market_price,
                sum(temp.price)             price,
                ifnull(sum(op.prod_num), 0) sellnum
@@ -93,6 +94,7 @@
                         sp.prod_id,
                         sp.product_name,
                         sp.product_img,
+                        sp.product_type_id,
                         ifnull(min(ps.market_price), 0) as market_price,
                         ifnull(min(sps.price), 0)       as price
                  from shop_product sp
@@ -117,6 +119,7 @@
                         temp.prod_id,
                         temp.product_name,
                         temp.product_img,
+                        temp.product_type_id,
                         sum(market_price) as market_price,
                         sum(price)        as price
                  from (
@@ -125,6 +128,7 @@
                                  sp.prod_id,
                                  sp.product_name,
                                  sp.product_img,
+                                 sp.product_type_id,
                                  ifnull(min(ps.market_price), 0) as market_price,
                                  ifnull(min(sps.price), 0)       as price
                           from shop_product sp
@@ -148,6 +152,7 @@
                         temp.prod_id,
                         temp.product_name,
                         temp.product_img,
+                        temp.product_type_id,
                         sum(temp.market_price) as market_price,
                         sum(temp.price)        as price
                  from (
@@ -155,6 +160,7 @@
                                  sp.prod_id,
                                  sp.product_name,
                                  sp.product_img,
+                                 sp.product_type_id,
                                  ifnull(min(ps.market_price), 0) as market_price,
                                  ifnull(min(sps.price), 0)       as price
                           from shop_product sp

@@ -31,5 +31,7 @@ public class HotProductVo {
     @ApiModelProperty(value = "商品市场价")
     private BigDecimal marketPrice;
 
+    @ApiModelProperty(value = "商品类型ID")
+    private Long productTypeId;
 
 }
