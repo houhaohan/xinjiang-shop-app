@@ -42,7 +42,7 @@
     </select>
 
     <select id="getCartByUserIdAndShopId" resultType="com.pinet.rest.entity.vo.CartVo">
-        select SUM(prod_num) as prodNum,ifnull(sum(price),0) as price from (
+        select ifnull(SUM(prod_num),0) as prodNum,ifnull(sum(price),0) as price from (
             select c.id,c.prod_num,(ifnull(sum(sps.price),0) * c.prod_num) as price
             from cart c
             left join cart_product_spec cps on c.id = cps.cart_id and cps.del_flag = 0
