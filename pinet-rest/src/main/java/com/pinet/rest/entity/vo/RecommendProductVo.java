@@ -9,6 +9,9 @@ import java.math.BigDecimal;
 @ApiModel(value = "HotProductVo",description = "热卖商品")
 @Data
 public class RecommendProductVo {
+    @ApiModelProperty(value = "商品ID",notes = "跟prodId值一样")
+    private Long id;
+
     @ApiModelProperty(value = "店铺ID")
     private Long shopId;
 

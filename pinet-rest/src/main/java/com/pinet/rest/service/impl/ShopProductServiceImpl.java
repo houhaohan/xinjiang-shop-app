@@ -18,7 +18,7 @@ import com.pinet.rest.service.IShopProductService;
 import com.pinet.rest.service.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,9 +78,12 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
         //后12条数据
         List<RecommendProductVo> last12List = baseMapper.selectLast12RecommendList(param,prodIds);
-        first4List.addAll(last12List);
-        page.setRecords(first4List);
-        page.setTotal(first4List.size());
+
+        List<RecommendProductVo> result = new ArrayList<>(first4List.size()+last12List.size());
+        result.addAll(first4List);
+        result.addAll(last12List);
+        page.setRecords(result);
+        page.setTotal(result.size());
         return page;
     }
 
