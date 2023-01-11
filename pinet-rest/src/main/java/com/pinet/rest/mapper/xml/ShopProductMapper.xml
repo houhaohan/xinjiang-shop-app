@@ -82,7 +82,7 @@
         select temp.shop_id,
                temp.shop_name,
                temp.prod_id,
-               temp.prod_id as id,
+               temp.id,
                temp.product_name,
                temp.product_img,
                temp.product_type_id,
@@ -90,7 +90,8 @@
                sum(temp.price)             price,
                ifnull(sum(op.prod_num), 0) sellnum
         from (
-                 select sp.shop_id,
+                 select sp.id,
+                        sp.shop_id,
                         s.shop_name,
                         sp.prod_id,
                         sp.product_name,
@@ -117,6 +118,7 @@
         from (
                  select temp.shop_id,
                         temp.shop_name,
+                        temp.id,
                         temp.prod_id,
                         temp.prod_id as id,
                         temp.product_name,
@@ -127,6 +129,7 @@
                  from (
                           select sp.shop_id,
                                  s.shop_name,
+                                 sp.id,
                                  sp.prod_id,
                                  sp.product_name,
                                  sp.product_img,
@@ -161,7 +164,7 @@
         from (
                  select temp.shop_id,
                         temp.prod_id,
-                        temp.prod_id as id,
+                        temp.id,
                         temp.product_name,
                         temp.product_img,
                         temp.product_type_id,
@@ -169,6 +172,7 @@
                         sum(temp.price)        as price
                  from (
                           select sp.shop_id,
+                                 sp.id,
                                  sp.prod_id,
                                  sp.product_name,
                                  sp.product_img,
