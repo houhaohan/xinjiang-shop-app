@@ -285,6 +285,7 @@
         from (
                  select s.id                 as shopId,
                         s.shop_name,
+                        sp.id,
                         sp.prod_id,
                         sp.product_name,
                         sp.product_img,
