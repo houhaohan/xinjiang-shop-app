@@ -3,6 +3,7 @@ package com.pinet.rest.mapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.rest.entity.ShopProduct;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.*;
 import org.apache.ibatis.annotations.Param;
@@ -30,14 +31,14 @@ public interface ShopProductMapper extends BaseMapper<ShopProduct> {
      * 随机查找8条推荐商品
      * @return
      */
-    Page<RecommendProductVo> selectRecommendList(Page<RecommendProductVo> page);
+    List<RecommendProductVo> selectLast12RecommendList(@Param("param") RecommendProductParam param,@Param("prodIds") List<Long> prodIds);
 
     /**
      * 根据用户ID查找8条推荐商品
-     * @param userId
+     * @param param
      * @return
      */
-    Page<RecommendProductVo> selectRecommendListByUserId(Page<RecommendProductVo> page,@Param("userId") Long userId);
+    List<RecommendProductVo> selectFirst8RecommendList(RecommendProductParam param);
 
     /**
      * 商品详情

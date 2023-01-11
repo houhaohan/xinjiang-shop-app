@@ -3,11 +3,10 @@ package com.pinet.rest.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.controller.BaseController;
 import com.pinet.core.result.Result;
-import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
-import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
+import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.vo.HotProductVo;
 import com.pinet.rest.entity.vo.RecommendProductVo;
 import com.pinet.rest.service.IShopProductService;
@@ -37,16 +36,15 @@ public class HomeController extends BaseController {
 
 
     /**
-     * 根据当前用户商品浏览量排序，查找8条数据，如果没有浏览量，随机查找8条数据，没登入就随机查找8条数据
+     * 首页推荐商品
      * @return
      */
     @ApiOperation("推荐商品")
     @RequestMapping(value = "/recommend/list",method = RequestMethod.GET)
     @NotTokenSign
     @ApiVersion(1)
-    public Result<Page<RecommendProductVo>> recommendList(CommonPage param){
-        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        Page<RecommendProductVo> pageList = shopProductService.recommendList(userId,param);
+    public Result<Page<RecommendProductVo>> recommendList(RecommendProductParam param){
+        Page<RecommendProductVo> pageList = shopProductService.recommendList(param);
         return Result.ok(pageList);
     }
 

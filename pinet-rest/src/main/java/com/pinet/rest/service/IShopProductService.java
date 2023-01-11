@@ -3,8 +3,8 @@ package com.pinet.rest.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.rest.entity.ShopProduct;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
+import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.*;
 
@@ -30,7 +30,7 @@ public interface IShopProductService extends IService<ShopProduct> {
      * 首页推荐商品
      * @return
      */
-    Page<RecommendProductVo> recommendList(Long userId, CommonPage param);
+    Page<RecommendProductVo> recommendList(RecommendProductParam param);
 
     /**
      * 商品详情

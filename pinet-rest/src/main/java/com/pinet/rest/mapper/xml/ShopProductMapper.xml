@@ -111,7 +111,7 @@
         limit 16
     </select>
 
-    <select id="selectRecommendList" resultType="com.pinet.rest.entity.vo.RecommendProductVo">
+    <select id="selectLast12RecommendList" resultType="com.pinet.rest.entity.vo.RecommendProductVo">
         select *
         from (
                  select temp.shop_id,
@@ -135,17 +135,26 @@
                                    left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
                                    left join shop_product_spec sps on sps.prod_spec_id = ps.id
                                    left join shop s on s.id = sp.shop_id
-                          where sp.shop_prod_status = 1
+                          where sp.shop_id = #{param.shopId}
+                            and sp.shop_prod_status = 1
+                            <if test="prodIds != null and prodIds.size() > 0">
+                                and sp.prod_id not in
+                                <foreach collection="prodIds" item="item" separator="," open="(" close=")">
+                                    #{item}
+                                </foreach>
+                            </if>
+
                             and sp.del_flag = 0
-                          group by ps.sku_id, sp.shop_id
+                          group by ps.sku_id
                           order by RAND()
                           limit 50
                       ) temp
                  group by temp.prod_id
+                 limit 12
              ) t
     </select>
 
-    <select id="selectRecommendListByUserId" resultType="com.pinet.rest.entity.vo.RecommendProductVo">
+    <select id="selectFirst8RecommendList" resultType="com.pinet.rest.entity.vo.RecommendProductVo">
         select *
         from (
                  select temp.shop_id,
@@ -162,19 +171,21 @@
                                  sp.product_img,
                                  sp.product_type_id,
                                  ifnull(min(ps.market_price), 0) as market_price,
-                                 ifnull(min(sps.price), 0)       as price
+                                 ifnull(min(sps.price), 0)       as price,
+                                 sum(pgo.times) times
                           from shop_product sp
                                    left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
                                    left join shop_product_spec sps on sps.prod_spec_id = ps.id
                                    left join product_glance_over pgo on sp.prod_id = pgo.prod_id and pgo.del_flag = 0
-                          where pgo.customer_id = #{userId}
+                          where sp.shop_id = #{shopId}
                             and sp.shop_prod_status = 1
                             and sp.del_flag = 0
-                          group by ps.sku_id, sp.shop_id
-                          order by pgo.times desc
-                          limit 50
+                          group by ps.sku_id
+                          order by times desc
+                          limit 40
                       ) temp
                  group by temp.prod_id
+                 limit 8
              ) t
     </select>
 

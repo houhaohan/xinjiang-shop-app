@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
+
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -62,10 +64,10 @@ public class ShopProductController extends BaseController {
     @ApiOperation("商品列表")
     @ApiVersion(1)
     public Result<ShopProductListVo> list(@RequestParam(value = "shopId",required = false) Long shopId,
-                                          @RequestParam(value = "lat",defaultValue = "30.20835") BigDecimal lat,
-                                          @RequestParam(value = "lng",defaultValue = "120.21194") BigDecimal lng){
-        if(shopId == null && lat == null && lng == null){
-            return Result.error("参数不能为空");
+                                          @RequestParam(value = "lat",required = false) BigDecimal lat,
+                                          @RequestParam(value = "lng",required = false) BigDecimal lng){
+        if(lat == null || lng == null){
+            return Result.error("获取经纬度失败，请检查定位是否开启");
         }
         if(shopId == null){
             shopId = shopService.getMinDistanceShop(lat, lng);

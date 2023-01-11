@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.ShopProduct;
-import com.pinet.rest.entity.common.CommonPage;
 import com.pinet.rest.entity.param.HomeProductParam;
+import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.HotProductVo;
 import com.pinet.rest.entity.vo.RecommendProductVo;
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -41,11 +42,11 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
-        if(param.getLat() == null && param.getLng() == null && param.getShopId() == null){
-            throw new IllegalArgumentException("参数不能为空");
+        if(param.getLat() == null || param.getLng() == null ){
+            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
         }
         //根据经纬度获取最近的店铺ID
-        if(param.getLat() != null && param.getLng() != null){
+        if(param.getLat() != null && param.getLng() != null && param.getShopId() == null){
             Long shopId = shopService.getMinDistanceShop(param.getLat(), param.getLng());
             if(shopId == null){
                 return Collections.emptyList();
@@ -56,13 +57,31 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     }
 
     @Override
-    public Page<RecommendProductVo> recommendList(Long userId, CommonPage param) {
-        Page<RecommendProductVo> page = new Page<>(param.getPageNum(),param.getPageSize());
-        if(userId == null || userId == 0){
-            //随机查找8条数据
-            return baseMapper.selectRecommendList(page);
+    public Page<RecommendProductVo> recommendList(RecommendProductParam param) {
+        if(param.getLat() == null || param.getLng() == null ){
+            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
         }
-        return baseMapper.selectRecommendListByUserId(page,userId);
+        Page<RecommendProductVo> page = new Page<>(1,20);
+        //根据经纬度获取最近的店铺ID
+        if(param.getLat() != null && param.getLng() != null && param.getShopId() == null){
+            Long shopId = shopService.getMinDistanceShop(param.getLat(), param.getLng());
+            if(shopId == null){
+                return page;
+            }
+            param.setShopId(shopId);
+        }
+
+        //前4个为用户浏览最多的8个，后面12个随机推荐
+        //前8条数据
+        List<RecommendProductVo> first4List = baseMapper.selectFirst8RecommendList(param);
+        List<Long> prodIds = first4List.stream().map(RecommendProductVo::getProdId).collect(Collectors.toList());
+
+        //后12条数据
+        List<RecommendProductVo> last12List = baseMapper.selectLast12RecommendList(param,prodIds);
+        first4List.addAll(last12List);
+        page.setRecords(first4List);
+        page.setTotal(first4List.size());
+        return page;
     }
 
     @Override

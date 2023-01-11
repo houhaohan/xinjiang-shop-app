@@ -1,13 +1,14 @@
 package com.pinet.rest.entity.param;
 
+import com.pinet.rest.entity.common.CommonPage;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import java.math.BigDecimal;
 
-@ApiModel(value = "HomeProductParam",description = "首页热卖排行版参数")
 @Data
-public class HomeProductParam {
+@ApiModel(value = "RecommendProductParam",description = "首页推荐商品参数")
+public class RecommendProductParam extends CommonPage {
 
     @ApiModelProperty(value = "店铺ID")
     private Long shopId;
