@@ -14,11 +14,8 @@ import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.entity.vo.CartListVo;
 import com.pinet.rest.entity.vo.CartVo;
 import com.pinet.rest.mapper.CartMapper;
-import com.pinet.rest.service.ICartProductSpecService;
-import com.pinet.rest.service.ICartService;
+import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pinet.rest.service.IShopProductSpecService;
-import com.pinet.rest.service.IShopService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +45,9 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     @Resource
     private IShopService shopService;
+
+    @Resource
+    private IShopProductService shopProductService;
 
     @Resource
     private ICartProductSpecService cartProductSpecService;
@@ -80,8 +80,15 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Override
     @Transactional(rollbackFor = Exception.class)
     public AddCartVo addCart(AddCartDto dto) {
-        Long customerId = dto.getCustomerId();
 
+        //校验店铺商品id是否存在
+        ShopProduct shopProduct = shopProductService.getById(dto.getShopProdId());
+        if (shopProduct == null){
+            throw new PinetException("店铺商品不存在");
+        }
+
+
+        Long customerId = dto.getCustomerId();
         Cart cart = new Cart();
         BeanUtils.copyProperties(dto, cart);
         cart.setCartStatus(1);
