@@ -94,6 +94,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         IPage<OrderListVo> orderListVos = ordersMapper.selectOrderList(page, customerId);
         orderListVos.getRecords().forEach(k -> {
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
+            //如果是自提订单并且是配送中 修改状态状态str为可领取
+            if (k.getOrderStatus().equals(OrderStatusEnum.SEND_OUT.getCode()) && k.getOrderType() == 2){
+                k.setOrderStatusStr("可领取");
+            }
             List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
             k.setOrderProducts(orderProducts);
             k.setProdNum(orderProducts.size());
