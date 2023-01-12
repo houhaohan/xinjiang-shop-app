@@ -33,7 +33,16 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
     private IAddressService addressService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean add(CustomerAddressDto customerAddressDto,Long userId) {
+        if(customerAddressDto.getStatus() == 1){
+            UpdateWrapper<CustomerAddress> wrapper = new UpdateWrapper<>();
+            wrapper.eq("customer_id",userId);
+            CustomerAddress item = new CustomerAddress();
+            item.setStatus(0);
+            update(item,wrapper);
+        }
+
         AddressIdVo addressIdVo = addressService.selectIdByName(customerAddressDto.getProvince(), customerAddressDto.getCity(), customerAddressDto.getDistrict());
         CustomerAddress entity = new CustomerAddress();
         BeanUtils.copyProperties(customerAddressDto,entity);

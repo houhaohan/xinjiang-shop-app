@@ -1,7 +1,6 @@
 package com.pinet.rest.controller;
 
 
-import com.alibaba.fastjson.JSONObject;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
@@ -27,8 +26,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
-
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 

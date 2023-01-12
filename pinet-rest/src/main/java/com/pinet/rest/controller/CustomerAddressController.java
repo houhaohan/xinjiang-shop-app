@@ -1,6 +1,7 @@
 package com.pinet.rest.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
@@ -11,6 +12,7 @@ import com.pinet.rest.service.ICustomerAddressService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -51,7 +53,9 @@ public class CustomerAddressController extends BaseController {
     @ApiOperation("新增")
     @RequestMapping(value = "/save",method = RequestMethod.POST)
     @ApiVersion(1)
-    public Result<String> save(@RequestBody CustomerAddressDto customerAddressDto){
+    public Result<String> save(@Validated @RequestBody CustomerAddressDto customerAddressDto){
+
+        System.out.println("参数；=============================》"+JSONObject.toJSONString(customerAddressDto));
         Long userId = super.currentUserId();
         boolean success = customerAddressService.add(customerAddressDto,userId);
         if(success){
@@ -63,7 +67,7 @@ public class CustomerAddressController extends BaseController {
     @ApiOperation("修改")
     @RequestMapping(value = "/updateById",method = RequestMethod.POST)
     @ApiVersion(1)
-    public Result<String> updateById(@RequestBody CustomerAddressDto customerAddressDto){
+    public Result<String> updateById(@Validated @RequestBody CustomerAddressDto customerAddressDto){
         Long userId = super.currentUserId();
         boolean success = customerAddressService.edit(customerAddressDto,userId);
         if(success){
