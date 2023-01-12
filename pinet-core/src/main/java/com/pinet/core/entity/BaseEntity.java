@@ -26,7 +26,7 @@ public class BaseEntity implements Serializable {
     @TableField(value = "create_by",fill = FieldFill.INSERT)
     private Long createBy;
     @ApiModelProperty(value = "创建时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     @TableField(value = "create_time",fill = FieldFill.INSERT)
     private Date createTime;
     @ApiModelProperty(value = "更新人")
@@ -36,7 +36,7 @@ public class BaseEntity implements Serializable {
     @TableField(value = "update_by",fill = FieldFill.UPDATE)
     private Long updateBy;
     @ApiModelProperty(value = "更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     @TableField(value = "update_time",fill = FieldFill.UPDATE)
     private Date updateTime;
     @ApiModelProperty(value = "是否删除  0正常  1删除")

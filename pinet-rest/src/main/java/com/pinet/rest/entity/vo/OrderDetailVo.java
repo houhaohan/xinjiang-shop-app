@@ -37,11 +37,11 @@ public class OrderDetailVo {
     private Integer orderStatus;
 
     @ApiModelProperty(value = "预计送达开始时间",name = "estimateArrivalStartTime")
-    @JsonFormat(pattern = "HH:mm")
+    @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     private Date estimateArrivalStartTime;
 
     @ApiModelProperty(value = "预计送达结束时间",name = "estimateArrivalEndTime")
-    @JsonFormat(pattern = "HH:mm")
+    @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     private Date estimateArrivalEndTime;
 
     @ApiModelProperty(value = "预计送达时间",name = "estimateArrivalTime")
@@ -63,7 +63,7 @@ public class OrderDetailVo {
     private BigDecimal orderPrice;
 
     @ApiModelProperty(value = "下单时间",name = "createTime")
-    @JsonFormat(pattern = "MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date createTime;
 
     @ApiModelProperty(value = "订单过期时间",name = "createTime")
