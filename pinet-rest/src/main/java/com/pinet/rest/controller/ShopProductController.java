@@ -1,6 +1,7 @@
 package com.pinet.rest.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.util.ThreadLocalUtil;
@@ -18,6 +19,7 @@ import com.pinet.rest.service.IShopProductService;
 import com.pinet.rest.service.IShopService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,6 +43,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/{version}/shop/product")
 @Api(tags = "商品")
+@Slf4j
 public class ShopProductController extends BaseController {
 
     @Autowired
@@ -67,7 +70,8 @@ public class ShopProductController extends BaseController {
                                           @RequestParam(value = "lat",required = false) BigDecimal lat,
                                           @RequestParam(value = "lng",required = false) BigDecimal lng){
         if(lat == null || lng == null){
-            return Result.error("获取经纬度失败，请检查定位是否开启");
+            lng = new BigDecimal("120.21551");
+            lat = new BigDecimal("30.25308");
         }
         if(shopId == null){
             shopId = shopService.getMinDistanceShop(lat, lng);

@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
@@ -16,8 +17,11 @@ import com.pinet.rest.mapper.ShopProductMapper;
 import com.pinet.rest.service.IProductGlanceOverService;
 import com.pinet.rest.service.IShopProductService;
 import com.pinet.rest.service.IShopService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +37,7 @@ import java.util.stream.Collectors;
  * @since 2022-12-08
  */
 @Service
+@Slf4j
 public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopProduct> implements IShopProductService {
 
     @Autowired
@@ -43,7 +48,10 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
         if(param.getLat() == null || param.getLng() == null ){
-            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
+//            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
+            log.error("获取经纬度失败,参数:{}", JSONObject.toJSONString(param));
+            param.setLng(new BigDecimal("120.21551"));
+            param.setLat(new BigDecimal("30.25308"));
         }
         //根据经纬度获取最近的店铺ID
         if(param.getLat() != null && param.getLng() != null && param.getShopId() == null){
@@ -59,7 +67,10 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Override
     public Page<RecommendProductVo> recommendList(RecommendProductParam param) {
         if(param.getLat() == null || param.getLng() == null ){
-            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
+//            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
+            log.error("获取经纬度失败,参数:{}", JSONObject.toJSONString(param));
+            param.setLng(new BigDecimal("120.21551"));
+            param.setLat(new BigDecimal("30.25308"));
         }
         Page<RecommendProductVo> page = new Page<>(1,20);
         //根据经纬度获取最近的店铺ID
