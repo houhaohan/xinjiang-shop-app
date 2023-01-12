@@ -47,14 +47,11 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
-        if(param.getLat() == null || param.getLng() == null ){
+//        if(param.getLat() == null || param.getLng() == null ){
 //            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
-            log.error("获取经纬度失败,参数:{}", JSONObject.toJSONString(param));
-            param.setLng(new BigDecimal("120.21551"));
-            param.setLat(new BigDecimal("30.25308"));
-        }
+//        }
         //根据经纬度获取最近的店铺ID
-        if(param.getLat() != null && param.getLng() != null && param.getShopId() == null){
+        if(param.getShopId() == null){
             Long shopId = shopService.getMinDistanceShop(param.getLat(), param.getLng());
             if(shopId == null){
                 return Collections.emptyList();
@@ -66,15 +63,12 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public Page<RecommendProductVo> recommendList(RecommendProductParam param) {
-        if(param.getLat() == null || param.getLng() == null ){
+//        if(param.getLat() == null || param.getLng() == null ){
 //            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
-            log.error("获取经纬度失败,参数:{}", JSONObject.toJSONString(param));
-            param.setLng(new BigDecimal("120.21551"));
-            param.setLat(new BigDecimal("30.25308"));
-        }
+//        }
         Page<RecommendProductVo> page = new Page<>(1,20);
         //根据经纬度获取最近的店铺ID
-        if(param.getLat() != null && param.getLng() != null && param.getShopId() == null){
+        if(param.getShopId() == null){
             Long shopId = shopService.getMinDistanceShop(param.getLat(), param.getLng());
             if(shopId == null){
                 return page;

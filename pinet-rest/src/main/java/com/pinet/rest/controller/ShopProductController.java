@@ -2,6 +2,7 @@ package com.pinet.rest.controller;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.util.ThreadLocalUtil;
@@ -67,12 +68,8 @@ public class ShopProductController extends BaseController {
     @ApiOperation("商品列表")
     @ApiVersion(1)
     public Result<ShopProductListVo> list(@RequestParam(value = "shopId",required = false) Long shopId,
-                                          @RequestParam(value = "lat",required = false) BigDecimal lat,
-                                          @RequestParam(value = "lng",required = false) BigDecimal lng){
-        if(lat == null || lng == null){
-            lng = new BigDecimal("120.21551");
-            lat = new BigDecimal("30.25308");
-        }
+                                          @RequestParam(value = "lat",defaultValue = CommonConstant.DEFAULT_LAT) BigDecimal lat,
+                                          @RequestParam(value = "lng",defaultValue = CommonConstant.DEFAULT_LNG) BigDecimal lng){
         if(shopId == null){
             shopId = shopService.getMinDistanceShop(lat, lng);
             if(shopId == null){
