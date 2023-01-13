@@ -1,33 +1,22 @@
 package com.pinet.core.controller;
 
-
-import com.alibaba.fastjson.JSONObject;
 import com.pinet.core.http.HttpResult;
 import com.pinet.core.http.HttpStatus;
 import com.pinet.core.ApiErrorEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
-import com.pinet.core.util.MD5Util;
 import com.pinet.core.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.error.ErrorController;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -81,6 +70,12 @@ public class PinetErrorController implements ErrorController {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result handler(MethodArgumentNotValidException e) {
+        log.error(e.getMessage());
+        return Result.error(ApiErrorEnum.PARAM_T_ERROR.getCode(), e.getBindingResult().getFieldError().getDefaultMessage());
+    }
+
+    @ExceptionHandler(BindException.class)
+    public Result handler(BindException e) {
         log.error(e.getMessage());
         return Result.error(ApiErrorEnum.PARAM_T_ERROR.getCode(), e.getBindingResult().getFieldError().getDefaultMessage());
     }
