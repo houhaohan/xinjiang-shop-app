@@ -51,9 +51,6 @@ public class WxLoginServiceImpl implements ILoginService {
             customer.setLastLoginIp(IPUtils.getIpAddr());
             customer.setLastLoginTime(System.currentTimeMillis());
             customer.setQsOpenId(sessionInfo.getOpenid());
-            customer.setNickname(wxLoginRequest.getNickName());
-            customer.setSex(wxLoginRequest.getGender());
-            customer.setAvatar(wxLoginRequest.getAvatarUrl());
             customerService.updateById(customer);
         }else {
             //创建新用户
@@ -72,7 +69,7 @@ public class WxLoginServiceImpl implements ILoginService {
                     .lastLoginTime(System.currentTimeMillis())
                     .qsOpenId(sessionInfo.getOpenid())
                     .nickname(wxLoginRequest.getNickName())
-                    .avatar(wxLoginRequest.getAvatarUrl())
+                    .avatar("http://image.ypxlbz.com/qingshi/image/8d342da4670d490fb81df2723b97293e.png")
                     .sex(wxLoginRequest.getGender())
                     .phone(phoneNoInfo.getPhoneNumber())
                     .active(1)

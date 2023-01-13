@@ -1,7 +1,6 @@
 package com.pinet.rest.controller;
 
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
@@ -45,7 +44,7 @@ public class CustomerAddressController extends BaseController {
             return Result.ok();
         }
         QueryWrapper<CustomerAddress> wrapper = new QueryWrapper<>();
-        wrapper.eq("customer_id",userId);
+        wrapper.eq("customer_id",userId).orderByDesc("id");
         List<CustomerAddress> list = customerAddressService.list(wrapper);
         return Result.ok(list);
     }
@@ -54,8 +53,6 @@ public class CustomerAddressController extends BaseController {
     @RequestMapping(value = "/save",method = RequestMethod.POST)
     @ApiVersion(1)
     public Result<String> save(@Validated @RequestBody CustomerAddressDto customerAddressDto){
-
-        System.out.println("参数；=============================》"+JSONObject.toJSONString(customerAddressDto));
         Long userId = super.currentUserId();
         boolean success = customerAddressService.add(customerAddressDto,userId);
         if(success){
