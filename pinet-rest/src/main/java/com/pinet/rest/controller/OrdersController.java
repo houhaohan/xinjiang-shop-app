@@ -10,7 +10,6 @@ import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.service.IOrdersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -109,7 +108,7 @@ public class OrdersController extends BaseController {
     @RequestMapping("/recurOrder")
     @ApiOperation("再来一单")
     @ApiVersion(1)
-    public Result<?> recurOrder(@Param("orderId") Long orderId){
+    public Result<?> recurOrder(Long orderId){
         ordersService.recurOrder(orderId,currentUserId());
         return Result.ok();
     }
