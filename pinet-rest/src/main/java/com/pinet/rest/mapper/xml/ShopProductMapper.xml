@@ -103,7 +103,7 @@
                           left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
                           left join shop_product_spec sps on sps.prod_spec_id = ps.id
                           left join shop s on s.id = sp.shop_id
-                 where sp.shop_id = #{shopId}
+                 where sp.shop_id = #{shopId} and sp.shop_prod_status = 1
                  group by ps.sku_id
                  limit 80
              ) temp
@@ -314,7 +314,7 @@
         where o.shop_id = #{shopId}
           and o.order_status = 100
           and sp.del_flag = 0
-        group by o.id
+        group by sp.prod_id
         order by count(1) desc
         limit 10
     </select>

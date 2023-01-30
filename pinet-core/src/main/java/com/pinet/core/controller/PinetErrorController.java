@@ -1,6 +1,5 @@
 package com.pinet.core.controller;
 
-import com.pinet.core.http.HttpResult;
 import com.pinet.core.http.HttpStatus;
 import com.pinet.core.ApiErrorEnum;
 import com.pinet.core.exception.PinetException;
@@ -24,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestControllerAdvice
 public class PinetErrorController implements ErrorController {
     @RequestMapping("/error")
-    public HttpResult error(HttpServletRequest request, HttpServletResponse response) {
+    public Result error(HttpServletRequest request, HttpServletResponse response) {
         Object obj = request.getAttribute("javax.servlet.error.exception");
         Object forwardurl = request.getAttribute("javax.servlet.error.request_uri");
         Object errorCode = request.getAttribute("javax.servlet.error.status_code");
@@ -36,7 +35,7 @@ public class PinetErrorController implements ErrorController {
         if (obj != null && obj instanceof PinetException) {
             PinetException uguessException = (PinetException) obj;
             msg = uguessException.getMsg();
-            return HttpResult.error(uguessException.getCode(), msg);
+            return Result.error(uguessException.getCode(), msg);
         }
         if (obj != null && obj instanceof Exception) {
             Exception exception = (Exception) obj;
@@ -48,7 +47,7 @@ public class PinetErrorController implements ErrorController {
                 msg = ApiErrorEnum.ERROR_NOT_FOUNT.getMsg();
             }
         }
-        return HttpResult.error(response.getStatus(), StringUtil.isEmpty(msg) ? "系统发生未知的错误" : msg);
+        return Result.error(response.getStatus(), StringUtil.isEmpty(msg) ? "系统发生未知的错误" : msg);
     }
 
 
@@ -68,17 +67,12 @@ public class PinetErrorController implements ErrorController {
         return Result.error(ApiErrorEnum.ERROR.getCode(), msg == null ? ApiErrorEnum.ERROR.getMsg() : StringUtil.subBeforeColon(msg));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result handler(MethodArgumentNotValidException e) {
-        log.error(e.getMessage());
-        return Result.error(ApiErrorEnum.PARAM_T_ERROR.getCode(), e.getBindingResult().getFieldError().getDefaultMessage());
-    }
-
-    @ExceptionHandler(BindException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class,BindException.class})
     public Result handler(BindException e) {
         log.error(e.getMessage());
         return Result.error(ApiErrorEnum.PARAM_T_ERROR.getCode(), e.getBindingResult().getFieldError().getDefaultMessage());
     }
+
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Result handler(HttpMessageNotReadableException e) {

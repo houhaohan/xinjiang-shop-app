@@ -2,8 +2,8 @@ package com.pinet.rest.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.pinet.core.entity.Token;
-import com.pinet.core.exception.PinetException;
-import com.pinet.core.http.HttpResult;
+import com.pinet.core.http.HttpStatus;
+import com.pinet.core.result.Result;
 import com.pinet.core.util.AppJwtTokenUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
@@ -19,7 +19,6 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * APP token的拦截器
@@ -101,7 +100,7 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
     private boolean error(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("utf8");
-        response.getWriter().write(JSON.toJSONString(HttpResult.error(403, "系统没有权限访问")));
+        response.getWriter().write(JSON.toJSONString(Result.error(HttpStatus.SC_FORBIDDEN, "系统没有权限访问")));
         logger.warn("{}系统没有直接访问权限，请检查token是否过期", request.getRequestURI());
         return false;
     }

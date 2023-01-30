@@ -47,7 +47,7 @@ public class ShopVo {
     @ApiModelProperty("纬度")
     private String lat;
 
-    @ApiModelProperty("距离")
+    @ApiModelProperty(value = "距离",example = "10.23")
     private Double distance;
 
     @ApiModelProperty("开始营业时间")
