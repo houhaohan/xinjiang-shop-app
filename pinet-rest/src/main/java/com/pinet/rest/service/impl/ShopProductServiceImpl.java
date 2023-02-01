@@ -75,14 +75,14 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
         //前4个为用户浏览最多的8个，后面12个随机推荐
         //前8条数据
-        List<RecommendProductVo> first4List = baseMapper.selectFirst8RecommendList(param);
-        List<Long> prodIds = first4List.stream().map(RecommendProductVo::getProdId).collect(Collectors.toList());
+        List<RecommendProductVo> first8List = baseMapper.selectFirst8RecommendList(param);
+        List<Long> prodIds = first8List.stream().map(RecommendProductVo::getProdId).collect(Collectors.toList());
 
         //后12条数据
         List<RecommendProductVo> last12List = baseMapper.selectLast12RecommendList(param,prodIds);
 
-        List<RecommendProductVo> result = new ArrayList<>(first4List.size()+last12List.size());
-        result.addAll(first4List);
+        List<RecommendProductVo> result = new ArrayList<>(first8List.size()+last12List.size());
+        result.addAll(first8List);
         result.addAll(last12List);
         page.setRecords(result);
         page.setTotal(result.size());

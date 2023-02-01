@@ -1,6 +1,5 @@
 package com.pinet.rest.mapper;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.rest.entity.ShopProduct;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.pinet.rest.entity.param.RecommendProductParam;
@@ -28,7 +27,7 @@ public interface ShopProductMapper extends BaseMapper<ShopProduct> {
     public List<HotProductVo> getProductByShopId(@Param("shopId") Long shopId);
 
     /**
-     * 随机查找8条推荐商品
+     * 随机查找12条推荐商品
      * @return
      */
     List<RecommendProductVo> selectLast12RecommendList(@Param("param") RecommendProductParam param,@Param("prodIds") List<Long> prodIds);

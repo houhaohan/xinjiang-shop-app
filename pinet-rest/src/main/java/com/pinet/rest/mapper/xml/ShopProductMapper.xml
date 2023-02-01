@@ -150,10 +150,10 @@
 
                             and sp.del_flag = 0
                           group by ps.sku_id
-                          order by RAND()
                           limit 50
                       ) temp
                  group by temp.prod_id
+                 order by RAND()
                  limit 12
              ) t
     </select>
@@ -168,7 +168,9 @@
                         temp.product_img,
                         temp.product_type_id,
                         sum(temp.market_price) as market_price,
-                        sum(temp.price)        as price
+                        sum(temp.price)        as price,
+                        (select ifnull(sum(pgo.times),0)  from product_glance_over pgo where temp.prod_id = pgo.prod_id and pgo.del_flag = 0) as times
+
                  from (
                           select sp.shop_id,
                                  sp.id,
@@ -177,20 +179,17 @@
                                  sp.product_img,
                                  sp.product_type_id,
                                  ifnull(min(ps.market_price), 0) as market_price,
-                                 ifnull(min(sps.price), 0)       as price,
-                                 sum(pgo.times) times
+                                 ifnull(min(sps.price), 0)       as price
                           from shop_product sp
                                    left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
                                    left join shop_product_spec sps on sps.prod_spec_id = ps.id
-                                   left join product_glance_over pgo on sp.prod_id = pgo.prod_id and pgo.del_flag = 0
                           where sp.shop_id = #{shopId}
                             and sp.shop_prod_status = 1
                             and sp.del_flag = 0
                           group by ps.sku_id
-                          order by times desc
-                          limit 40
                       ) temp
                  group by temp.prod_id
+                order by times desc
                  limit 8
              ) t
     </select>
