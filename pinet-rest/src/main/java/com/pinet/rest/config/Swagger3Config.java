@@ -47,7 +47,7 @@ public class Swagger3Config {
     @Bean
     public Docket docket(Environment environment) {
         // 设置要配置的Swagger环境
-        Profiles p = Profiles.of("local", "dev", "test");
+        Profiles p = Profiles.of("local", "dev", "test","prod");
         boolean flag = environment.acceptsProfiles(p);
         return new Docket(DocumentationType.OAS_30)
                 .apiInfo(apiInfo())

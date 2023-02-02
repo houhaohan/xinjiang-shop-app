@@ -27,7 +27,7 @@ public class BackendWebMVCConfig implements WebMvcConfigurer {
                 //不需要拦截的请求 swagger
                 .excludePathPatterns("/swagger-resources/**","/swagger-ui/**","/v3/**")
                 // 登入接口
-                .excludePathPatterns("/v*/login/**");
+                .excludePathPatterns("/v*/login/**","/websocket/**");
 
         registry.addInterceptor(handlerInterceptorBuild)
                 .order(2)
@@ -36,7 +36,7 @@ public class BackendWebMVCConfig implements WebMvcConfigurer {
                 //不需要拦截的请求 swagger
                 .excludePathPatterns("/swagger-resources/**","/swagger-ui/**","/v3/**")
                 // 登入接口
-                .excludePathPatterns("/v*/login/**");
+                .excludePathPatterns("/v*/login/**","/websocket/**");
     }
 
 

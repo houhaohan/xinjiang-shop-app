@@ -28,10 +28,6 @@ public class LoginController {
 
     @Autowired
     private RedisUtil redisUtil;
-    @Value("wx.miniapp.appid")
-    private String appId;
-    @Value("wx.miniapp.secret")
-    private String secret;
 
 
     /**
@@ -96,7 +92,7 @@ public class LoginController {
             redisUtil.delete(UserConstant.PREFIX_USER_TOKEN+token);
             return Result.ok();
         }catch (Exception e){
-            log.error("手机验证码登入失败，失败原因=======》{}",e.getMessage());
+            log.error("微信退出失败，失败原因=======》{}",e.getMessage());
         }
         return Result.error(500,"退出失败");
     }
