@@ -57,7 +57,7 @@ public class PinetErrorController implements ErrorController {
     @ExceptionHandler(PinetException.class)
     public Result handler(PinetException e) {
         log.error(e.getMessage(), e);
-        return Result.error(ApiErrorEnum.ERROR.getCode(), e.getMsg());
+        return Result.error(e.getCode(), e.getMsg());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

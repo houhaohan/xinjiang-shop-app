@@ -3,6 +3,7 @@ package com.pinet.inter;
 import com.alibaba.fastjson.JSON;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.UserConstant;
+import com.pinet.core.enums.ErrorCodeEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.http.HttpStatus;
 import com.pinet.core.result.Result;
@@ -57,7 +58,7 @@ public class  BackendInterceptor implements HandlerInterceptor {
 
             String userId = redisUtil.get(UserConstant.PREFIX_USER_TOKEN + accessToken);
             if(StringUtil.isEmpty(userId)){
-                throw new PinetException("token过期，请重新登入");
+                throw new PinetException("token过期，请重新登入", ErrorCodeEnum.USER_TOKEN_EXPIRE.getCode());
             }
 
             boolean validate = JwtTokenUtils.validateToken(accessToken, Long.valueOf(userId));
