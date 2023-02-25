@@ -228,6 +228,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
             //删除购物车已购商品
             cartService.delCartByShopId(dto.getShopId(), userId);
+
+
         } else {
             //直接结算（通过具体的商品样式、商品数量进行结算）
             List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());

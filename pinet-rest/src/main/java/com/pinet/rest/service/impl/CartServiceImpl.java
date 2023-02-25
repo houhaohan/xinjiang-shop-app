@@ -1,6 +1,7 @@
 package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
@@ -166,6 +167,13 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Cart::getShopId, shopId).eq(Cart::getCustomerId, customerId).eq(BaseEntity::getDelFlag, 0);
         remove(lambdaQueryWrapper);
+
+        //删除cart_product_spec表数据
+        List<Cart> cartList = list(lambdaQueryWrapper);
+        List<Long> cartIds = cartList.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        LambdaQueryWrapper<CartProductSpec> removeWrapper = new LambdaQueryWrapper<>();
+        removeWrapper.in(CartProductSpec::getCartId,cartIds).eq(BaseEntity::getDelFlag,0);
+        cartProductSpecService.remove(removeWrapper);
     }
 
     @Override
