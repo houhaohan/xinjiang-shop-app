@@ -141,6 +141,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean editCartProdNum(EditCartProdNumDto dto) {
         Cart cart = getById(dto.getCartId());
         if (cart == null || cart.getDelFlag() == 1) {
@@ -148,6 +149,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         }
         //如果数量为0则删除
         if (dto.getProdNum() == 0) {
+            cartProductSpecService.remove(new LambdaQueryWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,dto.getCartId()));
             return removeById(dto.getCartId());
         }
 
