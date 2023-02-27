@@ -47,7 +47,7 @@ public class  BackendInterceptor implements HandlerInterceptor {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             NotTokenSign notTokenSign = handlerMethod.getMethodAnnotation(NotTokenSign.class);
             // 过滤登入校验
-            if (null != notTokenSign) {
+            if (StringUtil.isBlank(accessToken) && null != notTokenSign) {
                 return true;
             }
 
