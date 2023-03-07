@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pinet.common.mq.config.QueueConstants;
+import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;

@@ -1,4 +1,4 @@
-package com.pinet.common.mq.config;
+package com.pinet.rest.mq.constants;
 
 
 /**

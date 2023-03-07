@@ -1,12 +1,11 @@
 package com.pinet.rest.mq.consumer;
 
-import com.pinet.common.mq.config.QueueConstants;
+import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.OrderProductSpec;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.service.IOrderProductService;
-import com.pinet.rest.service.IOrderProductSpecService;
 import com.pinet.rest.service.IOrdersService;
 import com.pinet.rest.service.IShopProductSpecService;
 import lombok.extern.slf4j.Slf4j;

@@ -1,14 +1,12 @@
 import cn.hutool.core.date.DateUtil;
 import com.pinet.PinetApplication;
-import com.pinet.common.mq.config.QueueConstants;
+import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.common.mq.util.JmsUtil;
-import com.pinet.common.redis.util.RedisUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsMessagingTemplate;
 
 import javax.annotation.Resource;
-import javax.jms.Queue;
 import java.util.Date;
 
 /**
