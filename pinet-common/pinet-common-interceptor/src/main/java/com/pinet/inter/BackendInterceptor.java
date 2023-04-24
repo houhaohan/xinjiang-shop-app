@@ -52,8 +52,8 @@ public class  BackendInterceptor implements HandlerInterceptor {
             }
 
             if(StringUtil.isEmpty(accessToken)){
-                return true;
-//                return error(request,response);
+//                return true;
+                return error(request,response);
             }
 
             String userId = redisUtil.get(UserConstant.PREFIX_USER_TOKEN + accessToken);

@@ -74,14 +74,15 @@ public class HandlerInterceptorBuild implements HandlerInterceptor {
             }
         }
         Long userId = customerTokenService.validateAndReturnCustomerId(appToken, terminal);
+        if(userId == null){
+            return error(request,response);
+//            throw new WlbzException("token过期，请重新登入");
+        }
         //如果token已过期，但是未加入黑名单也在保留范围内，则进行刷新token操作，在请求头内直接返回新的token
         if(userId != null && AppJwtTokenUtil.isTokenExpired(appToken)){
             Token customerToken = AppJwtTokenUtil.generateTokenObject(String.valueOf(userId) , request);
             customerTokenService.refreshToken(customerToken, appToken);
             response.setHeader(APP_ACCESS_TOKEN, TOKEN_HEAD_PREFIX + customerToken.getToken());
-        }else {
-//            throw new PinetException("token过期，请重新登入");
-            logger.error("登录认证失败,token{}",appToken);
         }
         ThreadLocalUtil.setUserId(userId == null ? 0 : Long.valueOf(userId));
         return true;

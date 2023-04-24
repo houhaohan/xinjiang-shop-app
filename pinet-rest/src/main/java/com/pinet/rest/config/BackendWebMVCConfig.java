@@ -25,7 +25,7 @@ public class BackendWebMVCConfig implements WebMvcConfigurer {
                 //默认拦截所有请求
                 .addPathPatterns("/**")
                 //不需要拦截的请求 swagger
-                .excludePathPatterns("/swagger-resources/**","/swagger-ui/**","/v3/**")
+                .excludePathPatterns("/swagger-resources/**","/swagger-ui/**","/v3/**","/webjars/**")
                 // 登入接口
                 .excludePathPatterns("/v*/login/**","/websocket/**");
 
@@ -34,7 +34,7 @@ public class BackendWebMVCConfig implements WebMvcConfigurer {
                 //默认拦截所有请求
                 .addPathPatterns("/**")
                 //不需要拦截的请求 swagger
-                .excludePathPatterns("/swagger-resources/**","/swagger-ui/**","/v3/**")
+                .excludePathPatterns("/swagger-resources/**","/swagger-ui/**","/v3/**","/webjars/**")
                 // 登入接口
                 .excludePathPatterns("/v*/login/**","/websocket/**");
     }
