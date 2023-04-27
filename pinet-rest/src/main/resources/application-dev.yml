@@ -134,6 +134,6 @@ social:
       sellerid: 13399722222@163.com
       partnerid: 2088031797087204
       notify-url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/aliApp/pay
-      app-cert-url: D://soft//cert//appCertPublicKey_2018042302596042.crt
-      root-cert-url: D://soft//cert//alipayRootCert.crt
-      public-cert-url: D://soft//cert//alipayCertPublicKey_RSA2.crt
+      app-cert-url: /usr/local/project/cert/appCertPublicKey_2018042302596042.crt
+      root-cert-url: /usr/local/project/cert/alipayRootCert.crt
+      public-cert-url: /usr/local/project/cert/alipayCertPublicKey_RSA2.crt
