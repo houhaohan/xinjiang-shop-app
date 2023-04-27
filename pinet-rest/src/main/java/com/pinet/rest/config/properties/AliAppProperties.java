@@ -26,8 +26,6 @@ public class AliAppProperties {
 
     private String partnerid;
 
-    private String privateKey1;
-
     private String appCertUrl;
 
     private String rootCertUrl;
@@ -56,13 +54,6 @@ public class AliAppProperties {
 
     public void setPublicCertUrl(String publicCertUrl) {
         this.publicCertUrl = publicCertUrl;
-    }
-
-    public String getPrivateKey1() {
-        return privateKey1;
-    }
-    public void setPrivateKey1(String privateKey1) {
-        this.privateKey1 = privateKey1;
     }
 
     public String getPartnerid() {

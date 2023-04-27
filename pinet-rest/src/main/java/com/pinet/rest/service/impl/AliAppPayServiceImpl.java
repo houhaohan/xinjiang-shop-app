@@ -1,6 +1,8 @@
 package com.pinet.rest.service.impl;
 
+import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
+import com.alipay.api.CertAlipayRequest;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.domain.AlipayTradeRefundApplyModel;
@@ -8,6 +10,7 @@ import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
+import com.pinet.core.util.DateUtil;
 import com.pinet.rest.config.properties.AliAppProperties;
 import com.pinet.rest.entity.OrderRefund;
 import com.pinet.rest.entity.param.PayParam;
@@ -18,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 
 /**
  * @program: xinjiang-shop-app
@@ -41,33 +45,44 @@ public class AliAppPayServiceImpl implements IPayService {
 
     @Override
     public Object pay(PayParam param) {
-        String orderStr = "";
+        String orderStr="";
         try {
-            //实例化客户端
-            AlipayClient alipayClient = new DefaultAlipayClient(REFUND_URL, aliAppProperties.getAppid(),
-                    aliAppProperties.getPrivateKey(), "json", "UTF-8",
-                    aliAppProperties.getPublicKeyAlipay(), "RSA2");
-            //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
-            AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
-            //SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+            //构造client
+            CertAlipayRequest request = new CertAlipayRequest();
+            //设置网关地址
+            request.setServerUrl(REFUND_URL);
+            //设置应用Id
+            request.setAppId(aliAppProperties.getAppid());
+            //设置应用私钥
+            request.setPrivateKey(aliAppProperties.getPrivateKey());
+            //设置请求格式，固定值json
+            request.setFormat("json");
+            //设置字符集
+            request.setCharset("UTF-8");
+            //设置签名类型
+            request.setSignType("RSA2");
+            //设置应用公钥证书路径
+            request.setCertPath(aliAppProperties.getAppCertUrl());
+            //设置支付宝公钥证书路径
+            request.setAlipayPublicCertPath(aliAppProperties.getPublicCertUrl());
+            //设置支付宝根证书路径
+            request.setRootCertPath(aliAppProperties.getRootCertUrl());
+            AlipayClient alipayClient = new DefaultAlipayClient(request);
+
+            AlipayTradeAppPayRequest appPayRequest = new AlipayTradeAppPayRequest();
             AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
-            //描述信息 添加附加数据
             model.setBody(param.getPayDesc());
-            // 商户订单号(自动生成)
-            model.setOutTradeNo(param.getOrderNo());
-            // 支付金额
-            model.setTotalAmount(param.getPayPrice().toString());
-
-            model.setSellerId(aliAppProperties.getSellerid());
             model.setSubject(param.getOrderNo());
-            request.setBizModel(model);
-
-            // 回调地址
-            request.setNotifyUrl(aliAppProperties.getNotifyUrl());
-            AlipayTradeAppPayResponse response = alipayClient.sdkExecute(request);
+            model.setOutTradeNo(param.getOrderNo());
+            model.setSellerId(aliAppProperties.getSellerid());
+            model.setTimeoutExpress("30m");
+            model.setTotalAmount(param.getPayPrice().toString());
+            model.setProductCode("QUICK_MSECURITY_PAY");
+            appPayRequest.setBizModel(model);
+            appPayRequest.setNotifyUrl(aliAppProperties.getNotifyUrl());
+            AlipayTradeAppPayResponse response = alipayClient.sdkExecute(appPayRequest);
             orderStr = response.getBody();
-            log.info(orderStr);
-        } catch (Exception e) {
+        } catch (AlipayApiException e) {
             e.printStackTrace();
         }
         return orderStr;
