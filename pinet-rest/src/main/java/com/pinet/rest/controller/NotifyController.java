@@ -100,7 +100,7 @@ public class NotifyController extends BaseController {
         String result = "failure";
         try {
             //异步通知验签
-            boolean signVerified = AlipaySignature.rsaCheckV1(params,aliAppProperties.getPublicKeyAlipay(),
+            boolean signVerified = AlipaySignature.rsaCertCheckV1(params,aliAppProperties.getPublicCertUrl(),
                     AlipayConstants.CHARSET_UTF8,
                     AlipayConstants.SIGN_TYPE_RSA2);
             if (!signVerified) {
