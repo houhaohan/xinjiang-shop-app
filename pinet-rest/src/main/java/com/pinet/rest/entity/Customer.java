@@ -4,12 +4,14 @@ package com.pinet.rest.entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pinet.core.constants.CommonConstant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -234,4 +236,13 @@ public class Customer implements Serializable {
     @JsonProperty(value = "openId")
     private String qsOpenId;
 
+    public String getAvatar(){
+        if (StrUtil.isBlank(avatar)){
+            return null;
+        }
+        if(!avatar.startsWith("http")){
+            return CommonConstant.IMAGE_DOMAIN+this.avatar;
+        }
+        return avatar;
+    }
 }

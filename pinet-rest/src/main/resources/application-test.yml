@@ -106,7 +106,7 @@ oss:
     access_key: qSK4UbqoR7gb0gkmHcwBeY3K3GoiW1UmDm01CMNx
     secret_key: eE83WK1Bo3iR7YyMfyTwsqTJL3HFFz14dNiimBDl
     bucket: testpinets
-    url: http://image.ypxlbz.com
+    url: https://image.ypxlbz.com
 
 social:
   weixin:

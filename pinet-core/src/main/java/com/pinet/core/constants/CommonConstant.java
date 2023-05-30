@@ -13,4 +13,7 @@ public class CommonConstant {
     //默认经度
     public static final String DEFAULT_LNG = "120.21551";
 
+    //图片域名前缀
+    public static final String IMAGE_DOMAIN = "http://image.ypxlbz.com/";
+
 }
