@@ -258,9 +258,9 @@
                         min(ps.market_price)                              as market_price,
                         min(sps.price)                                    as price
                  from shop s
-                          left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
-                          left join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-                          left join shop_product_spec sps on sps.prod_spec_id = ps.id
+                          inner join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
+                          inner join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
+                          inner join shop_product_spec sps on sps.prod_spec_id = ps.id
                  where s.id = #{shopId}
                    and s.del_flag = 0
                  group by ps.sku_id

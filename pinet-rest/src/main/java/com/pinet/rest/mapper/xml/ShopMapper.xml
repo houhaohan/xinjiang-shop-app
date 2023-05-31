@@ -60,6 +60,7 @@
 
     <select id="shopList" resultType="com.pinet.rest.entity.vo.ShopVo">
         select <include refid="Base_Column_List"/> from shop where shop_status = 1 and del_flag = 0
+        and exists (select 1 from shop_product where shop.id = shop_id and shop_prod_status = 1 and del_flag = 0)
     </select>
 
 </mapper>
