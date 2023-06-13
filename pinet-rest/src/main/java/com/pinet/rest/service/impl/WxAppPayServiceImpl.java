@@ -45,6 +45,7 @@ public class WxAppPayServiceImpl implements IPayService {
                 .spbillCreateIp(IPUtils.getIpAddr())
                 .notifyUrl(weiXinAppProperties.getNotifyUrl())
                 .timeStart(DateUtil.format(new Date(),"yyyyMMddHHmmss"))
+                .attach(param.getPayType().toString())
                 .build();
         wxPayUnifiedOrderRequest.setSignType(WxPayConstants.SignType.MD5);
         try {

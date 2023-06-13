@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.CustomerBalanceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.CustomerBalance">
+        <id column="customer_id" property="customerId" />
+        <result column="balance" property="balance" />
+        <result column="available_balance" property="availableBalance" />
+        <result column="blocked_balance" property="blockedBalance" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        customer_id, balance, available_balance, blocked_balance
+    </sql>
+
+</mapper>

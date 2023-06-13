@@ -32,4 +32,10 @@ public class PayParam {
      */
     private String payDesc;
 
+    /**
+     * 支付类型 1-订单支付 2-店帮主充值
+     * 用于回调的时候
+     */
+    private Integer payType;
+
 }

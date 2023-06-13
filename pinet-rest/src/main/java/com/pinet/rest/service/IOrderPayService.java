@@ -14,4 +14,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface IOrderPayService extends IService<OrderPay> {
     OrderPay getByOrderIdAndChannelId(Long orderId,String channelId);
 
+    /**
+     * 根据orderNo查询
+     * @param orderNo 订单编号
+     */
+    OrderPay getByOrderNo(Long orderNo);
 }

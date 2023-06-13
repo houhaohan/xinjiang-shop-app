@@ -10,11 +10,14 @@ import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.notify.WxPayRefundNotifyResult;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.pinet.core.controller.BaseController;
+import com.pinet.core.util.SpringContextUtils;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.config.properties.AliAppProperties;
+import com.pinet.rest.entity.enums.PayTypeEnum;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.OrderRefundNotifyParam;
 import com.pinet.rest.service.IOrdersService;
+import com.pinet.rest.service.payNotify.IPayNotifyService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,9 +61,12 @@ public class NotifyController extends BaseController {
         try {
             String xmlResult = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
             WxPayOrderNotifyResult notifyResult = appPayService.parseOrderNotifyResult(xmlResult);
+            Integer type = Integer.valueOf(notifyResult.getAttach());
             if ("SUCCESS".equals(notifyResult.getResultCode())) {
+                String serviceName = PayTypeEnum.getEnumByCode(type).getService();
+                IPayNotifyService payNotifyService = SpringContextUtils.getBean(serviceName, IPayNotifyService.class);
                 OrderPayNotifyParam param = new OrderPayNotifyParam(Long.valueOf(notifyResult.getOutTradeNo()),DateUtil.parse(notifyResult.getTimeEnd(),"yyyyMMddHHmmss"),notifyResult.getTransactionId(),"weixin_app");
-                ordersService.orderPayNotify(param);
+                payNotifyService.payNotify(param);
             }
 
             return WxPayNotifyResponse.success("成功");
@@ -80,9 +86,12 @@ public class NotifyController extends BaseController {
         try {
             String xmlResult = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
             WxPayOrderNotifyResult notifyResult = miniPayService.parseOrderNotifyResult(xmlResult);
+            Integer type = Integer.valueOf(notifyResult.getAttach());
             if ("SUCCESS".equals(notifyResult.getResultCode())) {
+                String serviceName = PayTypeEnum.getEnumByCode(type).getService();
+                IPayNotifyService payNotifyService = SpringContextUtils.getBean(serviceName, IPayNotifyService.class);
                 OrderPayNotifyParam param = new OrderPayNotifyParam(Long.valueOf(notifyResult.getOutTradeNo()),DateUtil.parse(notifyResult.getTimeEnd(),"yyyyMMddHHmmss") ,notifyResult.getTransactionId(),"weixin_mini");
-                ordersService.orderPayNotify(param);
+                payNotifyService.payNotify(param);
             }
             return WxPayNotifyResponse.success("成功");
         }catch (Exception e){
@@ -118,6 +127,9 @@ public class NotifyController extends BaseController {
             //支付宝交易号
             String tradeNo = params.get("trade_no");
 
+            //回调携带的参数
+            Integer type = Integer.valueOf(params.get("passback_params"));
+
             //4.验证 app_id 是否为该商家本身
             String appId = params.get("app_id");
             if (!appId.equals(aliAppProperties.getAppid())){
@@ -131,8 +143,10 @@ public class NotifyController extends BaseController {
                 return result;
             }
 
+            String serviceName = PayTypeEnum.getEnumByCode(type).getService();
+            IPayNotifyService payNotifyService = SpringContextUtils.getBean(serviceName, IPayNotifyService.class);
             OrderPayNotifyParam param = new OrderPayNotifyParam(Long.valueOf(outTradeNo), DateUtil.parse(gmtPayment,"yyyy-MM-dd HH:mm:ss"),tradeNo,"alipay_app");
-            ordersService.orderPayNotify(param);
+            payNotifyService.payNotify(param);
             result = "success";
         }catch (Exception e){
             log.error("支付宝回调结果异常,异常原因{}", e);

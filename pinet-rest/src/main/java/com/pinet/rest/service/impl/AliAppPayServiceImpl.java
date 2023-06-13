@@ -78,6 +78,7 @@ public class AliAppPayServiceImpl implements IPayService {
             model.setTimeoutExpress("30m");
             model.setTotalAmount(param.getPayPrice().toString());
             model.setProductCode("QUICK_MSECURITY_PAY");
+            model.setPassbackParams(param.getPayType().toString());
             appPayRequest.setBizModel(model);
             appPayRequest.setNotifyUrl(aliAppProperties.getNotifyUrl());
             AlipayTradeAppPayResponse response = alipayClient.sdkExecute(appPayRequest);
