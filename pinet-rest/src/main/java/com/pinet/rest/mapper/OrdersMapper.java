@@ -3,11 +3,15 @@ package com.pinet.rest.mapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.pinet.rest.entity.Orders;
+import com.pinet.rest.entity.dto.RecommendListDto;
+import com.pinet.rest.entity.vo.MemberVo;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.entity.vo.OrderListVo;
+import com.pinet.rest.entity.vo.RecommendListVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -24,4 +28,8 @@ public interface OrdersMapper extends BaseMapper<Orders> {
     OrderDetailVo selectOrderDetail(@Param("orderId") Long orderId);
 
     Integer countShopOrderMakeNum(@Param("shopId") Long shopId,@Param("queryDate") Date queryDate);
+
+    MemberVo countMember(@Param("customerId") Long customerId);
+
+    List<RecommendListVo> selectRecommendList(RecommendListDto dto);
 }

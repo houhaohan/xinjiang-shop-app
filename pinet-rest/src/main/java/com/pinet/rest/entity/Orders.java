@@ -68,5 +68,10 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("订单备注")
     private String remark;
 
+    @ApiModelProperty("分享人id")
+    private Integer shareId;
+
+    @ApiModelProperty("佣金")
+    private BigDecimal commission;
 
 }

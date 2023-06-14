@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.DB;
@@ -27,10 +28,6 @@ import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.OrderRefundNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.param.RefundParam;
-import com.pinet.rest.entity.vo.CreateOrderVo;
-import com.pinet.rest.entity.vo.OrderDetailVo;
-import com.pinet.rest.entity.vo.OrderListVo;
-import com.pinet.rest.entity.vo.OrderSettlementVo;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import org.springframework.stereotype.Service;
@@ -441,6 +438,23 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             addCartDto.setShopProdSpecIds(shopProdSpecIds);
             cartService.addCart(addCartDto);
         });
+    }
+
+    @Override
+    public MemberVo countMember(Long customerId) {
+        return baseMapper.countMember(customerId);
+    }
+
+    @Override
+    public List<RecommendListVo> recommendList(RecommendListDto dto) {
+        List<RecommendListVo> recommendListVos = baseMapper.selectRecommendList(dto);
+        recommendListVos.forEach(k->{
+            k.getRecommendTimeBos().forEach(k1->{
+                List<OrderProduct> orderProducts = orderProductService.getByOrderId(k1.getOrderId());
+                k1.setOrderProducts(orderProducts);
+            });
+        });
+        return recommendListVos;
     }
 
 

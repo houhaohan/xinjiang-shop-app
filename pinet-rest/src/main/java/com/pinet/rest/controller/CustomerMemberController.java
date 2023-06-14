@@ -5,7 +5,11 @@ import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.PayDto;
+import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.param.PayParam;
+import com.pinet.rest.entity.vo.MemberVo;
+import com.pinet.rest.entity.vo.RecommendListVo;
+import com.pinet.rest.entity.vo.RecommendProductVo;
 import com.pinet.rest.service.ICustomerMemberService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -41,6 +46,28 @@ public class CustomerMemberController extends BaseController {
         Object res = customerMemberService.recharge(dto);
         return Result.ok(res);
     }
+
+    @ApiOperation("会员中心")
+    @PostMapping("/member")
+    @ApiVersion(1)
+    public Result<MemberVo> member(){
+        MemberVo memberVo = customerMemberService.member();
+        return Result.ok(memberVo);
+    }
+
+
+    @ApiOperation("推荐记录")
+    @PostMapping("/recommendList")
+    @ApiVersion(1)
+    public Result<?> recommendList(@RequestBody RecommendListDto dto){
+        List<RecommendListVo> recommendListVos = customerMemberService.recommendList(dto);
+        return Result.ok(recommendListVos);
+    }
+
+
+
+
+
 
 
 

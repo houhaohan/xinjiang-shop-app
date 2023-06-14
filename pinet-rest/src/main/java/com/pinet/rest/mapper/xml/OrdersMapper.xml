@@ -24,6 +24,8 @@
         <result column="actual_arrival_time" property="actualArrivalTime"/>
         <result column="order_distance" property="orderDistance"/>
         <result column="remark" property="remark"/>
+        <result column="share_id" property="shareId"/>
+        <result column="commission" property="commission"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -34,7 +36,7 @@
         update_by,
         update_time,
         del_flag,
-        order_no, order_type, order_status, customer_id, shop_id, shop_name, order_price, order_prod_price, shipping_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark
+        order_no, order_type, order_status, customer_id, shop_id, shop_name, order_price, order_prod_price, shipping_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission
     </sql>
 
 
@@ -49,7 +51,8 @@
                o.shop_id      shopId
         from `orders` o
         where o.del_flag = 0
-          and o.customer_id = #{customerId,jdbcType=BIGINT} order by o.create_time desc
+          and o.customer_id = #{customerId,jdbcType=BIGINT}
+        order by o.create_time desc
     </select>
 
     <select id="selectOrderDetail" resultType="com.pinet.rest.entity.vo.OrderDetailVo" parameterType="java.lang.Long">
@@ -78,6 +81,45 @@
           and shop_id = #{shopId}
           and create_time > #{queryDate}
           and order_status = 30
+    </select>
+    <select id="countMember" resultType="com.pinet.rest.entity.vo.MemberVo">
+        select count(create_time > curdate() or null)                     todayOrderCount,
+               ifnull(sum(if(create_time > curdate(), commission, 0)), 0) todaySumPrice,
+               ifnull(sum(if(create_time &lt; curdate() and create_time > DATE_SUB(curdate(), INTERVAL 1 DAY),
+                             commission, 0)), 0)                          yesterdaySumPrice
+        from orders
+        where share_id = #{customerId}
+          and del_flag = 0
+    </select>
+
+    <resultMap id="selectRecommendListResultMap" type="com.pinet.rest.entity.vo.RecommendListVo">
+        <id column="date" property="date"/>
+        <collection property="recommendTimeBos" resultMap="recommendTimeBosResultMap"/>
+    </resultMap>
+
+    <resultMap id="recommendTimeBosResultMap" type="com.pinet.rest.entity.bo.RecommendTimeBo">
+        <id column="o_id" property="orderId"/>
+        <id column="time" property="time"/>
+        <id column="avatar" property="avatar"/>
+        <id column="nickname" property="nickName"/>
+        <id column="commission" property="commission"/>
+    </resultMap>
+
+    <select id="selectRecommendList" resultMap="selectRecommendListResultMap"
+            parameterType="com.pinet.rest.entity.dto.RecommendListDto">
+        select DATE_FORMAT(o.create_time, '%Y-%m-%d') date,
+        o.id o_id,
+        DATE_FORMAT(o.create_time, '%H:%i') time,
+        c.avatar,
+        c.nickname,
+        o.commission
+        from orders o
+        left join customer c on c.customer_id = o.customer_id
+        where o.share_id = #{customerId}
+        <if test="queryDate != null">
+            and o.create_time > #{queryDate} and o.create_time &lt; date_add(#{queryDate},INTERVAL 1 DAY)
+        </if>
+        order by o.create_time desc
     </select>
 
 </mapper>

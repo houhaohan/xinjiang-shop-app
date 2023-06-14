@@ -2,16 +2,10 @@ package com.pinet.rest.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.Orders;
-import com.pinet.rest.entity.dto.CreateOrderDto;
-import com.pinet.rest.entity.dto.OrderListDto;
-import com.pinet.rest.entity.dto.OrderPayDto;
-import com.pinet.rest.entity.dto.OrderSettlementDto;
+import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.OrderRefundNotifyParam;
-import com.pinet.rest.entity.vo.CreateOrderVo;
-import com.pinet.rest.entity.vo.OrderDetailVo;
-import com.pinet.rest.entity.vo.OrderListVo;
-import com.pinet.rest.entity.vo.OrderSettlementVo;
+import com.pinet.rest.entity.vo.*;
 
 import java.util.List;
 
@@ -69,4 +63,18 @@ public interface IOrdersService extends IService<Orders> {
      * @param orderId
      */
     void recurOrder(Long orderId,Long customerId);
+
+    /**
+     * 统计会员中心数据
+     * @param customerId 用户id
+     * @return
+     */
+    MemberVo countMember(Long customerId);
+
+    /**
+     * 会员中心  推荐记录
+     * @param dto
+     * @return
+     */
+    List<RecommendListVo> recommendList(RecommendListDto dto);
 }

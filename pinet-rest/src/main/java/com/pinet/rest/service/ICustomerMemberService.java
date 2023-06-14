@@ -3,6 +3,11 @@ package com.pinet.rest.service;
 import com.pinet.rest.entity.CustomerMember;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.PayDto;
+import com.pinet.rest.entity.dto.RecommendListDto;
+import com.pinet.rest.entity.vo.MemberVo;
+import com.pinet.rest.entity.vo.RecommendListVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -27,4 +32,17 @@ public interface ICustomerMemberService extends IService<CustomerMember> {
      * @return
      */
     CustomerMember getByCustomerId(Long customerId);
+
+    /**
+     * 会员中心
+     * @return
+     */
+    MemberVo member();
+
+    /**
+     * 推荐记录vo
+     * @return
+     */
+    List<RecommendListVo> recommendList(RecommendListDto dto);
+
 }

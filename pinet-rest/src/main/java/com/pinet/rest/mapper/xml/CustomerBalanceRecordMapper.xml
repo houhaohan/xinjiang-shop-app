@@ -4,16 +4,16 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pinet.rest.entity.CustomerBalanceRecord">
-        <result column="id" property="id" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-        <result column="create_by" property="createBy" />
-        <result column="update_by" property="updateBy" />
-        <result column="del_flag" property="delFlag" />
-        <result column="customer_id" property="customerId" />
-        <result column="money" property="money" />
-        <result column="type" property="type" />
-        <result column="fk_id" property="fkId" />
+        <result column="id" property="id"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="money" property="money"/>
+        <result column="type" property="type"/>
+        <result column="fk_id" property="fkId"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -27,7 +27,11 @@
         customer_id, money, type, fk_id
     </sql>
     <select id="sumMoneyByCustomerIdAndType" resultType="java.math.BigDecimal">
-        select sum(money) from customer_balance_record where del_flag = 0 and customer_id = #{customerId} and type = #{type}
+        select ifnull(sum(money), 0)
+        from customer_balance_record
+        where del_flag = 0
+          and customer_id = #{customerId}
+          and type = #{type}
     </select>
 
 </mapper>
