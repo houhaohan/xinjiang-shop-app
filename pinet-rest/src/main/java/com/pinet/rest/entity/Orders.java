@@ -50,6 +50,9 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("订单商品金额")
     private BigDecimal orderProdPrice;
 
+    @ApiModelProperty("优惠金额")
+    private BigDecimal discountAmount;
+
     @ApiModelProperty("配送费(初版固定为3元)")
     private BigDecimal shippingFee;
 
@@ -69,7 +72,7 @@ public class Orders extends BaseEntity {
     private String remark;
 
     @ApiModelProperty("分享人id")
-    private Integer shareId;
+    private Long shareId;
 
     @ApiModelProperty("佣金")
     private BigDecimal commission;

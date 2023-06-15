@@ -45,4 +45,11 @@ public interface ICustomerMemberService extends IService<CustomerMember> {
      */
     List<RecommendListVo> recommendList(RecommendListDto dto);
 
+    /**
+     * 获取用户会员等级
+     * @param customerId
+     * @return
+     */
+    Integer getMemberLevel(Long customerId);
+
 }

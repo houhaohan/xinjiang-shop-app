@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.rest.entity.enums.MemberLevelEnum;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.common.mq.util.JmsUtil;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -82,6 +84,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Resource
     private IOrderRefundService orderRefundService;
 
+    @Resource
+    private ICustomerMemberService customerMemberService;
+
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
@@ -92,7 +97,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderListVos.getRecords().forEach(k -> {
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
             //如果是自提订单并且是配送中 修改状态状态str为可领取
-            if (k.getOrderStatus().equals(OrderStatusEnum.SEND_OUT.getCode()) && k.getOrderType() == 2){
+            if (k.getOrderStatus().equals(OrderStatusEnum.SEND_OUT.getCode()) && k.getOrderType() == 2) {
                 k.setOrderStatusStr("可领取");
             }
             List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
@@ -110,7 +115,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         orderDetailVo.setOrderProducts(orderProductService.getByOrderId(orderId));
         //判断是自提还是外卖
-        if (orderDetailVo.getOrderType() == 1){
+        if (orderDetailVo.getOrderType() == 1) {
             OrderAddress orderAddress = orderAddressService.getOrderAddress(orderId);
             orderDetailVo.setAddress(orderAddress.getAddress());
             //脱敏
@@ -123,8 +128,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //处理下预计送达时间
-        String estimateArrivalStartTime = DateUtil.format(orderDetailVo.getEstimateArrivalStartTime(),"HH:mm");
-        String estimateArrivalEndTime = DateUtil.format(orderDetailVo.getEstimateArrivalEndTime(),"HH:mm");
+        String estimateArrivalStartTime = DateUtil.format(orderDetailVo.getEstimateArrivalStartTime(), "HH:mm");
+        String estimateArrivalEndTime = DateUtil.format(orderDetailVo.getEstimateArrivalEndTime(), "HH:mm");
 
         orderDetailVo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
 
@@ -139,6 +144,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     public OrderSettlementVo orderSettlement(OrderSettlementDto dto) {
+
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+
         Shop shop = shopService.getById(dto.getShopId());
         OrderSettlementVo vo = new OrderSettlementVo();
         vo.setShopName(shop.getShopName());
@@ -167,14 +175,24 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
         vo.setOrderMakeCount(countShopOrderMakeNum(dto.getShopId()));
-        //计算总金额
-        BigDecimal orderPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(shippingFee, BigDecimal::add);
+        //计算商品总金额
+        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        //设置订单原价
+        vo.setOriginalPrice(orderProdPrice.add(shippingFee));
+
+
+        //计算商品折后金额
+        orderProdPrice = getDiscountedPrice(customerId, orderProdPrice);
+
+        //计算订单优惠后现价
+        BigDecimal orderPrice = orderProdPrice.add(shippingFee);
         vo.setOrderPrice(orderPrice);
 
         //返回预计送达时间
         Date now = new Date();
-        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetHour(now, 1),"HH:mm");
-        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 90),"HH:mm");
+        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetHour(now, 1), "HH:mm");
+        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 90), "HH:mm");
 
         vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
 
@@ -209,7 +227,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //自提订单默认距离是0  外卖订单 校验距离 10公里以内
         double m = 0D;
-        if (dto.getOrderType() == 1){
+        if (dto.getOrderType() == 1) {
             m = LatAndLngUtils.getDistance(Double.parseDouble(dto.getLng()), Double.parseDouble(dto.getLat()),
                     Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
             if (m > 10000D) {
@@ -246,17 +264,27 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
 
-        //计算订单总金额  和订单商品金额
-        BigDecimal orderPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(shippingFee, BigDecimal::add);
-        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+        //订单商品原价
+        BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+        //商品折后价
+        BigDecimal orderProdPrice = getDiscountedPrice(userId, orderProdOriginalPrice);
+
+        //优惠金额
+        BigDecimal discountAmount = orderProdOriginalPrice.subtract(orderProdPrice);
+        //总金额
+        BigDecimal orderPrice = orderProdPrice.add(shippingFee);
 
         //对比订单总金额和结算的总金额  如果不相同说明商品价格有调整
         if (orderPrice.compareTo(dto.getOrderPrice()) != 0) {
             throw new PinetException("订单信息发生变化,请重新下单");
         }
 
+        //判断该订单是否有佣金
+        //邀请人必须是店帮主  被邀人不能是店帮主
+
         //创建订单基础信息
-        Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, shop);
+        Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, discountAmount, shop);
+        setOrdersCommission(order);
         //插入订单
         this.save(order);
 
@@ -284,6 +312,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //将订单放到mq中
         jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_PAY_NAME, order.getId().toString(), (long) (15 * 60 * 1000));
 
+
         CreateOrderVo createOrderVo = new CreateOrderVo();
         createOrderVo.setOrderId(order.getId());
         createOrderVo.setOrderNo(order.getOrderNo());
@@ -294,9 +323,32 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return createOrderVo;
     }
 
+    /**
+     * 设置佣金
+     *
+     * @param orders
+     */
+    private void setOrdersCommission(Orders orders) {
+        if (orders.getShareId() <= 0){
+            orders.setCommission(BigDecimal.ZERO);
+        }
 
-    private Long getExpireTime(Date createTime){
-        Date expireTime =  DateUtil.offsetMinute(createTime, 15);
+        //下单人会员等级
+        Integer customerMemberLevel = customerMemberService.getMemberLevel(orders.getCustomerId());
+        //分享人会员等级
+        Integer shareMemberLevel = customerMemberService.getMemberLevel(orders.getShareId());
+
+        //邀请人必须是店帮主  被邀人不能是店帮主
+        if (shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !customerMemberLevel.equals(MemberLevelEnum._20.getCode())){
+            //佣金=商品总金额 * 0.1
+            BigDecimal commission = orders.getOrderProdPrice().multiply(new BigDecimal("0.1")).setScale(2, RoundingMode.HALF_UP);
+            orders.setCommission(commission);
+        }
+    }
+
+
+    private Long getExpireTime(Date createTime) {
+        Date expireTime = DateUtil.offsetMinute(createTime, 15);
         return expireTime.getTime();
     }
 
@@ -348,22 +400,22 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Transactional(rollbackFor = Exception.class)
     public Boolean orderPayNotify(OrderPayNotifyParam param) {
         LambdaQueryWrapper<Orders> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Orders::getOrderNo,param.getOrderNo()).eq(BaseEntity::getDelFlag,0);
+        lambdaQueryWrapper.eq(Orders::getOrderNo, param.getOrderNo()).eq(BaseEntity::getDelFlag, 0);
         Orders orders = getOne(lambdaQueryWrapper);
-        if (orders == null){
-            log.error("微信支付回调出现异常,订单号不存在:"+param.getOrderNo());
+        if (orders == null) {
+            log.error("微信支付回调出现异常,订单号不存在:" + param.getOrderNo());
             return false;
         }
 
 
-        OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(),param.getChannelId());
+        OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(), param.getChannelId());
         orderPay.setPayStatus(2);
         orderPay.setPayTime(param.getPayTime());
         orderPay.setOutTradeNo(param.getOutTradeNo());
         orderPayService.updateById(orderPay);
 
         //判断订单状态  如果订单状态是已取消  就退款
-        if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())){
+        if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {
 
             IPayService payService = SpringContextUtils.getBean(orderPay.getChannelId() + "_" + "service", IPayService.class);
             //构造退款记录
@@ -381,11 +433,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderRefundService.save(orderRefund);
 
             //调用退款方法
-            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(),orders.getOrderNo().toString(),orderRefund.getRefundNo().toString(),orders.getOrderPrice().toString(),orderRefund.getId());
+            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(), orders.getOrderNo().toString(), orderRefund.getRefundNo().toString(), orders.getOrderPrice().toString(), orderRefund.getId());
             payService.refund(refundParam);
             orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
             return updateById(orders);
-        }else {
+        } else {
             //更新总订单状态
             orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
             return updateById(orders);
@@ -395,11 +447,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public Boolean cancelOrder(Long orderId) {
         Orders orders = getById(orderId);
-        if (orders == null){
+        if (orders == null) {
             throw new PinetException("订单不存在");
         }
         //判断订单状态  是否可以取消  只有待付款状态可以取消
-        if (!orders.getOrderStatus().equals(OrderStatusEnum.NOT_PAY.getCode())){
+        if (!orders.getOrderStatus().equals(OrderStatusEnum.NOT_PAY.getCode())) {
             throw new PinetException("只有待付款状态下才可以取消");
         }
         orders.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
@@ -409,10 +461,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public Boolean orderRefundNotify(OrderRefundNotifyParam param) {
         LambdaQueryWrapper<OrderRefund> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(OrderRefund::getRefundNo,param.getRefundNo()).eq(BaseEntity::getDelFlag,0);
+        lambdaQueryWrapper.eq(OrderRefund::getRefundNo, param.getRefundNo()).eq(BaseEntity::getDelFlag, 0);
         OrderRefund orderRefund = orderRefundService.getOne(lambdaQueryWrapper);
-        if (orderRefund == null){
-            log.error("微信退款回调失败，退款单号不存在"+param.getRefundNo());
+        if (orderRefund == null) {
+            log.error("微信退款回调失败，退款单号不存在" + param.getRefundNo());
             throw new PinetException("退款单号不存在");
         }
         orderRefund.setRefundStatus(2);
@@ -422,13 +474,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void recurOrder(Long orderId,Long customerId) {
+    public void recurOrder(Long orderId, Long customerId) {
         Orders order = getById(orderId);
-        if (order == null){
+        if (order == null) {
             throw new PinetException("订单不存在");
         }
         List<OrderProduct> orderProducts = orderProductService.getByOrderId(orderId);
-        orderProducts.forEach(k->{
+        orderProducts.forEach(k -> {
             AddCartDto addCartDto = new AddCartDto();
             addCartDto.setShopId(order.getShopId());
             addCartDto.setShopProdId(k.getShopProdId());
@@ -448,8 +500,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public List<RecommendListVo> recommendList(RecommendListDto dto) {
         List<RecommendListVo> recommendListVos = baseMapper.selectRecommendList(dto);
-        recommendListVos.forEach(k->{
-            k.getRecommendTimeBos().forEach(k1->{
+        recommendListVos.forEach(k -> {
+            k.getRecommendTimeBos().forEach(k1 -> {
                 List<OrderProduct> orderProducts = orderProductService.getByOrderId(k1.getOrderId());
                 k1.setOrderProducts(orderProducts);
             });
@@ -457,8 +509,18 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return recommendListVos;
     }
 
+    @Override
+    public BigDecimal getDiscountedPrice(Long customerId, BigDecimal originalPrice) {
+        Integer memberLevel = customerMemberService.getMemberLevel(customerId);
+        MemberLevelEnum memberLevelEnum = MemberLevelEnum.getEnumByCode(memberLevel);
 
-    private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, Shop shop) {
+        BigDecimal discountedPrice = originalPrice.multiply(memberLevelEnum.getDiscount()).setScale(2, RoundingMode.HALF_UP);
+
+        return discountedPrice;
+    }
+
+
+    private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, BigDecimal discountAmount, Shop shop) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Date now = new Date();
         Date estimateArrivalStartTime = DateUtil.offsetHour(now, 1);
@@ -474,11 +536,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         order.setShopName(shop.getShopName());
         order.setOrderPrice(orderPrice);
         order.setOrderProdPrice(orderProdPrice);
+        order.setDiscountAmount(discountAmount);
         order.setShippingFee(shippingFee);
         order.setEstimateArrivalStartTime(estimateArrivalStartTime);
         order.setEstimateArrivalEndTime(estimateArrivalEndTime);
         order.setOrderDistance(m.intValue());
         order.setRemark(dto.getRemark());
+        order.setShareId(dto.getShareId());
 
         return order;
     }

@@ -99,14 +99,11 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
         memberVo.setSumRechargePrice(sumRechargePrice);
 
 
-        int memberLevel = 0;
-        CustomerMember customerMember = getByCustomerId(customerId);
-        if (ObjectUtil.isNotNull(customerMember)) {
-            memberLevel = customerMember.getMemberLevel();
-        }
+        int memberLevel = getMemberLevel(customerId);
+
 
         memberVo.setMemberLevel(memberLevel);
-        memberVo.setMemberLevelStr(MemberLevelEnum.getEnumByCode(memberLevel));
+        memberVo.setMemberLevelStr(MemberLevelEnum.getMsgByCode(memberLevel));
 
 
         Customer customer = customerService.getById(customerId);
@@ -124,5 +121,15 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
         List<RecommendListVo> recommendListVos = ordersService.recommendList(dto);
 
         return recommendListVos;
+    }
+
+    @Override
+    public Integer getMemberLevel(Long customerId) {
+        int memberLevel = 0;
+        CustomerMember customerMember = getByCustomerId(customerId);
+        if (ObjectUtil.isNotNull(customerMember)) {
+            memberLevel = customerMember.getMemberLevel();
+        }
+        return memberLevel;
     }
 }

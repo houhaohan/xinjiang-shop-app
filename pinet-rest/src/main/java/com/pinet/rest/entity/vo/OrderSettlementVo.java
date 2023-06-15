@@ -19,8 +19,11 @@ import java.util.List;
 @Data
 @ApiModel(value = "OrderSettlementVo",description = "订单结算vo")
 public class OrderSettlementVo {
-    @ApiModelProperty(value = "总金额",name = "orderPrice")
+    @ApiModelProperty(value = "总金额(实付金额)",name = "orderPrice")
     private BigDecimal orderPrice;
+
+    @ApiModelProperty(value = "订单原价(折扣前金额)",name = "originalPrice")
+    private BigDecimal originalPrice;
 
     @ApiModelProperty(value = "配送费",name = "shippingFee")
     private BigDecimal shippingFee;

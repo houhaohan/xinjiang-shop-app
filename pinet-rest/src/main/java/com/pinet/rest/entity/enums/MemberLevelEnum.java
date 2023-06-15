@@ -1,5 +1,7 @@
 package com.pinet.rest.entity.enums;
 
+import java.math.BigDecimal;
+
 /**
  * @program: xinjiang-shop-app
  * @description: 订单状态enum
@@ -10,20 +12,23 @@ public enum MemberLevelEnum {
     /**
      * 订单状态
      */
-    _0(0,"门客"),
-    _10(10,"会员"),
-    _20(20,"店帮主");
+    _0(0,"门客",new BigDecimal("1")),
+    _10(10,"会员",new BigDecimal("0.8")),
+    _20(20,"店帮主",new BigDecimal("0.5"));
 
 
     private Integer code;
     private String msg;
+    //折扣
+    private BigDecimal discount;
 
     MemberLevelEnum() {
     }
 
-    MemberLevelEnum(Integer code, String msg) {
+    MemberLevelEnum(Integer code, String msg, BigDecimal discount) {
         this.code = code;
         this.msg = msg;
+        this.discount = discount;
     }
 
     public Integer getCode() {
@@ -42,13 +47,21 @@ public enum MemberLevelEnum {
         this.msg = msg;
     }
 
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(BigDecimal discount) {
+        this.discount = discount;
+    }
+
     /**
-     * 通过code取枚举
+     * 通过code取msg
      *
      * @param code 值
      * @return
      */
-    public static String getEnumByCode(Integer code) {
+    public static String getMsgByCode(Integer code) {
         if (code == null) {
             return null;
         }
@@ -59,5 +72,25 @@ public enum MemberLevelEnum {
         }
 
         return "";
+    }
+
+
+    /**
+     * 通过code取enum
+     *
+     * @param code 值
+     * @return
+     */
+    public static MemberLevelEnum getEnumByCode(Integer code) {
+        if (code == null) {
+            return null;
+        }
+        for (MemberLevelEnum enums : MemberLevelEnum.values()) {
+            if (enums.getCode().equals(code)) {
+                return enums;
+            }
+        }
+
+        return null;
     }
 }

@@ -7,6 +7,7 @@ import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.OrderRefundNotifyParam;
 import com.pinet.rest.entity.vo.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -77,4 +78,12 @@ public interface IOrdersService extends IService<Orders> {
      * @return
      */
     List<RecommendListVo> recommendList(RecommendListDto dto);
+
+    /**
+     * 获取折后价
+     * @param customerId 用户id
+     * @param originalPrice 原价
+     * @return
+     */
+    BigDecimal getDiscountedPrice(Long customerId,BigDecimal originalPrice);
 }

@@ -38,4 +38,7 @@ public class CreateOrderDto extends OrderSettlementDto{
     @ApiModelProperty(value = "备注",name = "remark")
     private String remark;
 
+    @ApiModelProperty(value = "分享人id",name = "shareId")
+    private Long shareId = 0L;
+
 }
