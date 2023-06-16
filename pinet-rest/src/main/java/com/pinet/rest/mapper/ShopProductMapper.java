@@ -2,6 +2,7 @@ package com.pinet.rest.mapper;
 
 import com.pinet.rest.entity.ShopProduct;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.*;
@@ -68,4 +69,5 @@ public interface ShopProductMapper extends BaseMapper<ShopProduct> {
      */
     List<String> sellwell(@Param("shopId") Long shopId);
 
+    GetShopProdIdByProdIdVo selectShopIdAndShopProdId(GetShopIdAndShopProdIdDto dto);
 }

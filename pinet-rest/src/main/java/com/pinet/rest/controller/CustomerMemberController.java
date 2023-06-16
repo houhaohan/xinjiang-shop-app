@@ -1,12 +1,14 @@
 package com.pinet.rest.controller;
 
 
+import com.pinet.core.page.PageRequest;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.param.PayParam;
+import com.pinet.rest.entity.vo.MemberRecommendProdVo;
 import com.pinet.rest.entity.vo.MemberVo;
 import com.pinet.rest.entity.vo.RecommendListVo;
 import com.pinet.rest.entity.vo.RecommendProductVo;
@@ -62,6 +64,16 @@ public class CustomerMemberController extends BaseController {
     public Result<?> recommendList(@RequestBody RecommendListDto dto){
         List<RecommendListVo> recommendListVos = customerMemberService.recommendList(dto);
         return Result.ok(recommendListVos);
+    }
+
+
+
+    @ApiOperation("推荐商品")
+    @PostMapping("/memberRecommendProd")
+    @ApiVersion(1)
+    public Result<?> recommendProd(PageRequest request){
+        List<MemberRecommendProdVo> memberRecommendProdVos = customerMemberService.memberRecommendProd(request);
+        return Result.ok(memberRecommendProdVos);
     }
 
 

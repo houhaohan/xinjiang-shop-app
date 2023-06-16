@@ -66,20 +66,6 @@ public interface IOrdersService extends IService<Orders> {
     void recurOrder(Long orderId,Long customerId);
 
     /**
-     * 统计会员中心数据
-     * @param customerId 用户id
-     * @return
-     */
-    MemberVo countMember(Long customerId);
-
-    /**
-     * 会员中心  推荐记录
-     * @param dto
-     * @return
-     */
-    List<RecommendListVo> recommendList(RecommendListDto dto);
-
-    /**
      * 获取折后价
      * @param customerId 用户id
      * @param originalPrice 原价

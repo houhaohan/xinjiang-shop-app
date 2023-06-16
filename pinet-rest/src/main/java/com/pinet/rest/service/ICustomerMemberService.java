@@ -1,9 +1,11 @@
 package com.pinet.rest.service;
 
+import com.pinet.core.page.PageRequest;
 import com.pinet.rest.entity.CustomerMember;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.RecommendListDto;
+import com.pinet.rest.entity.vo.MemberRecommendProdVo;
 import com.pinet.rest.entity.vo.MemberVo;
 import com.pinet.rest.entity.vo.RecommendListVo;
 
@@ -52,4 +54,10 @@ public interface ICustomerMemberService extends IService<CustomerMember> {
      */
     Integer getMemberLevel(Long customerId);
 
+    /**
+     * 推荐商品
+     * @param request
+     * @return
+     */
+    List<MemberRecommendProdVo> memberRecommendProd(PageRequest request);
 }

@@ -3,6 +3,7 @@ package com.pinet.rest.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.rest.entity.ShopProduct;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.HomeProductParam;
 import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
@@ -59,4 +60,10 @@ public interface IShopProductService extends IService<ShopProduct> {
      */
     List<String> sellwell(Long shopId);
 
+    /**
+     * 根据经纬度和productId获取shopId和shopProductId
+     * @param dto
+     * @return
+     */
+    GetShopProdIdByProdIdVo getShopIdAndShopProdId(GetShopIdAndShopProdIdDto dto);
 }

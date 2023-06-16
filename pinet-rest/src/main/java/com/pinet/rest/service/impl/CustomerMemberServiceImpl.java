@@ -3,23 +3,30 @@ package com.pinet.rest.service.impl;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.page.PageRequest;
 import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.SpringContextUtils;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.CustomerMember;
 import com.pinet.rest.entity.OrderPay;
+import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
 import com.pinet.rest.entity.enums.MemberLevelEnum;
 import com.pinet.rest.entity.param.PayParam;
+import com.pinet.rest.entity.vo.MemberRecommendProdVo;
 import com.pinet.rest.entity.vo.MemberVo;
+import com.pinet.rest.entity.vo.OrderListVo;
 import com.pinet.rest.entity.vo.RecommendListVo;
 import com.pinet.rest.mapper.CustomerMemberMapper;
+import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import org.springframework.stereotype.Service;
 
@@ -41,13 +48,16 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
     private IOrderPayService orderPayService;
 
     @Resource
-    private IOrdersService ordersService;
+    private OrdersMapper ordersMapper;
 
     @Resource
     private ICustomerBalanceRecordService customerBalanceRecordService;
 
     @Resource
     private ICustomerService customerService;
+
+    @Resource
+    private IOrderProductService orderProductService;
 
     @Override
     public Object recharge(PayDto dto) {
@@ -92,7 +102,7 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
     @Override
     public MemberVo member() {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
-        MemberVo memberVo = ordersService.countMember(customerId);
+        MemberVo memberVo = ordersMapper.countMember(customerId);
 
         //统计累计充值金额
         BigDecimal sumRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(customerId, BalanceRecordTypeEnum._5);
@@ -118,8 +128,13 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
     public List<RecommendListVo> recommendList(RecommendListDto dto) {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         dto.setCustomerId(customerId);
-        List<RecommendListVo> recommendListVos = ordersService.recommendList(dto);
-
+        List<RecommendListVo> recommendListVos = ordersMapper.selectRecommendList(dto);
+        recommendListVos.forEach(k -> {
+            k.getRecommendTimeBos().forEach(k1 -> {
+                List<OrderProduct> orderProducts = orderProductService.getByOrderId(k1.getOrderId());
+                k1.setOrderProducts(orderProducts);
+            });
+        });
         return recommendListVos;
     }
 
@@ -131,5 +146,12 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
             memberLevel = customerMember.getMemberLevel();
         }
         return memberLevel;
+    }
+
+    @Override
+    public List<MemberRecommendProdVo> memberRecommendProd(PageRequest request) {
+        Page<OrderListVo> page = new Page<>(request.getPageNum(), request.getPageSize());
+        IPage<MemberRecommendProdVo> memberRecommendProd = baseMapper.selectMemberRecommendProd(page);
+        return memberRecommendProd.getRecords();
     }
 }

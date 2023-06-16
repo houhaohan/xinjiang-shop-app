@@ -492,22 +492,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         });
     }
 
-    @Override
-    public MemberVo countMember(Long customerId) {
-        return baseMapper.countMember(customerId);
-    }
 
-    @Override
-    public List<RecommendListVo> recommendList(RecommendListDto dto) {
-        List<RecommendListVo> recommendListVos = baseMapper.selectRecommendList(dto);
-        recommendListVos.forEach(k -> {
-            k.getRecommendTimeBos().forEach(k1 -> {
-                List<OrderProduct> orderProducts = orderProductService.getByOrderId(k1.getOrderId());
-                k1.setOrderProducts(orderProducts);
-            });
-        });
-        return recommendListVos;
-    }
 
     @Override
     public BigDecimal getDiscountedPrice(Long customerId, BigDecimal originalPrice) {

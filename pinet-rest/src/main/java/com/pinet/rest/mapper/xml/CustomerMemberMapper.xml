@@ -24,5 +24,36 @@
         del_flag,
         customer_id, member_level
     </sql>
+    <select id="selectMemberRecommendProd" resultType="com.pinet.rest.entity.vo.MemberRecommendProdVo">
+        SELECT
+            p.id productId,
+            p.product_img productImg,
+            p.product_name productName,
+            p. marketPrice,
+            sp.salesCount
+        FROM
+            (
+                SELECT
+                    p.id,
+                    product_name,
+                    product_img,
+                    MAX( sp.market_price )  marketPrice
+                FROM
+                    product p
+                        LEFT JOIN product_spec sp ON sp.product_id = p.id
+                GROUP BY
+                    p.id
+            ) p
+                LEFT JOIN (
+                SELECT
+                    sp.prod_id,
+                    SUM( op.prod_num ) salesCount
+                FROM
+                    order_product op
+                        LEFT JOIN shop_product sp ON sp.id = op.shop_prod_id
+                GROUP BY
+                    sp.prod_id
+            ) sp ON sp.prod_id = p.id order by sp.salesCount desc
+    </select>
 
 </mapper>

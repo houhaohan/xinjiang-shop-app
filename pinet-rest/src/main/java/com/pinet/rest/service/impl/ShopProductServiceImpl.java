@@ -4,14 +4,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.StringUtil;
+import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.ShopProduct;
+import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.HomeProductParam;
 import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
-import com.pinet.rest.entity.vo.HotProductVo;
-import com.pinet.rest.entity.vo.RecommendProductVo;
-import com.pinet.rest.entity.vo.ShopProductListVo;
-import com.pinet.rest.entity.vo.ShopProductVo;
+import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.ShopProductMapper;
 import com.pinet.rest.service.IProductGlanceOverService;
 import com.pinet.rest.service.IShopProductService;
@@ -91,7 +90,6 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public ShopProductVo getDetailById(Long id) {
-
         ShopProductVo shopProductVo = baseMapper.getDetailById(id);
         if(shopProductVo == null){
             throw new PinetException("商品不存在");
@@ -125,5 +123,11 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     public List<String> sellwell(Long shopId) {
         if(shopId == null) return Collections.EMPTY_LIST;
         return baseMapper.sellwell(shopId);
+    }
+
+    @Override
+    public GetShopProdIdByProdIdVo getShopIdAndShopProdId(GetShopIdAndShopProdIdDto dto) {
+        GetShopProdIdByProdIdVo getShopProdIdByProdIdVo = baseMapper.selectShopIdAndShopProdId(dto);
+        return getShopProdIdByProdIdVo;
     }
 }

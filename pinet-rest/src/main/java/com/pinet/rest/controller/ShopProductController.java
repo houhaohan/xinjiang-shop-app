@@ -9,8 +9,10 @@ import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.CustomerAddress;
 import com.pinet.rest.entity.Shop;
+import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.CartVo;
+import com.pinet.rest.entity.vo.GetShopProdIdByProdIdVo;
 import com.pinet.rest.entity.vo.ShopProductListVo;
 import com.pinet.rest.entity.vo.ShopProductVo;
 import com.pinet.rest.service.ICartService;
@@ -21,10 +23,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import com.pinet.core.controller.BaseController;
 import java.math.BigDecimal;
 import java.util.List;
@@ -131,5 +131,16 @@ public class ShopProductController extends BaseController {
         ShopProductVo shopProductVo = shopProductService.getDetailById(id);
         return Result.ok(shopProductVo);
     }
+
+
+    @PostMapping("/getShopIdAndShopProdId")
+    @ApiVersion(1)
+    @ApiOperation("根据商品id获取店铺id和店铺商品id")
+    @NotTokenSign
+    public Result<GetShopProdIdByProdIdVo> getShopIdAndShopProdId(@Validated @RequestBody GetShopIdAndShopProdIdDto dto){
+        GetShopProdIdByProdIdVo getShopProdIdByProdIdVo = shopProductService.getShopIdAndShopProdId(dto);
+        return Result.ok(getShopProdIdByProdIdVo);
+    }
+
 
 }

@@ -317,4 +317,20 @@
         order by count(1) desc
         limit 10
     </select>
+    <select id="selectShopIdAndShopProdId" resultType="com.pinet.rest.entity.vo.GetShopProdIdByProdIdVo">
+        SELECT s.id shopId,sp.id shopProductId,
+               ROUND(
+                           6378.138 * 2 * ASIN(
+                               SQRT(
+                                           POW( SIN( ( #{lat}  * PI() / 180- lat * PI() / 180 ) / 2 ), 2 ) + COS( #{lat} * PI() / 180 ) * COS( lat * PI() / 180 ) * POW( SIN( ( #{lng} * PI() / 180- lng * PI() / 180 ) / 2 ), 2 )
+                                   )
+                           ) * 1000
+                   ) AS distance
+        FROM shop s
+                 left join shop_product sp on s.id = sp.shop_id
+        WHERE s.del_flag = 0 and sp.del_flag = 0 and sp.prod_id = #{productId}
+        ORDER BY
+            distance ASC
+        LIMIT 1
+    </select>
 </mapper>
