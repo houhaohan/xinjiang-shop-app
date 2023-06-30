@@ -4,14 +4,18 @@ package com.pinet.rest.controller;
 import com.pinet.core.page.PageRequest;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
+import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.ProductType;
 import com.pinet.rest.entity.bo.RecommendTimeBo;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.RecommendListDto;
+import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.service.ICustomerMemberService;
+import com.pinet.rest.service.payNotify.IPayNotifyService;
+import com.pinet.rest.service.payNotify.impl.RechargeNotifyServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
@@ -39,6 +43,9 @@ import java.util.List;
 public class CustomerMemberController extends BaseController {
     @Resource
     private ICustomerMemberService customerMemberService;
+
+    @Resource
+    private RechargeNotifyServiceImpl rechargeNotifyService;
 
     @ApiOperation("充值")
     @PostMapping("/recharge")
@@ -90,6 +97,15 @@ public class CustomerMemberController extends BaseController {
     public Result<?> prodList(){
         List<ProductListVo> productListVos = customerMemberService.productList();
         return Result.ok(productListVos);
+    }
+
+
+    @RequestMapping("/test")
+    @ApiVersion(1)
+    @NotTokenSign
+    public Result<?> test(OrderPayNotifyParam param){
+        rechargeNotifyService.payNotify(param);
+        return Result.ok();
     }
 
 

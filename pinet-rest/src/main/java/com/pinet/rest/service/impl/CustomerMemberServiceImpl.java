@@ -98,18 +98,17 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
 
     @Override
     public CustomerMember getByCustomerId(Long customerId) {
-        LambdaQueryWrapper<CustomerMember> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(CustomerMember::getCustomerId, customerId).eq(BaseEntity::getDelFlag, 0);
-        return getOne(lambdaQueryWrapper);
+        return baseMapper.selectByCustomerId(customerId);
     }
 
     @Override
     public MemberVo member() {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         MemberVo memberVo = ordersMapper.countMember(customerId);
+        CustomerMember customerMember = getByCustomerId(customerId);
 
         //统计累计充值金额
-        BigDecimal sumRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(customerId, BalanceRecordTypeEnum._5);
+        BigDecimal sumRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(customerId, BalanceRecordTypeEnum._5,customerMember.getExpireTime());
         memberVo.setSumRechargePrice(sumRechargePrice);
 
 
@@ -124,7 +123,6 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
         memberVo.setAvatar(customer.getAvatar());
         memberVo.setNickName(customer.getNickname());
 
-        CustomerMember customerMember = getByCustomerId(customerId);
         if (ObjectUtil.isNotNull(customerMember)){
             memberVo.setExpireTime(customerMember.getExpireTime());
         }
