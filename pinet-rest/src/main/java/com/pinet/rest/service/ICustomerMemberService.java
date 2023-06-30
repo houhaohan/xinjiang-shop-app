@@ -3,10 +3,12 @@ package com.pinet.rest.service;
 import com.pinet.core.page.PageRequest;
 import com.pinet.rest.entity.CustomerMember;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.bo.RecommendTimeBo;
 import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.vo.MemberRecommendProdVo;
 import com.pinet.rest.entity.vo.MemberVo;
+import com.pinet.rest.entity.vo.ProductListVo;
 import com.pinet.rest.entity.vo.RecommendListVo;
 
 import java.util.List;
@@ -60,4 +62,12 @@ public interface ICustomerMemberService extends IService<CustomerMember> {
      * @return
      */
     List<MemberRecommendProdVo> memberRecommendProd(PageRequest request);
+
+    /**
+     * 会员中心推荐记录
+     * @return
+     */
+    List<RecommendTimeBo> recommendIndexList();
+
+    List<ProductListVo> productList();
 }

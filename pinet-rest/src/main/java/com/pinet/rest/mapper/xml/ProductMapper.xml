@@ -4,17 +4,17 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Product">
-        <result column="id" property="id" />
-        <result column="create_by" property="createBy" />
-        <result column="create_time" property="createTime" />
-        <result column="update_by" property="updateBy" />
-        <result column="update_time" property="updateTime" />
-        <result column="del_flag" property="delFlag" />
-        <result column="product_name" property="productName" />
-        <result column="product_img" property="productImg" />
-        <result column="product_desc" property="productDesc" />
-        <result column="product_type_id" property="productTypeId" />
-        <result column="product_type" property="productType" />
+        <result column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_img" property="productImg"/>
+        <result column="product_desc" property="productDesc"/>
+        <result column="product_type_id" property="productTypeId"/>
+        <result column="product_type" property="productType"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -27,5 +27,27 @@
         del_flag,
         product_name, product_img, product_desc, product_type_id, product_type
     </sql>
+    <resultMap id="selectProductListResultMap" type="com.pinet.rest.entity.vo.ProductListVo">
+        <id column="product_type_id" property="typeId"/>
+        <result column="product_type" property="typeName"/>
+        <collection property="productList" resultMap="selectProdSpecResultMap"/>
+    </resultMap>
+    <resultMap id="selectProdSpecResultMap" type="com.pinet.rest.entity.vo.MemberRecommendProdVo">
+        <result column="product_name" property="productName"/>
+        <result column="product_img" property="productImg"/>
+        <result column="marketPrice" property="marketPrice"/>
+        <result column="p_id" property="productId"/>
+    </resultMap>
+    <select id="selectProductList" resultMap="selectProductListResultMap">
+        select p.id                 p_id,
+               p.product_type,
+               p.product_type_id,
+               p.product_name,
+               p.product_img,
+               max(ps.market_price) marketPrice
+        from qingshi.product p
+                 left join qingshi.product_spec ps on ps.product_id = p.id
+        where p.del_flag = 0
+    </select>
 
 </mapper>

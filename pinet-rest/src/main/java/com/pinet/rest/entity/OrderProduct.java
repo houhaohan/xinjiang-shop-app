@@ -58,5 +58,8 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("订单商品样式信息字符串")
     private String orderProductSpecStr;
 
+    @ApiModelProperty("佣金")
+    private BigDecimal commission;
+
 
 }

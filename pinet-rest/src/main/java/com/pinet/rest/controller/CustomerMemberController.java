@@ -4,14 +4,13 @@ package com.pinet.rest.controller;
 import com.pinet.core.page.PageRequest;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
+import com.pinet.rest.entity.ProductType;
+import com.pinet.rest.entity.bo.RecommendTimeBo;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.param.PayParam;
-import com.pinet.rest.entity.vo.MemberRecommendProdVo;
-import com.pinet.rest.entity.vo.MemberVo;
-import com.pinet.rest.entity.vo.RecommendListVo;
-import com.pinet.rest.entity.vo.RecommendProductVo;
+import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.service.ICustomerMemberService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -58,11 +57,19 @@ public class CustomerMemberController extends BaseController {
     }
 
 
-    @ApiOperation("推荐记录")
+    @ApiOperation("更多记录")
     @PostMapping("/recommendList")
     @ApiVersion(1)
     public Result<?> recommendList(@RequestBody RecommendListDto dto){
         List<RecommendListVo> recommendListVos = customerMemberService.recommendList(dto);
+        return Result.ok(recommendListVos);
+    }
+
+    @ApiOperation("推荐记录")
+    @RequestMapping("/recommendIndexList")
+    @ApiVersion(1)
+    public Result<?> recommendIndexList(){
+        List<RecommendTimeBo> recommendListVos = customerMemberService.recommendIndexList();
         return Result.ok(recommendListVos);
     }
 
@@ -77,7 +84,13 @@ public class CustomerMemberController extends BaseController {
     }
 
 
-
+    @ApiOperation("更多商品")
+    @PostMapping("/prodList")
+    @ApiVersion(1)
+    public Result<?> prodList(){
+        List<ProductListVo> productListVos = customerMemberService.productList();
+        return Result.ok(productListVos);
+    }
 
 
 

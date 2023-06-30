@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
@@ -128,6 +129,9 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Override
     public GetShopProdIdByProdIdVo getShopIdAndShopProdId(GetShopIdAndShopProdIdDto dto) {
         GetShopProdIdByProdIdVo getShopProdIdByProdIdVo = baseMapper.selectShopIdAndShopProdId(dto);
+        if (ObjectUtil.isNull(getShopProdIdByProdIdVo)){
+            throw new PinetException("附近店铺没有这个商品");
+        }
         return getShopProdIdByProdIdVo;
     }
 }

@@ -2,6 +2,9 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.Product;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.ProductListVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,5 +15,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-12-06
  */
 public interface IProductService extends IService<Product> {
-
+    /**
+     * 查询所有商品 并按照类型分组
+     * @return
+     */
+    List<ProductListVo> productList();
 }

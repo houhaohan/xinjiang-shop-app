@@ -284,7 +284,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //创建订单基础信息
         Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, discountAmount, shop);
-        setOrdersCommission(order);
+        setOrdersCommission(order,orderProducts);
         //插入订单
         this.save(order);
 
@@ -328,9 +328,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      *
      * @param orders
      */
-    private void setOrdersCommission(Orders orders) {
+    private void setOrdersCommission(Orders orders,List<OrderProduct> orderProducts) {
         if (orders.getShareId() <= 0){
-            orders.setCommission(BigDecimal.ZERO);
+            return;
+        }
+
+        //判断下单人和分享人是否是同一个人
+        if (orders.getCustomerId().equals(orders.getShareId())){
+            return;
         }
 
         //下单人会员等级
@@ -343,6 +348,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             //佣金=商品总金额 * 0.1
             BigDecimal commission = orders.getOrderProdPrice().multiply(new BigDecimal("0.1")).setScale(2, RoundingMode.HALF_UP);
             orders.setCommission(commission);
+
+
+            //设置单个商品的佣金
+            orderProducts.forEach(k->{
+                k.setCommission(k.getProdPrice().multiply(new BigDecimal("0.1")).setScale(2, RoundingMode.HALF_UP));
+            });
+
         }
     }
 

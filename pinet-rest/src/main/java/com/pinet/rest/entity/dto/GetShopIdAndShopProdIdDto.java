@@ -1,5 +1,6 @@
 package com.pinet.rest.entity.dto;
 
+import com.pinet.core.constants.CommonConstant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -14,14 +15,11 @@ import javax.validation.constraints.NotNull;
  **/
 @Data
 public class GetShopIdAndShopProdIdDto {
-    @NotBlank(message = "经纬度不能为空")
     @ApiModelProperty(value = "lat",name = "lat")
-    private String lat;
+    private String lat = CommonConstant.DEFAULT_LAT;
 
-    @NotBlank
-    @NotBlank(message = "经纬度不能为空")
     @ApiModelProperty(value = "lng",name = "lng")
-    private String lng;
+    private String lng = CommonConstant.DEFAULT_LAT;
 
     @NotNull(message = "商品id不能为空")
     @ApiModelProperty(value = "商品id",name = "productId")

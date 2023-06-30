@@ -1,10 +1,13 @@
 package com.pinet.rest.service.impl;
 
 import com.pinet.rest.entity.Product;
+import com.pinet.rest.entity.vo.ProductListVo;
 import com.pinet.rest.mapper.ProductMapper;
 import com.pinet.rest.service.IProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +20,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements IProductService {
 
+    @Override
+    public List<ProductListVo> productList() {
+        return baseMapper.selectProductList();
+    }
 }

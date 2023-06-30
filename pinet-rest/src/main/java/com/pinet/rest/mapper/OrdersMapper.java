@@ -3,6 +3,7 @@ package com.pinet.rest.mapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.pinet.rest.entity.Orders;
+import com.pinet.rest.entity.bo.RecommendTimeBo;
 import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.vo.MemberVo;
 import com.pinet.rest.entity.vo.OrderDetailVo;
@@ -31,5 +32,7 @@ public interface OrdersMapper extends BaseMapper<Orders> {
 
     MemberVo countMember(@Param("customerId") Long customerId);
 
-    List<RecommendListVo> selectRecommendList(RecommendListDto dto);
+    Page<RecommendListVo> selectRecommendList(Page<RecommendListVo> page,@Param("dto") RecommendListDto dto);
+
+    List<RecommendTimeBo> selectRecommendIndexList(@Param("customerId") Long customerId);
 }
