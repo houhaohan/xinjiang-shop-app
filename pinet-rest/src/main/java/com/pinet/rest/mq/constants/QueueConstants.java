@@ -9,4 +9,6 @@ package com.pinet.rest.mq.constants;
  **/
 public class QueueConstants {
     public static final String QING_SHI_ORDER_PAY_NAME = "qingshi.order.pay.queue";
+
+    public static final String QING_MEMBER_PAY_NAME = "qingshi.member.pay.queue";
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -329,7 +330,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param orders
      */
     private void setOrdersCommission(Orders orders,List<OrderProduct> orderProducts) {
-        if (orders.getShareId() <= 0){
+        if (ObjectUtil.isNull(orders.getShareId()) ||  orders.getShareId() <= 0){
             return;
         }
 

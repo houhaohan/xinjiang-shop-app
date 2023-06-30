@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p>
@@ -16,5 +17,5 @@ import java.math.BigDecimal;
  */
 public interface CustomerBalanceRecordMapper extends BaseMapper<CustomerBalanceRecord> {
 
-    BigDecimal sumMoneyByCustomerIdAndType(@Param("customerId") Long customerId, @Param("type") Integer type);
+    BigDecimal sumMoneyByCustomerIdAndType(@Param("customerId") Long customerId, @Param("type") Integer type, @Param("startTime") Date startTime);
 }

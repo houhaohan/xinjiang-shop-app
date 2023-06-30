@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p>
@@ -34,6 +35,11 @@ public class CustomerBalanceRecordServiceImpl extends ServiceImpl<CustomerBalanc
 
     @Override
     public BigDecimal sumMoneyByCustomerIdAndType(Long customerId, BalanceRecordTypeEnum balanceRecordTypeEnum) {
-        return baseMapper.sumMoneyByCustomerIdAndType(customerId,balanceRecordTypeEnum.getCode());
+        return sumMoneyByCustomerIdAndType(customerId,balanceRecordTypeEnum,null);
+    }
+
+    @Override
+    public BigDecimal sumMoneyByCustomerIdAndType(Long customerId, BalanceRecordTypeEnum balanceRecordTypeEnum, Date startTime) {
+        return baseMapper.sumMoneyByCustomerIdAndType(customerId,balanceRecordTypeEnum.getCode(),startTime);
     }
 }

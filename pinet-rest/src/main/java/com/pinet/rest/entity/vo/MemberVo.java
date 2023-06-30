@@ -1,9 +1,11 @@
 package com.pinet.rest.entity.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @program: xinjiang-shop-app
@@ -36,4 +38,8 @@ public class MemberVo {
 
     @ApiModelProperty(value = "用户头像")
     private String avatar;
+
+    @ApiModelProperty(value = "过期时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+    private Date expireTime;
 }

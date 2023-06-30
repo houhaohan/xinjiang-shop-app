@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p>
@@ -26,10 +27,19 @@ public interface ICustomerBalanceRecordService extends IService<CustomerBalanceR
     boolean addCustomerBalanceRecord(Long customerId, BigDecimal money, BalanceRecordTypeEnum balanceRecordTypeEnum, Long fkId);
 
     /**
-     * 根据type统计金额
+     *根据type统计金额
      * @param customerId 用户id
      * @param balanceRecordTypeEnum 类型
      * @return
      */
     BigDecimal sumMoneyByCustomerIdAndType(Long customerId, BalanceRecordTypeEnum balanceRecordTypeEnum);
+
+    /**
+     * 根据type统计金额
+     * @param customerId 用户id
+     * @param balanceRecordTypeEnum 类型
+     * @param startTime  >startTime
+     * @return
+     */
+    BigDecimal sumMoneyByCustomerIdAndType(Long customerId, BalanceRecordTypeEnum balanceRecordTypeEnum, Date startTime);
 }
