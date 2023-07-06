@@ -44,9 +44,6 @@ public class CustomerMemberController extends BaseController {
     @Resource
     private ICustomerMemberService customerMemberService;
 
-    @Resource
-    private RechargeNotifyServiceImpl rechargeNotifyService;
-
     @ApiOperation("充值")
     @PostMapping("/recharge")
     @ApiVersion(1)
@@ -94,22 +91,11 @@ public class CustomerMemberController extends BaseController {
     @ApiOperation("更多商品")
     @PostMapping("/prodList")
     @ApiVersion(1)
+    @NotTokenSign
     public Result<?> prodList(){
         List<ProductListVo> productListVos = customerMemberService.productList();
         return Result.ok(productListVos);
     }
-
-
-    @RequestMapping("/test")
-    @ApiVersion(1)
-    @NotTokenSign
-    public Result<?> test(OrderPayNotifyParam param){
-        rechargeNotifyService.payNotify(param);
-        return Result.ok();
-    }
-
-
-
 
 
 }

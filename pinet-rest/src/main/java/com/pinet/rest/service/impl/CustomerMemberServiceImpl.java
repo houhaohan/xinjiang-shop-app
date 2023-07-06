@@ -2,11 +2,12 @@ package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pinet.core.entity.BaseEntity;
+import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.page.PageRequest;
 import com.pinet.core.util.IPUtils;
@@ -27,11 +28,11 @@ import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.CustomerMemberMapper;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,6 +44,8 @@ import java.util.List;
  * @since 2023-06-13
  */
 @Service
+@DS(DB.MASTER)
+@Slf4j
 public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper, CustomerMember> implements ICustomerMemberService {
     @Resource
     private IOrderPayService orderPayService;
@@ -108,7 +111,16 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
         CustomerMember customerMember = getByCustomerId(customerId);
 
         //统计累计充值金额
-        BigDecimal sumRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(customerId, BalanceRecordTypeEnum._5,customerMember.getExpireTime());
+        BigDecimal sumRechargePrice;
+        log.info("会员信息"+JSONObject.toJSONString(customerMember));
+        if (ObjectUtil.isNotNull(customerMember) && ObjectUtil.isNotNull(customerMember.getExpireTime()) &&  customerMember.getExpireTime().getTime() < System.currentTimeMillis()){
+            memberVo.setExpireTime(customerMember.getExpireTime());
+            sumRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(customerId, BalanceRecordTypeEnum._5,customerMember.getExpireTime());
+        }else {
+            sumRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(customerId, BalanceRecordTypeEnum._5);
+        }
+
+
         memberVo.setSumRechargePrice(sumRechargePrice);
 
 
@@ -123,9 +135,6 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
         memberVo.setAvatar(customer.getAvatar());
         memberVo.setNickName(customer.getNickname());
 
-        if (ObjectUtil.isNotNull(customerMember)){
-            memberVo.setExpireTime(customerMember.getExpireTime());
-        }
         return memberVo;
     }
 

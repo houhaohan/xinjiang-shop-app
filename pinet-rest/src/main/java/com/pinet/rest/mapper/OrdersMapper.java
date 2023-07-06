@@ -2,6 +2,7 @@ package com.pinet.rest.mapper;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.CustomerMember;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.bo.RecommendTimeBo;
 import com.pinet.rest.entity.dto.RecommendListDto;

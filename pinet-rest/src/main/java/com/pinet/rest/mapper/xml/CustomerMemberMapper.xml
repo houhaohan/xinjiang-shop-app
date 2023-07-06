@@ -49,7 +49,7 @@
         ) sp ON sp.prod_id = p.id
         order by sp.salesCount desc
     </select>
-    <select id="selectByCustomerId" resultMap="BaseResultMap">
+    <select id="selectByCustomerId" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
         <include refid="Base_Column_List"/>
         from customer_member where customer_id = #{customerId} and del_flag = 0 limit 1

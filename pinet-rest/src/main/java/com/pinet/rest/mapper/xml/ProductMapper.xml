@@ -47,7 +47,7 @@
                max(ps.market_price) marketPrice
         from qingshi.product p
                  left join qingshi.product_spec ps on ps.product_id = p.id
-        where p.del_flag = 0
+        where p.del_flag = 0 GROUP BY p.id
     </select>
 
 </mapper>

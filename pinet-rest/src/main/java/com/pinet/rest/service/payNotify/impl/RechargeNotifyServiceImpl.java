@@ -10,6 +10,7 @@ import com.pinet.rest.entity.OrderPay;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
 import com.pinet.rest.entity.enums.MemberLevelEnum;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
+import com.pinet.rest.entity.vo.ProductListVo;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.ICustomerBalanceRecordService;
 import com.pinet.rest.service.ICustomerBalanceService;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @program: xinjiang-shop-app
