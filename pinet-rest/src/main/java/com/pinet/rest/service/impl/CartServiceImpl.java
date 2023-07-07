@@ -168,10 +168,11 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     public void delCartByShopId(Long shopId, Long customerId) {
         LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Cart::getShopId, shopId).eq(Cart::getCustomerId, customerId).eq(BaseEntity::getDelFlag, 0);
+        List<Cart> cartList = list(lambdaQueryWrapper);
+
         remove(lambdaQueryWrapper);
 
         //删除cart_product_spec表数据
-        List<Cart> cartList = list(lambdaQueryWrapper);
         List<Long> cartIds = cartList.stream().map(BaseEntity::getId).collect(Collectors.toList());
         LambdaQueryWrapper<CartProductSpec> removeWrapper = new LambdaQueryWrapper<>();
         removeWrapper.in(CartProductSpec::getCartId,cartIds).eq(BaseEntity::getDelFlag,0);
