@@ -6,10 +6,7 @@ import com.pinet.rest.entity.CustomerMember;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.bo.RecommendTimeBo;
 import com.pinet.rest.entity.dto.RecommendListDto;
-import com.pinet.rest.entity.vo.MemberVo;
-import com.pinet.rest.entity.vo.OrderDetailVo;
-import com.pinet.rest.entity.vo.OrderListVo;
-import com.pinet.rest.entity.vo.RecommendListVo;
+import com.pinet.rest.entity.vo.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -36,4 +33,6 @@ public interface OrdersMapper extends BaseMapper<Orders> {
     Page<RecommendListVo> selectRecommendList(Page<RecommendListVo> page,@Param("dto") RecommendListDto dto);
 
     List<RecommendTimeBo> selectRecommendIndexList(@Param("customerId") Long customerId);
+
+    List<PickUpListVo> selectPickUpList(@Param("customerId") Long customerId);
 }

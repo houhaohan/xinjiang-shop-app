@@ -123,7 +123,7 @@
         order by o.create_time desc
     </select>
     <select id="selectRecommendIndexList" resultType="com.pinet.rest.entity.bo.RecommendTimeBo">
-        select o.id orderId,
+        select o.id                                         orderId,
                DATE_FORMAT(o.create_time, '%Y-%m-%d %H:%i') time,
                c.avatar,
                c.nickname,
@@ -131,6 +131,14 @@
         from orders o
                  left join xjs.customer c on c.customer_id = o.customer_id
         where o.share_id = #{customerId}
-        order by o.create_time desc limit 3
+        order by o.create_time desc
+        limit 3
+    </select>
+    <select id="selectPickUpList" resultType="com.pinet.rest.entity.vo.PickUpListVo">
+        select create_time createTime, shop_name shopName, id, order_status orderStatus
+        from qingshi.orders
+        where customer_id = #{customerId}
+          and order_status in (30, 40)
+        order by create_time desc
     </select>
 </mapper>

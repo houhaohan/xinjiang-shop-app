@@ -113,4 +113,13 @@ public class OrdersController extends BaseController {
         return Result.ok();
     }
 
+
+    @RequestMapping("/pickUpList")
+    @ApiOperation("自提兑换码")
+    @ApiVersion(1)
+    public Result<?> pickUpList(){
+        List<PickUpListVo> pickUpListVos = ordersService.pickUpList();
+        return Result.ok(pickUpListVos);
+    }
+
 }

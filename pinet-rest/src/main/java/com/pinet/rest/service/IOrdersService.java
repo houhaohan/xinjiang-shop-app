@@ -72,4 +72,10 @@ public interface IOrdersService extends IService<Orders> {
      * @return
      */
     BigDecimal getDiscountedPrice(Long customerId,BigDecimal originalPrice);
+
+    /**
+     * 自提兑换码
+     * @return
+     */
+    List<PickUpListVo> pickUpList();
 }

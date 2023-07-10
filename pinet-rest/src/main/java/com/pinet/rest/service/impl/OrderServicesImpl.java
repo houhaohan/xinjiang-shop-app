@@ -517,6 +517,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return discountedPrice;
     }
 
+    @Override
+    public List<PickUpListVo> pickUpList() {
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+        List<PickUpListVo> pickUpListVos = baseMapper.selectPickUpList(customerId);
+        pickUpListVos.forEach(k->{
+            if (k.getOrderStatus().equals(OrderStatusEnum.MAKE.getCode())){
+                k.setOrderStatusStr(OrderStatusEnum.MAKE.getMsg());
+            }else {
+                k.setOrderStatusStr("可领取");
+            }
+        });
+        return pickUpListVos;
+    }
+
 
     private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, BigDecimal discountAmount, Shop shop) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
