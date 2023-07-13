@@ -11,6 +11,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
+import com.pinet.rest.entity.enums.CapitalFlowWayEnum;
 import com.pinet.rest.entity.enums.MemberLevelEnum;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mq.constants.QueueConstants;
@@ -87,6 +89,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Resource
     private ICustomerMemberService customerMemberService;
+
+    @Resource
+    private IBCapitalFlowService bCapitalFlowService;
+
+    @Resource
+    private IBUserBalanceService ibUserBalanceService;
 
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
@@ -427,6 +435,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPay.setOutTradeNo(param.getOutTradeNo());
         orderPayService.updateById(orderPay);
 
+        //资金流水
+        bCapitalFlowService.add(orderPay.getPayPrice(),orders.getId(),orders.getCreateTime(),
+                CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._1,orders.getShopId());
+
+        //修改余额
+        ibUserBalanceService.addAmount(orders.getShopId(),orderPay.getPayPrice());
+
+
         //判断订单状态  如果订单状态是已取消  就退款
         if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {
 
@@ -480,6 +496,18 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             log.error("微信退款回调失败，退款单号不存在" + param.getRefundNo());
             throw new PinetException("退款单号不存在");
         }
+        //订单信息
+        Orders orders = getById(orderRefund.getOrderId());
+        //订单支付信息
+        OrderPay orderPay =  orderPayService.getById(orderRefund.getOrderPayId());
+        //资金流水
+        bCapitalFlowService.add(orderPay.getPayPrice(),orders.getId(),orders.getCreateTime(),
+                CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2,orders.getShopId());
+
+        //修改余额
+        ibUserBalanceService.addAmount(orders.getShopId(),orderPay.getPayPrice().negate());
+
+
         orderRefund.setRefundStatus(2);
         orderRefund.setOutTradeNo(param.getOutTradeNo());
         return orderRefundService.updateById(orderRefund);

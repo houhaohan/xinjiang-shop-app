@@ -12,11 +12,14 @@ import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.pinet.core.util.DateUtil;
 import com.pinet.rest.config.properties.AliAppProperties;
+import com.pinet.rest.entity.OrderPay;
 import com.pinet.rest.entity.OrderRefund;
+import com.pinet.rest.entity.Orders;
+import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
+import com.pinet.rest.entity.enums.CapitalFlowWayEnum;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.param.RefundParam;
-import com.pinet.rest.service.IOrderRefundService;
-import com.pinet.rest.service.IPayService;
+import com.pinet.rest.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +41,18 @@ public class AliAppPayServiceImpl implements IPayService {
     @Resource
     private IOrderRefundService orderRefundService;
 
+    @Resource
+    private IBCapitalFlowService ibCapitalFlowService;
+
+    @Resource
+    private IBUserBalanceService ibUserBalanceService;
+
+    @Resource
+    private IOrdersService ordersService;
+
+    @Resource
+    private IOrderPayService orderPayService;
+
     /**
      * 支付宝网关
      */
@@ -45,7 +60,7 @@ public class AliAppPayServiceImpl implements IPayService {
 
     @Override
     public Object pay(PayParam param) {
-        String orderStr="";
+        String orderStr = "";
         try {
             //构造client
             CertAlipayRequest request = new CertAlipayRequest();
@@ -114,15 +129,29 @@ public class AliAppPayServiceImpl implements IPayService {
             request.setBizModel(model);
             AlipayTradeRefundResponse response = alipayClient.execute(request);
             //判断是否退款成功 更新退款记录状态
-            if (response.isSuccess()){
+            if (response.isSuccess()) {
                 //更新退款记录状态为已到账
                 OrderRefund orderRefund = orderRefundService.getById(param.getOrderRefundId());
                 orderRefund.setRefundStatus(2);
                 orderRefund.setOutTradeNo(response.getTradeNo());
                 orderRefundService.updateById(orderRefund);
+
+
+                //订单信息
+                Orders orders = ordersService.getById(orderRefund.getOrderId());
+                //订单支付信息
+                OrderPay orderPay = orderPayService.getById(orderRefund.getOrderPayId());
+
+                //更新资金流水和余额
+                ibCapitalFlowService.add(orderPay.getPayPrice(), orders.getId(), orders.getCreateTime(),
+                        CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2, orders.getShopId());
+
+                //修改余额
+                ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());
+
             }
         } catch (Exception e) {
-            log.error("支付宝退款出现异常{}",e);
+            log.error("支付宝退款出现异常{}", e);
         }
 
 
