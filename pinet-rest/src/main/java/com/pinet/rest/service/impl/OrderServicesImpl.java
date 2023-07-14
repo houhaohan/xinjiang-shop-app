@@ -501,7 +501,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //订单支付信息
         OrderPay orderPay =  orderPayService.getById(orderRefund.getOrderPayId());
         //资金流水
-        bCapitalFlowService.add(orderPay.getPayPrice(),orders.getId(),orders.getCreateTime(),
+        bCapitalFlowService.add(orderPay.getPayPrice().negate(),orders.getId(),orders.getCreateTime(),
                 CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2,orders.getShopId());
 
         //修改余额
