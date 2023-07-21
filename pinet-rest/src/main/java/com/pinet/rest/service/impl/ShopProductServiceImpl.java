@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.StringUtil;
-import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.HomeProductParam;
@@ -19,6 +18,7 @@ import com.pinet.rest.service.IShopService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -95,7 +95,6 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         if(shopProductVo == null){
             throw new PinetException("商品不存在");
         }
-
         //更新商品浏览次数
         productGlanceOverService.updateGlanceOverTimes(id);
         return shopProductVo;

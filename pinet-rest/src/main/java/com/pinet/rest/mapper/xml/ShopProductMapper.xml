@@ -223,8 +223,8 @@
 		) t2) as price-->
         from shop_product sp
         left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
-        left join product_sku ps on ps.id = sps.sku_id and ps.del_flag = 0
-        left join product_spec psp on psp.id = sps.prod_spec_id and psp.del_flag = 0
+        left join product_sku ps on ps.id = sps.sku_id
+        left join product_spec psp on psp.id = sps.prod_spec_id
         where sp.id = #{id}
     </select>
 
@@ -260,11 +260,11 @@
                         min(sps.price)                                    as price
                  from shop s
                           inner join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
-                          inner join product_spec ps on ps.product_id = sp.prod_id and ps.del_flag = 0
-                          inner join shop_product_spec sps on sps.prod_spec_id = ps.id and sps.shop_prod_id = sp.id
+                          inner join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
+                          left join product_spec ps on ps.id = sps.prod_spec_id and ps.del_flag = 0
                  where s.id = #{shopId}
                    and s.del_flag = 0
-                 group by ps.sku_id
+                 group by sps.sku_id
              ) temp
         group by temp.id
     </select>
@@ -334,4 +334,6 @@
             distance ASC
         LIMIT 1
     </select>
+
+
 </mapper>
