@@ -1,10 +1,10 @@
 server:
-  port: 8090
+  port: 1800
   servlet:
-    context-path: /api
+    context-path:
 spring:
   application:
-    name: pinet-rest
+    name: kry
   servlet:
     multipart:
       max-file-size: 10MB
@@ -12,40 +12,40 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-  autoconfigure:
-    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
-  datasource:
-    type: com.alibaba.druid.pool.DruidDataSource
-    dynamic:
-      # 指定默认数据源
-      primary: master
-      druid:
-        min-idle: 10
-        max-pool-prepared-statement-per-connection-size: 20
-        validation-query-timeout: 30000
-        test-while-idle: true
-        time-between-eviction-runs-millis: 5000
-        max-active: 400
-        validation-query: SELECT 1 FROM DUAL
-        max-wait: 60000
-        connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-        test-on-borrow: false
-        pool-prepared-statements: true
-        initial-size: 20
-        min-evictable-idle-time-millis: 300000
-        test-on-return: false
-        filter: stat,wall,slf4j
-      datasource:
-        master:
-          url: jdbc:mysql://192.168.1.91:3306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
-          username: root
-          password: 123456
-          driver-class-name: com.mysql.cj.jdbc.Driver
-        slave:
-          url: jdbc:mysql://192.168.1.91:3306/xinjiang-shop?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
-          username: root
-          password: 123456
-          driver-class-name: com.mysql.cj.jdbc.Driver
+#  autoconfigure:
+#    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+#  datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource
+#    dynamic:
+#      # 指定默认数据源
+#      primary: master
+#      druid:
+#        min-idle: 10
+#        max-pool-prepared-statement-per-connection-size: 20
+#        validation-query-timeout: 30000
+#        test-while-idle: true
+#        time-between-eviction-runs-millis: 5000
+#        max-active: 400
+#        validation-query: SELECT 1 FROM DUAL
+#        max-wait: 60000
+#        connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+#        test-on-borrow: false
+#        pool-prepared-statements: true
+#        initial-size: 20
+#        min-evictable-idle-time-millis: 300000
+#        test-on-return: false
+#        filter: stat,wall,slf4j
+#      datasource:
+#        master:
+#          url: jdbc:mysql://192.168.1.91:3306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+#          username: root
+#          password: 123456
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#        slave:
+#          url: jdbc:mysql://192.168.1.91:3306/xinjiang-shop?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+#          username: root
+#          password: 123456
+#          driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
     database: 0
     host: 192.168.1.91
@@ -139,9 +139,8 @@ social:
       public-cert-url: /usr/local/project/cert/alipayCertPublicKey_RSA2.crt
 
 kry:
-  projectName: kry-open-plantform-demo
+  projectName: keruyun
   projectVersion: @project.version@
-  #url: https://openapi.keruyun.com
-  url: https://gldopenapi.keruyun.com
-  appKey: 8a455f1d88a83e33b15f3ebfce97f2a4
-  appSecret: cc04a0564e4b5f069ec499cf04b2308e
+  url: https://openapi.keruyun.com
+  appKey: 4f29fbff04660448bf6b0d4b9b6ce7f0
+  appSecret: 1bb67d38ba133db3a0cd1b1336263ff1
