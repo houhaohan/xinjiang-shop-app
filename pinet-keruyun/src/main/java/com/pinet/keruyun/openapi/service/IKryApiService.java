@@ -4,11 +4,19 @@ import com.pinet.keruyun.openapi.dto.*;
 import com.pinet.keruyun.openapi.param.CategoryParam;
 import com.pinet.keruyun.openapi.param.DetailDishParam;
 import com.pinet.keruyun.openapi.param.DishListParam;
+import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.vo.*;
 
 import java.util.List;
 
 public interface IKryApiService {
+
+    /**
+     * 获取token
+     * @return
+     */
+    public String getToken(AuthType authType, Long orgId);
+
 
     /**
      * 根据品牌查询门店列表

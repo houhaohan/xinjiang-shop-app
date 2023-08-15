@@ -80,11 +80,11 @@ public class KryCallService {
     private String execCall(Request request) {
         Response response = null;
         try {
-            log.info("kry_request:{}", JsonUtil.toJson(request));
+//            log.info("kry_request:{}", JsonUtil.toJson(request));
             response = okHttpClient.newCall(request).execute();
             if (response.isSuccessful()) {
                 String responseStr = response.body().string();
-                log.info("kry_response:{}", responseStr);
+//                log.info("kry_response:{}", responseStr);
                 return responseStr;
             }
         } catch (Exception e) {

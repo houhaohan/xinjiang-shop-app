@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 public class KryApiParamConfig {
     private String projectVersion;
     private String projectName;
-
     private String url;
     private String appKey;
     private String appSecret;

@@ -26,6 +26,11 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
 
 
     @Override
+    public String getToken(AuthType authType, Long orgId) {
+        return super.getToken(authType,orgId);
+    }
+
+    @Override
     public List<BrandStoreVO.Shop> queryBrandStores(Long orgId,String token) {
         String responseStr = super.postCall(KryAPI.BRAND_SHOP_LIST, AuthType.BRAND, orgId, token, null);
         KryResponse<BrandStoreVO> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<BrandStoreVO>>() {
