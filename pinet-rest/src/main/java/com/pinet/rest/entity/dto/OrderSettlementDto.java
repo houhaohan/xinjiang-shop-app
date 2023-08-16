@@ -42,6 +42,8 @@ public class OrderSettlementDto {
     @ApiModelProperty(value = "商品样式id(结算类型为直接购买必传)",name = "shopProdSpecIds")
     private String shopProdSpecIds;
 
+    @ApiModelProperty("使用的优惠券id")
+    private Long customerCouponId;
 
 
 }

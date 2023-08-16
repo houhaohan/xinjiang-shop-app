@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.core.page.PageRequest;
 import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
 import com.pinet.rest.entity.enums.CapitalFlowWayEnum;
 import com.pinet.rest.entity.enums.MemberLevelEnum;
@@ -96,6 +97,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Resource
     private IBUserBalanceService ibUserBalanceService;
 
+    @Resource
+    private ICustomerCouponService customerCouponService;
+
+    @Resource
+    private IOrderDiscountService orderDiscountService;
+
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
@@ -148,6 +155,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         Integer prodTotalNum = orderDetailVo.getOrderProducts().stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
         orderDetailVo.setProdTotalNum(prodTotalNum);
+        orderDetailVo.setOrderDiscounts(orderDiscountService.getByOrderId(orderDetailVo.getOrderId()));
         return orderDetailVo;
     }
 
@@ -179,20 +187,26 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setOrderProductBoList(orderProducts);
 
         //判断店铺是否营业
-        if (!shopService.checkShopStatus(shop)) {
-            throw new PinetException("店铺已经打烊了~");
-        }
+        checkShop(shop);
 
         vo.setOrderMakeCount(countShopOrderMakeNum(dto.getShopId()));
         //计算商品总金额
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        //设置订单原价
+        //设置订单原价 和 商品原价
         vo.setOriginalPrice(orderProdPrice.add(shippingFee));
+        vo.setOriginalOrderProductPrice(orderProdPrice);
+        //优惠信息初始化
+        List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
+        //店帮主优惠计算
+        orderProdPrice = getDiscountedPrice(customerId, orderProdPrice, orderDiscounts);
 
-        //计算商品折后金额
-        orderProdPrice = getDiscountedPrice(customerId, orderProdPrice);
+        //使用完优惠券处理
+        if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
+            orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts);
+        }
+
 
         //计算订单优惠后现价
         BigDecimal orderPrice = orderProdPrice.add(shippingFee);
@@ -208,8 +222,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         Integer orderProductNum = orderProducts.stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
         vo.setOrderProductNum(orderProductNum);
+        vo.setOrderDiscounts(orderDiscounts);
 
-
+        List<CustomerCoupon> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));
+        for (CustomerCoupon customerCoupon : customerCoupons) {
+            customerCouponService.checkCoupon(customerCoupon, shop.getId(), vo.getOriginalOrderProductPrice());
+        }
+        vo.setCustomerCoupons(customerCoupons);
         return vo;
     }
 
@@ -226,10 +245,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
         Shop shop = shopService.getById(dto.getShopId());
-        //判断店铺是否营业
-        if (!shopService.checkShopStatus(shop)) {
-            throw new PinetException("店铺已经打烊了~");
-        }
+
+        checkShop(shop);
 
         //配送费
         BigDecimal shippingFee = getShippingFee(dto.getOrderType());
@@ -272,11 +289,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             }
         }
 
+        //优惠信息初始化
+        List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
         //订单商品原价
         BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-        //商品折后价
-        BigDecimal orderProdPrice = getDiscountedPrice(userId, orderProdOriginalPrice);
+
+        //店帮主商品折后价
+        BigDecimal orderProdPrice = getDiscountedPrice(userId, orderProdOriginalPrice, orderDiscounts);
+
+
+        //使用完优惠券处理
+        if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
+            orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts);
+        }
 
         //优惠金额
         BigDecimal discountAmount = orderProdOriginalPrice.subtract(orderProdPrice);
@@ -293,7 +319,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //创建订单基础信息
         Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, discountAmount, shop);
-        setOrdersCommission(order,orderProducts);
+        setOrdersCommission(order, orderProducts);
         //插入订单
         this.save(order);
 
@@ -311,6 +337,15 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderProductSpecService.saveBatch(k.getOrderProductSpecs());
         });
 
+        //插入优惠明细表
+        if (orderDiscounts.size() > 0) {
+            orderDiscounts.forEach(k -> {
+                k.setOrderId(order.getId());
+            });
+            orderDiscountService.saveBatch(orderDiscounts);
+        }
+
+
         //外卖订单插入订单地址表
         if (dto.getOrderType() == 1) {
             OrderAddress orderAddress = orderAddressService.createByCustomerAddressId(dto.getCustomerAddressId());
@@ -320,7 +355,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //将订单放到mq中
         jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_PAY_NAME, order.getId().toString(), (long) (15 * 60 * 1000));
-
 
         CreateOrderVo createOrderVo = new CreateOrderVo();
         createOrderVo.setOrderId(order.getId());
@@ -332,18 +366,28 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return createOrderVo;
     }
 
+
+    private void checkShop(Shop shop) {
+        //判断店铺是否营业
+        if (!shopService.checkShopStatus(shop)) {
+            throw new PinetException("店铺已经打烊了~");
+        }
+
+    }
+
+
     /**
      * 设置佣金
      *
      * @param orders
      */
-    private void setOrdersCommission(Orders orders,List<OrderProduct> orderProducts) {
-        if (ObjectUtil.isNull(orders.getShareId()) ||  orders.getShareId() <= 0){
+    private void setOrdersCommission(Orders orders, List<OrderProduct> orderProducts) {
+        if (ObjectUtil.isNull(orders.getShareId()) || orders.getShareId() <= 0) {
             return;
         }
 
         //判断下单人和分享人是否是同一个人
-        if (orders.getCustomerId().equals(orders.getShareId())){
+        if (orders.getCustomerId().equals(orders.getShareId())) {
             return;
         }
 
@@ -353,18 +397,45 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Integer shareMemberLevel = customerMemberService.getMemberLevel(orders.getShareId());
 
         //邀请人必须是店帮主  被邀人不能是店帮主
-        if (shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !customerMemberLevel.equals(MemberLevelEnum._20.getCode())){
+        if (shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !customerMemberLevel.equals(MemberLevelEnum._20.getCode())) {
             //佣金=商品总金额 * 0.1
             BigDecimal commission = orders.getOrderProdPrice().multiply(new BigDecimal("0.1")).setScale(2, RoundingMode.HALF_UP);
             orders.setCommission(commission);
 
 
             //设置单个商品的佣金
-            orderProducts.forEach(k->{
+            orderProducts.forEach(k -> {
                 k.setCommission(k.getProdPrice().multiply(new BigDecimal("0.1")).setScale(2, RoundingMode.HALF_UP));
             });
 
         }
+    }
+
+
+    /**
+     * 处理优惠券
+     *
+     * @param customerCouponId 使用的优惠券id
+     * @param shopId           店铺id
+     * @param orderProdPrice   实付金额
+     * @return 使用完优惠券后的价格
+     */
+    private BigDecimal processCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice, List<OrderDiscount> orderDiscounts) {
+        CustomerCoupon customerCoupon = customerCouponService.getById(customerCouponId);
+        Boolean checkFlag = customerCouponService.checkCoupon(customerCoupon, shopId, orderProdPrice);
+        if (!checkFlag) {
+            throw new PinetException("优惠券不可用");
+        }
+
+        //添加优惠明细信息
+        OrderDiscount orderDiscount = new OrderDiscount();
+        orderDiscount.setDiscountMsg("满减优惠券").setType(2).setDiscountAmount(customerCoupon.getCouponAmount());
+        orderDiscounts.add(orderDiscount);
+
+        //更新优惠券为已使用
+        customerCoupon.setCouponStatus(4);
+        customerCouponService.updateById(customerCoupon);
+        return orderProdPrice.subtract(customerCoupon.getCouponAmount());
     }
 
 
@@ -436,11 +507,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPayService.updateById(orderPay);
 
         //资金流水
-        bCapitalFlowService.add(orderPay.getPayPrice(),orders.getId(),orders.getCreateTime(),
-                CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._1,orders.getShopId());
+        bCapitalFlowService.add(orderPay.getPayPrice(), orders.getId(), orders.getCreateTime(),
+                CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._1, orders.getShopId());
 
         //修改余额
-        ibUserBalanceService.addAmount(orders.getShopId(),orderPay.getPayPrice());
+        ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice());
 
 
         //判断订单状态  如果订单状态是已取消  就退款
@@ -474,6 +545,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean cancelOrder(Long orderId) {
         Orders orders = getById(orderId);
         if (orders == null) {
@@ -484,7 +556,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new PinetException("只有待付款状态下才可以取消");
         }
         orders.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
-        return updateById(orders);
+        boolean res = updateById(orders);
+
+        //判断是否使用了优惠券
+        if (orders.getCustomerCouponId() != null && orders.getCustomerCouponId() > 0) {
+            CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
+            customerCoupon.setCouponStatus(2);
+            customerCouponService.updateById(customerCoupon);
+        }
+
+        return res;
     }
 
     @Override
@@ -499,13 +580,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //订单信息
         Orders orders = getById(orderRefund.getOrderId());
         //订单支付信息
-        OrderPay orderPay =  orderPayService.getById(orderRefund.getOrderPayId());
+        OrderPay orderPay = orderPayService.getById(orderRefund.getOrderPayId());
         //资金流水
-        bCapitalFlowService.add(orderPay.getPayPrice().negate(),orders.getId(),orders.getCreateTime(),
-                CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2,orders.getShopId());
+        bCapitalFlowService.add(orderPay.getPayPrice().negate(), orders.getId(), orders.getCreateTime(),
+                CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2, orders.getShopId());
 
         //修改余额
-        ibUserBalanceService.addAmount(orders.getShopId(),orderPay.getPayPrice().negate());
+        ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());
 
 
         orderRefund.setRefundStatus(2);
@@ -534,13 +615,21 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
 
-
     @Override
-    public BigDecimal getDiscountedPrice(Long customerId, BigDecimal originalPrice) {
+    public BigDecimal getDiscountedPrice(Long customerId, BigDecimal originalPrice, List<OrderDiscount> orderDiscounts) {
         Integer memberLevel = customerMemberService.getMemberLevel(customerId);
         MemberLevelEnum memberLevelEnum = MemberLevelEnum.getEnumByCode(memberLevel);
 
         BigDecimal discountedPrice = originalPrice.multiply(memberLevelEnum.getDiscount()).setScale(2, RoundingMode.HALF_UP);
+
+        //如果不是门客  添加优惠明细信息
+        if (!memberLevel.equals(MemberLevelEnum._0.getCode())) {
+            OrderDiscount orderDiscount = new OrderDiscount();
+            orderDiscount.setDiscountMsg(memberLevelEnum.getMsg() + memberLevelEnum.getDiscount().multiply(new BigDecimal(10)) + "优惠")
+                    .setDiscountAmount(originalPrice.subtract(discountedPrice)).setType(1);
+            orderDiscounts.add(orderDiscount);
+        }
+
 
         return discountedPrice;
     }
@@ -549,10 +638,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     public List<PickUpListVo> pickUpList() {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         List<PickUpListVo> pickUpListVos = baseMapper.selectPickUpList(customerId);
-        pickUpListVos.forEach(k->{
-            if (k.getOrderStatus().equals(OrderStatusEnum.MAKE.getCode())){
+        pickUpListVos.forEach(k -> {
+            if (k.getOrderStatus().equals(OrderStatusEnum.MAKE.getCode())) {
                 k.setOrderStatusStr(OrderStatusEnum.MAKE.getMsg());
-            }else {
+            } else {
                 k.setOrderStatusStr("可领取");
             }
         });

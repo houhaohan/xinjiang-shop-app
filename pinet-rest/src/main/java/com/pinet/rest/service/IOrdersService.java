@@ -1,6 +1,7 @@
 package com.pinet.rest.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
@@ -71,7 +72,7 @@ public interface IOrdersService extends IService<Orders> {
      * @param originalPrice 原价
      * @return
      */
-    BigDecimal getDiscountedPrice(Long customerId,BigDecimal originalPrice);
+    BigDecimal getDiscountedPrice(Long customerId, BigDecimal originalPrice, List<OrderDiscount> orderDiscounts);
 
     /**
      * 自提兑换码

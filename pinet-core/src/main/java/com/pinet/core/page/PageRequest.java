@@ -1,6 +1,8 @@
 package com.pinet.core.page;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 分页请求
@@ -8,6 +10,8 @@ import lombok.Data;
  */
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PageRequest {
 	/**
 	 * 当前页码

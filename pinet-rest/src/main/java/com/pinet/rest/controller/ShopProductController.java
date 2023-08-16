@@ -15,10 +15,7 @@ import com.pinet.rest.entity.vo.CartVo;
 import com.pinet.rest.entity.vo.GetShopProdIdByProdIdVo;
 import com.pinet.rest.entity.vo.ShopProductListVo;
 import com.pinet.rest.entity.vo.ShopProductVo;
-import com.pinet.rest.service.ICartService;
-import com.pinet.rest.service.ICustomerAddressService;
-import com.pinet.rest.service.IShopProductService;
-import com.pinet.rest.service.IShopService;
+import com.pinet.rest.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.pinet.core.controller.BaseController;
+
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -52,6 +51,9 @@ public class ShopProductController extends BaseController {
     private ICartService cartService;
     @Autowired
     private ICustomerAddressService customerAddressService;
+
+    @Resource
+    private IShopBrowseLogService shopBrowseLogService;
 
     /**
      * 商品列表，经纬度默认是杭州滨江的经纬度
@@ -91,6 +93,12 @@ public class ShopProductController extends BaseController {
             result.setDefaultAddress(defaultAddress);
             shop.setDistance(distance);
             result.setShopInfo(shop);
+        }
+
+        //判断下已登录的用户插入店铺浏览记录表
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+        if (customerId != null && customerId > 0){
+            shopBrowseLogService.addBrowseLog(shopId,customerId);
         }
         return Result.ok(result);
     }

@@ -1,6 +1,7 @@
 package com.pinet.rest.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.Shop;
 import io.swagger.annotations.ApiModel;
@@ -92,6 +93,10 @@ public class OrderDetailVo {
     @ApiModelProperty(value = "店铺信息",name = "shop")
     private Shop shop;
 
+    @ApiModelProperty(value = "优惠明细",name = "orderDiscounts")
+    private List<OrderDiscount> orderDiscounts;
 
+    @ApiModelProperty(value = "优惠总金额",name = "discountAmount")
+    private BigDecimal discountAmount;
 
 }

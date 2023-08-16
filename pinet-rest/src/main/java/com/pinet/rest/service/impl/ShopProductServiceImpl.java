@@ -55,7 +55,8 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
             }
             param.setShopId(shopId);
         }
-        return baseMapper.getProductByShopId(param.getShopId());
+        List<HotProductVo> hotProductVos =  baseMapper.getProductByShopId(param.getShopId());
+        return hotProductVos;
     }
 
     @Override

@@ -97,6 +97,10 @@ public class Result<T> implements Serializable {
 		r.setData(data);
 		return r;
 	}
+
+	public static <T> Result<T> error() {
+		return error(HttpStatus.SC_INTERNAL_SERVER_ERROR, "操作失败");
+	}
 	
 	public static <T> Result<T> error(String msg) {
 		return error(HttpStatus.SC_INTERNAL_SERVER_ERROR, msg);
