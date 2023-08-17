@@ -58,4 +58,10 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
     void pushCouponExpireMsg(String data1,String data2,String data3,String data4,String data5,String openId);
 
     void pushCouponExpireMsg(Long customerCouponId);
+
+    /**
+     * 发放新人优惠券
+     * @param customerId
+     */
+    void grantNewCustomerCoupon(Long customerId);
 }

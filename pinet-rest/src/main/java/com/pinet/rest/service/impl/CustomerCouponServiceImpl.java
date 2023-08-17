@@ -6,6 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
@@ -18,6 +19,7 @@ import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.pinet.rest.entity.Shop;
+import com.pinet.rest.entity.dto.SetNewCustomerCouponDto;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.mapper.CustomerCouponMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
@@ -31,6 +33,10 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -158,7 +164,10 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     public void couponWarn(Long customerCouponId) {
         CustomerCoupon customerCoupon = getById(customerCouponId);
         if (ObjectUtil.isNotNull(customerCoupon)) {
-            jmsUtil.sendMsgQueue(QueueConstants.QING_COUPON_EXPIRE_WARN_NAME, customerCouponId.toString());
+            Date remindTime = DateUtil.offsetDay(customerCoupon.getExpireTime(), -1);
+            if (remindTime.getTime() - System.currentTimeMillis() > 0) {
+                jmsUtil.delaySend(QueueConstants.QING_COUPON_EXPIRE_WARN_NAME, customerCouponId.toString(), remindTime.getTime() - System.currentTimeMillis());
+            }
         }
     }
 
@@ -193,7 +202,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     public void pushCouponExpireMsg(Long customerCouponId) {
         CustomerCoupon customerCoupon = getById(customerCouponId);
         String data1 = "你的优惠券将在1天后过期,请及时使用";
-        String data2 = LocalDateTimeUtil.format(customerCoupon.getExpireTime(), "yyyy-MM-dd HH:mm:ss");
+        String data2 = DateUtil.format(customerCoupon.getExpireTime(), "yyyy-MM-dd HH:mm:ss");
         String data3 = customerCoupon.getCouponAmount().toString();
         String data4 = "你的优惠券即将过期";
         String data5 = "所有门店可用";
@@ -204,6 +213,27 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         Customer customer = customerService.getById(customerCoupon.getCustomerId());
 
         pushCouponExpireMsg(data1, data2, data3, data4, data5, customer.getQsOpenId());
+    }
+
+    @Override
+    public void grantNewCustomerCoupon(Long customerId) {
+        String redisKey = "qingshi:coupon:newCustomer:" + 0L;
+        String json = redisUtil.get(redisKey);
+        if (StringUtil.isNotBlank(json)) {
+            SetNewCustomerCouponDto setNewCustomerCouponDto = JSONObject.parseObject(json, SetNewCustomerCouponDto.class);
+            CustomerCoupon customerCoupon = new CustomerCoupon();
+            customerCoupon.setCouponGrantId(setNewCustomerCouponDto.getCouponGrantId());
+            customerCoupon.setCouponGrantRecordId(0L);
+            customerCoupon.setCustomerId(customerId);
+            customerCoupon.setExpireTime(setNewCustomerCouponDto.getExpireTime());
+            customerCoupon.setCouponName(setNewCustomerCouponDto.getCouponName());
+            customerCoupon.setCouponType(1);
+            customerCoupon.setShopId(0L);
+            customerCoupon.setThresholdAmount(setNewCustomerCouponDto.getThresholdAmount());
+            customerCoupon.setCouponAmount(setNewCustomerCouponDto.getCouponAmount());
+            customerCoupon.setCouponStatus(1);
+            save(customerCoupon);
+        }
     }
 
 

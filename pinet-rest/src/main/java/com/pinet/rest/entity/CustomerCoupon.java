@@ -41,7 +41,7 @@ public class CustomerCoupon extends BaseEntity {
 
     @ApiModelProperty("过期时间")
     @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
-    private LocalDateTime expireTime;
+    private Date expireTime;
 
     @ApiModelProperty("优惠券名称")
     private String couponName;
