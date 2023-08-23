@@ -123,7 +123,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         List<CustomerCoupon> customerCoupons = baseMapper.selectIndexCouponList(lastId, userId);
 
         if (CollUtil.isNotEmpty(customerCoupons)) {
-            redisUtil.set(redisKey, customerCoupons.get(customerCoupons.size() - 1).getId().toString());
+            redisUtil.set(redisKey, customerCoupons.get(0).getId().toString());
         }
         customerCoupons.forEach(this::setRule);
         return customerCoupons;
@@ -234,6 +234,11 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
             customerCoupon.setCouponStatus(1);
             save(customerCoupon);
         }
+    }
+
+    @Override
+    public Integer countByCustomerId(Long customerId) {
+        return baseMapper.countByCustomerId(customerId);
     }
 
 

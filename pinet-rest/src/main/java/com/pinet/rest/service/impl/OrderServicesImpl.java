@@ -204,7 +204,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //使用完优惠券处理
         if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
-            orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts);
+            orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts,1);
         }
 
 
@@ -301,7 +301,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //使用完优惠券处理
         if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
-            orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts);
+            orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts,2);
         }
 
         //优惠金额
@@ -418,9 +418,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param customerCouponId 使用的优惠券id
      * @param shopId           店铺id
      * @param orderProdPrice   实付金额
+     * @param type   1结算  2下单
      * @return 使用完优惠券后的价格
      */
-    private BigDecimal processCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice, List<OrderDiscount> orderDiscounts) {
+    private BigDecimal processCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice,
+                                     List<OrderDiscount> orderDiscounts,Integer type) {
         CustomerCoupon customerCoupon = customerCouponService.getById(customerCouponId);
         Boolean checkFlag = customerCouponService.checkCoupon(customerCoupon, shopId, orderProdPrice);
         if (!checkFlag) {
@@ -433,10 +435,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderDiscounts.add(orderDiscount);
 
         //更新优惠券为已使用
-        customerCoupon.setCouponStatus(4);
-        customerCouponService.updateById(customerCoupon);
+        if (type == 2){
+            customerCoupon.setCouponStatus(4);
+            customerCouponService.updateById(customerCoupon);
+        }
         return orderProdPrice.subtract(customerCoupon.getCouponAmount());
     }
+
+
 
 
     private Long getExpireTime(Date createTime) {

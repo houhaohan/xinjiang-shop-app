@@ -113,7 +113,7 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
         //统计累计充值金额
         BigDecimal sumRechargePrice;
         log.info("会员信息"+JSONObject.toJSONString(customerMember));
-        if (ObjectUtil.isNotNull(customerMember) && ObjectUtil.isNotNull(customerMember.getExpireTime()) &&  customerMember.getExpireTime().getTime() < System.currentTimeMillis()){
+        if (ObjectUtil.isNotNull(customerMember) && ObjectUtil.isNotNull(customerMember.getExpireTime()) &&  customerMember.getExpireTime().getTime() > System.currentTimeMillis()){
             memberVo.setExpireTime(customerMember.getExpireTime());
             sumRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(customerId, BalanceRecordTypeEnum._5,customerMember.getExpireTime());
         }else {

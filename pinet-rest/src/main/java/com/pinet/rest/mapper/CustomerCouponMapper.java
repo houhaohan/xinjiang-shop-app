@@ -24,4 +24,6 @@ public interface CustomerCouponMapper extends BaseMapper<CustomerCoupon> {
     IPage<CustomerCoupon> selectcustomerCouponInvalidList(@Param("page")IPage<CustomerCoupon> page,@Param("userId") Long userId);
 
     List<CustomerCoupon> selectIndexCouponList(@Param("lastId") Long lastId,@Param("userId") Long userId);
+
+    Integer countByCustomerId(@Param("customerId") Long customerId);
 }
