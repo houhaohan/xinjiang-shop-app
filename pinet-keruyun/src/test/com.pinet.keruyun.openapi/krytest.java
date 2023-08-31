@@ -57,7 +57,7 @@ public class krytest {
 //        System.out.println(s);
 
 
-        map.put("dateType","OPEN_TIME");
+        map.put("dateType","FINISH_TIME");
         map.put("startDate","2023-08-20 00:00:00");
         map.put("endDate","2023-09-01 23:59:59");
 //        map.put("orderTypeList",Arrays.asList("FOR_HERE","SELF_TAKE_OUT"));

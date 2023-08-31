@@ -49,10 +49,13 @@ public class ShopProductController extends BaseController {
 
     @Autowired
     private IShopProductService shopProductService;
+
     @Autowired
     private IShopService shopService;
+
     @Autowired
     private ICartService cartService;
+
     @Autowired
     private ICustomerAddressService customerAddressService;
 
