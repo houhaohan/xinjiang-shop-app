@@ -1,13 +1,16 @@
 package com.pinet.rest.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.pinet.core.entity.BaseEntity;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
+
 
 /**
  * <p>
@@ -21,6 +24,7 @@ import lombok.Setter;
 @Setter
 @TableName("order_discount")
 @ApiModel(value = "OrderDiscount对象", description = "订单优惠明细表")
+@Accessors(chain=true)
 public class OrderDiscount extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -35,6 +39,7 @@ public class OrderDiscount extends BaseEntity {
     private String discountMsg;
 
     @ApiModelProperty("优惠类型  1店帮主  2优惠券")
+    @TableField("`type`")
     private Integer type;
 
 

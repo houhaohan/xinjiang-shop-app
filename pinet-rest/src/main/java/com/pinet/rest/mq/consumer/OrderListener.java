@@ -46,9 +46,7 @@ public class OrderListener {
         Orders order = ordersService.getById(Long.parseLong(message));
         //如果是待付款  更改状态为已取消
         if (order.getOrderStatus().equals(OrderStatusEnum.NOT_PAY.getCode())) {
-            order.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
-            order.setUpdateTime(new Date());
-            ordersService.updateById(order);
+            ordersService.cancelOrder(order.getId());
 
             //库存回滚
             List<OrderProduct> orderProductList = orderProductService.getByOrderId(order.getId());

@@ -15,11 +15,14 @@ import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
 import com.pinet.rest.entity.request.SmsLoginRequest;
 import com.pinet.rest.entity.vo.UserInfo;
+import com.pinet.rest.service.ICustomerCouponService;
 import com.pinet.rest.service.ICustomerService;
 import com.pinet.rest.service.ILoginService;
 import lombok.RequiredArgsConstructor;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +35,9 @@ public class PhoneLoginServiceImpl implements ILoginService {
     private final RedisUtil redisUtil;
 
     private final WxMaService wxMaService;
+
+    @Resource
+    private ICustomerCouponService customerCouponService;
 
     @Override
     public UserInfo login(LoginRequest loginRequest) throws WxErrorException {
@@ -72,6 +78,7 @@ public class PhoneLoginServiceImpl implements ILoginService {
                     .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
                     .build();
             customerService.save(customer);
+            customerCouponService.grantNewCustomerCoupon(customer.getCustomerId());
         }
 
         String userId = "" + customer.getCustomerId();

@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  *
  * @author wlbz
  * @since 2023-08-22
+
  */
 public interface OrderDiscountMapper extends BaseMapper<OrderDiscount> {
 
