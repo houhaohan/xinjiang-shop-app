@@ -44,7 +44,7 @@ public interface IKryApiService {
      * 菜品详情
      * @return
      */
-    public KryResult<DetailDishVO> listQueryDetailDish(Long orgId, String token, DetailDishParam param);
+    public KryResult<List<DetailDishVO>> listQueryDetailDish(Long orgId, String token, DetailDishParam param);
 
     /**
      * 菜品分类
@@ -53,12 +53,14 @@ public interface IKryApiService {
      */
     public KryResult<List<CategoryVO>> listQueryCategory(Long orgId, String token, CategoryParam param);
 
+
     /**
-     * 快餐下单
+     * 堂食扫码下单
+     * 参考文档： https://open.keruyun.com/docs/zh/p3JOKokB77V9K553kNMI.html
      * @param dto
      * @return
      */
-    public OrderCreateVO snackOrderCreate(Long orgId, String token, KrySnackOrderCreateDTO dto);
+    public String scanCodePrePlaceOrder(Long orgId, String token, KryScanCodeOrderCreateDTO dto);
 
 
     /**
@@ -67,6 +69,13 @@ public interface IKryApiService {
      * @return
      */
     public OrderCreateVO takeoutOrderCreate(Long orgId, String token, KryTakeoutOrderCreateDTO dto);
+
+    /**
+     * 外卖下单
+     * @param dto
+     * @return
+     */
+    public String openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto);
 
     /**
      * 合作方申请退款 快餐单

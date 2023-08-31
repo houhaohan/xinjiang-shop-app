@@ -24,7 +24,7 @@ public class KryOrderProduct implements Serializable {
     @NotNull
     private String tpId;
 
-    @ApiModelProperty(value = "客如云菜品ID")
+    @ApiModelProperty(value = "客如云商品ID，为空按名字+规格匹配,无法匹配则当网络菜品处理")
     private Long id;
 
     @ApiModelProperty("套餐主菜Id")

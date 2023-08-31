@@ -24,7 +24,6 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
         super(okHttpClient, kryApiParamConfig);
     }
 
-
     @Override
     public String getToken(AuthType authType, Long orgId) {
         return super.getToken(authType,orgId);
@@ -59,9 +58,10 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
     }
 
     @Override
-    public KryResult<DetailDishVO> listQueryDetailDish(Long orgId, String token, DetailDishParam param) {
+    public KryResult<List<DetailDishVO>> listQueryDetailDish(Long orgId, String token, DetailDishParam param) {
         String responseStr = super.postCall(KryAPI.BRAND_SHOP_DETAIL_DISH, AuthType.SHOP, orgId, token, param);
-        KryResponse<KryResult<DetailDishVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<KryResult<DetailDishVO>>>() {
+        System.err.println(responseStr);
+        KryResponse<KryResult<List<DetailDishVO>>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<KryResult<List<DetailDishVO>>>>() {
         });
         return response.getResult();
     }
@@ -69,6 +69,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
     @Override
     public KryResult<List<CategoryVO>> listQueryCategory(Long orgId, String token, CategoryParam param) {
         String responseStr = super.postCall(KryAPI.BRAND_SHOP_CATEGORY, AuthType.SHOP, orgId, token, param);
+        System.err.println(responseStr);
 
         KryResponse<KryResult<List<CategoryVO>>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<KryResult<List<CategoryVO>>>>() {
         });
@@ -78,15 +79,17 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
         return null;
     }
 
+
     @Override
-    public OrderCreateVO snackOrderCreate(Long orgId, String token, KrySnackOrderCreateDTO dto) {
-        String responseStr = super.postCall(KryAPI.SNACK_ORDER_CREATE, AuthType.SHOP, orgId, token, dto);
+    public String scanCodePrePlaceOrder(Long orgId, String token, KryScanCodeOrderCreateDTO dto) {
+        String responseStr = super.postCall(KryAPI.SCAN_CODE_ORDER_CREATE, AuthType.SHOP, orgId, token, dto);
+        System.err.println(responseStr);
         KryResponse<OrderCreateVO> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<OrderCreateVO>>() {
         });
         if (0 == response.getCode()) {
-            return response.getResult();
+            return JsonUtil.toJson(response.getResult());
         }
-        return null;
+        return JsonUtil.toJson(response);
     }
 
     @Override
@@ -98,6 +101,18 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
             return response.getResult();
         }
         return null;
+    }
+
+    @Override
+    public String openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto) {
+        String responseStr = super.postCall(KryAPI.TAKEOUT_ORDER_CREATE, AuthType.SHOP, orgId, token, dto);
+        System.err.println(responseStr);
+        KryResponse<OrderCreateVO> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<OrderCreateVO>>() {
+        });
+        if (0 == response.getCode()) {
+            return JsonUtil.toJson(response.getResult());
+        }
+        return JsonUtil.toJson(response);
     }
 
     @Override

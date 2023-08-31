@@ -28,6 +28,12 @@ public class Cart extends BaseEntity {
     @ApiModelProperty("商铺id")
     private Long shopId;
 
+    @ApiModelProperty("菜品ID")
+    private String dishId;
+
+    @ApiModelProperty("单位")
+    private String unit;
+
     @ApiModelProperty("店铺商品id")
     private Long shopProdId;
 

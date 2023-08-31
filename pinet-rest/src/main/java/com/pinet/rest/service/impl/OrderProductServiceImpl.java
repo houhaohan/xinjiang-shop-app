@@ -5,6 +5,7 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
+import com.pinet.rest.entity.dto.OrderProductDto;
 import com.pinet.rest.mapper.OrderProductMapper;
 import com.pinet.rest.service.*;
 import org.springframework.stereotype.Service;
@@ -88,11 +89,11 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
             throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
         }
 
-
+        orderProduct.setDishId(shopProduct.getProdId());
         orderProduct.setShopProdId(shopProduct.getId());
         orderProduct.setProdName(shopProduct.getProductName());
         orderProduct.setProdNum(queryOrderProductBo.getProdNum());
-
+        orderProduct.setUnit(shopProduct.getUnit());
 
         List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
 
@@ -128,6 +129,11 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         orderProduct.setProdImg(shopProduct.getProductImg());
 
         return orderProduct;
+    }
+
+    @Override
+    public List<OrderProductDto> selectByOrderId(Long orderId) {
+        return orderProductMapper.getByOrderId(orderId);
     }
 
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.KryComboGroupMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.KryComboGroup">
+        <result column="id" property="id" />
+        <result column="create_by" property="createBy" />
+        <result column="create_time" property="createTime" />
+        <result column="update_by" property="updateBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="del_flag" property="delFlag" />
+        <result column="shop_prod_id" property="shopProdId" />
+        <result column="dish_id" property="dishId" />
+        <result column="group_name" property="groupName" />
+        <result column="max_choose" property="maxChoose" />
+        <result column="min_choose" property="minChoose" />
+        <result column="sort" property="sort" />
+        <result column="repeatable" property="repeatable" />
+        <result column="group_type" property="groupType" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,
+        create_by,
+        create_time,
+        update_by,
+        update_time,
+        del_flag,
+        shop_prod_id, dish_id, group_name, max_choose, min_choose, sort, repeatable, group_type
+    </sql>
+
+</mapper>

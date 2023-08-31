@@ -15,7 +15,7 @@ public class DishListVO {
     private List<DishList> dataList;
 
     @Data
-    private static class DishList{
+    public static class DishList{
         @ApiModelProperty("菜品ID")
         private String dishId;
 

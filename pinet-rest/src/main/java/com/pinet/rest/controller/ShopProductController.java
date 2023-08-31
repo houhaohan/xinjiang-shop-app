@@ -1,12 +1,15 @@
 package com.pinet.rest.controller;
 
 
+import cn.hutool.core.lang.UUID;
+import com.alibaba.fastjson.JSONObject;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.keruyun.openapi.vo.KryResponse;
 import com.pinet.rest.entity.CustomerAddress;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import com.pinet.core.controller.BaseController;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -105,8 +109,6 @@ public class ShopProductController extends BaseController {
         return Result.ok(list);
     }
 
-
-
     @RequestMapping(value = "/sellwell",method = RequestMethod.GET)
     @NotTokenSign
     @ApiOperation("店铺畅销商品")
@@ -115,8 +117,6 @@ public class ShopProductController extends BaseController {
         List<String> list = shopProductService.sellwell(shopId);
         return Result.ok(list);
     }
-
-
 
     /**
      * 商品详情
@@ -132,7 +132,6 @@ public class ShopProductController extends BaseController {
         return Result.ok(shopProductVo);
     }
 
-
     @PostMapping("/getShopIdAndShopProdId")
     @ApiVersion(1)
     @ApiOperation("根据商品id获取店铺id和店铺商品id")
@@ -142,5 +141,61 @@ public class ShopProductController extends BaseController {
         return Result.ok(getShopProdIdByProdIdVo);
     }
 
+    @PostMapping("/brandDishOpenMsg")
+    @ApiOperation("品牌商品开放消息")
+    @ApiVersion(1)
+    @NotTokenSign
+    public KryResponse brandDishOpenMsg(@RequestParam(required = false) String validate, @RequestBody Map<String,Object> map){
+        System.out.println("品牌商品开放消息");
+        System.out.println(JSONObject.toJSONString(map));
+
+        KryResponse response = new KryResponse();
+        response.setMessage("成功[OK]");
+        response.setMessageUuid(UUID.randomUUID().toString());
+        if("success".equals(validate)){
+            response.setCode(0);
+            return response;
+        }
+        response.setCode(-1);
+        return response;
+    }
+
+    @PostMapping("/shopDishOpenMsg")
+    @ApiOperation("门店商品开放消息")
+    @ApiVersion(1)
+    @NotTokenSign
+    public KryResponse shopDishOpenMsg(@RequestParam(required = false) String validate, @RequestBody Map<String,Object> map){
+        System.out.println("门店商品开放消息");
+        System.out.println(JSONObject.toJSONString(map));
+
+        KryResponse response = new KryResponse();
+        response.setMessage("成功[OK]");
+        response.setMessageUuid(UUID.randomUUID().toString());
+        if("success".equals(validate)){
+            response.setCode(0);
+            return response;
+        }
+        response.setCode(-1);
+        return response;
+    }
+
+    @PostMapping("/updateDishStock")
+    @ApiOperation("商品库存信息变更")
+    @ApiVersion(1)
+    @NotTokenSign
+    public KryResponse updateDishStock(@RequestParam(required = false) String validate, @RequestBody Map<String,Object> map){
+        System.out.println("门店商品开放消息");
+        System.out.println(JSONObject.toJSONString(map));
+
+        KryResponse response = new KryResponse();
+        response.setMessage("成功[OK]");
+        response.setMessageUuid(UUID.randomUUID().toString());
+        if("success".equals(validate)){
+            response.setCode(0);
+            return response;
+        }
+        response.setCode(-1);
+        return response;
+    }
 
 }

@@ -10,4 +10,5 @@ public class DetailDishParam {
 
     @ApiModelProperty("菜品ID，上限5个")
     private List<String> dishIds;
+
 }

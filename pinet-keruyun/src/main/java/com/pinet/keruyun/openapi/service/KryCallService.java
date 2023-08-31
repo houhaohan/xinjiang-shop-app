@@ -25,7 +25,9 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class KryCallService {
+
     private final OkHttpClient okHttpClient;
+
     private final KryApiParamConfig kryApiParamConfig;
 
     @Cacheable(value = {"authTypeAndOrgIdMapToken"}, key = "#authType+'_'+#orgId")
@@ -114,4 +116,5 @@ public class KryCallService {
                 .requestBody(requestBody)
                 .build();
     }
+
 }

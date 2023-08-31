@@ -80,6 +80,9 @@ public class Shop extends BaseEntity {
     @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     private Date finishTime;
 
+    @ApiModelProperty("客如云店铺ID")
+    private Long kryShopId;
+
     @ApiModelProperty("距离")
     @TableField(exist = false)
     private Double distance;

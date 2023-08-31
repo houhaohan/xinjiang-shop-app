@@ -15,6 +15,7 @@
         <result column="order_status" property="orderStatus"/>
         <result column="customer_id" property="customerId"/>
         <result column="shop_id" property="shopId"/>
+        <result column="kry_shop_id" property="kryShopId"/>
         <result column="shop_name" property="shopName"/>
         <result column="order_price" property="orderPrice"/>
         <result column="order_prod_price" property="orderProdPrice"/>
@@ -37,7 +38,7 @@
         update_by,
         update_time,
         del_flag,
-        order_no, order_type, order_status, customer_id, shop_id, shop_name, order_price, order_prod_price,discount_amount, shipping_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission
+        order_no, order_type, order_status, customer_id, shop_id, kry_shop_id, shop_name, order_price, order_prod_price,discount_amount, shipping_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission
     </sql>
 
 

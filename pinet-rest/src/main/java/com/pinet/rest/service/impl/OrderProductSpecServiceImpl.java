@@ -1,10 +1,13 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.rest.entity.OrderProductSpec;
 import com.pinet.rest.mapper.OrderProductSpecMapper;
 import com.pinet.rest.service.IOrderProductSpecService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +20,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderProductSpecServiceImpl extends ServiceImpl<OrderProductSpecMapper, OrderProductSpec> implements IOrderProductSpecService {
 
+    @Override
+    public List<OrderProductSpec> getByOrderProdId(Long orderProdId) {
+        QueryWrapper<OrderProductSpec> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("order_prod_id",orderProdId);
+        return list(queryWrapper);
+    }
 }

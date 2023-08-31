@@ -12,6 +12,7 @@
         <result column="del_flag" property="delFlag"/>
         <result column="customer_id" property="customerId"/>
         <result column="shop_id" property="shopId"/>
+        <result column="dish_id" property="dishId"/>
         <result column="shop_prod_id" property="shopProdId"/>
         <result column="prod_num" property="prodNum"/>
         <result column="cart_status" property="cartStatus"/>
@@ -25,7 +26,7 @@
         update_by,
         update_time,
         del_flag,
-        customer_id, shop_id, shop_prod_id, prod_num, cart_status
+        customer_id, shop_id, dish_id, shop_prod_id, prod_num, cart_status
     </sql>
     <select id="selectCartList" resultType="com.pinet.rest.entity.vo.CartListVo"
             parameterType="com.pinet.rest.entity.dto.CartListDto">
