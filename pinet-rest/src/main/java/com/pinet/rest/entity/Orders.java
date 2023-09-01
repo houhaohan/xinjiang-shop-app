@@ -44,7 +44,7 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("商家店铺名称")
     private String shopName;
 
-    @ApiModelProperty("订单总金额（商品金额+配送费）")
+    @ApiModelProperty("订单总金额（商品金额+配送费+打包费）")
     private BigDecimal orderPrice;
 
     @ApiModelProperty("订单商品金额")
@@ -55,6 +55,9 @@ public class Orders extends BaseEntity {
 
     @ApiModelProperty("配送费(初版固定为3元)")
     private BigDecimal shippingFee;
+
+    @ApiModelProperty("打包费")
+    private BigDecimal packageFee;
 
     @ApiModelProperty("预计送达开始时间（实际下单时间推迟1-1.5个小时）")
     private Date estimateArrivalStartTime;

@@ -61,5 +61,7 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("佣金")
     private BigDecimal commission;
 
+    @ApiModelProperty("打包费")
+    private BigDecimal packageFee;
 
 }

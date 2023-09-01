@@ -33,6 +33,9 @@ public class OrderSettlementVo {
     @ApiModelProperty(value = "配送费", name = "shippingFee")
     private BigDecimal shippingFee;
 
+    @ApiModelProperty(value = "打包费", name = "packageFee")
+    private BigDecimal packageFee;
+
     @ApiModelProperty(value = "制作中数量", name = "orderMakeCount")
     private Integer orderMakeCount;
 

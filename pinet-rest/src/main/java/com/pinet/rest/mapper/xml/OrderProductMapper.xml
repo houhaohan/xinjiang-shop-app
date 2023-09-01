@@ -18,6 +18,7 @@
         <result column="prod_price" property="prodPrice"/>
         <result column="prod_img" property="prodImg"/>
         <result column="commission" property="commission"/>
+        <result column="package_fee" property="packageFee"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -28,7 +29,7 @@
         update_by,
         update_time,
         del_flag,
-        order_id, shop_prod_id, prod_name, prod_unit_price, prod_num, prod_price, prod_sku_id, prod_sku_name, shop_prod_spec_id, prod_spec_name,prod_img,commission
+        order_id, shop_prod_id, prod_name, prod_unit_price, prod_num, prod_price, prod_sku_id, prod_sku_name, shop_prod_spec_id, prod_spec_name,prod_img,commission,package_fee
     </sql>
     <select id="selectOrderProduct" resultType="com.pinet.rest.entity.bo.OrderProductBo" parameterType="java.lang.Long">
         select op.id             orderProductId,
