@@ -62,7 +62,7 @@ public class OrderAddress extends BaseEntity {
     private String tel;
 
     @ApiModelProperty("1先生 2女士")
-    private String sex;
+    private Integer sex;
 
 
 }

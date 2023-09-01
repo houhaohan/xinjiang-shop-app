@@ -1,5 +1,6 @@
 package com.pinet.rest.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@TableName("orders")
 @ApiModel(value = "Orders对象", description = "订单表")
 public class Orders extends BaseEntity {
 
@@ -28,6 +30,12 @@ public class Orders extends BaseEntity {
 
     @ApiModelProperty("订单编号")
     private Long orderNo;
+
+    @ApiModelProperty("客如云订单编号")
+    private String kryOrderNo;
+
+    @ApiModelProperty("取餐号")
+    private String mealCode;
 
     @ApiModelProperty("订单状态  1外卖  2自提")
     private Integer orderType;
@@ -40,6 +48,9 @@ public class Orders extends BaseEntity {
 
     @ApiModelProperty("商家店铺id")
     private Long shopId;
+
+    @ApiModelProperty("客如云店铺id")
+    private Long kryShopId;
 
     @ApiModelProperty("商家店铺名称")
     private String shopName;

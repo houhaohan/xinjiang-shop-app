@@ -9,7 +9,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author wlbz
- * @since 2023-08-15
+ * @since 2023-08-22
+
  */
 public interface OrderDiscountMapper extends BaseMapper<OrderDiscount> {
 

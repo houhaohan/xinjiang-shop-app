@@ -11,9 +11,15 @@ import java.util.List;
  * </p>
  *
  * @author wlbz
- * @since 2023-08-15
+ * @since 2023-08-22
  */
 public interface IOrderDiscountService extends IService<OrderDiscount> {
+
+    /**
+     * 根据订单ID查询
+     * @param orderId
+     * @return
+     */
     List<OrderDiscount> getByOrderId(Long orderId);
 
 }

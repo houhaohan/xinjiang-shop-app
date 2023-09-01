@@ -94,6 +94,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         BeanUtils.copyProperties(dto, cart);
         cart.setCartStatus(1);
         cart.setCustomerId(customerId);
+        cart.setDishId(shopProduct.getProdId());
+        cart.setUnit(shopProduct.getUnit());
 
         //添加购物车选中的样式
         String[] shopProdSpecIds = dto.getShopProdSpecIds().split(",");

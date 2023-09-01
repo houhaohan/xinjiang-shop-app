@@ -36,15 +36,25 @@ spring:
         filter: stat,wall,slf4j
       datasource:
         master:
-          url: jdbc:mysql://47.110.9.224:3306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+          url: jdbc:mysql://127.0.0.1:3306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
           username: root
-          password: ypxl.2022-12-09!@#
+          password: root
           driver-class-name: com.mysql.cj.jdbc.Driver
         slave:
-          url: jdbc:mysql://47.110.9.224:3306/xinjiang-shop?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+          url: jdbc:mysql://127.0.0.1:3306/xinjiang-shop?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
           username: root
-          password: ypxl.2022-12-09!@#
+          password: root
           driver-class-name: com.mysql.cj.jdbc.Driver
+#        master:
+#          url: jdbc:mysql://47.110.9.224:3306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+#          username: root
+#          password: ypxl.2022-12-09!@#
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          slave:
+#            url: jdbc:mysql://47.110.9.224:3306/xinjiang-shop?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+#            username: root
+#            password: ypxl.2022-12-09!@#
+#            driver-class-name: com.mysql.cj.jdbc.Driver
 
 
   redis:
@@ -138,3 +148,11 @@ social:
       app-cert-url: /www/cert/appCertPublicKey_2018042302596042.crt
       root-cert-url: /www/cert/alipayRootCert.crt
       public-cert-url: /www/cert/alipayCertPublicKey_RSA2.crt
+kry:
+  projectName: keruyun
+  projectVersion: @project.version@
+  url: https://openapi.keruyun.com
+  appKey: 4f29fbff04660448bf6b0d4b9b6ce7f0
+  appSecret: 1bb67d38ba133db3a0cd1b1336263ff1
+  brandId: 12698040
+  brandToken: ae5f960130e9d2ed01b406be6988b576

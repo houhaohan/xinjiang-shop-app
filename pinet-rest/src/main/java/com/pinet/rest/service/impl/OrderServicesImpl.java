@@ -2,16 +2,27 @@ package com.pinet.rest.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.page.PageRequest;
+import com.pinet.core.util.*;
+import com.pinet.keruyun.openapi.dto.*;
+import com.pinet.keruyun.openapi.service.IKryApiService;
+import com.pinet.keruyun.openapi.type.AuthType;
+import com.pinet.keruyun.openapi.vo.OrderCreateVO;
+import com.pinet.keruyun.openapi.vo.OrderDetailVO;
+import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
 import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
 import com.pinet.rest.entity.enums.CapitalFlowWayEnum;
 import com.pinet.rest.entity.enums.MemberLevelEnum;
@@ -21,10 +32,6 @@ import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
-import com.pinet.core.util.IPUtils;
-import com.pinet.core.util.LatAndLngUtils;
-import com.pinet.core.util.SpringContextUtils;
-import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.*;
@@ -35,6 +42,8 @@ import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.param.RefundParam;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,6 +112,15 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Resource
     private IOrderDiscountService orderDiscountService;
 
+    @Autowired
+    private IKryApiService kryApiService;
+
+    @Autowired
+    private IKryComboGroupDetailService kryComboGroupDetailService;
+
+    @Value("${spring.profiles.active}")
+    private String active;
+
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
@@ -156,6 +174,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Integer prodTotalNum = orderDetailVo.getOrderProducts().stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
         orderDetailVo.setProdTotalNum(prodTotalNum);
         orderDetailVo.setOrderDiscounts(orderDiscountService.getByOrderId(orderDetailVo.getOrderId()));
+
+        if(StringUtil.isBlank(orderDetailVo.getMealCode()) && StringUtil.isNotBlank(orderDetailVo.getKryOrderNo())){
+            String token = kryApiService.getToken(AuthType.SHOP, orderDetailVo.getKryShopId());
+            KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
+            kryOrderDetailDTO.setOrderId(orderDetailVo.getKryOrderNo());
+            OrderDetailVO orderDetail = kryApiService.getOrderDetail(orderDetailVo.getKryShopId(), token, kryOrderDetailDTO);
+            if(orderDetail != null){
+                Orders orders = new Orders();
+                orders.setId(orderId);
+                orders.setMealCode(orderDetail.getOrderBaseVO().getSerialNo());
+                updateById(orders);
+                orderDetailVo.setMealCode(orders.getMealCode());
+            }
+        }
         return orderDetailVo;
     }
 
@@ -545,7 +577,15 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return updateById(orders);
         } else {
             //更新总订单状态
-            orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
+            orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
+            //推送客如云,订单状态  1外卖  2自提
+            if(orders.getOrderType() == 1){
+
+            }else {
+                //自提单
+                String kryOrderNo = scanCodePrePlaceOrder(orders);
+                orders.setKryOrderNo(kryOrderNo);
+            }
             return updateById(orders);
         }
     }
@@ -678,6 +718,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         order.setOrderDistance(m.intValue());
         order.setRemark(dto.getRemark());
         order.setShareId(dto.getShareId());
+        order.setKryShopId(shop.getKryShopId());
 
         return order;
     }
@@ -706,4 +747,317 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return Arrays.stream(idArray)
                 .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean syncOrderStatus(OrderSyncDTO dto) {
+        //退款
+        QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("kry_order_no",dto.getOrderBody().getRelatedOrderNo());
+        Orders orders = getOne(queryWrapper);
+
+        //校验:
+        //查看是否已经退款
+        if(orders.getOrderStatus().equals(OrderStatusEnum.REFUND.getCode())){
+            throw new PinetException("订单已退款");
+        }
+        //判断订单状态
+        OrderPay orderPay = orderPayService.getOne(Wrappers.lambdaQuery(new OrderPay())
+                .eq(OrderPay::getOrderId, orders.getId())
+                .eq(OrderPay::getPayStatus, 2)
+        );
+        if (orderPay == null){
+            throw new PinetException("订单支付信息异常");
+        }
+
+        OrderRefund orderRefund = new OrderRefund();
+        orderRefund.setRefundNo(IdUtil.getSnowflake().nextId());
+        orderRefund.setOrderId(orders.getId());
+        orderRefund.setOrderPayId(orderPay.getId());
+        orderRefund.setRefundPrice(orders.getOrderPrice());
+        orderRefund.setOrderPrice(orders.getOrderPrice());
+        orderRefund.setIsAllRefund(true);
+        orderRefund.setRefundDesc("运营后台操作退款");
+        orderRefund.setRefundStatus(1);
+        orderRefundService.save(orderRefund);
+        //调退款
+        IPayService payService = SpringContextUtils.getBean(orderPay.getChannelId() + "_" + "service", IPayService.class);
+        RefundParam refundParam = new RefundParam(
+                orders.getOrderPrice().toString(),
+                orders.getOrderNo().toString(),
+                orderRefund.getRefundNo().toString(),
+                orders.getOrderPrice().toString(),
+                orderRefund.getId());
+        payService.refund(refundParam);
+        //更新订单状态
+        orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
+        return updateById(orders);
+    }
+
+    @Override
+    public boolean completeOrder(Long orderId) {
+        Orders orders = getById(orderId);
+        orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
+        updateById(orders);
+
+        //判断订单是否有佣金 如果有佣金 && 订单状态是已完成 设置佣金三天后到账
+        if(orders.getCommission().compareTo(BigDecimal.ZERO) > 0){
+            jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), (long) (15 * 60 * 1000));
+        }
+        return true;
+    }
+
+
+    /**
+     * 外卖下单takeout/order/create
+     */
+//    private void takeoutOrderCreate(Orders order){
+//        KryTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryTakeoutOrderCreateDTO();
+//        takeoutOrderCreateDTO.setTpOrderId(String.valueOf(order.getOrderNo()));
+//        takeoutOrderCreateDTO.setNeedInvoice(0);
+//        takeoutOrderCreateDTO.setCreateTime(order.getCreateTime().getTime());
+//        takeoutOrderCreateDTO.setStatus(1);
+//        takeoutOrderCreateDTO.setRemark(order.getRemark());
+//        takeoutOrderCreateDTO.setPeopleCount(1);
+//
+//        KryShop shop = new KryShop();
+//        shop.setShopIdenty(order.getKryShopId());
+//        shop.setShopName(order.getShopName());
+//        shop.setTpShopId(String.valueOf(order.getKryShopId()));
+//        takeoutOrderCreateDTO.setShop(shop);
+//
+//        List<OrderProduct> orderProducts = orderProductService.getByOrderId(order.getId());
+//        List<KryOrderProduct> kryOrderProductList = new ArrayList<>(orderProducts.size());
+//        for(OrderProduct orderProduct : orderProducts){
+//            KryOrderProduct kryOrderProduct = new KryOrderProduct();
+//            kryOrderProduct.setName(orderProduct.getProdName());
+//            kryOrderProduct.setId(Long.valueOf(orderProduct.getDishId()));
+//            kryOrderProduct.setParentUuid("");
+//            kryOrderProduct.setUuid("");
+//            kryOrderProduct.setType(0);
+//            kryOrderProduct.setTpId(orderProduct.getDishId());
+//            kryOrderProduct.setQuantity(orderProduct.getProdNum());
+//            kryOrderProduct.setUnit(orderProduct.getUnit());
+//            kryOrderProduct.setPrice(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
+//            kryOrderProduct.setPackagePrice(0);
+//            kryOrderProduct.setPackageQuantity(1);
+//            kryOrderProduct.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+//            kryOrderProduct.setRemark("");
+//            kryOrderProduct.setProperties(null);
+//            kryOrderProductList.add(kryOrderProduct);
+//        }
+//        takeoutOrderCreateDTO.setProducts(kryOrderProductList);
+//
+//        OrderAddress orderAddress = orderAddressService.getOrderAddress(order.getId());
+//        Delivery delivery = new Delivery();
+//        delivery.setExpectTime(0L);
+//        delivery.setDeliveryParty(3);
+//        delivery.setReceiverName(orderAddress.getName());
+//        delivery.setReceiverPhone(orderAddress.getTel());
+//        delivery.setReceiverGender(orderAddress.getSex() == 1 ? 1 : 0);
+//        takeoutOrderCreateDTO.setDelivery(delivery);
+//
+//        KryOrderPayment kryOrderPayment = new KryOrderPayment();
+//        kryOrderPayment.setTotalFee(BigDecimalUtil.yuanToFen(order.getOrderPrice()));
+//        kryOrderPayment.setDeliveryFee(0);
+//        kryOrderPayment.setPackageFee(0);
+//        kryOrderPayment.setDiscountFee(0);
+//        takeoutOrderCreateDTO.setPayment(kryOrderPayment);
+//    }
+
+
+    /**
+     * https://open.keruyun.com/docs/zh/UnJOKokB77V9K553GtMO.html
+     * @param order
+     * @return
+     */
+    public OrderCreateVO takeoutOrderCreate(Orders order){
+        KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
+        takeoutOrderCreateDTO.setOutBizNo(""+order.getOrderNo());
+        takeoutOrderCreateDTO.setRemark(order.getRemark());
+        takeoutOrderCreateDTO.setOrderSecondSource("WECHAT_MINI_PROGRAM");
+        takeoutOrderCreateDTO.setPromoFee(BigDecimalUtil.yuanToFen(order.getDiscountAmount()));
+        takeoutOrderCreateDTO.setTotalFee(BigDecimalUtil.yuanToFen(order.getOrderPrice()));
+        takeoutOrderCreateDTO.setActualFee(BigDecimalUtil.yuan2Fen(order.getOrderProdPrice()));
+
+        DcOrderBizRequest dcOrderBizRequest = new DcOrderBizRequest();
+        dcOrderBizRequest.setDinnerType("DELIVERY");//外送
+        dcOrderBizRequest.setTakeoutFee(BigDecimalUtil.yuan2Fen(order.getShippingFee()));
+        dcOrderBizRequest.setTableWareFee(0L);
+        dcOrderBizRequest.setTakeMealType("SELF_TAKE");
+        takeoutOrderCreateDTO.setDcOrderBizRequest(dcOrderBizRequest);
+
+        OrderStrategyRequest orderStrategyRequest = new OrderStrategyRequest();
+        orderStrategyRequest.setValidateDishStock(true);
+        takeoutOrderCreateDTO.setOrderStrategyRequest(orderStrategyRequest);
+
+        OrderPay orderPay = orderPayService.getByOrderNo(order.getOrderNo());
+        PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
+        paymentDetailRequest.setOutBizId(String.valueOf(orderPay.getId()));
+        paymentDetailRequest.setOutBizId(UUID.randomUUID().toString());
+        paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orderPay.getPayPrice()));
+        paymentDetailRequest.setChangeAmount(0);
+        paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
+        paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
+        paymentDetailRequest.setPayType("PAY_MODE_SMALL_PROGRAM");
+        takeoutOrderCreateDTO.setPaymentDetailRequestList(Arrays.asList(paymentDetailRequest));
+
+        //订单附加费列表,可不填
+        takeoutOrderCreateDTO.setExtraFeeRequestList(null);
+
+        List<OrderProductDto> orderProducts = orderProductService.selectByOrderId(order.getId());
+        List<OrderDishRequest> orderDishRequestList = new ArrayList<>(orderProducts.size());
+        for(OrderProductDto orderProduct : orderProducts){
+            OrderDishRequest orderDishRequest = new OrderDishRequest();
+            orderDishRequest.setDishId(orderProduct.getProdId());
+            orderDishRequest.setOutDishNo(String.valueOf(orderProduct.getId()));
+            orderDishRequest.setDishName(orderProduct.getProductName());
+            orderDishRequest.setDishQuantity(orderProduct.getProdNum());
+            orderDishRequest.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
+            orderDishRequest.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
+            orderDishRequest.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            orderDishRequest.setPromoFee(0L);
+            orderDishRequest.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            orderDishRequest.setPackageFee("0");
+            orderDishRequest.setUnitId(orderProduct.getUnitId());
+            orderDishRequest.setUnitName(orderProduct.getUnit());
+            orderDishRequest.setUnitCode(orderProduct.getUnit());
+            orderDishRequest.setDishAttachPropList(null);
+            orderDishRequest.setDishList(null);
+            orderDishRequest.setDishSkuId(orderProduct.getKrySkuId());
+            orderDishRequest.setWeightDishFlag(false);
+            orderDishRequest.setDishImgUrl(orderProduct.getProductImg());
+            orderDishRequest.setIsPack(true);
+            if("SINGLE".equalsIgnoreCase(orderProduct.getDishType())){
+                orderDishRequest.setItemOriginType("SINGLE_DISH");
+                orderDishRequest.setDishType("SINGLE_DISH");
+            }else if("COMBO".equalsIgnoreCase(orderProduct.getDishType())){
+                orderDishRequest.setItemOriginType("COMBO_DISH");
+                orderDishRequest.setDishType("COMBO_DISH");
+            }
+            orderDishRequestList.add(orderDishRequest);
+        }
+
+        takeoutOrderCreateDTO.setOrderDishRequestList(orderDishRequestList);
+        takeoutOrderCreateDTO.setDeliveryInfoRequestList(null);
+
+        String token = kryApiService.getToken(AuthType.SHOP, order.getKryShopId());
+        return kryApiService.openTakeoutOrderCreate(order.getKryShopId(), token, takeoutOrderCreateDTO);
+    }
+
+    /**
+     * 参考文档： https://open.keruyun.com/docs/zh/p3JOKokB77V9K553kNMI.html
+     * 堂食扫码下单
+     * @param orders
+     * @return
+     */
+    public String scanCodePrePlaceOrder(Orders orders){
+        if(!"prod".equals(active)){
+            return null;
+        }
+        KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
+        dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
+        dto.setRemark(orders.getRemark());
+        dto.setOrderSecondSource("WECHAT_MINI_PROGRAM");
+        dto.setPromoFee(BigDecimalUtil.yuanToFen(orders.getDiscountAmount()));
+        dto.setTotalFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
+        dto.setActualFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
+
+        PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
+        paymentDetailRequest.setOutBizId(String.valueOf(orders.getId()));
+        paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
+        paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
+        paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
+        paymentDetailRequest.setPayType("PAY_MODE_SMALL_PROGRAM");
+        dto.setPaymentDetailRequestList(Arrays.asList(paymentDetailRequest));
+
+        OrderStrategyRequest orderStrategyRequest = new OrderStrategyRequest();
+        orderStrategyRequest.setValidateDishStock(false);
+        dto.setOrderStrategyRequest(orderStrategyRequest);
+
+        DcOrderBizRequest dcOrderBizRequest = new DcOrderBizRequest();
+        dcOrderBizRequest.setTakeMealType("SELF_TAKE");
+        dcOrderBizRequest.setTableWareFee(0L);
+        dcOrderBizRequest.setDinnerType("TAKE_OUT");
+        dcOrderBizRequest.setTakeoutFee(0L);
+        dto.setDcOrderBizRequest(dcOrderBizRequest);
+
+        List<OrderProductDto> orderProducts = orderProductService.selectByOrderId(orders.getId());
+
+        List<OrderDishRequest> orderDishRequestList = new ArrayList<>();
+        for(OrderProductDto orderProduct : orderProducts){
+            OrderDishRequest request = new OrderDishRequest();
+            request.setOutDishNo(String.valueOf(orderProduct.getId()));
+            request.setDishId(orderProduct.getProdId());
+            if("SINGLE".equalsIgnoreCase(orderProduct.getDishType())){
+                request.setDishType("SINGLE_DISH");
+            }else if("COMBO".equalsIgnoreCase(orderProduct.getDishType())){
+                request.setDishType("COMBO_DISH");
+            }else if("SIDE".equalsIgnoreCase(orderProduct.getDishType())){
+                request.setDishType("ADDITIONAL_ITEM");
+            }
+
+            request.setDishName(orderProduct.getProductName());
+            request.setDishQuantity(orderProduct.getProdNum());
+            request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
+            request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
+            request.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            request.setPromoFee(0L);//菜品优惠总金额
+            request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            request.setPackageFee("0");
+            request.setDishSkuId(orderProduct.getKrySkuId());
+            request.setDishSkuCode(orderProduct.getSkuCode());
+            request.setDishSkuName(orderProduct.getSkuName());
+            request.setWeightDishFlag(false);
+            request.setUnitCode(orderProduct.getUnit());
+            request.setUnitId(orderProduct.getUnitId());
+            request.setUnitName(orderProduct.getUnit());
+
+            List<ScanCodeDish> dishList = new ArrayList<>();
+            //配料明细 或者 套餐明细
+            if("SINGLE".equalsIgnoreCase(orderProduct.getDishType())){
+                //配料明细
+
+            }else if("COMBO".equalsIgnoreCase(orderProduct.getDishType())){
+                //套餐明细
+                List<KryComboGroupDetailVo> kryComboGroupDetailList = kryComboGroupDetailService.getByShopProdId(orderProduct.getId());
+                for(KryComboGroupDetailVo groupDetail : kryComboGroupDetailList){
+                    ScanCodeDish dish = new ScanCodeDish();
+                    dish.setOutDishNo(String.valueOf(groupDetail.getId()));
+                    dish.setDishId(orderProduct.getProdId());
+                    dish.setDishType("COMBO_DISH");
+                    dish.setDishName(groupDetail.getDishName());
+                    dish.setDishQuantity(new BigDecimal(String.valueOf(orderProduct.getProdNum())));
+                    dish.setDishFee(BigDecimalUtil.yuan2Fen(orderProduct.getProdUnitPrice()));
+                    dish.setUnitId(groupDetail.getUnitId());
+                    dish.setUnitCode(groupDetail.getUnit());
+                    dish.setUnitName(groupDetail.getUnit());
+                    dish.setDishOriginalFee(groupDetail.getSellPrice());
+                    dish.setTotalFee(groupDetail.getSellPrice());
+                    dish.setPromoFee(0L);
+                    dish.setActualFee(groupDetail.getSellPrice());
+                    dish.setPackageFee("0");
+                    dish.setWeightDishFlag("0");
+                    dish.setDishImgUrl(groupDetail.getImageUrl());
+                    dish.setIsPack("false");
+                    dish.setDishGiftFlag("false");
+                    dish.setItemOriginType("COMBO");
+                    dish.setDishSkuId(orderProduct.getKrySkuId());
+                    dishList.add(dish);
+                    request.setDishList(null);
+                }
+            }
+
+            request.setIsPack(false);
+            orderDishRequestList.add(request);
+        }
+        dto.setOrderDishRequestList(orderDishRequestList);
+        String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
+        ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
+        if(scanCodePrePlaceOrderVo == null){
+            return null;
+        }
+        return scanCodePrePlaceOrderVo.getData().getOrderNo();
+    }
+
 }

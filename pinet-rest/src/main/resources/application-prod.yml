@@ -141,3 +141,12 @@ social:
       app-cert-url: /usr/project/jars/appCertPublicKey_2018042302596042.crt
       root-cert-url: /usr/project/jars/alipayRootCert.crt
       public-cert-url: /usr/project/jars/alipayCertPublicKey_RSA2.crt
+
+kry:
+  projectName: keruyun
+  projectVersion: @project.version@
+  url: https://openapi.keruyun.com
+  appKey: 4f29fbff04660448bf6b0d4b9b6ce7f0
+  appSecret: 1bb67d38ba133db3a0cd1b1336263ff1
+  brandId: 12698040
+  brandToken: ae5f960130e9d2ed01b406be6988b576

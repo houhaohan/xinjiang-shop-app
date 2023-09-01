@@ -137,3 +137,11 @@ social:
       app-cert-url: /usr/local/project/cert/appCertPublicKey_2018042302596042.crt
       root-cert-url: /usr/local/project/cert/alipayRootCert.crt
       public-cert-url: /usr/local/project/cert/alipayCertPublicKey_RSA2.crt
+
+kry:
+  projectName: kry-open-plantform-demo
+  projectVersion: @project.version@
+  #url: https://openapi.keruyun.com
+  url: https://gldopenapi.keruyun.com
+  appKey: 8a455f1d88a83e33b15f3ebfce97f2a4
+  appSecret: cc04a0564e4b5f069ec499cf04b2308e

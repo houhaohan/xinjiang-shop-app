@@ -24,7 +24,7 @@
         update_by,
         update_time,
         del_flag,
-        order_id, discount_amount, discount_msg, type
+        order_id, discount_amount, discount_msg, `type`
     </sql>
 
 </mapper>

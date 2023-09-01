@@ -25,14 +25,29 @@ public class ShopProduct extends BaseEntity {
     @ApiModelProperty("店铺id")
     private Long shopId;
 
-    @ApiModelProperty("商品id")
-    private Long prodId;
+    @ApiModelProperty("客如云商品id")
+    private String prodId;
 
     @ApiModelProperty("商品名称")
     private String productName;
 
     @ApiModelProperty("商品图片")
     private String productImg;
+
+    @ApiModelProperty("单位ID")
+    private String unitId;
+
+    @ApiModelProperty("单位")
+    private String unit;
+
+    @ApiModelProperty("菜品类型。SINGLE：单菜 ，COMBO：套餐， SIDE：配料")
+    private String dishType;
+
+    @ApiModelProperty("菜品编码")
+    private String dishCode;
+
+    @ApiModelProperty("助记码")
+    private String helpCode;
 
     @ApiModelProperty("商品描述(富文本框)")
     private String productDesc;

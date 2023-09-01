@@ -27,6 +27,12 @@ public class OrderDetailVo {
     @ApiModelProperty(value = "订单号",name = "orderNo")
     private Long orderNo;
 
+    @ApiModelProperty(value = "客如云订单号",name = "kryOrderNo")
+    private String kryOrderNo;
+
+    @ApiModelProperty(value = "取餐号",name = "mealCode")
+    private String mealCode;
+
     @ApiModelProperty(value = "订单状态  1外卖  2自提",name = "orderType")
     private Integer orderType;
 
@@ -52,6 +58,9 @@ public class OrderDetailVo {
 
     @ApiModelProperty(value = "店铺id",name = "shopId")
     private Long shopId;
+
+    @ApiModelProperty(value = "客如云店铺id",name = "kryShopId")
+    private Long kryShopId;
 
     @ApiModelProperty(value = "商品总价",name = "orderPrice")
     private BigDecimal orderProdPrice;

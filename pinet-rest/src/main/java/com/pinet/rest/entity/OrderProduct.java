@@ -35,8 +35,14 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("店铺商品id")
     private Long shopProdId;
 
+    @ApiModelProperty("客如云菜品ID")
+    private String dishId;
+
     @ApiModelProperty("商品名称")
     private String prodName;
+
+    @ApiModelProperty("单位")
+    private String unit;
 
     @ApiModelProperty("商品单价")
     private BigDecimal prodUnitPrice;

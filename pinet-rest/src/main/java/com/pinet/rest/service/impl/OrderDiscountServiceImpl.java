@@ -1,7 +1,7 @@
 package com.pinet.rest.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.pinet.core.entity.BaseEntity;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.mapper.OrderDiscountMapper;
 import com.pinet.rest.service.IOrderDiscountService;
@@ -16,15 +16,15 @@ import java.util.List;
  * </p>
  *
  * @author wlbz
- * @since 2023-08-15
+ * @since 2023-08-22
  */
 @Service
 public class OrderDiscountServiceImpl extends ServiceImpl<OrderDiscountMapper, OrderDiscount> implements IOrderDiscountService {
 
     @Override
     public List<OrderDiscount> getByOrderId(Long orderId) {
-        LambdaQueryWrapper<OrderDiscount> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(OrderDiscount::getOrderId,orderId).eq(BaseEntity::getDelFlag,0);
-        return list(lambdaQueryWrapper);
+        QueryWrapper<OrderDiscount> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("order_id",orderId);
+        return list(queryWrapper);
     }
 }
