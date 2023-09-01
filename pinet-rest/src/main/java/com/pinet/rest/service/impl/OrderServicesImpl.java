@@ -6,7 +6,6 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -17,13 +16,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.page.PageRequest;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.pinet.core.util.*;
 import com.pinet.keruyun.openapi.dto.*;
 import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.keruyun.openapi.type.AuthType;
-import com.pinet.keruyun.openapi.util.JsonUtil;
-import com.pinet.keruyun.openapi.vo.KryResponse;
 import com.pinet.keruyun.openapi.vo.OrderCreateVO;
 import com.pinet.keruyun.openapi.vo.OrderDetailVO;
 import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
@@ -47,6 +43,7 @@ import com.pinet.rest.entity.param.RefundParam;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -119,10 +116,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private IKryApiService kryApiService;
 
     @Autowired
-    private IShopProductService shopProductService;
-
-    @Autowired
     private IKryComboGroupDetailService kryComboGroupDetailService;
+
+    @Value("${spring.profiles.active}")
+    private String active;
 
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
@@ -585,12 +582,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             if(orders.getOrderType() == 1){
 
             }else {
-                ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = scanCodePrePlaceOrder(orders);
-
-                if(scanCodePrePlaceOrderVo != null){
-                    String kryOrderNo = scanCodePrePlaceOrderVo.getData().getOrderNo();
-                    orders.setKryOrderNo(kryOrderNo);
-                }
+                //自提单
+                String kryOrderNo = scanCodePrePlaceOrder(orders);
+                orders.setKryOrderNo(kryOrderNo);
             }
             return updateById(orders);
         }
@@ -880,7 +874,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     public OrderCreateVO takeoutOrderCreate(Orders order){
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(""+order.getOrderNo());
-//        takeoutOrderCreateDTO.setOutBizNo(UUID.randomUUID().toString());
         takeoutOrderCreateDTO.setRemark(order.getRemark());
         takeoutOrderCreateDTO.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         takeoutOrderCreateDTO.setPromoFee(BigDecimalUtil.yuanToFen(order.getDiscountAmount()));
@@ -889,7 +882,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         DcOrderBizRequest dcOrderBizRequest = new DcOrderBizRequest();
         dcOrderBizRequest.setDinnerType("DELIVERY");//外送
-        dcOrderBizRequest.setTakeoutFee(0L);
+        dcOrderBizRequest.setTakeoutFee(BigDecimalUtil.yuan2Fen(order.getShippingFee()));
         dcOrderBizRequest.setTableWareFee(0L);
         dcOrderBizRequest.setTakeMealType("SELF_TAKE");
         takeoutOrderCreateDTO.setDcOrderBizRequest(dcOrderBizRequest);
@@ -918,8 +911,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             OrderDishRequest orderDishRequest = new OrderDishRequest();
             orderDishRequest.setDishId(orderProduct.getProdId());
             orderDishRequest.setOutDishNo(String.valueOf(orderProduct.getId()));
-            orderDishRequest.setDishType("SINGLE_DISH");
-//            orderDishRequest.setDishType("SINGLE_DISH(\"SINGLE_DISH\", \"单菜\")");
             orderDishRequest.setDishName(orderProduct.getProductName());
             orderDishRequest.setDishQuantity(orderProduct.getProdNum());
             orderDishRequest.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
@@ -939,8 +930,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequest.setIsPack(true);
             if("SINGLE".equalsIgnoreCase(orderProduct.getDishType())){
                 orderDishRequest.setItemOriginType("SINGLE_DISH");
+                orderDishRequest.setDishType("SINGLE_DISH");
             }else if("COMBO".equalsIgnoreCase(orderProduct.getDishType())){
                 orderDishRequest.setItemOriginType("COMBO_DISH");
+                orderDishRequest.setDishType("COMBO_DISH");
             }
             orderDishRequestList.add(orderDishRequest);
         }
@@ -958,7 +951,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param orders
      * @return
      */
-    public ScanCodePrePlaceOrderVo scanCodePrePlaceOrder(Orders orders){
+    public String scanCodePrePlaceOrder(Orders orders){
+        if(!"prod".equals(active)){
+            return null;
+        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
         dto.setRemark(orders.getRemark());
@@ -1057,8 +1053,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         dto.setOrderDishRequestList(orderDishRequestList);
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
-        System.out.println(JSONObject.toJSONString(dto));
-        return kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
+        ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
+        if(scanCodePrePlaceOrderVo == null){
+            return null;
+        }
+        return scanCodePrePlaceOrderVo.getData().getOrderNo();
     }
 
 }

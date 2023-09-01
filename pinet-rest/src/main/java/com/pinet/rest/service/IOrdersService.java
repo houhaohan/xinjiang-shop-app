@@ -83,7 +83,7 @@ public interface IOrdersService extends IService<Orders> {
      */
     List<PickUpListVo> pickUpList();
 
-    ScanCodePrePlaceOrderVo scanCodePrePlaceOrder(Orders orders);
+    String scanCodePrePlaceOrder(Orders orders);
 
     /**
      * 客如云订单交易推送接口
