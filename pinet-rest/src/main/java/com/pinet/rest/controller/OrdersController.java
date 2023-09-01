@@ -8,6 +8,7 @@ import com.pinet.core.result.Result;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.keruyun.openapi.dto.OrderBodyDTO;
 import com.pinet.keruyun.openapi.dto.OrderChangeEventDTO;
 import com.pinet.keruyun.openapi.dto.OrderSyncDTO;
 import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
@@ -55,6 +56,7 @@ public class OrdersController extends BaseController {
     @RequestMapping("/orderDetail")
     @ApiOperation("订单详情")
     @ApiVersion(1)
+    @NotTokenSign
     public Result<OrderDetailVo> orderDetail(Long orderId) {
         OrderDetailVo orderDetailVo = ordersService.orderDetail(orderId);
         return Result.ok(orderDetailVo);
@@ -126,7 +128,7 @@ public class OrdersController extends BaseController {
     @RequestMapping("/pickUpList")
     @ApiOperation("自提兑换码")
     @ApiVersion(1)
-    public Result<?> pickUpList(){
+    public Result<List<PickUpListVo>> pickUpList(){
         List<PickUpListVo> pickUpListVos = ordersService.pickUpList();
         return Result.ok(pickUpListVos);
     }
@@ -146,9 +148,13 @@ public class OrdersController extends BaseController {
         System.out.println("validate==="+validate);
         System.out.println(JSONObject.toJSONString(dto));
 
-        if("OPEN_TRADE_PAYMENT_REFUND".equalsIgnoreCase(dto.getEventCode()) && "REFUND_SUCCESS".equalsIgnoreCase(dto.getPaymentBody().getStatus())){
-            //退款
-            ordersService.syncOrderStatus(dto);
+        OrderBodyDTO orderBody = dto.getOrderBody();
+        if(orderBody != null){
+            if("ORDER".equalsIgnoreCase(dto.getDomain())
+                    && "ORDER_SUCCESS".equalsIgnoreCase(dto.getEventCode())
+                    && "ORDER_REFUND".equalsIgnoreCase(orderBody.getRefundAction())){
+                ordersService.syncOrderStatus(dto);
+            }
         }
 
         KryResponse response = new KryResponse();

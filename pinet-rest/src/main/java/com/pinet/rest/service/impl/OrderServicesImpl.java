@@ -6,6 +6,7 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -24,6 +25,7 @@ import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.util.JsonUtil;
 import com.pinet.keruyun.openapi.vo.KryResponse;
 import com.pinet.keruyun.openapi.vo.OrderCreateVO;
+import com.pinet.keruyun.openapi.vo.OrderDetailVO;
 import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
 import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
 import com.pinet.rest.entity.enums.CapitalFlowWayEnum;
@@ -175,6 +177,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Integer prodTotalNum = orderDetailVo.getOrderProducts().stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
         orderDetailVo.setProdTotalNum(prodTotalNum);
         orderDetailVo.setOrderDiscounts(orderDiscountService.getByOrderId(orderDetailVo.getOrderId()));
+
+        if(StringUtil.isBlank(orderDetailVo.getMealCode()) && StringUtil.isNotBlank(orderDetailVo.getKryOrderNo())){
+            String token = kryApiService.getToken(AuthType.SHOP, orderDetailVo.getKryShopId());
+            KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
+            kryOrderDetailDTO.setOrderId(orderDetailVo.getKryOrderNo());
+            OrderDetailVO orderDetail = kryApiService.getOrderDetail(orderDetailVo.getKryShopId(), token, kryOrderDetailDTO);
+            if(orderDetail != null){
+                Orders orders = new Orders();
+                orders.setId(orderId);
+                orders.setMealCode(orderDetail.getOrderBaseVO().getSerialNo());
+                updateById(orders);
+                orderDetailVo.setMealCode(orders.getMealCode());
+            }
+        }
         return orderDetailVo;
     }
 
@@ -564,21 +580,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return updateById(orders);
         } else {
             //更新总订单状态
-            orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
-            updateById(orders);
-
+            orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
             //推送客如云,订单状态  1外卖  2自提
             if(orders.getOrderType() == 1){
 
             }else {
-                String str = scanCodePrePlaceOrder(orders);
-                KryResponse<ScanCodePrePlaceOrderVo> response = JsonUtil.fromJson(str, new TypeReference<KryResponse<ScanCodePrePlaceOrderVo>>() {
-                });
-                if(response.getCode() == 0){
-                    String kryOrderNo = response.getResult().getData().getOrderNo();
+                ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = scanCodePrePlaceOrder(orders);
+
+                if(scanCodePrePlaceOrderVo != null){
+                    String kryOrderNo = scanCodePrePlaceOrderVo.getData().getOrderNo();
+                    orders.setKryOrderNo(kryOrderNo);
                 }
             }
-            return true;
+            return updateById(orders);
         }
     }
 
@@ -710,6 +724,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         order.setOrderDistance(m.intValue());
         order.setRemark(dto.getRemark());
         order.setShareId(dto.getShareId());
+        order.setKryShopId(shop.getKryShopId());
 
         return order;
     }
@@ -744,7 +759,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     public boolean syncOrderStatus(OrderSyncDTO dto) {
         //退款
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("order_no",Long.valueOf(dto.getOrderNo()));
+        queryWrapper.eq("kry_order_no",dto.getOrderBody().getRelatedOrderNo());
         Orders orders = getOne(queryWrapper);
 
         //校验:
@@ -862,7 +877,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param order
      * @return
      */
-    public String takeoutOrderCreate(Orders order){
+    public OrderCreateVO takeoutOrderCreate(Orders order){
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(""+order.getOrderNo());
 //        takeoutOrderCreateDTO.setOutBizNo(UUID.randomUUID().toString());
@@ -873,7 +888,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         takeoutOrderCreateDTO.setActualFee(BigDecimalUtil.yuan2Fen(order.getOrderProdPrice()));
 
         DcOrderBizRequest dcOrderBizRequest = new DcOrderBizRequest();
-        dcOrderBizRequest.setDinnerType("DELIVERY");
+        dcOrderBizRequest.setDinnerType("DELIVERY");//外送
         dcOrderBizRequest.setTakeoutFee(0L);
         dcOrderBizRequest.setTableWareFee(0L);
         dcOrderBizRequest.setTakeMealType("SELF_TAKE");
@@ -913,10 +928,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequest.setPromoFee(0L);
             orderDishRequest.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
             orderDishRequest.setPackageFee("0");
-            orderDishRequest.setUnitId(orderProduct.getUnit());
+            orderDishRequest.setUnitId(orderProduct.getUnitId());
             orderDishRequest.setUnitName(orderProduct.getUnit());
+            orderDishRequest.setUnitCode(orderProduct.getUnit());
             orderDishRequest.setDishAttachPropList(null);
             orderDishRequest.setDishList(null);
+            orderDishRequest.setDishSkuId(orderProduct.getKrySkuId());
+            orderDishRequest.setWeightDishFlag(false);
             orderDishRequest.setDishImgUrl(orderProduct.getProductImg());
             orderDishRequest.setIsPack(true);
             if("SINGLE".equalsIgnoreCase(orderProduct.getDishType())){
@@ -927,12 +945,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(orderDishRequest);
         }
 
-        takeoutOrderCreateDTO.setOrderDishRequestList(null);
+        takeoutOrderCreateDTO.setOrderDishRequestList(orderDishRequestList);
         takeoutOrderCreateDTO.setDeliveryInfoRequestList(null);
 
-        String token = kryApiService.getToken(AuthType.SHOP, 13200066L);
-        return kryApiService.openTakeoutOrderCreate(13200066L, token, takeoutOrderCreateDTO);
-
+        String token = kryApiService.getToken(AuthType.SHOP, order.getKryShopId());
+        return kryApiService.openTakeoutOrderCreate(order.getKryShopId(), token, takeoutOrderCreateDTO);
     }
 
     /**
@@ -941,9 +958,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param orders
      * @return
      */
-    public String scanCodePrePlaceOrder(Orders orders){
+    public ScanCodePrePlaceOrderVo scanCodePrePlaceOrder(Orders orders){
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
-        dto.setOutBizNo(String.valueOf(orders.getOrderNo())+"000");
+        dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
         dto.setRemark(orders.getRemark());
         dto.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         dto.setPromoFee(BigDecimalUtil.yuanToFen(orders.getDiscountAmount()));
@@ -951,7 +968,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         dto.setActualFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
 
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
-        paymentDetailRequest.setOutBizId(String.valueOf(orders.getId())+"000");
+        paymentDetailRequest.setOutBizId(String.valueOf(orders.getId()));
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
         paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
         paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
@@ -965,7 +982,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         DcOrderBizRequest dcOrderBizRequest = new DcOrderBizRequest();
         dcOrderBizRequest.setTakeMealType("SELF_TAKE");
         dcOrderBizRequest.setTableWareFee(0L);
-        dcOrderBizRequest.setDinnerType("FOR_HERE");
+        dcOrderBizRequest.setDinnerType("TAKE_OUT");
         dcOrderBizRequest.setTakeoutFee(0L);
         dto.setDcOrderBizRequest(dcOrderBizRequest);
 
@@ -1031,14 +1048,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setItemOriginType("COMBO");
                     dish.setDishSkuId(orderProduct.getKrySkuId());
                     dishList.add(dish);
+                    request.setDishList(null);
                 }
             }
-            request.setDishList(null);
+
             request.setIsPack(false);
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
+        System.out.println(JSONObject.toJSONString(dto));
         return kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
     }
 

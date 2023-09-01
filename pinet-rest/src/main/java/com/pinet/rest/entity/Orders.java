@@ -31,6 +31,12 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("订单编号")
     private Long orderNo;
 
+    @ApiModelProperty("客如云订单编号")
+    private String kryOrderNo;
+
+    @ApiModelProperty("取餐号")
+    private String mealCode;
+
     @ApiModelProperty("订单状态  1外卖  2自提")
     private Integer orderType;
 

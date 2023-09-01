@@ -60,7 +60,7 @@ public interface IKryApiService {
      * @param dto
      * @return
      */
-    public String scanCodePrePlaceOrder(Long orgId, String token, KryScanCodeOrderCreateDTO dto);
+    public ScanCodePrePlaceOrderVo scanCodePrePlaceOrder(Long orgId, String token, KryScanCodeOrderCreateDTO dto);
 
 
     /**
@@ -75,7 +75,7 @@ public interface IKryApiService {
      * @param dto
      * @return
      */
-    public String openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto);
+    public OrderCreateVO openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto);
 
     /**
      * 合作方申请退款 快餐单
@@ -118,5 +118,13 @@ public interface IKryApiService {
      * @return
      */
     public KryResponse takeoutOrderStatusGet(Long orgId, String token,TakeoutOrderStatusGetDTO dto);
+
+    /**
+     * 订单详情
+     * @param orgId
+     * @param token
+     * @return
+     */
+    public OrderDetailVO getOrderDetail(Long orgId, String token,KryOrderDetailDTO dto);
 
 }

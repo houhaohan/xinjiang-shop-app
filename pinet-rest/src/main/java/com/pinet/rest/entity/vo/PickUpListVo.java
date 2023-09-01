@@ -21,7 +21,7 @@ public class PickUpListVo {
     @ApiModelProperty(value = "店铺名称",name = "shopName")
     private String shopName;
 
-    @ApiModelProperty(value = "自提码",name = "id")
+    @ApiModelProperty(value = "订单ID",name = "id")
     private String id;
 
     @ApiModelProperty(value = "订单状态",name = "orderStatus")
@@ -29,4 +29,7 @@ public class PickUpListVo {
 
     @ApiModelProperty(value = "订单状态str",name = "orderStatusStr")
     private String orderStatusStr;
+
+    @ApiModelProperty(value = "取餐码",name = "mealCode")
+    private String mealCode;
 }
