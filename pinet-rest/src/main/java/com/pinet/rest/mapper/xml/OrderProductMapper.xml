@@ -108,6 +108,7 @@
             op.prod_unit_price ,
             op.prod_num ,
             op.prod_price ,
+            op.package_fee,
             sps.kry_sku_id,
             sps.sku_code,
             sps.sku_name

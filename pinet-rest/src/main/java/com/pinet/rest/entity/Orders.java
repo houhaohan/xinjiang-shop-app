@@ -67,6 +67,9 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("配送费(初版固定为3元)")
     private BigDecimal shippingFee;
 
+    @ApiModelProperty("打包费")
+    private BigDecimal packageFee;
+
     @ApiModelProperty("预计送达开始时间（实际下单时间推迟1-1.5个小时）")
     private Date estimateArrivalStartTime;
 

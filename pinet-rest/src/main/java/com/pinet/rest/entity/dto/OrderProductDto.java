@@ -47,6 +47,9 @@ public class OrderProductDto {
     @ApiModelProperty("商品总价，等于 单价 * 数量")
     private BigDecimal prodPrice;
 
+    @ApiModelProperty("打包费")
+    private BigDecimal packageFee;
+
     @ApiModelProperty("商品数量")
     private Integer prodNum;
 
