@@ -53,10 +53,10 @@ public class krytest {
 
 
 
-        KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
-        kryOrderDetailDTO.setOrderId("20230901061316000169538099230184");
-        OrderDetailVO orderDetail = kryApiService.getOrderDetail(13290197L, "97b6428f0aa494666462dd0dc92f6f9d", kryOrderDetailDTO);
-        System.out.println(JsonUtil.toJson(orderDetail));
+//        KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
+//        kryOrderDetailDTO.setOrderId("20230901061316000169538099230184");
+//        OrderDetailVO orderDetail = kryApiService.getOrderDetail(13290197L, "97b6428f0aa494666462dd0dc92f6f9d", kryOrderDetailDTO);
+//        System.out.println(JsonUtil.toJson(orderDetail));
 
     }
 }

@@ -75,49 +75,8 @@ public interface IKryApiService {
      * @param dto
      * @return
      */
-    public OrderCreateVO openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto);
+    public TakeoutOrderCreateVo openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto);
 
-    /**
-     * 合作方申请退款 快餐单
-     * @param dto
-     * @return
-     */
-    public KryResponse snackOrderApplyRefund(Long orgId, String token, OrderApplyRefundDTO dto);
-
-    /**
-     * 合作方申请退款 外卖单
-     * @param dto
-     * @return
-     */
-    public KryResponse takeoutOrderApplyRefund(Long orgId, String token, OrderApplyRefundDTO dto);
-
-    /**
-     * 合作方取消 外卖订单
-     * @param dto
-     * @return
-     */
-    public KryResponse takeoutOrderCancel(Long orgId, String token, TakeoutOrderCancelDTO dto);
-
-    /**
-     * 通知客如云取消订单
-     * @param dto
-     * @return
-     */
-    public KryResponse snackOrderRefund(Long orgId, String token,SnackOrderRefundDTO dto);
-
-    /**
-     * 合作方推送配送状态通知
-     * @param dto
-     * @return
-     */
-    public KryResponse takeoutOrderStatusPush(Long orgId, String token,TakeoutOrderStatusPushDTO dto);
-
-    /**
-     * 订单状态查询
-     * @param dto
-     * @return
-     */
-    public KryResponse takeoutOrderStatusGet(Long orgId, String token,TakeoutOrderStatusGetDTO dto);
 
     /**
      * 订单详情

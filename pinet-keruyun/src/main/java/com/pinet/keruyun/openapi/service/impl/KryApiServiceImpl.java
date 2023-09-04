@@ -15,6 +15,7 @@ import com.pinet.keruyun.openapi.vo.*;
 import okhttp3.OkHttpClient;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -100,56 +101,15 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
     }
 
     @Override
-    public OrderCreateVO openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto) {
+    public TakeoutOrderCreateVo openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto) {
         String responseStr = super.postCall(KryAPI.TAKEOUT_ORDER_CREATE, AuthType.SHOP, orgId, token, dto);
-        KryResponse<OrderCreateVO> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<OrderCreateVO>>() {
+        System.err.println(responseStr);
+        KryResponse<TakeoutOrderCreateVo> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<TakeoutOrderCreateVo>>() {
         });
         if (0 == response.getCode()) {
             return response.getResult();
         }
         return null;
-    }
-
-    @Override
-    public KryResponse snackOrderApplyRefund(Long orgId, String token, OrderApplyRefundDTO dto) {
-        String responseStr = super.postCall(KryAPI.SNACK_ORDER_APPLY_REFUND, AuthType.SHOP, orgId, token, dto);
-        KryResponse response = JsonUtil.fromJson(responseStr, KryResponse.class);
-        return response;
-    }
-
-    @Override
-    public KryResponse takeoutOrderApplyRefund(Long orgId, String token, OrderApplyRefundDTO dto) {
-        String responseStr = super.postCall(KryAPI.TAKEOUT_ORDER_APPLY_REFUND, AuthType.SHOP, orgId, token, dto);
-        KryResponse response = JsonUtil.fromJson(responseStr, KryResponse.class);
-        return response;
-    }
-
-    @Override
-    public KryResponse takeoutOrderCancel(Long orgId, String token, TakeoutOrderCancelDTO dto) {
-        String responseStr = super.postCall(KryAPI.TAKEOUT_ORDER_CANCEL, AuthType.SHOP, orgId, token, dto);
-        KryResponse response = JsonUtil.fromJson(responseStr, KryResponse.class);
-        return response;
-    }
-
-    @Override
-    public KryResponse snackOrderRefund(Long orgId, String token, SnackOrderRefundDTO dto) {
-        String responseStr = super.postCall(KryAPI.SNACK_ORDER_REFUND, AuthType.SHOP, orgId, token, dto);
-        KryResponse response = JsonUtil.fromJson(responseStr, KryResponse.class);
-        return response;
-    }
-
-    @Override
-    public KryResponse takeoutOrderStatusPush(Long orgId, String token, TakeoutOrderStatusPushDTO dto) {
-        String responseStr = super.postCall(KryAPI.TAKEOUT_ORDER_STATUS_PUSH, AuthType.SHOP, orgId, token, dto);
-        KryResponse response = JsonUtil.fromJson(responseStr, KryResponse.class);
-        return response;
-    }
-
-    @Override
-    public KryResponse takeoutOrderStatusGet(Long orgId, String token, TakeoutOrderStatusGetDTO dto) {
-        String responseStr = super.postCall(KryAPI.TAKEOUT_ORDER_STATUS_GET, AuthType.SHOP, orgId, token, dto);
-        KryResponse response = JsonUtil.fromJson(responseStr, KryResponse.class);
-        return response;
     }
 
     @Override
@@ -163,7 +123,6 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
         }
         return null;
     }
-
 
 
 }
