@@ -53,7 +53,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
     }
 
     @Override
-    public List<OrderProduct> getByCartAndShop(Long shopId) {
+    public List<OrderProduct> getByCartAndShop(Long shopId,Integer orderType) {
         List<OrderProduct> orderProducts = new ArrayList<>();
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shopId);
@@ -67,7 +67,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
             //查询购物车商品样式
             List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
             List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-            QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds);
+            QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds,orderType);
             OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
             orderProducts.add(orderProduct);
         });
@@ -88,6 +88,16 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         if (shopProduct.getDelFlag() == 1) {
             throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
         }
+
+        //设置打包费   //自提没有打包费
+        if (queryOrderProductBo.getOrderType() == 1){
+            if ("SINGLE".equals(shopProduct.getDishType())){
+                orderProduct.setPackageFee(new BigDecimal("1").multiply(new BigDecimal(queryOrderProductBo.getProdNum())));
+            }else if ("COMBO".equals(shopProduct.getDishType())){
+                orderProduct.setPackageFee(new BigDecimal("2").multiply(new BigDecimal(queryOrderProductBo.getProdNum())));
+            }
+        }
+
 
         orderProduct.setDishId(shopProduct.getProdId());
         orderProduct.setShopProdId(shopProduct.getId());

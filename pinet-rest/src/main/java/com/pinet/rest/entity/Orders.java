@@ -94,4 +94,7 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("使用的优惠券id  0表示未使用")
     private Long customerCouponId;
 
+    @ApiModelProperty("订单来源  1小程序   2app   3系统生成")
+    private Integer orderSource;
+
 }

@@ -29,5 +29,7 @@ public class QueryOrderProductBo {
      */
     private List<Long> shopProdSpecIds;
 
+    private Integer orderType;
+
 
 }

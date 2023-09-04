@@ -41,4 +41,7 @@ public class CreateOrderDto extends OrderSettlementDto{
     @ApiModelProperty(value = "分享人id",name = "shareId")
     private Long shareId = 0L;
 
+    @ApiModelProperty(value = "订单来源  1小程序   2app   3系统生成",name = "orderSource")
+    private Integer orderSource = 2;
+
 }

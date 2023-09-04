@@ -108,4 +108,7 @@ public class OrderDetailVo {
     @ApiModelProperty(value = "优惠总金额",name = "discountAmount")
     private BigDecimal discountAmount;
 
+    @ApiModelProperty(value = "打包费",name = "packageFee")
+    private BigDecimal packageFee;
+
 }

@@ -68,6 +68,6 @@ public class OrderProduct extends BaseEntity {
     private BigDecimal commission;
 
     @ApiModelProperty("打包费")
-    private BigDecimal packageFee;
+    private BigDecimal packageFee = BigDecimal.ZERO;
 
 }

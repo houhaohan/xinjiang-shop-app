@@ -31,6 +31,7 @@
         <result column="share_id" property="shareId"/>
         <result column="commission" property="commission"/>
         <result column="customer_coupon_id" property="customerCouponId"/>
+        <result column="order_source" property="orderSource"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -41,7 +42,7 @@
         update_by,
         update_time,
         del_flag,
-        order_no, kry_order_no, order_type, order_status, customer_id, shop_id, kry_shop_id, shop_name, order_price, order_prod_price,discount_amount, shipping_fee,package_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission, customer_coupon_id
+        order_no, kry_order_no, order_type, order_status, customer_id, shop_id, kry_shop_id, shop_name, order_price, order_prod_price,discount_amount, shipping_fee,package_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission, customer_coupon_id,order_source
     </sql>
 
 
@@ -78,7 +79,8 @@
                o.order_price                 orderPrice,
                o.create_time                 createTime,
                o.remark,
-               o.discount_amount             discountAmount
+               o.discount_amount             discountAmount,
+               o.package_fee                 packageFee
         from `orders` o
         where o.del_flag = 0
           and o.id = #{orderId}

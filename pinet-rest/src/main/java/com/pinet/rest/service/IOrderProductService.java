@@ -32,7 +32,7 @@ public interface IOrderProductService extends IService<OrderProduct> {
      * @param shopId 店铺id
      * @return List
      */
-    List<OrderProduct> getByCartAndShop(Long shopId);
+    List<OrderProduct> getByCartAndShop(Long shopId,Integer orderType);
 
     /**
      * 通过QueryOrderProductBo参数构造OrderProduct数据
