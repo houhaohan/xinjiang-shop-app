@@ -6,7 +6,6 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -821,15 +820,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * https://open.keruyun.com/docs/zh/UnJOKokB77V9K553GtMO.html
-     *
+     * 客如云外卖下单
      * @param order
      * @return
      */
-    public TakeoutOrderCreateVo takeoutOrderCreate(Orders order){
-        if(!"prod".equals(active)){
-            return null;
-        }
-    public OrderCreateVO takeoutOrderCreate(Orders order) {
+    public TakeoutOrderCreateVo takeoutOrderCreate(Orders order) {
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
         takeoutOrderCreateDTO.setOutBizNo("" + order.getOrderNo());
@@ -930,18 +925,15 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     /**
      * 参考文档： https://open.keruyun.com/docs/zh/p3JOKokB77V9K553kNMI.html
      * 堂食扫码下单
-     *
      * @param orders
      * @return
      */
-
     @Override
     public String scanCodePrePlaceOrder(Orders orders){
         //生产环境才推单，其他环境就不推了吧
         if(!"prod".equals(active)){
             return null;
         }
-
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
         dto.setRemark(orders.getRemark());
@@ -1041,21 +1033,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         dto.setOrderDishRequestList(orderDishRequestList);
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
-        System.err.println(JSONObject.toJSONString(scanCodePrePlaceOrderVo));
         if(scanCodePrePlaceOrderVo == null || scanCodePrePlaceOrderVo.getData() == null ){
             return null;
         }
         return scanCodePrePlaceOrderVo.getData().getOrderNo();
     }
 
-
-
-    public static void main(String[] args) {
-
-        OrderProductDto dto = new OrderProductDto();
-        dto.setPackageFee(new BigDecimal(4));
-        String s = BigDecimalUtil.yuan2FenStr(dto.getPackageFee());
-        System.out.println(s);
-    }
 
 }
