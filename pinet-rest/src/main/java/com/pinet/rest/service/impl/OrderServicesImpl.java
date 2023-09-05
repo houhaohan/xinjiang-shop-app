@@ -6,6 +6,7 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -45,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -584,7 +586,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
             //推送客如云,订单状态  1外卖  2自提
             if (orders.getOrderType() == 1) {
-
+                //todo 暂未开放
+                //TakeoutOrderCreateVo takeoutOrderCreateVo = takeoutOrderCreate(orders);
             } else {
                 //自提单
                 String kryOrderNo = scanCodePrePlaceOrder(orders);
@@ -886,8 +889,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequest.setUnitId(orderProduct.getUnitId());
             orderDishRequest.setUnitName(orderProduct.getUnit());
             orderDishRequest.setUnitCode(orderProduct.getUnit());
-
-//            orderDishRequest.setDishAttachPropList(null);//附加项（加料、做法）列表
+            //附加项（加料、做法）列表
+            orderDishRequest.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
 //            orderDishRequest.setDishList(null);
             orderDishRequest.setDishSkuId(orderProduct.getKrySkuId());
             orderDishRequest.setWeightDishFlag(false);
@@ -992,6 +995,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setUnitId(orderProduct.getUnitId());
             request.setUnitName(orderProduct.getUnit());
 
+            //附加项（加料、做法）列表
+            request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
             List<ScanCodeDish> dishList = new ArrayList<>();
             //配料明细 或者 套餐明细
             if("SINGLE".equalsIgnoreCase(orderProduct.getDishType())){
@@ -1037,6 +1042,36 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return null;
         }
         return scanCodePrePlaceOrderVo.getData().getOrderNo();
+    }
+
+    /**
+     * 获取订单商品做法数据
+     * @param orderProdId
+     * @return
+     */
+    private List<DishAttachProp> getDishAttachPropList(Long orderProdId){
+        List<OrderProductSpec> orderProductSpecs = orderProductSpecService.getByOrderProdId(orderProdId);
+        List<DishAttachProp> dishAttachPropList = new ArrayList<>();
+        for(OrderProductSpec spec : orderProductSpecs){
+            if("标准".equals(spec.getProdSpecName()) && "规格".equals(spec.getProdSkuName())){
+                //这个不是做法
+                continue;
+            }
+            String id = String.valueOf(spec.getId());
+            DishAttachProp dishAttachProp = new DishAttachProp();
+            dishAttachProp.setOutAttachPropNo(id);
+            dishAttachProp.setAttachPropType("PRACTICE");
+            dishAttachProp.setAttachPropCode(id);
+            dishAttachProp.setAttachPropName(spec.getProdSpecName());
+            dishAttachProp.setPrice(0L);
+            dishAttachProp.setQuantity(1);
+            dishAttachProp.setTotalFee(0L);
+            dishAttachProp.setPromoFee(0L);
+            dishAttachProp.setActualFee(0L);
+            dishAttachProp.setAttachPropId(id);
+            dishAttachPropList.add(dishAttachProp);
+        }
+        return CollectionUtils.isEmpty(dishAttachPropList) ? null : dishAttachPropList;
     }
 
 

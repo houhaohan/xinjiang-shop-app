@@ -105,6 +105,7 @@
             sp.product_name ,
             sp.product_img ,
             sp.product_desc ,
+            op.id as orderProductId,
             op.order_id ,
             op.prod_unit_price ,
             op.prod_num ,
@@ -116,7 +117,7 @@
         FROM order_product op
         LEFT JOIN shop_product sp ON op.shop_prod_id = sp.id AND sp.del_flag = 0
         LEFT JOIN order_product_spec ops ON ops.order_id = op.order_id AND ops.order_prod_id = op.id AND ops.del_flag = 0
-        LEFT JOIN shop_product_spec sps ON sps.id = ops.shop_prod_spec_id AND (cooking_way_id = '' OR cooking_way_id IS NULL) AND sps.del_flag = 0
+        LEFT JOIN shop_product_spec sps ON sps.id = ops.shop_prod_spec_id AND (sps.cooking_way_id = '' OR sps.cooking_way_id IS NULL) AND sps.del_flag = 0
         WHERE op.order_id = #{orderId} AND kry_sku_id IS NOT NULL
     </select>
 </mapper>
