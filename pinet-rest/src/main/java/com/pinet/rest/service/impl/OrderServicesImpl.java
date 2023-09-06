@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -1023,10 +1024,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setItemOriginType("COMBO");
                     dish.setDishSkuId(orderProduct.getKrySkuId());
                     dishList.add(dish);
-                    request.setDishList(null);
                 }
             }
 
+            if(!CollectionUtils.isEmpty(dishList)){
+                request.setDishList(dishList);
+            }
             request.setIsPack(false);
             orderDishRequestList.add(request);
         }
