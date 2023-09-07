@@ -12,6 +12,7 @@ import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.type.KryAPI;
 import com.pinet.keruyun.openapi.util.JsonUtil;
 import com.pinet.keruyun.openapi.vo.*;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@Slf4j
 public class KryApiServiceImpl extends KryCallService implements IKryApiService {
 
     public KryApiServiceImpl(OkHttpClient okHttpClient, KryApiParamConfig kryApiParamConfig) {
@@ -81,20 +83,20 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
     @Override
     public ScanCodePrePlaceOrderVo scanCodePrePlaceOrder(Long orgId, String token, KryScanCodeOrderCreateDTO dto) {
         String responseStr = super.postCall(KryAPI.SCAN_CODE_ORDER_CREATE, AuthType.SHOP, orgId, token, dto);
+        log.info("客如云外卖订单同步结果=============>{}",responseStr);
         KryResponse<ScanCodePrePlaceOrderVo> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<ScanCodePrePlaceOrderVo>>() {
         });
-        if (0 == response.getCode()) {
-            return response.getResult();
-        }
-        return null;
+        return response.getResult();
     }
 
     @Override
     public OrderCreateVO takeoutOrderCreate(Long orgId, String token, KryTakeoutOrderCreateDTO dto) {
         String responseStr = super.postCall(KryAPI.TAKEOUT_ORDER_CREATE, AuthType.SHOP, orgId, token, dto);
+        log.info("客如云外卖订单同步结果=============>{}",responseStr);
         KryResponse<OrderCreateVO> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<OrderCreateVO>>() {
         });
         if (0 == response.getCode()) {
+
             return response.getResult();
         }
         return null;

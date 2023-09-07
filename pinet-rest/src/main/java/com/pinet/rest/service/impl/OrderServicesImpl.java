@@ -119,6 +119,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Autowired
     private IKryComboGroupDetailService kryComboGroupDetailService;
 
+    @Autowired
+    private IKryOrderCompensateService kryOrderCompensateService;
+
+    @Autowired
+    private IKryOrderPushLogService kryOrderPushLogService;
+
     @Value("${spring.profiles.active}")
     private String active;
 
@@ -827,7 +833,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param order
      * @return
      */
-    public TakeoutOrderCreateVo takeoutOrderCreate(Orders order) {
+    public String takeoutOrderCreate(Orders order) {
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
         takeoutOrderCreateDTO.setOutBizNo("" + order.getOrderNo());
@@ -922,7 +928,22 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         deliveryInfoRequest.setLongitude(new BigDecimal(orderAddress.getLng()));
         takeoutOrderCreateDTO.setDeliveryInfoRequestList(Arrays.asList(deliveryInfoRequest));
         String token = kryApiService.getToken(AuthType.SHOP, order.getKryShopId());
-        return kryApiService.openTakeoutOrderCreate(order.getKryShopId(), token, takeoutOrderCreateDTO);
+        TakeoutOrderCreateVo takeoutOrderCreateVo = kryApiService.openTakeoutOrderCreate(order.getKryShopId(), token, takeoutOrderCreateDTO);
+        //记录日志
+        pushKryOrderLog(order.getId(),JSONObject.toJSONString(takeoutOrderCreateDTO),JSONObject.toJSONString(takeoutOrderCreateVo),takeoutOrderCreateVo.getSuccess());
+
+        if(takeoutOrderCreateVo == null){
+            return null;
+        }
+        if("false".equals(takeoutOrderCreateVo.getSuccess())){
+            //推送失败，重试
+            pushKryOrderMessage(order,takeoutOrderCreateVo.getFormatMsgInfo());
+            return null;
+        }
+        if(takeoutOrderCreateVo.getData() == null ){
+            return null;
+        }
+        return takeoutOrderCreateVo.getData().getOrderNo();
     }
 
     /**
@@ -1028,17 +1049,29 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setItemOriginType("COMBO");
                     dish.setDishSkuId(orderProduct.getKrySkuId());
                     dishList.add(dish);
-                    request.setDishList(null);
                 }
             }
-
+            if(!CollectionUtils.isEmpty(dishList)){
+                request.setDishList(dishList);
+            }
             request.setIsPack(false);
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
-        if(scanCodePrePlaceOrderVo == null || scanCodePrePlaceOrderVo.getData() == null ){
+        //记录日志
+        pushKryOrderLog(orders.getId(),JSONObject.toJSONString(dto),JSONObject.toJSONString(scanCodePrePlaceOrderVo),scanCodePrePlaceOrderVo.getSuccess());
+
+        if(scanCodePrePlaceOrderVo == null){
+            return null;
+        }
+        if("fail".equals(scanCodePrePlaceOrderVo.getSuccess())){
+            //推送失败，重试
+            pushKryOrderMessage(orders,scanCodePrePlaceOrderVo.getFormatMsgInfo());
+            return null;
+        }
+        if(scanCodePrePlaceOrderVo.getData() == null ){
             return null;
         }
         return scanCodePrePlaceOrderVo.getData().getOrderNo();
@@ -1074,5 +1107,39 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return CollectionUtils.isEmpty(dishAttachPropList) ? null : dishAttachPropList;
     }
 
+
+    /**
+     * 推送客如云订单的消息
+     * @param orders
+     * @param message 失败原因
+     */
+    private void pushKryOrderMessage(Orders orders,String message){
+        KryOrderCompensate kryOrderCompensate = new KryOrderCompensate();
+        kryOrderCompensate.setKryOrderNo(orders.getKryOrderNo());
+        kryOrderCompensate.setOrderId(orders.getId());
+        kryOrderCompensate.setTimes(0);
+        kryOrderCompensate.setStatus(0);
+        kryOrderCompensate.setPushTime(new Date());
+        kryOrderCompensate.setFailReason(message);
+        kryOrderCompensateService.save(kryOrderCompensate);
+
+
+    }
+
+    /**
+     * 客如云订单日志
+     * @param orderId
+     * @param param
+     * @param res
+     */
+    private void pushKryOrderLog(Long orderId,String param,String res,String success){
+        KryOrderPushLog log = new KryOrderPushLog();
+        log.setOrderId(orderId);
+        log.setParams(param);
+        log.setPushTime(new Date());
+        log.setPushRes(res);
+        log.setStatus("fail".equals(success) ? 0 : 1);
+        kryOrderPushLogService.save(log);
+    }
 
 }
