@@ -1122,8 +1122,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         kryOrderCompensate.setPushTime(new Date());
         kryOrderCompensate.setFailReason(message);
         kryOrderCompensateService.save(kryOrderCompensate);
-
-
     }
 
     /**

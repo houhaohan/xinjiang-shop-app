@@ -32,5 +32,5 @@ public interface ShopMapper extends BaseMapper<Shop> {
      * 查找店铺列表
      * @return
      */
-    List<ShopVo> shopList();
+    List<ShopVo> shopList(@Param("city") String city);
 }
