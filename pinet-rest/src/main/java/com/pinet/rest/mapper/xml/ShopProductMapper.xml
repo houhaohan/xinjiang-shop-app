@@ -104,6 +104,7 @@
             MIN(price) AS price
             FROM shop_product sp
             LEFT JOIN shop_product_spec sps ON sps.shop_prod_id = sp.id
+            WHERE sp.shop_id = #{shopId}
             GROUP BY sps.sku_id
         ) temp
         LEFT JOIN shop s ON s.id = temp.shop_id
