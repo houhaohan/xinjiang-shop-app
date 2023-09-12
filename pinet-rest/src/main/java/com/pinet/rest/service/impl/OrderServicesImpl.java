@@ -517,6 +517,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         param.setPayPrice(dto.getOrderPrice());
         param.setPayDesc("轻食订单下单");
         param.setPayType(1);
+        param.setPayPassWord(dto.getPayPassword());
+        param.setOrderId(dto.getOrderId());
         Object res = payService.pay(param);
 
 
@@ -955,7 +957,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders){
         //生产环境才推单，其他环境就不推了吧
-        if(!"prod".equals(active)){
+        if("dev".equals(active)){
             return null;
         }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();

@@ -6,12 +6,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.constants.DB;
+import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.OkHttpUtil;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.ShopListDto;
 import com.pinet.rest.entity.vo.ShopVo;
 import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.service.IShopService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -32,26 +34,29 @@ import static com.pinet.core.util.LatAndLngUtils.getDistance;
  */
 @Service
 @DS(DB.MASTER)
+@Slf4j
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
     @Autowired
     private ShopMapper shopMapper;
 
     @Override
     public Long getMinDistanceShop(BigDecimal lat, BigDecimal lng) {
-        return shopMapper.getMinDistanceShop(lat,lng);
+        return shopMapper.getMinDistanceShop(lat, lng);
     }
 
     @Override
-    public List<ShopVo>  shopList(ShopListDto dto) {
+    public List<ShopVo> shopList(ShopListDto dto) {
         if (dto.getLat() == null || dto.getLng() == null) {
             throw new IllegalArgumentException("参数不能为空");
         }
         //根据IP获取城市
-        String url = "https://restapi.amap.com/v3/ip?output=json&key=d6f83cc59d2e545ce0f6daf28e80d85f";
+        String url = "https://restapi.amap.com/v3/ip?output=json&key=d6f83cc59d2e545ce0f6daf28e80d85f&ip="+IPUtils.getIpAddr();
+
         String str = OkHttpUtil.get(url, null);
         JSONObject object = JSON.parseObject(str);
         String city = object.getString("city");
-
+        log.info("根据ip获取城市信息:{}", str);
+        log.info("获取到的ip信息:{}", IPUtils.getIpAddr());
         //当前定位的城市店铺
         List<ShopVo> shopList = shopMapper.shopList(city);
         if (CollectionUtils.isEmpty(shopList)) {
@@ -78,8 +83,8 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             return false;
         }
         Date now = new Date();
-        Date startTime = DateUtil.parseTimeToday(DateUtil.format(shop.getWorkTime(),"HH:mm:ss"));
-        Date endTime = DateUtil.parseTimeToday(DateUtil.format(shop.getFinishTime(),"HH:mm:ss"));
+        Date startTime = DateUtil.parseTimeToday(DateUtil.format(shop.getWorkTime(), "HH:mm:ss"));
+        Date endTime = DateUtil.parseTimeToday(DateUtil.format(shop.getFinishTime(), "HH:mm:ss"));
         return com.pinet.core.util.DateUtil.isEffectiveDate(now, startTime, endTime);
     }
 
