@@ -21,8 +21,10 @@ public class DaDaTest {
 
 
     public static void main(String[] args) throws RpcException {
-//        createOrder();
-        cancelOrder();
+
+        //{"order_status":1,"cancel_reason":"","update_time":1694158211,"cancel_from":0,"signature":"d0c956211692ea68d11daf0d81bfdec0","dm_id":0,"is_finish_code":false,"order_id":"2131312311","client_id":"1526014050948743168"}
+        createOrder();
+//        cancelOrder();
     }
 
     /**
@@ -39,7 +41,7 @@ public class DaDaTest {
                 .build();
         AddOrderReq req = AddOrderReq.builder()
                 .shopNo(Configuration.getInstance().getShopNo())
-                .originId("21313123")
+                .originId("2131312311")
                 .cityCode("021")
                 .cargoPrice(50d)
                 .cargoNum(1)
@@ -72,7 +74,17 @@ public class DaDaTest {
      */
     private static void cancelOrder() throws RpcException {
         CancelOrderReq build = CancelOrderReq.builder()
-                .orderId("21313123")
+                .orderId("213131231")
+                .cancelReasonId(4)
+                .cancelReason("顾客取消订单")
+                .build();
+        CancelOrderResp execute = CancelOrderClient.execute(build);
+        System.out.println(JSONObject.toJSONString(execute));
+    }
+
+    private static void queryOrder() throws RpcException {
+        CancelOrderReq build = CancelOrderReq.builder()
+                .orderId("213131231")
                 .cancelReasonId(4)
                 .cancelReason("顾客取消订单")
                 .build();
