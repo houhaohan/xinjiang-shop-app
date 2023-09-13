@@ -176,7 +176,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         try {
 
             wxMaService.getMsgService().sendSubscribeMsg(WxMaSubscribeMessage.builder()
-                    .templateId("1VuNBumcd3eIRf4ZpT5wFCzgRm1WgpC72GFn1CrnlfU")
+                    .templateId("e13-yQdGgep28jJ7GJiRNFYwulIso5TNM4UOsfPE7jI")
                     .data(Lists.newArrayList(
                             //描述
                             new WxMaSubscribeMessage.MsgData("thing3", data1),
