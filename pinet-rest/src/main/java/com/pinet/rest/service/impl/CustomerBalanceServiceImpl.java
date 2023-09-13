@@ -53,4 +53,18 @@ public class CustomerBalanceServiceImpl extends ServiceImpl<CustomerBalanceMappe
         queryWrapper.eq("customer_id",customerId);
         return getOne(queryWrapper);
     }
+
+    @Override
+    public boolean addByCustomerId(Long customerId) {
+        CustomerBalance query = getByCustomerId(customerId);
+        if (ObjectUtil.isNotNull(query)){
+            return true;
+        }
+        CustomerBalance customerBalance = new CustomerBalance();
+        customerBalance.setCustomerId(customerId);
+        customerBalance.setBalance(BigDecimal.ZERO);
+        customerBalance.setAvailableBalance(BigDecimal.ZERO);
+        customerBalance.setBlockedBalance(BigDecimal.ZERO);
+        return save(customerBalance);
+    }
 }

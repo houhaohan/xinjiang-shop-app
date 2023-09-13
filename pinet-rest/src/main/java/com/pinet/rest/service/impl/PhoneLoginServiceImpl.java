@@ -15,6 +15,7 @@ import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
 import com.pinet.rest.entity.request.SmsLoginRequest;
 import com.pinet.rest.entity.vo.UserInfo;
+import com.pinet.rest.service.ICustomerBalanceService;
 import com.pinet.rest.service.ICustomerCouponService;
 import com.pinet.rest.service.ICustomerService;
 import com.pinet.rest.service.ILoginService;
@@ -38,6 +39,9 @@ public class PhoneLoginServiceImpl implements ILoginService {
 
     @Resource
     private ICustomerCouponService customerCouponService;
+
+    @Resource
+    private ICustomerBalanceService customerBalanceService;
 
     @Override
     public UserInfo login(LoginRequest loginRequest) throws WxErrorException {
@@ -78,7 +82,10 @@ public class PhoneLoginServiceImpl implements ILoginService {
                     .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
                     .build();
             customerService.save(customer);
+            //发放新人优惠券
             customerCouponService.grantNewCustomerCoupon(customer.getCustomerId());
+            //添加用户账户表
+            customerBalanceService.addByCustomerId(customer.getCustomerId());
         }
 
         String userId = "" + customer.getCustomerId();

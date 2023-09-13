@@ -495,7 +495,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
     public Object orderPay(OrderPayDto dto) {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
 

@@ -1,5 +1,6 @@
 package com.pinet.rest.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
@@ -33,6 +34,9 @@ public class CustomerBalanceRecord extends BaseEntity {
 
     @ApiModelProperty("1资源通任务增加   2充值增加   3轻食下单消费扣减  4提现扣减  5店帮主充值 ")
     private Integer type;
+
+    @TableField(exist=false)
+    private String typeStr;
 
     @ApiModelProperty("关联业务外键")
     private Long fkId;

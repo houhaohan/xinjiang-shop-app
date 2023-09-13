@@ -40,4 +40,7 @@ public interface ICustomerBalanceService extends IService<CustomerBalance> {
      */
     CustomerBalance getByCustomerId(Long customerId);
 
+    boolean addByCustomerId(Long customerId);
+
+
 }

@@ -1,24 +1,30 @@
 package com.pinet.rest.controller;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.controller.BaseController;
+import com.pinet.core.page.PageRequest;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.rest.entity.CustomerBalance;
+import com.pinet.rest.entity.CustomerBalanceRecord;
+import com.pinet.rest.entity.dto.BalanceRecordListDto;
 import com.pinet.rest.entity.dto.TopCountDto;
 import com.pinet.rest.entity.param.HomeProductParam;
 import com.pinet.rest.entity.param.RecommendProductParam;
+import com.pinet.rest.entity.vo.BalanceVo;
 import com.pinet.rest.entity.vo.HotProductVo;
 import com.pinet.rest.entity.vo.RecommendProductVo;
+import com.pinet.rest.service.ICustomerBalanceRecordService;
+import com.pinet.rest.service.ICustomerBalanceService;
 import com.pinet.rest.service.ICustomerCouponService;
 import com.pinet.rest.service.IShopProductService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -32,6 +38,12 @@ public class HomeController extends BaseController {
 
     @Resource
     private ICustomerCouponService customerCouponService;
+
+    @Resource
+    private ICustomerBalanceService customerBalanceService;
+
+    @Resource
+    private ICustomerBalanceRecordService customerBalanceRecordService;
 
     @ApiOperation("热卖排行版")
     @RequestMapping(value = "/hotSell/list", method = RequestMethod.GET)
@@ -65,8 +77,39 @@ public class HomeController extends BaseController {
         TopCountDto topCountDto = new TopCountDto();
         Integer couponCount = customerCouponService.countByCustomerId(customerId);
         topCountDto.setCouponCount(couponCount);
+
+        //余额
+        CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
+        if (ObjectUtil.isNotNull(customerBalance)){
+            topCountDto.setBalance(customerBalance.getAvailableBalance());
+        }
         return Result.ok(topCountDto);
     }
+
+
+
+
+    @PostMapping("/balance")
+    @ApiOperation("余额")
+    @ApiVersion(1)
+    public Result<?> balance(){
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+        BalanceVo vo = new BalanceVo();
+        CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
+        vo.setBalance(customerBalance.getAvailableBalance());
+        List<CustomerBalanceRecord> customerBalanceRecords = customerBalanceRecordService.getListLimit5(customerId);
+        vo.setCustomerBalanceRecords(customerBalanceRecords);
+        return Result.ok(vo);
+    }
+
+    @PostMapping("/balanceRecordList")
+    @ApiOperation("余额变动明细")
+    @ApiVersion(1)
+    public Result<List<CustomerBalanceRecord>> balanceRecordList(@RequestBody BalanceRecordListDto dto){
+        List<CustomerBalanceRecord> customerBalanceRecords = customerBalanceRecordService.balanceRecordList(dto);
+        return Result.ok(customerBalanceRecords);
+    }
+
 
 }
 
