@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.constants.DB;
 import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.OkHttpUtil;
+import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.ShopListDto;
 import com.pinet.rest.entity.vo.ShopVo;
@@ -39,6 +40,8 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Autowired
     private ShopMapper shopMapper;
 
+    private static final String key = "d6f83cc59d2e545ce0f6daf28e80d85f";
+
     @Override
     public Long getMinDistanceShop(BigDecimal lat, BigDecimal lng) {
         return shopMapper.getMinDistanceShop(lat, lng);
@@ -46,17 +49,12 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
 
     @Override
     public List<ShopVo> shopList(ShopListDto dto) {
+        log.info("店铺列表参数=======>{}",JSON.toJSONString(dto));
         if (dto.getLat() == null || dto.getLng() == null) {
             throw new IllegalArgumentException("参数不能为空");
         }
-        //根据IP获取城市
-        String url = "https://restapi.amap.com/v3/ip?output=json&key=d6f83cc59d2e545ce0f6daf28e80d85f&ip="+IPUtils.getIpAddr();
-
-        String str = OkHttpUtil.get(url, null);
-        JSONObject object = JSON.parseObject(str);
-        String city = object.getString("city");
-        log.info("根据ip获取城市信息:{}", str);
-        log.info("获取到的ip信息:{}", IPUtils.getIpAddr());
+        //根据经纬度获取城市
+        String city = getCityInfo(dto.getLng(), dto.getLat());
         //当前定位的城市店铺
         List<ShopVo> shopList = shopMapper.shopList(city);
         if (CollectionUtils.isEmpty(shopList)) {
@@ -87,5 +85,40 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         Date endTime = DateUtil.parseTimeToday(DateUtil.format(shop.getFinishTime(), "HH:mm:ss"));
         return com.pinet.core.util.DateUtil.isEffectiveDate(now, startTime, endTime);
     }
+
+    private String getCityInfo(BigDecimal lng,BigDecimal lat){
+        String city = getCityByIp();
+        if(StringUtil.isNotBlank(city) && !"[]".equals(city)){
+            return city;
+        }
+        return getCityByLocation(lng,lat);
+    }
+
+    private String getCityByIp(){
+        String url = String.format("https://restapi.amap.com/v3/ip?ip=%s&output=json&key=%s", IPUtils.getIpAddr(),key);
+        log.info("根据IP获取城市URL=======>{}",url);
+        String str = OkHttpUtil.get(url, null);
+        JSONObject jsonObject = JSONObject.parseObject(str);
+        return jsonObject.getString("city");
+    }
+
+    private String getCityByLocation(BigDecimal lng,BigDecimal lat){
+        String url = String.format("https://restapi.amap.com/v3/geocode/regeo?output=json&location=%s,%s&key=%s&extensions=base", lng,lat,key);
+        log.info("根据经纬度获取城市URL=======>{}",url);
+        String str = OkHttpUtil.get(url, null);
+        JSONObject object = JSON.parseObject(str);
+        JSONObject regeocode = object.getJSONObject("regeocode");
+        JSONObject addressComponent = regeocode.getJSONObject("addressComponent");
+        String city = addressComponent.getString("city");
+        String province = addressComponent.getString("province");
+        if("北京市".equals(province)
+                || "重庆市".equals(province)
+                || "上海市".equals(province)
+                || "天津市".equals(province)){
+            city = province;
+        }
+        return city;
+    }
+
 
 }
