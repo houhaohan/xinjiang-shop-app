@@ -990,7 +990,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         PromoDetailRequest promoDetailRequest = new PromoDetailRequest();
         promoDetailRequest.setOutPromoDetailId(UUID.randomUUID().toString());
         promoDetailRequest.setPromoId(UUID.randomUUID().toString());
-        promoDetailRequest.setPromoName("优惠");
+        promoDetailRequest.setPromoName("优惠A");
         promoDetailRequest.setPromoFee(BigDecimalUtil.yuan2Fen(orders.getDiscountAmount()));
         promoDetailRequest.setPromoCategory("ORDER_DIMENSION");
         promoDetailRequest.setPromoDiscount(null);
@@ -1018,7 +1018,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
             request.setPromoFee(0L);
-            request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            request.setActualFee(request.getTotalFee().intValue() - request.getPromoFee().intValue());
             request.setPackageFee("0");
             request.setDishSkuId(orderProduct.getKrySkuId());
             request.setDishSkuCode(orderProduct.getSkuCode());
@@ -1051,7 +1051,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setUnitName(groupDetail.getUnit());
                     dish.setDishOriginalFee(groupDetail.getSellPrice());
                     dish.setTotalFee(groupDetail.getSellPrice());
-                    dish.setPromoFee(0L);
+                    dish.setPromoFee(183L);
                     dish.setActualFee(groupDetail.getSellPrice());
                     dish.setPackageFee("0");
                     dish.setWeightDishFlag("0");
