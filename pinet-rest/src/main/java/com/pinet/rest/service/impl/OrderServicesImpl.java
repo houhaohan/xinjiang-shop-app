@@ -957,9 +957,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders){
         //生产环境才推单，其他环境就不推了吧
-        if("dev".equals(active)){
-            return null;
-        }
+//        if(!"prod".equals(active)){
+//            return null;
+//        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
         dto.setRemark(orders.getRemark());
@@ -987,10 +987,25 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         dcOrderBizRequest.setTakeoutFee(0L);
         dto.setDcOrderBizRequest(dcOrderBizRequest);
 
+        PromoDetailRequest promoDetailRequest = new PromoDetailRequest();
+        promoDetailRequest.setOutPromoDetailId(UUID.randomUUID().toString());
+        promoDetailRequest.setPromoId(UUID.randomUUID().toString());
+        promoDetailRequest.setPromoName("优惠");
+        promoDetailRequest.setPromoFee(BigDecimalUtil.yuan2Fen(orders.getDiscountAmount()));
+        promoDetailRequest.setPromoCategory("ORDER_DIMENSION");
+        promoDetailRequest.setPromoDiscount(null);
+        promoDetailRequest.setPromoType("THIRD_MERCHANT");
+        promoDetailRequest.setPromoDimension("TOATL_CART");
+        dto.setPromoDetailRequestList(Arrays.asList(promoDetailRequest));
+
         List<OrderProductDto> orderProducts = orderProductService.selectByOrderId(orders.getId());
+        int size = orderProducts.size();
+        //取模运算
+        BigDecimal[] bigDecimals = BigDecimal.valueOf(dto.getPromoFee()).divideAndRemainder(BigDecimal.valueOf(size));
 
         List<OrderDishRequest> orderDishRequestList = new ArrayList<>();
-        for(OrderProductDto orderProduct : orderProducts){
+        for(int i = 0; i < size; i++){
+            OrderProductDto orderProduct = orderProducts.get(i);
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getId()));
             request.setDishId(orderProduct.getProdId());
@@ -1007,8 +1022,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
-            request.setPromoFee(0L);//菜品优惠总金额
-            request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+//            if(size == 1){
+//                request.setPromoFee(BigDecimalUtil.yuan2Fen(orders.getDiscountAmount()));//菜品优惠总金额
+//            }else if(i == size-1){
+//                //最后一条明细
+//                request.setPromoFee(BigDecimalUtil.yuan2Fen(bigDecimals[1]));//菜品优惠总金额
+//            }else {
+//                request.setPromoFee(BigDecimalUtil.yuan2Fen(bigDecimals[0]));
+//            }
+            request.setPromoFee(0L);
+            request.setActualFee(request.getTotalFee().intValue() - request.getPromoFee().intValue());
             request.setPackageFee("0");
             request.setDishSkuId(orderProduct.getKrySkuId());
             request.setDishSkuCode(orderProduct.getSkuCode());
@@ -1140,6 +1163,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         log.setPushRes(res);
         log.setStatus("fail".equals(success) ? 0 : 1);
         kryOrderPushLogService.save(log);
+    }
+
+    public static void main(String[] args) {
+        double a = 7.33;
+        double b = a % 3;
+        double c = a / 3;
+
+        BigDecimal bigDecimal = new BigDecimal("133").divideToIntegralValue(new BigDecimal(3));
+//
+//        System.out.println(b);
+//        System.out.println(c);
+        System.out.println(JSONObject.toJSONString(bigDecimal));
+
     }
 
 }
