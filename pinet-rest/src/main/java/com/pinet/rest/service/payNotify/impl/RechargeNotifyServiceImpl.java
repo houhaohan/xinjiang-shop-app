@@ -86,8 +86,7 @@ public class RechargeNotifyServiceImpl implements IPayNotifyService {
             countRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(orderPay.getCustomerId(),BalanceRecordTypeEnum._5);
         }
 
-        //todo 测试先改成0.1 上线后改回100
-        if (countRechargePrice.compareTo(new BigDecimal("0.1")) >= 0){
+        if (countRechargePrice.compareTo(new BigDecimal("100")) >= 0){
             memberLevel = 10;
         }
         //首次成为店帮主后设置过期时间  mq延迟一年后自动设置变为会员
