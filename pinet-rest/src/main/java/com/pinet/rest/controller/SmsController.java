@@ -1,6 +1,7 @@
 package com.pinet.rest.controller;
 
 
+import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.enums.ErrorCodeEnum;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
@@ -31,7 +32,23 @@ public class SmsController {
         if(smsTemplate == null){
             return Result.error(ErrorCodeEnum.FAILED);
         }
-        SmsSendResponse result = smsService.send(request.getPhone(), smsTemplate);
+        SmsSendResponse result = smsService.send(request.getPhone(), smsTemplate, CommonConstant.SMS_CODE_LOGIN);
+        if("0".equals(result.getCode())){
+            return Result.ok(result);
+        }
+        return Result.error(result.getErrorMsg());
+    }
+
+
+    @ApiOperation("发送忘记支付密码验证码")
+    @RequestMapping(value = "/sendForgetPayPasswordCode",method = RequestMethod.POST)
+    @ApiVersion(1)
+    public Result<?> sendForgetPayPasswordCode(@Validated @RequestBody SmsSendRequest request){
+        SmsTemplate smsTemplate = SmsTemplate.getTemplateByName(request.getType());
+        if(smsTemplate == null){
+            return Result.error(ErrorCodeEnum.FAILED);
+        }
+        SmsSendResponse result = smsService.send(request.getPhone(), smsTemplate,CommonConstant.SMS_CODE_FORGET_PAY_PASSWORD);
         if("0".equals(result.getCode())){
             return Result.ok(result);
         }

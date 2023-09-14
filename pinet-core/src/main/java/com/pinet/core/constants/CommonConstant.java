@@ -4,6 +4,8 @@ public class CommonConstant {
 
     public static final String SMS_CODE_LOGIN = "sms_code:login:";
 
+    public static final String SMS_CODE_FORGET_PAY_PASSWORD = "sms_code:forget:pay_password:";
+
     //最大订单数
     public static final Integer MAX_ORDER_NUM = 100;
 

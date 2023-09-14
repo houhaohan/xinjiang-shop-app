@@ -26,14 +26,14 @@ public class SmsServiceImpl implements ISmsService {
     private Long expire;
 
     @Override
-    public SmsSendResponse send(String phone, SmsTemplate smsTemplate) {
+    public SmsSendResponse send(String phone, SmsTemplate smsTemplate,String redisKey) {
         int code = StringUtil.randomSixCode();
         Map<String,String> codeMap = new HashMap<>();
         codeMap.put("code",String.valueOf(code));
         JSONObject sendResult = SmsFactory.createChangLan().send(phone, smsTemplate, codeMap);
         if("0".equals(sendResult.getString("code"))){
             //发送成功
-            redisUtil.set(CommonConstant.SMS_CODE_LOGIN +phone,String.valueOf(code),expire, TimeUnit.SECONDS);
+            redisUtil.set(redisKey +phone,String.valueOf(code),expire, TimeUnit.SECONDS);
         }
         return sendResult.toJavaObject(SmsSendResponse.class);
     }
