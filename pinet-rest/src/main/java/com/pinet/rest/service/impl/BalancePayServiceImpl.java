@@ -45,10 +45,6 @@ public class BalancePayServiceImpl implements IPayService {
         if (ObjectUtil.isNull(customerBalance)) {
             throw new PinetException("余额支付失败,用户资金初始化失败");
         }
-        //判断余额是否充足
-        if (customerBalance.getAvailableBalance().compareTo(param.getPayPrice()) < 0) {
-            throw new PinetException("余额不足");
-        }
 
         Customer customer = customerService.getById(customerId);
         //判断支付密码是否正确
@@ -59,6 +55,12 @@ public class BalancePayServiceImpl implements IPayService {
         if (!customer.getPayPassword().equals(param.getPayPassWord())) {
             throw new PinetException("支付密码错误");
         }
+
+        //判断余额是否充足
+        if (customerBalance.getAvailableBalance().compareTo(param.getPayPrice()) < 0) {
+            throw new PinetException("余额不足");
+        }
+
 
         //扣减可用资金
         customerBalanceService.subtractAvailableBalance(customerId, param.getPayPrice());

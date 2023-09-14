@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.controller.BaseController;
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.page.PageRequest;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.StringUtil;
@@ -160,6 +161,9 @@ public class HomeController extends BaseController {
     public Result<?> checkPayPassword(String payPassword){
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Customer customer = customerService.getById(userId);
+        if (customer.getPayPassword() == null || StringUtil.isBlank(customer.getPayPassword())){
+            throw new PinetException("请先设置支付密码");
+        }
         if (!payPassword.equals(customer.getPayPassword())){
             return Result.ok(false);
         }
