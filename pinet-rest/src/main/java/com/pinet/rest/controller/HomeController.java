@@ -1,6 +1,7 @@
 package com.pinet.rest.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.controller.BaseController;
 import com.pinet.core.exception.PinetException;
@@ -25,6 +26,7 @@ import com.pinet.rest.entity.vo.RecommendProductVo;
 import com.pinet.rest.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/{version}/home")
 @Api(tags = "首页")
+@Slf4j
 public class HomeController extends BaseController {
     @Autowired
     private IShopProductService shopProductService;
@@ -164,10 +167,7 @@ public class HomeController extends BaseController {
         if (customer.getPayPassword() == null || StringUtil.isBlank(customer.getPayPassword())){
             throw new PinetException("请先设置支付密码");
         }
-        if (!payPassword.equals(customer.getPayPassword())){
-            return Result.ok(false);
-        }
-        return Result.ok(true);
+        return Result.ok(customer.getPayPassword().equals(payPassword));
     }
 
 
