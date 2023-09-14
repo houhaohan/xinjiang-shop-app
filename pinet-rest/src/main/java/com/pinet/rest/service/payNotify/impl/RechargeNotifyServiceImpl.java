@@ -86,7 +86,6 @@ public class RechargeNotifyServiceImpl implements IPayNotifyService {
             countRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(orderPay.getCustomerId(),BalanceRecordTypeEnum._5);
         }
 
-
         if (countRechargePrice.compareTo(new BigDecimal("100")) >= 0){
             memberLevel = 10;
         }

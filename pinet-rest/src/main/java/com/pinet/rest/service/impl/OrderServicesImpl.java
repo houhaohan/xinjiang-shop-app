@@ -507,20 +507,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (orders.getOrderPrice().compareTo(dto.getOrderPrice()) != 0) {
             throw new PinetException("支付金额异常,请重新支付");
         }
-
         //根据不同支付渠道获取调用不同支付方法
         IPayService payService = SpringContextUtils.getBean(dto.getChannelId() + "_" + "service", IPayService.class);
-        //封装PayParam
-        PayParam param = new PayParam();
-        param.setOpenId(dto.getOpenId());
-        param.setOrderNo(orders.getOrderNo().toString());
-        param.setPayPrice(dto.getOrderPrice());
-        param.setPayDesc("轻食订单下单");
-        param.setPayType(1);
-        param.setPayPassWord(dto.getPayPassword());
-        param.setOrderId(dto.getOrderId());
-        Object res = payService.pay(param);
-
 
         //构造orderPay
         OrderPay orderPay = new OrderPay();
@@ -536,6 +524,18 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPay.setIp(IPUtils.getIpAddr());
 
         orderPayService.save(orderPay);
+
+        //封装PayParam
+        PayParam param = new PayParam();
+        param.setOpenId(dto.getOpenId());
+        param.setOrderNo(orders.getOrderNo().toString());
+        param.setPayPrice(dto.getOrderPrice());
+        param.setPayDesc("轻食订单下单");
+        param.setPayType(1);
+        param.setPayPassWord(dto.getPayPassword());
+        param.setOrderId(dto.getOrderId());
+        Object res = payService.pay(param);
+
 
         return res;
     }
