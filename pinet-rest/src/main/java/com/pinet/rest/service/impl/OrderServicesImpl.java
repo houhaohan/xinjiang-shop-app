@@ -585,7 +585,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderRefundService.save(orderRefund);
 
             //调用退款方法
-            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(), orders.getOrderNo().toString(), orderRefund.getRefundNo().toString(), orders.getOrderPrice().toString(), orderRefund.getId());
+            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(),
+                    orders.getOrderNo().toString(),
+                    orderRefund.getRefundNo().toString(),
+                    orders.getOrderPrice().toString(),
+                    orderRefund.getId(),orders.getCustomerId());
             payService.refund(refundParam);
             orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
             return updateById(orders);
@@ -770,7 +774,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
     public boolean syncOrderStatus(OrderSyncDTO dto) {
         //退款
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
@@ -808,7 +812,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 orders.getOrderNo().toString(),
                 orderRefund.getRefundNo().toString(),
                 orders.getOrderPrice().toString(),
-                orderRefund.getId());
+                orderRefund.getId(),orders.getCustomerId());
         payService.refund(refundParam);
         //更新订单状态
         orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
@@ -957,9 +961,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders){
         //生产环境才推单，其他环境就不推了吧
-//        if(!"prod".equals(active)){
-//            return null;
-//        }
+        if(!"prod".equals(active)){
+            return null;
+        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
         dto.setRemark(orders.getRemark());

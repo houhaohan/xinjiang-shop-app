@@ -80,11 +80,10 @@ public class BalancePayServiceImpl implements IPayService {
 
     @Override
     public void refund(RefundParam param) {
-        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         //退回可用资金
-        customerBalanceService.addAvailableBalance(customerId, new BigDecimal(param.getRefundFee()));
+        customerBalanceService.addAvailableBalance(param.getCustomerId(), new BigDecimal(param.getRefundFee()));
 
         //插入资金流水
-        customerBalanceRecordService.addCustomerBalanceRecord(customerId, new BigDecimal(param.getRefundFee()), BalanceRecordTypeEnum._7, param.getOrderRefundId());
+        customerBalanceRecordService.addCustomerBalanceRecord(param.getCustomerId(), new BigDecimal(param.getRefundFee()), BalanceRecordTypeEnum._7, param.getOrderRefundId());
     }
 }

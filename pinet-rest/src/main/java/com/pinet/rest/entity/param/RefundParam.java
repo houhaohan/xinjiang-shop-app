@@ -40,4 +40,9 @@ public class RefundParam {
      */
     private Long orderRefundId;
 
+    /**
+     * 下单的用户id
+     */
+    private Long customerId;
+
 }
