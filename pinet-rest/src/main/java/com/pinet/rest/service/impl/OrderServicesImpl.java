@@ -990,7 +990,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         PromoDetailRequest promoDetailRequest = new PromoDetailRequest();
         promoDetailRequest.setOutPromoDetailId(UUID.randomUUID().toString());
         promoDetailRequest.setPromoId(UUID.randomUUID().toString());
-        promoDetailRequest.setPromoName("优惠A");
+        promoDetailRequest.setPromoName("优惠");
         promoDetailRequest.setPromoFee(BigDecimalUtil.yuan2Fen(orders.getDiscountAmount()));
         promoDetailRequest.setPromoCategory("ORDER_DIMENSION");
         promoDetailRequest.setPromoDiscount(null);
