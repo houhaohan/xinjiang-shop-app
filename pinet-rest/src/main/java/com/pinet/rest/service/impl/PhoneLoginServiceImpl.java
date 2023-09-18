@@ -22,6 +22,7 @@ import com.pinet.rest.service.ILoginService;
 import lombok.RequiredArgsConstructor;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -44,6 +45,7 @@ public class PhoneLoginServiceImpl implements ILoginService {
     private ICustomerBalanceService customerBalanceService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserInfo login(LoginRequest loginRequest) throws WxErrorException {
         SmsLoginRequest smsLoginRequest = (SmsLoginRequest)loginRequest;
         String code = redisUtil.get(CommonConstant.SMS_CODE_LOGIN + smsLoginRequest.getPhone());
