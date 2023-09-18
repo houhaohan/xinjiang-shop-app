@@ -255,8 +255,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //返回预计送达时间
         Date now = new Date();
-        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetHour(now, 1), "HH:mm");
-        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 90), "HH:mm");
+        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetMinute(now, 15), "HH:mm");
+        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 45), "HH:mm");
 
         vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
 
