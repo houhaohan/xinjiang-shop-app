@@ -2,7 +2,6 @@ package com.pinet.rest.service.impl;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.UserConstant;
@@ -24,7 +23,6 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -38,11 +36,9 @@ public class PhoneLoginServiceImpl implements ILoginService {
 
     private final WxMaService wxMaService;
 
-    @Resource
-    private ICustomerCouponService customerCouponService;
+    private final ICustomerCouponService customerCouponService;
 
-    @Resource
-    private ICustomerBalanceService customerBalanceService;
+    private final ICustomerBalanceService customerBalanceService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

@@ -1055,7 +1055,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setUnitName(groupDetail.getUnit());
                     dish.setDishOriginalFee(groupDetail.getSellPrice());
                     dish.setTotalFee(groupDetail.getSellPrice());
-                    dish.setPromoFee(183L);
+                    dish.setPromoFee(0L);
                     dish.setActualFee(groupDetail.getSellPrice());
                     dish.setPackageFee("0");
                     dish.setWeightDishFlag("0");
