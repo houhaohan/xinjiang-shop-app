@@ -96,8 +96,8 @@ sms:
 # 微信开发配置
 wx:
   miniapp:
-    appid: wx89ad3dd778a3e6ff
-    secret: 4e0c7a50e7c358eb290cc994ee03766d
+    appid: wx2cf61e93a478f54f
+    secret: 8cb2cf16e9334e123de200549a7e3afb
 
 #oss配置
 oss:
@@ -120,8 +120,8 @@ social:
       key: ZHANGSHUOwudi1234567891011121314
       p12url: /www/apiclient_cert.p12
     mini:
-      appid: wx89ad3dd778a3e6ff
-      secret: 4e0c7a50e7c358eb290cc994ee03766d
+      appid: wx2cf61e93a478f54f
+      secret: 8cb2cf16e9334e123de200549a7e3afb
       mch_id: 1502776411
       notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxMini/pay
       key: ZHANGSHUOwudi1234567891011121314
