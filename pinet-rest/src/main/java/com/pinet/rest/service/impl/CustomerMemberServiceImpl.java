@@ -119,22 +119,13 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
         }else {
             sumRechargePrice = customerBalanceRecordService.sumMoneyByCustomerIdAndType(customerId, BalanceRecordTypeEnum._5);
         }
-
-
         memberVo.setSumRechargePrice(sumRechargePrice);
-
-
         int memberLevel = getMemberLevel(customerId);
-
-
         memberVo.setMemberLevel(memberLevel);
         memberVo.setMemberLevelStr(MemberLevelEnum.getMsgByCode(memberLevel));
-
-
         Customer customer = customerService.getById(customerId);
         memberVo.setAvatar(customer.getAvatar());
         memberVo.setNickName(customer.getNickname());
-
         return memberVo;
     }
 

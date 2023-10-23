@@ -13,8 +13,6 @@ import com.pinet.rest.service.ICustomerAddressService;
 import com.pinet.rest.service.IOrderAddressService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -29,8 +27,6 @@ import java.util.Date;
  */
 @Service
 public class OrderAddressServiceImpl extends ServiceImpl<OrderAddressMapper, OrderAddress> implements IOrderAddressService {
-    @Resource
-    private OrderAddressMapper orderAddressMapper;
 
     @Resource
     private ICustomerAddressService customerAddressService;

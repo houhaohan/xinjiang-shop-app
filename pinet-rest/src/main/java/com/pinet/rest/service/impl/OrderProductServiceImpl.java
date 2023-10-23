@@ -97,8 +97,6 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
                 orderProduct.setPackageFee(new BigDecimal("2").multiply(new BigDecimal(queryOrderProductBo.getProdNum())));
             }
         }
-
-
         orderProduct.setDishId(shopProduct.getProdId());
         orderProduct.setShopProdId(shopProduct.getId());
         orderProduct.setProdName(shopProduct.getProductName());
@@ -106,7 +104,6 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         orderProduct.setUnit(shopProduct.getUnit());
 
         List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
-
         //单价
         BigDecimal prodUnitPrice = BigDecimal.ZERO;
         for (Long shopProdSpecId : queryOrderProductBo.getShopProdSpecIds()) {
@@ -118,7 +115,6 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
             prodUnitPrice = prodUnitPrice.add(shopProductSpec.getPrice());
 
             ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
-
             OrderProductSpec orderProductSpec = new OrderProductSpec();
             orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
             orderProductSpec.setProdSkuName(productSku.getSkuName());
@@ -126,18 +122,13 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
             orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
             orderProductSpecs.add(orderProductSpec);
         }
-
         orderProduct.setOrderProductSpecs(orderProductSpecs);
-
         orderProduct.setOrderProductSpecStr(orderProductSpecs.stream().map(OrderProductSpec::getProdSpecName).collect(Collectors.joining(",")));
-
         orderProduct.setProdUnitPrice(prodUnitPrice);
         //计算总价
         BigDecimal prodPrice = prodUnitPrice.multiply(new BigDecimal(queryOrderProductBo.getProdNum())).setScale(2, RoundingMode.DOWN);
         orderProduct.setProdPrice(prodPrice);
-
         orderProduct.setProdImg(shopProduct.getProductImg());
-
         return orderProduct;
     }
 

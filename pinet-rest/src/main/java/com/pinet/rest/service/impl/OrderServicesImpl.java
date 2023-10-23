@@ -699,8 +699,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     .setDiscountAmount(originalPrice.subtract(discountedPrice)).setType(1);
             orderDiscounts.add(orderDiscount);
         }
-
-
         return discountedPrice;
     }
 

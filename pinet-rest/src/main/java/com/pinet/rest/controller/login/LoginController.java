@@ -41,7 +41,6 @@ public class LoginController {
     @ApiVersion(1)
     public Result<UserInfo> wxLogin(@Validated @RequestBody WxLoginRequest request){
         try{
-            System.out.println(request.getCode());
             ILoginService loginService = SpringContextUtils.getBean("wxLoginService", ILoginService.class);
             UserInfo userInfo = loginService.login(request);
             return Result.ok(userInfo);
