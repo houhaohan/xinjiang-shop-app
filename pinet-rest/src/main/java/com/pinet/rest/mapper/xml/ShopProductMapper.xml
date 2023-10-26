@@ -223,7 +223,7 @@
                temp.product_type,
                temp.lng,
                temp.lat,
-               '' as product_desc,
+               temp.product_desc,
                sum(price)        as price
         from (
                  select sp.id,
@@ -237,6 +237,7 @@
                         sp.product_img,
                         sp.product_type_id,
                         sp.product_type,
+                        sp.product_desc,
                         min(sps.price)                                    as price
                  from shop s
                           inner join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
