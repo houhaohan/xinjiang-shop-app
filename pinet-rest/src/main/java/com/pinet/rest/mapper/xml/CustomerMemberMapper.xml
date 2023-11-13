@@ -34,7 +34,8 @@
         from (
                 select sp.id,sp.product_name,sp.product_img,sps.price as marketPrice from shop_product sp
                 left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
-                where sp.del_flag = 0 and sp.shop_prod_status = 1
+                left join shop s on s.id = sp.shop_id and s.del_flag = 0
+                where sp.del_flag = 0 and sp.shop_prod_status = 1 and s.shop_status = 1
                 group by sp.id
         ) p
         left join (
