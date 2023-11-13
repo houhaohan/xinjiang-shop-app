@@ -84,6 +84,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         ShopProduct shopProduct = shopProductService.getById(dto.getShopProdId());
         if(dto.getShareFlag() == 1){
             Long shopId = shopService.getMinDistanceShop(dto.getLat(), dto.getLng());
+            dto.setShopId(shopId);
             boolean exist = verificationProductIsExist(shopId, shopProduct.getProdId(), shopProduct.getProductName());
             if(!exist){
                 throw new PinetException("最近店铺没有该商品，请跳转首页购买其他商品", ApiErrorEnum.ERROR_TO_INDEX.getCode());
