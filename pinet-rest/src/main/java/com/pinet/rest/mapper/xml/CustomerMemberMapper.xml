@@ -26,28 +26,26 @@
         customer_id, member_level,expire_time
     </sql>
     <select id="selectMemberRecommendProd" resultType="com.pinet.rest.entity.vo.MemberRecommendProdVo">
-        SELECT p.id           productId,
+        select p.id           productId,
                p.product_img  productImg,
                p.product_name productName,
                p.marketPrice,
-               sp.salesCount
-        FROM (
-                 SELECT p.id,
-                        product_name,
-                        product_img,
-                        MAX(sp.market_price) marketPrice
-                 FROM product p
-                          LEFT JOIN product_spec sp ON sp.product_id = p.id
-                 GROUP BY p.id
-             ) p
-                 LEFT JOIN (
-            SELECT sp.prod_id,
-                   SUM(op.prod_num) salesCount
-            FROM order_product op
-                     LEFT JOIN shop_product sp ON sp.id = op.shop_prod_id
-            GROUP BY sp.prod_id
-        ) sp ON sp.prod_id = p.id
+               ifnull(sp.salesCount,0) as salesCount
+        from (
+                select sp.id,sp.product_name,sp.product_img,sps.price as marketPrice from shop_product sp
+                left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
+                where sp.del_flag = 0 and sp.shop_prod_status = 1
+                group by sp.id
+        ) p
+        left join (
+             select sp.prod_id,SUM(op.prod_num) salesCount
+             from order_product op
+             left join shop_product sp on sp.id = op.shop_prod_id and sp.del_flag = 0
+             where op.del_flag = 0 and sp.shop_prod_status = 1
+             group by sp.prod_id
+        ) sp on sp.prod_id = p.id
         order by sp.salesCount desc
+
     </select>
     <select id="selectByCustomerId" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select

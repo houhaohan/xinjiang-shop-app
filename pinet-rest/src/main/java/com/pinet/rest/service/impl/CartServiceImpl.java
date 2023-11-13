@@ -1,12 +1,12 @@
 package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.pinet.core.ApiErrorEnum;
 import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
-import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
@@ -25,7 +25,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,16 +77,22 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         return cartListVos;
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public AddCartVo addCart(AddCartDto dto) {
-
-        //校验店铺商品id是否存在
         ShopProduct shopProduct = shopProductService.getById(dto.getShopProdId());
+        if(dto.getShareFlag() == 1){
+            Long shopId = shopService.getMinDistanceShop(dto.getLat(), dto.getLng());
+            boolean exist = verificationProductIsExist(shopId, shopProduct.getProdId(), shopProduct.getProductName());
+            if(!exist){
+                throw new PinetException("最近店铺没有该商品，请跳转首页购买其他商品", ApiErrorEnum.ERROR_TO_INDEX.getCode());
+            }
+        }
+        //校验店铺商品id是否存在
         if (shopProduct == null){
             throw new PinetException("店铺商品不存在");
         }
-
 
         Long customerId = dto.getCustomerId();
         Cart cart = new Cart();
@@ -189,4 +194,18 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
     }
 
+
+    /**
+     * 校验该门店是否有该商品
+     * @param shopId
+     * @param productId
+     * @param productName
+     * @return
+     */
+    private boolean verificationProductIsExist(Long shopId,String productId,String productName){
+        QueryWrapper<ShopProduct> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("shop_id",shopId);
+        queryWrapper.and(i->i.eq("prod_id",productId).or().eq("product_name",productName));
+        return shopProductService.count(queryWrapper) > 0;
+    }
 }
