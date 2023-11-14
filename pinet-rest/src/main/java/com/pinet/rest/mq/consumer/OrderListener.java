@@ -43,6 +43,7 @@ public class OrderListener {
     @JmsListener(destination = QueueConstants.QING_SHI_ORDER_PAY_NAME, containerFactory = "queueListener")
     @Transactional(rollbackFor = Exception.class)
     public void orderConsumer(String message) {
+        log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~订单到期未支付,系统自动取消 ~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         Orders order = ordersService.getById(Long.parseLong(message));
         //如果是待付款  更改状态为已取消
         if (order.getOrderStatus().equals(OrderStatusEnum.NOT_PAY.getCode())) {
