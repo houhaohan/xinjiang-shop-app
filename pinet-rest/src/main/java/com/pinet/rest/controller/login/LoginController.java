@@ -41,7 +41,6 @@ public class LoginController {
     @ApiVersion(1)
     public Result<UserInfo> wxLogin(@Validated @RequestBody WxLoginRequest request){
         try{
-            System.out.println(request.getCode());
             ILoginService loginService = SpringContextUtils.getBean("wxLoginService", ILoginService.class);
             UserInfo userInfo = loginService.login(request);
             return Result.ok(userInfo);
@@ -51,7 +50,7 @@ public class LoginController {
             return Result.error(500,e.getMessage());
         }
         catch (Exception e){
-            log.error("微信登入失败，失败原因=======》{}",e.getMessage());
+            log.error("微信登入失败，失败原因=======》{}",e);
         }
         return Result.error(500,"登入失败");
     }

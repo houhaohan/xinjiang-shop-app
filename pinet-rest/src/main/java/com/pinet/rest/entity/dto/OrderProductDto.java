@@ -17,6 +17,9 @@ public class OrderProductDto {
     @ApiModelProperty("商品ID")
     private String prodId;
 
+    @ApiModelProperty("订单商品ID")
+    private Long orderProductId;
+
     @ApiModelProperty("商品编码")
     private String dishCode;
 
@@ -61,6 +64,8 @@ public class OrderProductDto {
 
     @ApiModelProperty("sku名称")
     private String skuName;
+
+
 
 
 }

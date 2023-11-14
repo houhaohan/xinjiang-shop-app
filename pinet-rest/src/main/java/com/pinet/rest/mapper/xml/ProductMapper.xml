@@ -36,18 +36,20 @@
         <result column="product_name" property="productName"/>
         <result column="product_img" property="productImg"/>
         <result column="marketPrice" property="marketPrice"/>
-        <result column="p_id" property="productId"/>
+        <result column="productId" property="productId"/>
     </resultMap>
     <select id="selectProductList" resultMap="selectProductListResultMap">
-        select p.id                 p_id,
-               p.product_type,
-               p.product_type_id,
-               p.product_name,
-               p.product_img,
-               max(ps.market_price) marketPrice
-        from qingshi.product p
-                 left join qingshi.product_spec ps on ps.product_id = p.id
-        where p.del_flag = 0 GROUP BY p.id
+        select p.id as productId,
+			 p.product_type,
+			 p.product_type_id,
+			 p.product_name,
+			 p.product_img,
+			 max(ps.price) marketPrice
+        from qingshi.shop_product p
+        left join qingshi.shop_product_spec ps on ps.shop_prod_id = p.id and ps.del_flag = 0
+        left join shop s on s.id = p.shop_id and s.del_flag = 0
+        where p.del_flag = 0 and s.shop_status = 1
+        GROUP BY p.id
     </select>
 
 </mapper>

@@ -1,11 +1,14 @@
 package com.pinet.rest.service;
 
+import com.pinet.core.page.PageRequest;
 import com.pinet.rest.entity.CustomerBalanceRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.dto.BalanceRecordListDto;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -42,4 +45,8 @@ public interface ICustomerBalanceRecordService extends IService<CustomerBalanceR
      * @return
      */
     BigDecimal sumMoneyByCustomerIdAndType(Long customerId, BalanceRecordTypeEnum balanceRecordTypeEnum, Date startTime);
+
+    List<CustomerBalanceRecord> getListLimit5(Long customerId);
+
+    List<CustomerBalanceRecord> balanceRecordList(BalanceRecordListDto dto);
 }

@@ -21,4 +21,26 @@ public interface ICustomerBalanceService extends IService<CustomerBalance> {
      */
     boolean addAvailableBalance(Long customerId, BigDecimal availableBalance);
 
+
+    /**
+     * 减少可用余额
+     * @param customerId 用户id
+     * @param availableBalance 减少的可用金额
+     * @return 是否成功
+     */
+    boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance);
+
+
+
+
+    /**
+     * 查询用户的余额表信息
+     * @param customerId
+     * @return
+     */
+    CustomerBalance getByCustomerId(Long customerId);
+
+    boolean addByCustomerId(Long customerId);
+
+
 }

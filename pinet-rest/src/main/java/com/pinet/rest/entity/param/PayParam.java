@@ -12,6 +12,12 @@ import java.math.BigDecimal;
  **/
 @Data
 public class PayParam {
+
+    /**
+     * 订单id
+     */
+    private Long orderId;
+
     /**
      * openId
      */
@@ -37,5 +43,10 @@ public class PayParam {
      * 用于回调的时候
      */
     private Integer payType;
+
+    /**
+     * 支付密码 余额支付的时候使用
+     */
+    private String payPassWord;
 
 }

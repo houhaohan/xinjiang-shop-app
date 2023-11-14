@@ -15,6 +15,7 @@ import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.request.LoginRequest;
 import com.pinet.rest.entity.request.WxLoginRequest;
 import com.pinet.rest.entity.vo.UserInfo;
+import com.pinet.rest.service.ICustomerBalanceService;
 import com.pinet.rest.service.ICustomerCouponService;
 import com.pinet.rest.service.ICustomerService;
 import com.pinet.rest.service.ILoginService;
@@ -38,6 +39,9 @@ public class WxLoginServiceImpl implements ILoginService {
 
     @Resource
     private ICustomerCouponService customerCouponService;
+
+    @Resource
+    private ICustomerBalanceService customerBalanceService;
 
     @Override
     public UserInfo login(LoginRequest loginRequest) throws WxErrorException {
@@ -74,7 +78,8 @@ public class WxLoginServiceImpl implements ILoginService {
                     .lastLoginIp(ip)
                     .lastLoginTime(System.currentTimeMillis())
                     .qsOpenId(sessionInfo.getOpenid())
-                    .nickname(wxLoginRequest.getNickName())
+//                    .nickname(wxLoginRequest.getNickName())
+                    .nickname("微信用户")
                     .avatar("http://image.ypxlbz.com/qingshi/image/8d342da4670d490fb81df2723b97293e.png")
                     .sex(wxLoginRequest.getGender())
                     .phone(phoneNoInfo.getPhoneNumber())
@@ -82,7 +87,10 @@ public class WxLoginServiceImpl implements ILoginService {
                     .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
                     .build();
             customerService.save(customer);
+            //发放新人优惠券
             customerCouponService.grantNewCustomerCoupon(customer.getCustomerId());
+            //添加用户账户表
+            customerBalanceService.addByCustomerId(customer.getCustomerId());
         }
 
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());

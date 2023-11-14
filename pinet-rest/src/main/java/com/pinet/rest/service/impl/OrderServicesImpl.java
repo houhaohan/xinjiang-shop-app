@@ -6,6 +6,7 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -117,6 +118,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Autowired
     private IKryComboGroupDetailService kryComboGroupDetailService;
+
+    @Autowired
+    private IKryOrderCompensateService kryOrderCompensateService;
+
+    @Autowired
+    private IKryOrderPushLogService kryOrderPushLogService;
 
     @Value("${spring.profiles.active}")
     private String active;
@@ -248,8 +255,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //返回预计送达时间
         Date now = new Date();
-        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetHour(now, 1), "HH:mm");
-        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 90), "HH:mm");
+        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetMinute(now, 15), "HH:mm");
+        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 45), "HH:mm");
 
         vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
 
@@ -488,7 +495,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
     public Object orderPay(OrderPayDto dto) {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
 
@@ -500,18 +507,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (orders.getOrderPrice().compareTo(dto.getOrderPrice()) != 0) {
             throw new PinetException("支付金额异常,请重新支付");
         }
-
         //根据不同支付渠道获取调用不同支付方法
         IPayService payService = SpringContextUtils.getBean(dto.getChannelId() + "_" + "service", IPayService.class);
-        //封装PayParam
-        PayParam param = new PayParam();
-        param.setOpenId(dto.getOpenId());
-        param.setOrderNo(orders.getOrderNo().toString());
-        param.setPayPrice(dto.getOrderPrice());
-        param.setPayDesc("轻食订单下单");
-        param.setPayType(1);
-        Object res = payService.pay(param);
-
 
         //构造orderPay
         OrderPay orderPay = new OrderPay();
@@ -527,6 +524,18 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPay.setIp(IPUtils.getIpAddr());
 
         orderPayService.save(orderPay);
+
+        //封装PayParam
+        PayParam param = new PayParam();
+        param.setOpenId(dto.getOpenId());
+        param.setOrderNo(orders.getOrderNo().toString());
+        param.setPayPrice(dto.getOrderPrice());
+        param.setPayDesc("轻食订单下单");
+        param.setPayType(1);
+        param.setPayPassWord(dto.getPayPassword());
+        param.setOrderId(dto.getOrderId());
+        Object res = payService.pay(param);
+
 
         return res;
     }
@@ -576,7 +585,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderRefundService.save(orderRefund);
 
             //调用退款方法
-            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(), orders.getOrderNo().toString(), orderRefund.getRefundNo().toString(), orders.getOrderPrice().toString(), orderRefund.getId());
+            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(),
+                    orders.getOrderNo().toString(),
+                    orderRefund.getRefundNo().toString(),
+                    orders.getOrderPrice().toString(),
+                    orderRefund.getId(),orders.getCustomerId());
             payService.refund(refundParam);
             orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
             return updateById(orders);
@@ -585,7 +598,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
             //推送客如云,订单状态  1外卖  2自提
             if (orders.getOrderType() == 1) {
-
+                //todo 暂未开放
+                //TakeoutOrderCreateVo takeoutOrderCreateVo = takeoutOrderCreate(orders);
             } else {
                 //自提单
                 String kryOrderNo = scanCodePrePlaceOrder(orders);
@@ -685,8 +699,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     .setDiscountAmount(originalPrice.subtract(discountedPrice)).setType(1);
             orderDiscounts.add(orderDiscount);
         }
-
-
         return discountedPrice;
     }
 
@@ -760,7 +772,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
     public boolean syncOrderStatus(OrderSyncDTO dto) {
         //退款
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
@@ -798,7 +810,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 orders.getOrderNo().toString(),
                 orderRefund.getRefundNo().toString(),
                 orders.getOrderPrice().toString(),
-                orderRefund.getId());
+                orderRefund.getId(),orders.getCustomerId());
         payService.refund(refundParam);
         //更新订单状态
         orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
@@ -825,7 +837,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param order
      * @return
      */
-    public TakeoutOrderCreateVo takeoutOrderCreate(Orders order) {
+    public String takeoutOrderCreate(Orders order) {
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
         takeoutOrderCreateDTO.setOutBizNo("" + order.getOrderNo());
@@ -887,8 +899,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequest.setUnitId(orderProduct.getUnitId());
             orderDishRequest.setUnitName(orderProduct.getUnit());
             orderDishRequest.setUnitCode(orderProduct.getUnit());
-
-//            orderDishRequest.setDishAttachPropList(null);//附加项（加料、做法）列表
+            //附加项（加料、做法）列表
+            orderDishRequest.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
 //            orderDishRequest.setDishList(null);
             orderDishRequest.setDishSkuId(orderProduct.getKrySkuId());
             orderDishRequest.setWeightDishFlag(false);
@@ -920,7 +932,22 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         deliveryInfoRequest.setLongitude(new BigDecimal(orderAddress.getLng()));
         takeoutOrderCreateDTO.setDeliveryInfoRequestList(Arrays.asList(deliveryInfoRequest));
         String token = kryApiService.getToken(AuthType.SHOP, order.getKryShopId());
-        return kryApiService.openTakeoutOrderCreate(order.getKryShopId(), token, takeoutOrderCreateDTO);
+        TakeoutOrderCreateVo takeoutOrderCreateVo = kryApiService.openTakeoutOrderCreate(order.getKryShopId(), token, takeoutOrderCreateDTO);
+        //记录日志
+        pushKryOrderLog(order.getId(),JSONObject.toJSONString(takeoutOrderCreateDTO),JSONObject.toJSONString(takeoutOrderCreateVo),takeoutOrderCreateVo.getSuccess());
+
+        if(takeoutOrderCreateVo == null){
+            return null;
+        }
+        if("false".equals(takeoutOrderCreateVo.getSuccess())){
+            //推送失败，重试
+            pushKryOrderMessage(order,takeoutOrderCreateVo.getFormatMsgInfo());
+            return null;
+        }
+        if(takeoutOrderCreateVo.getData() == null ){
+            return null;
+        }
+        return takeoutOrderCreateVo.getData().getOrderNo();
     }
 
     /**
@@ -962,10 +989,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         dcOrderBizRequest.setTakeoutFee(0L);
         dto.setDcOrderBizRequest(dcOrderBizRequest);
 
-        List<OrderProductDto> orderProducts = orderProductService.selectByOrderId(orders.getId());
+        PromoDetailRequest promoDetailRequest = new PromoDetailRequest();
+        promoDetailRequest.setOutPromoDetailId(UUID.randomUUID().toString());
+        promoDetailRequest.setPromoId(UUID.randomUUID().toString());
+        promoDetailRequest.setPromoName("优惠");
+        promoDetailRequest.setPromoFee(BigDecimalUtil.yuan2Fen(orders.getDiscountAmount()));
+        promoDetailRequest.setPromoCategory("ORDER_DIMENSION");
+        promoDetailRequest.setPromoDiscount(null);
+        promoDetailRequest.setPromoType("THIRD_MERCHANT");
+        promoDetailRequest.setPromoDimension("TOATL_CART");
+        dto.setPromoDetailRequestList(Arrays.asList(promoDetailRequest));
 
+        List<OrderProductDto> orderProducts = orderProductService.selectByOrderId(orders.getId());
         List<OrderDishRequest> orderDishRequestList = new ArrayList<>();
-        for(OrderProductDto orderProduct : orderProducts){
+        for(OrderProductDto orderProduct: orderProducts){
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getId()));
             request.setDishId(orderProduct.getProdId());
@@ -982,8 +1019,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
-            request.setPromoFee(0L);//菜品优惠总金额
-            request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            request.setPromoFee(0L);
+            request.setActualFee(request.getTotalFee().intValue() - request.getPromoFee().intValue());
             request.setPackageFee("0");
             request.setDishSkuId(orderProduct.getKrySkuId());
             request.setDishSkuCode(orderProduct.getSkuCode());
@@ -993,6 +1030,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setUnitId(orderProduct.getUnitId());
             request.setUnitName(orderProduct.getUnit());
 
+            //附加项（加料、做法）列表
+            request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
             List<ScanCodeDish> dishList = new ArrayList<>();
             //配料明细 或者 套餐明细
             if("SINGLE".equalsIgnoreCase(orderProduct.getDishType())){
@@ -1026,7 +1065,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dishList.add(dish);
                 }
             }
-
             if(!CollectionUtils.isEmpty(dishList)){
                 request.setDishList(dishList);
             }
@@ -1036,11 +1074,83 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         dto.setOrderDishRequestList(orderDishRequestList);
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
-        if(scanCodePrePlaceOrderVo == null || scanCodePrePlaceOrderVo.getData() == null ){
+        //记录日志
+        pushKryOrderLog(orders.getId(),JSONObject.toJSONString(dto),JSONObject.toJSONString(scanCodePrePlaceOrderVo),scanCodePrePlaceOrderVo.getSuccess());
+
+        if(scanCodePrePlaceOrderVo == null){
+            return null;
+        }
+        if("fail".equals(scanCodePrePlaceOrderVo.getSuccess())){
+            //推送失败，重试
+            pushKryOrderMessage(orders,scanCodePrePlaceOrderVo.getFormatMsgInfo());
+            return null;
+        }
+        if(scanCodePrePlaceOrderVo.getData() == null ){
             return null;
         }
         return scanCodePrePlaceOrderVo.getData().getOrderNo();
     }
 
+    /**
+     * 获取订单商品做法数据
+     * @param orderProdId
+     * @return
+     */
+    private List<DishAttachProp> getDishAttachPropList(Long orderProdId){
+        List<OrderProductSpec> orderProductSpecs = orderProductSpecService.getByOrderProdId(orderProdId);
+        List<DishAttachProp> dishAttachPropList = new ArrayList<>();
+        for(OrderProductSpec spec : orderProductSpecs){
+            if("标准".equals(spec.getProdSpecName()) && "规格".equals(spec.getProdSkuName())){
+                //这个不是做法
+                continue;
+            }
+            String id = String.valueOf(spec.getId());
+            DishAttachProp dishAttachProp = new DishAttachProp();
+            dishAttachProp.setOutAttachPropNo(id);
+            dishAttachProp.setAttachPropType("PRACTICE");
+            dishAttachProp.setAttachPropCode(id);
+            dishAttachProp.setAttachPropName(spec.getProdSpecName());
+            dishAttachProp.setPrice(0L);
+            dishAttachProp.setQuantity(1);
+            dishAttachProp.setTotalFee(0L);
+            dishAttachProp.setPromoFee(0L);
+            dishAttachProp.setActualFee(0L);
+            dishAttachProp.setAttachPropId(id);
+            dishAttachPropList.add(dishAttachProp);
+        }
+        return CollectionUtils.isEmpty(dishAttachPropList) ? null : dishAttachPropList;
+    }
 
+
+    /**
+     * 推送客如云订单的消息
+     * @param orders
+     * @param message 失败原因
+     */
+    private void pushKryOrderMessage(Orders orders,String message){
+        KryOrderCompensate kryOrderCompensate = new KryOrderCompensate();
+        kryOrderCompensate.setKryOrderNo(orders.getKryOrderNo());
+        kryOrderCompensate.setOrderId(orders.getId());
+        kryOrderCompensate.setTimes(0);
+        kryOrderCompensate.setStatus(0);
+        kryOrderCompensate.setPushTime(new Date());
+        kryOrderCompensate.setFailReason(message);
+        kryOrderCompensateService.save(kryOrderCompensate);
+    }
+
+    /**
+     * 客如云订单日志
+     * @param orderId
+     * @param param
+     * @param res
+     */
+    private void pushKryOrderLog(Long orderId,String param,String res,String success){
+        KryOrderPushLog log = new KryOrderPushLog();
+        log.setOrderId(orderId);
+        log.setParams(param);
+        log.setPushTime(new Date());
+        log.setPushRes(res);
+        log.setStatus("fail".equals(success) ? 0 : 1);
+        kryOrderPushLogService.save(log);
+    }
 }

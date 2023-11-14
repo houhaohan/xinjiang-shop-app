@@ -76,6 +76,8 @@ public class ShopProductController extends BaseController {
     public Result<ShopProductListVo> list(@RequestParam(value = "shopId",required = false) Long shopId,
                                           @RequestParam(value = "lat",defaultValue = CommonConstant.DEFAULT_LAT) BigDecimal lat,
                                           @RequestParam(value = "lng",defaultValue = CommonConstant.DEFAULT_LNG) BigDecimal lng){
+      log.info("商品列表参数:shopId={},lat={},lng={}",shopId,lat,lng);
+
         if(shopId == null){
             shopId = shopService.getMinDistanceShop(lat, lng);
             if(shopId == null){

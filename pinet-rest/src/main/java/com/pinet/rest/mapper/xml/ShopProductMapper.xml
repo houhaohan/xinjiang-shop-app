@@ -103,7 +103,8 @@
             sp.product_type_id,
             MIN(price) AS price
             FROM shop_product sp
-            LEFT JOIN shop_product_spec sps ON sps.shop_prod_id = sp.id
+            LEFT JOIN shop_product_spec sps ON sps.shop_prod_id = sp.id and sps.del_flag = 0
+            WHERE sp.shop_id = #{shopId} and sp.shop_prod_status = 1 and sp.del_flag = 0
             GROUP BY sps.sku_id
         ) temp
         LEFT JOIN shop s ON s.id = temp.shop_id
@@ -175,7 +176,7 @@
                                  sp.product_type_id,
                                  ifnull(min(sps.price), 0)       as price
                           from shop_product sp
-                          left join shop_product_spec sps on  sps.shop_prod_id = sp.id
+                          left join shop_product_spec sps on  sps.shop_prod_id = sp.id and sps.del_flag = 0
                           where sp.shop_id = #{shopId}
                             and sp.shop_prod_status = 1
                             and sp.del_flag = 0
@@ -222,7 +223,7 @@
                temp.product_type,
                temp.lng,
                temp.lat,
-               '' as product_desc,
+               temp.product_desc,
                sum(price)        as price
         from (
                  select sp.id,
@@ -236,6 +237,7 @@
                         sp.product_img,
                         sp.product_type_id,
                         sp.product_type,
+                        sp.product_desc,
                         min(sps.price)                                    as price
                  from shop s
                           inner join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0

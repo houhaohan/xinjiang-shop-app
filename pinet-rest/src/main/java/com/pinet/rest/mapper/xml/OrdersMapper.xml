@@ -125,7 +125,7 @@
         c.nickname,
         o.commission
         from orders o
-        left join xjs.customer c on c.customer_id = o.customer_id
+        left join `xinjiang-shop`.customer c on c.customer_id = o.customer_id
         where o.share_id = #{dto.customerId}
         <if test="dto.queryDate != null">
             and o.create_time > #{dto.queryDate} and o.create_time &lt; date_add(#{dto.queryDate},INTERVAL 1 DAY)
@@ -139,7 +139,7 @@
                c.nickname,
                o.commission
         from orders o
-                 left join xjs.customer c on c.customer_id = o.customer_id
+                 left join `xinjiang-shop`.customer c on c.customer_id = o.customer_id
         where o.share_id = #{customerId}
         order by o.create_time desc
         limit 3

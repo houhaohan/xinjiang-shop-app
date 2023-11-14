@@ -6,5 +6,5 @@ import com.pinet.sms.enums.SmsTemplate;
 public interface ISmsService {
 
 
-    SmsSendResponse send(String phone, SmsTemplate smsTemplate);
+    SmsSendResponse send(String phone, SmsTemplate smsTemplate,String redisKey);
 }

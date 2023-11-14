@@ -7,6 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 /**
  * @program: xinjiang-shop-app
@@ -17,7 +18,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @ApiModel(value = "AddCartDto",description = "添加购物车dto")
 public class AddCartDto {
-    @NotNull(message = "店铺id不能为空")
+    //@NotNull(message = "店铺id不能为空")
     @ApiModelProperty(value = "店铺id",name = "shopId")
     private Long shopId;
 
@@ -36,6 +37,16 @@ public class AddCartDto {
 
     @ApiModelProperty(value = "内部参数不需要传",name = "customerId")
     private Long customerId;
+
+    // 分享的商品加购物车需要传经纬度，用来茶最近店铺
+    @ApiModelProperty("纬度")
+    private BigDecimal lat;
+
+    @ApiModelProperty("经度")
+    private BigDecimal lng;
+
+    @ApiModelProperty("是否是他人分享来的商品，0-否，1-是")
+    private Integer shareFlag;
 
 
 }

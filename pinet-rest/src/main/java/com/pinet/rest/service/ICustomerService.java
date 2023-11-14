@@ -2,6 +2,8 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.Customer;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.dto.ForgetPayPasswordDto;
+import com.pinet.rest.entity.dto.SetPayPasswordDto;
 
 /**
 * @author Administrator
@@ -24,4 +26,17 @@ public interface ICustomerService extends IService<Customer> {
      */
     Customer getByPhone(String phone);
 
+    /**
+     * 设置支付密码
+     * @param dto
+     */
+    void setPayPassword(SetPayPasswordDto dto);
+
+    /**
+     * 修改支付密码
+     * @param dto
+     */
+    void updatePayPassword(SetPayPasswordDto dto);
+
+    void forgetPayPassword(ForgetPayPasswordDto dto);
 }

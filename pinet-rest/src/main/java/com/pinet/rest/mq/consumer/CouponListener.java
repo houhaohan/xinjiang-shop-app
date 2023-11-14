@@ -1,15 +1,11 @@
 package com.pinet.rest.mq.consumer;
 
-import com.baomidou.dynamic.datasource.annotation.DSTransactional;
-import com.pinet.rest.entity.CustomerMember;
-import com.pinet.rest.entity.enums.MemberLevelEnum;
+
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.ICustomerCouponService;
-import com.pinet.rest.service.ICustomerMemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
