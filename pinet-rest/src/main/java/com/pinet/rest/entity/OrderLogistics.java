@@ -35,10 +35,10 @@ public class OrderLogistics extends BaseEntity {
     @ApiModelProperty("物流id")
     private String clientId;
 
-    @ApiModelProperty("配送平台")
+    @ApiModelProperty("配送平台,dada-达达配送")
     private String platform;
 
-    @ApiModelProperty("订单状态")
+    @ApiModelProperty("订单状态，待接单＝1,待取货＝2,配送中＝3,已完成＝4,已取消＝5, 已追加待接单=8,妥投异常之物品返回中=9")
     private Integer orderStatus;
 
     @ApiModelProperty("重复回传状态原因(1-重新分配骑士，2-骑士转单)")

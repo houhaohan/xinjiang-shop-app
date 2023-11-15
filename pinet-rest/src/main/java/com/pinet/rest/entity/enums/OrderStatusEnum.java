@@ -13,6 +13,8 @@ public enum OrderStatusEnum {
     NOT_PAY(10,"待付款"),
     PAY_COMPLETE(20,"已支付(已下单)"),
     MAKE(30,"制作中"),
+    ORDER_TAKE(31,"骑士已接单"),
+    TO_SHOP(32,"骑士已到店"),
     SEND_OUT(40,"配送中"),
     DELIVERY(50,"已送达"),
     REFUND(90,"已退款"),

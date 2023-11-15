@@ -594,17 +594,18 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
             return updateById(orders);
         } else {
-            //更新总订单状态
-            orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
             //推送客如云,订单状态  1外卖  2自提
             if (orders.getOrderType() == 1) {
                 //todo 暂未开放
-                //TakeoutOrderCreateVo takeoutOrderCreateVo = takeoutOrderCreate(orders);
+                orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
+                String kryOrderNo = takeoutOrderCreate(orders);
+                //创建配送订单
+
             } else {
                 //自提单
                 String kryOrderNo = scanCodePrePlaceOrder(orders);
                 orders.setKryOrderNo(kryOrderNo);
-
+                orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
                 //判断订单是否有佣金 如果有佣金 && 订单状态是已完成 设置佣金三天后到账
                 if(orders.getCommission().compareTo(BigDecimal.ZERO) > 0){
                     jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), 15 * 60 * 1000L);

@@ -40,7 +40,7 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("订单状态  1外卖  2自提")
     private Integer orderType;
 
-    @ApiModelProperty("订单状态 10待付款   20已支付（已下单）  30商家制作中   40商品配送中   50商品已送达   90订单已退款     99订单取消   100订单完成")
+    @ApiModelProperty("订单状态 10待付款   20已支付（已下单）  30商家制作中 31-骑士已接单 32-骑士已到店 40商品配送中   50商品已送达   90订单已退款     99订单取消   100订单完成")
     private Integer orderStatus;
 
     @ApiModelProperty("下单用户id")

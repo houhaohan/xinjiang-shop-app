@@ -12,7 +12,11 @@ import com.imdada.open.platform.client.order.ReAddOrderClient;
 import com.imdada.open.platform.config.Configuration;
 import com.imdada.open.platform.exception.RpcException;
 import com.pinet.PinetApplication;
+import com.pinet.rest.entity.Orders;
+import com.pinet.rest.service.IDaDaService;
+import com.pinet.rest.service.IOrdersService;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Collections;
@@ -22,6 +26,11 @@ import static net.sf.jsqlparser.parser.feature.Feature.execute;
 
 @SpringBootTest(classes = PinetApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class DaDaTest {
+    @Autowired
+    private IDaDaService daDaService;
+
+    @Autowired
+    private IOrdersService ordersService;
 
 
     public static void main(String[] args) throws RpcException {
@@ -91,7 +100,7 @@ public class DaDaTest {
     }
 
     private static void queryOrder() throws RpcException {
-        Object resp = QueryOrderStatusClient.execute("2131312313");
+        Object resp = QueryOrderStatusClient.execute("1700068263319629824");
         System.out.println(JSON.toJSONString(resp));
     }
 
@@ -139,5 +148,9 @@ public class DaDaTest {
     @Test
     public void test() throws RpcException {
         queryOrder();
+
+//        Orders orders = ordersService.getById(948);
+//        daDaService.createOrder(orders);
+        //{"deliverFee":124.0,"distance":199002.0,"fee":124.0,"insuranceFee":0.0,"tips":0.0}
     }
 }
