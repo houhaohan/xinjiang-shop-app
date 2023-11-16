@@ -46,7 +46,7 @@ public class AddCartDto {
     private BigDecimal lng;
 
     @ApiModelProperty("是否是他人分享来的商品，0-否，1-是")
-    private Integer shareFlag;
+    private Integer shareFlag = 0;
 
 
 }
