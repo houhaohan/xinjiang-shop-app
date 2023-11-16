@@ -235,7 +235,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         //设置订单原价 和 商品原价
-        vo.setOriginalPrice(orderProdPrice.add(shippingFee));
+        vo.setOriginalPrice(orderProdPrice.add(shippingFee).add(packageFee));
         vo.setOriginalOrderProductPrice(orderProdPrice);
         //优惠信息初始化
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
