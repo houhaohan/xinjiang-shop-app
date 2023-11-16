@@ -54,10 +54,7 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -552,7 +549,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
     public Boolean orderPayNotify(OrderPayNotifyParam param) {
         LambdaQueryWrapper<Orders> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Orders::getOrderNo, param.getOrderNo()).eq(BaseEntity::getDelFlag, 0);
@@ -871,6 +868,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @return
      */
     public String takeoutOrderCreate(Orders order) {
+        if (!Objects.equals(active, "prod")){
+            return "";
+        }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
         takeoutOrderCreateDTO.setOutBizNo("" + order.getOrderNo());
