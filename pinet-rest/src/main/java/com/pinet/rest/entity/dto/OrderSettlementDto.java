@@ -45,5 +45,8 @@ public class OrderSettlementDto {
     @ApiModelProperty("使用的优惠券id")
     private Long customerCouponId;
 
+    @ApiModelProperty(value = "收货地址id(外卖订单必传)",name = "customerAddressId")
+    private Long customerAddressId;
+
 
 }

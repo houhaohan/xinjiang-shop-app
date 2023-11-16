@@ -19,9 +19,6 @@ import java.math.BigDecimal;
 @Data
 @ApiModel(value = "CreateOrderDto",description = "创建订单dto")
 public class CreateOrderDto extends OrderSettlementDto{
-    @ApiModelProperty(value = "收货地址id(外卖订单必传)",name = "customerAddressId")
-    private Long customerAddressId;
-
     /**
      * 该参数不做具体逻辑处理  只用来对比结算和创建订单金额是否相同
      */

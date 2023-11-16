@@ -79,14 +79,14 @@ public class OrdersController extends BaseController {
     @ApiVersion(1)
     public Result<CreateOrderVo> createOrder(@Validated @RequestBody CreateOrderDto dto) {
         checkParam(dto);
-        if (dto.getOrderType() == 1 && dto.getCustomerAddressId() == null){
-            throw new PinetException("外卖订单收货地址id必传");
-        }
         CreateOrderVo vo = ordersService.createOrder(dto);
         return Result.ok(vo);
     }
 
     private void checkParam(OrderSettlementDto dto){
+        if (dto.getOrderType() == 1 && dto.getCustomerAddressId() == null){
+            throw new PinetException("外卖订单收货地址id必传");
+        }
         //如果是直接购买  店铺商品id 和商品数量为必传
         if (dto.getSettlementType() == 2 && (dto.getShopProdId() == null || dto.getProdNum() == null || StringUtil.isBlank(dto.getShopProdSpecIds()))) {
             throw new PinetException("直接购买必传店铺商品id || 商品数量 || 商品样式id");

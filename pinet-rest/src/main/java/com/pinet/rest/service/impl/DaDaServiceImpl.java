@@ -16,11 +16,13 @@ import com.pinet.rest.entity.OrderLogistics;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
+import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -28,8 +30,8 @@ import java.util.List;
 
 @Service
 public class DaDaServiceImpl implements IDaDaService {
-    @Autowired
-    private IOrdersService ordersService;
+    @Resource
+    private OrdersMapper ordersMapper;
 
     @Autowired
     private IOrderLogisticsService orderLogisticsService;
@@ -50,7 +52,7 @@ public class DaDaServiceImpl implements IDaDaService {
     @Transactional(rollbackFor = Exception.class)
     public void syncOrderStatus(CallbackParam callbackParam) throws RpcException {
         //订单状态 10待付款   20已支付（已下单）  30商家制作中   40商品配送中   50商品已送达   90订单已退款     99订单取消   100订单完成
-        Orders orders = ordersService.getById(callbackParam.getOrderId());
+        Orders orders = ordersMapper.selectById(callbackParam.getOrderId());
         OrderLogistics orderLogistics = orderLogisticsService.getByOrderId(Long.valueOf(callbackParam.getOrderId()));
         if(DaDaCallbackStatusEnum.WAIT_ACCEPT.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             orderLogistics = new OrderLogistics();
@@ -92,7 +94,7 @@ public class DaDaServiceImpl implements IDaDaService {
             orderLogistics.setOrderStatus(callbackParam.getOrderStatus());
             orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
         }
-        ordersService.updateById(orders);
+        ordersMapper.updateById(orders);
     }
 
     @Override
