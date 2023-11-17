@@ -145,9 +145,7 @@ public class OrdersController extends BaseController {
     @ApiVersion(1)
     @NotTokenSign
     public KryResponse syncOrderStatus(@RequestParam(required = false) String validate,@RequestBody OrderSyncDTO dto){
-        System.out.println("订单状态同步");
-        System.out.println("validate==="+validate);
-        System.out.println(JSONObject.toJSONString(dto));
+        log.info("订单状态同步参数===========>{}",JSONObject.toJSONString(dto));
 
         OrderBodyDTO orderBody = dto.getOrderBody();
         if(orderBody != null){
@@ -183,8 +181,7 @@ public class OrdersController extends BaseController {
     @ApiVersion(1)
     @NotTokenSign
     public KryResponse orderChangeEvent(@RequestParam(required = false) String validate, @RequestBody OrderChangeEventDTO dto){
-        System.out.println("订单变更事件同步");
-        System.out.println(JSONObject.toJSONString(dto));
+        log.info("订单变更事件同步===============》{}",JSONObject.toJSONString(dto));
 
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
@@ -220,8 +217,7 @@ public class OrdersController extends BaseController {
     @ApiVersion(1)
     @NotTokenSign
     public KryResponse performanceCall(@RequestParam(required = false) String validate, @RequestBody PerformanceCallDTO dto){
-        System.out.println("履约叫号触达");
-        System.out.println(JSONObject.toJSONString(dto));
+        log.info("履约叫号触达参数===============>{}",JSONObject.toJSONString(dto));
 
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
@@ -233,4 +229,5 @@ public class OrdersController extends BaseController {
         response.setCode(-1);
         return response;
     }
+
 }

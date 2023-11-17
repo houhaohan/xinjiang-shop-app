@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,12 +45,13 @@ public class DaDaCallbackController {
     }
 
 
-    @RequestMapping(value = "/orderStatus/callback")
+    @RequestMapping(value = "/deliverFee/callback")
     @NotTokenSign
-    public JSONObject orderStatusCallback(@RequestBody CallbackParam param){
+    public JSONObject deliverFeeCallback(@RequestBody CallbackParam param){
         try{
-           //{"order_status":1,"cancel_reason":"","update_time":1694158211,"cancel_from":0,"signature":"d0c956211692ea68d11daf0d81bfdec0","dm_id":0,"is_finish_code":false,"order_id":"2131312311","client_id":"1526014050948743168"}
-            daDaService.syncOrderStatus(param);
+            //运费查询回调接口
+            log.info("运费查询回调接口，参数======》{}",JSON.toJSONString(param));
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -66,7 +68,7 @@ public class DaDaCallbackController {
      * @return
      */
     @ApiOperation("达达运费查询")
-    @RequestMapping(value = "/queryDeliverFee")
+    @PostMapping(value = "/queryDeliverFee")
     public Result<AddOrderResp> queryDeliverFee(@RequestBody AddOrderReq req){
         try{
             AddOrderResp resp = daDaService.queryDeliverFee(req);

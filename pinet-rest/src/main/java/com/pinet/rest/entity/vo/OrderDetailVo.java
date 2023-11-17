@@ -25,6 +25,7 @@ public class OrderDetailVo {
     private Long orderId;
 
     @ApiModelProperty(value = "订单号",name = "orderNo")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long orderNo;
 
     @ApiModelProperty(value = "客如云订单号",name = "kryOrderNo")

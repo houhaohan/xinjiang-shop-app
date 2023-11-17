@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2022-12-29
  */
 @RestController
-@RequestMapping("/default-address")
+@RequestMapping("/defaultAddress")
 public class DefaultAddressController extends BaseController {
 
 }

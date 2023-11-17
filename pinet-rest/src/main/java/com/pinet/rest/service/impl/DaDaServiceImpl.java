@@ -4,21 +4,23 @@ import com.alibaba.fastjson.JSONObject;
 import com.imdada.open.platform.callback.internal.CallbackParam;
 import com.imdada.open.platform.callback.internal.DaDaCallbackStatusEnum;
 import com.imdada.open.platform.client.internal.req.order.AddOrderReq;
+import com.imdada.open.platform.client.internal.req.order.CancelOrderReq;
 import com.imdada.open.platform.client.internal.req.order.internal.ProductDetail;
 import com.imdada.open.platform.client.internal.resp.order.AddOrderResp;
+import com.imdada.open.platform.client.internal.resp.order.CancelOrderResp;
 import com.imdada.open.platform.client.order.AddOrderClient;
+import com.imdada.open.platform.client.order.CancelOrderClient;
 import com.imdada.open.platform.client.order.QueryDeliverFeeAndAddOrderClient;
 import com.imdada.open.platform.client.order.ReAddOrderClient;
 import com.imdada.open.platform.config.Configuration;
 import com.imdada.open.platform.exception.RpcException;
-import com.pinet.rest.entity.OrderAddress;
-import com.pinet.rest.entity.OrderLogistics;
-import com.pinet.rest.entity.OrderProduct;
-import com.pinet.rest.entity.Orders;
+import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +31,9 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Slf4j
 public class DaDaServiceImpl implements IDaDaService {
+
     @Resource
     private OrdersMapper ordersMapper;
 
@@ -42,6 +46,12 @@ public class DaDaServiceImpl implements IDaDaService {
     @Autowired
     private IOrderAddressService orderAddressService;
 
+    @Autowired
+    private IShopService shopService;
+
+    @Value("${spring.profiles.active}")
+    private String active;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void callback(CallbackParam callbackParam) throws RpcException {
@@ -51,8 +61,10 @@ public class DaDaServiceImpl implements IDaDaService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void syncOrderStatus(CallbackParam callbackParam) throws RpcException {
-        //订单状态 10待付款   20已支付（已下单）  30商家制作中   40商品配送中   50商品已送达   90订单已退款     99订单取消   100订单完成
-        Orders orders = ordersMapper.selectById(callbackParam.getOrderId());
+        if(!"prod".equals(active)){
+            return;
+        }
+        Orders orders = ordersMapper.selectByOrderNo(Long.valueOf(callbackParam.getOrderId()));
         OrderLogistics orderLogistics = orderLogisticsService.getByOrderId(Long.valueOf(callbackParam.getOrderId()));
         if(DaDaCallbackStatusEnum.WAIT_ACCEPT.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             orderLogistics = new OrderLogistics();
@@ -61,6 +73,10 @@ public class DaDaServiceImpl implements IDaDaService {
             orderLogistics.setClientId(callbackParam.getClientId());
             orderLogistics.setOrderStatus(callbackParam.getOrderStatus());
             orderLogistics.setPlatform("dada");
+            orderLogistics.setSignature(callbackParam.getSignature());
+            orderLogistics.setDistance(orders.getOrderDistance().doubleValue());
+            orderLogistics.setFee(0d);
+            orderLogistics.setDeliverFee(0d);
             orderLogisticsService.save(orderLogistics);
         }else if(DaDaCallbackStatusEnum.WAIT_PICK.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             //已接单-待取货
@@ -78,20 +94,28 @@ public class DaDaServiceImpl implements IDaDaService {
         }else if(DaDaCallbackStatusEnum.ARRIVE_SHOP.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             //已到店-待取货
             orderLogistics.setOrderStatus(callbackParam.getOrderStatus());
+            orderLogisticsService.updateById(orderLogistics);
 
             orders.setOrderStatus(OrderStatusEnum.TO_SHOP.getCode());
         }else if(DaDaCallbackStatusEnum.DELIVERING.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             orderLogistics.setOrderStatus(callbackParam.getOrderStatus());
             orderLogistics.setFetchTime(new Date());
+            orderLogisticsService.updateById(orderLogistics);
+
             orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
         }else if(DaDaCallbackStatusEnum.HAD_CANCEL.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             orderLogistics.setCancelFrom(callbackParam.getCancelFrom());
             orderLogistics.setCancelReason(callbackParam.getCancelReason());
             orderLogistics.setCancelTime(new Date());
+            orderLogisticsService.updateById(orderLogistics);
+
             //重新发单
             reAddOrder(orders);
         }else if(DaDaCallbackStatusEnum.HAD_COMPLETE.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             orderLogistics.setOrderStatus(callbackParam.getOrderStatus());
+            orderLogistics.setFinishTime(new Date());
+            orderLogisticsService.updateById(orderLogistics);
+
             orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
         }
         ordersMapper.updateById(orders);
@@ -99,25 +123,55 @@ public class DaDaServiceImpl implements IDaDaService {
 
     @Override
     public AddOrderResp createOrder(Orders orders) throws RpcException {
-        //{"deliverFee":13.0,"distance":1097.0,"fee":13.0,"insuranceFee":0.0,"tips":1.0}
+        if(!"prod".equals(active)){
+            return null;
+        }
         AddOrderReq req = addOrderReq(orders);
         AddOrderResp resp = AddOrderClient.execute(req);
-        System.err.println(JSONObject.toJSONString(resp));
+        log.info("达达创建订单响应参数=====》{}",JSONObject.toJSONString(resp));
         return resp;
     }
 
     @Override
     public AddOrderResp reAddOrder(Orders orders) throws RpcException {
-        //{"deliverFee":13.0,"distance":1097.0,"fee":13.0,"insuranceFee":0.0,"tips":1.0}
+        if(!"prod".equals(active)){
+            return null;
+        }
         AddOrderReq req = addOrderReq(orders);
         AddOrderResp resp = ReAddOrderClient.execute(req);
-        System.out.println(JSONObject.toJSONString(resp));
+        log.info("达达重发订单响应参数=====》{}",JSONObject.toJSONString(resp));
         return resp;
     }
 
     @Override
     public AddOrderResp queryDeliverFee(AddOrderReq req) throws RpcException {
+        if(!"prod".equals(active)){
+            return null;
+        }
         return QueryDeliverFeeAndAddOrderClient.execute(req);
+    }
+
+    @Override
+    public void cancelOrder(Long orderNo) throws RpcException {
+        if(!"prod".equals(active)){
+            return;
+        }
+        CancelOrderReq req = CancelOrderReq.builder()
+                .cancelReasonId(10000)
+                .cancelReason("其他")
+                .orderId(String.valueOf(orderNo))
+                .build();
+        CancelOrderResp resp = CancelOrderClient.execute(req);
+
+        OrderLogistics orderLogistics = orderLogisticsService.getByOrderId(orderNo);
+        if(orderLogistics == null){
+            return;
+        }
+        orderLogistics.setCancelReason("其他");
+        orderLogistics.setCancelFrom(2);
+        orderLogistics.setCancelTime(new Date());
+        orderLogistics.setDeductFee(resp.getDeductFee());
+        orderLogisticsService.updateById(orderLogistics);
     }
 
     private AddOrderReq addOrderReq(Orders orders){
@@ -136,9 +190,8 @@ public class DaDaServiceImpl implements IDaDaService {
         int sum = orderProducts.stream().mapToInt(OrderProduct::getProdNum).sum();
         OrderAddress orderAddress = orderAddressService.getOrderAddress(orders.getId());
         return AddOrderReq.builder()
-                .shopNo("f1b801be8af3483a")//677075-8531106
+                .shopNo(getDeliveryShopNo(orders.getShopId()))
                 .originId(String.valueOf(orders.getOrderNo()))
-                //.cityCode("021")
                 .cargoPrice(orders.getOrderPrice().doubleValue())
                 .cargoNum(sum)
                 .tips(0D)
@@ -158,5 +211,15 @@ public class DaDaServiceImpl implements IDaDaService {
                 .pickUpPos(null)
                 .productList(productDetails)
                 .build();
+    }
+
+    /**
+     * 获取达达的店铺编码
+     * @param shopId
+     * @return
+     */
+    private String getDeliveryShopNo(Long shopId){
+        Shop shop = shopService.getById(shopId);
+        return shop.getDeliveryShopNo();
     }
 }

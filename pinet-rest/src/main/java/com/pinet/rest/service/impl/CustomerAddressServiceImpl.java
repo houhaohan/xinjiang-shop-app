@@ -112,7 +112,8 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
     private boolean equals(CustomerAddressDto customerAddressDto,CustomerAddress customerAddress){
         return customerAddressDto.getProvince().equals(customerAddress.getProvince())
                 && customerAddressDto.getCity().equals(customerAddress.getCity())
-                && customerAddressDto.getDistrict().equals(customerAddress.getDistrict());
+                && customerAddressDto.getDistrict().equals(customerAddress.getDistrict())
+                && customerAddressDto.getAddressName().equals(customerAddress.getAddressName());
     }
 
 }

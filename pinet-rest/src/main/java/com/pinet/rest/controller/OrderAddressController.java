@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2022-12-06
  */
 @RestController
-@RequestMapping("/order-address")
+@RequestMapping("/orderAddress")
 public class OrderAddressController extends BaseController {
 
 }

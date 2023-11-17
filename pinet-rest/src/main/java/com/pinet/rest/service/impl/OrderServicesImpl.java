@@ -16,7 +16,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.imdada.open.platform.client.internal.req.order.AddOrderReq;
+import com.imdada.open.platform.client.internal.req.order.CancelOrderReq;
 import com.imdada.open.platform.client.internal.resp.order.AddOrderResp;
+import com.imdada.open.platform.client.internal.resp.order.CancelOrderResp;
+import com.imdada.open.platform.client.order.CancelOrderClient;
 import com.imdada.open.platform.exception.RpcException;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.DB;
@@ -45,6 +48,7 @@ import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -238,7 +242,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(), orderProdPrice);
+        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(), orderProdPrice,shop.getDeliveryShopNo());
         vo.setShippingFee(shippingFee);
 
         //设置订单原价 和 商品原价
@@ -346,7 +350,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(),orderProdOriginalPrice);
+        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(),orderProdOriginalPrice,shop.getDeliveryShopNo());
 
 
         //店帮主商品折后价
@@ -408,7 +412,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
         //将订单放到mq中
-        jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_PAY_NAME, order.getId().toString(), (long) (15 * 60 * 1000));
+        jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_PAY_NAME, order.getId().toString(), 15 * 60 * 1000L);
 
         CreateOrderVo createOrderVo = new CreateOrderVo();
         createOrderVo.setOrderId(order.getId());
@@ -543,8 +547,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         param.setPayPassWord(dto.getPayPassword());
         param.setOrderId(dto.getOrderId());
         Object res = payService.pay(param);
-
-
         return res;
     }
 
@@ -607,8 +609,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 //todo 暂未开放
                 orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
                 String kryOrderNo = takeoutOrderCreate(orders);
+                orders.setKryOrderNo(kryOrderNo);
+                orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
                 //创建配送订单
-
+                try {
+                    daDaService.createOrder(orders);
+                } catch (RpcException e) {
+                    throw new PinetException("外卖订单创建异常，请联系商家处理");
+                }
             } else {
                 //自提单
                 String kryOrderNo = scanCodePrePlaceOrder(orders);
@@ -762,9 +770,17 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param orderType 订单类型( 1外卖  2自提)
      * @return BigDecimal
      */
-    private BigDecimal getShippingFee(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice) {
+    private BigDecimal getShippingFee(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice,String deliveryShopNo) {
         if (orderType == 2) {
             return new BigDecimal("0");
+        }
+        //测试环境默认4元吧
+        if(!"prod".equals(active)){
+            return new BigDecimal("4");
+        }
+        if(StringUtil.isBlank(deliveryShopNo)){
+            //todo 商家没有对接外卖平台，自配送
+            return new BigDecimal("5");
         }
 
         //查询收货地址
@@ -775,11 +791,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         Snowflake snowflake = IdUtil.getSnowflake();
 
-        AddOrderReq addOrderReq = AddOrderReq.builder().shopNo("f1b801be8af3483a").originId(snowflake.nextIdStr())
-                .cargoPrice(orderProdPrice.doubleValue()).prepay(0).receiverName(customerAddress.getName())
-                .receiverAddress(customerAddress.getAddress()).receiverPhone(customerAddress.getPhone())
-                .callback("http://testxingjianghouse.ypxlbz.com/house/qingshi/api/dada/callback")
-                .cargoWeight(0.5).receiverLat(customerAddress.getLat().doubleValue()).receiverLng(customerAddress.getLng().doubleValue()).build();
+        AddOrderReq addOrderReq = AddOrderReq.builder()
+                .shopNo(deliveryShopNo)
+                .originId(snowflake.nextIdStr())
+                .cargoPrice(orderProdPrice.doubleValue())
+                .prepay(0)
+                .receiverName(customerAddress.getName())
+                .receiverAddress(customerAddress.getAddress())
+                .receiverPhone(customerAddress.getPhone())
+                .callback("http://xinjiangapi.ypxlbz.com/house/qingshi/api/dada/deliverFee/callback")
+                .cargoWeight(0.5)
+                .receiverLat(customerAddress.getLat().doubleValue())
+                .receiverLng(customerAddress.getLng().doubleValue())
+                .build();
 
         try {
             AddOrderResp addOrderResp =  daDaService.queryDeliverFee(addOrderReq);
@@ -800,6 +824,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
     }
 
+    @SneakyThrows
     @Override
     @DSTransactional
     public boolean syncOrderStatus(OrderSyncDTO dto) {
@@ -843,7 +868,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         payService.refund(refundParam);
         //更新订单状态
         orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
-        return updateById(orders);
+        updateById(orders);
+
+
+        //取消配送
+        if(orders.getOrderType() == 1){
+            daDaService.cancelOrder(orders.getOrderNo());
+        }
+        return true;
     }
 
     @Override

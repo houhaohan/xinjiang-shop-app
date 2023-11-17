@@ -29,6 +29,7 @@
         <result column="fetch_time" property="fetchTime" />
         <result column="finish_time" property="finishTime" />
         <result column="cancel_time" property="cancelTime" />
+        <result column="deduct_fee" property="deductFee" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -39,7 +40,7 @@
         update_by,
         update_time,
         del_flag,
-        order_id, client_id, platform, order_status, repeat_reason_type, cancel_reason, cancel_from, signature, dm_id, dm_name, dm_mobile, finish_code, distance, fee, deliver_fee, accept_time, fetch_time, finish_time, cancel_time
+        order_id, client_id, platform, order_status, repeat_reason_type, cancel_reason, cancel_from, signature, dm_id, dm_name, dm_mobile, finish_code, distance, fee, deliver_fee, accept_time, fetch_time, finish_time, cancel_time,deduct_fee
     </sql>
 
 </mapper>

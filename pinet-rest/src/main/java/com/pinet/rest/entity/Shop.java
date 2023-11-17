@@ -83,6 +83,9 @@ public class Shop extends BaseEntity {
     @ApiModelProperty("客如云店铺ID")
     private Long kryShopId;
 
+    @ApiModelProperty("配送平台 店铺编码")
+    private String deliveryShopNo;
+
     @ApiModelProperty("距离")
     @TableField(exist = false)
     private Double distance;

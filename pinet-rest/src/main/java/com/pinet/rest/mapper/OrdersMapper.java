@@ -35,4 +35,6 @@ public interface OrdersMapper extends BaseMapper<Orders> {
     List<RecommendTimeBo> selectRecommendIndexList(@Param("customerId") Long customerId);
 
     List<PickUpListVo> selectPickUpList(@Param("customerId") Long customerId);
+
+    Orders selectByOrderNo(@Param("orderNo") Long orderNo);
 }

@@ -94,5 +94,8 @@ public class OrderLogistics extends BaseEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date cancelTime;
 
+    @ApiModelProperty("违约金")
+    private Double deductFee;
+
 
 }

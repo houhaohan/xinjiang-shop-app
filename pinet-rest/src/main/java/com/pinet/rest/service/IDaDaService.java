@@ -38,5 +38,11 @@ public interface IDaDaService {
      */
     AddOrderResp queryDeliverFee(AddOrderReq req) throws RpcException;
 
+    /**
+     * 取消达达骑手订单
+     * @param orderNo
+     */
+    void cancelOrder(Long orderNo) throws RpcException;
+
 
 }

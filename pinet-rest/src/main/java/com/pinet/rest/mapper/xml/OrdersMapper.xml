@@ -151,4 +151,8 @@
           and order_status in (30, 40)
         order by create_time desc
     </select>
+
+    <select id="selectByOrderNo" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from orders where order_no = #{orderNo}
+    </select>
 </mapper>

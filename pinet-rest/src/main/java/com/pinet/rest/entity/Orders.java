@@ -1,10 +1,9 @@
 package com.pinet.rest.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.core.entity.BaseEntity;
-import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import io.swagger.annotations.ApiModel;
@@ -29,6 +28,7 @@ public class Orders extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("订单编号")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long orderNo;
 
     @ApiModelProperty("客如云订单编号")
