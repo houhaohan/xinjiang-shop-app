@@ -109,9 +109,9 @@ public class DaDaServiceImpl implements IDaDaService {
             orderLogistics.setCancelReason(callbackParam.getCancelReason());
             orderLogistics.setCancelTime(new Date());
             orderLogisticsService.updateById(orderLogistics);
-
+            orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
             //重新发单
-            reAddOrder(orders);
+            //reAddOrder(orders);
         }else if(DaDaCallbackStatusEnum.HAD_COMPLETE.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             orderLogistics.setOrderStatus(callbackParam.getOrderStatus());
             orderLogistics.setFinishTime(new Date());
