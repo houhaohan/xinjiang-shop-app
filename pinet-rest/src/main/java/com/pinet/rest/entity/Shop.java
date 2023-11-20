@@ -80,6 +80,13 @@ public class Shop extends BaseEntity {
     @JsonFormat(pattern = "HH:mm",timezone = "GMT+8")
     private Date finishTime;
 
+    @ApiModelProperty("是否自配送 0-否，1-是")
+    private Integer selfDelivery;
+
+    @ApiModelProperty("是否支持外卖  0-否，1-是")
+    @TableField("is_support_delivery")
+    private Integer supportDelivery;
+
     @ApiModelProperty("客如云店铺ID")
     private Long kryShopId;
 

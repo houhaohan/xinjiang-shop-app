@@ -2,8 +2,6 @@ package com.pinet.rest.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.keruyun.openapi.dto.OrderSyncDTO;
-import com.pinet.keruyun.openapi.vo.KryResponse;
-import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.dto.*;

@@ -26,6 +26,8 @@
         <result column="shop_status" property="shopStatus" />
         <result column="work_time" property="workTime" />
         <result column="finish_time" property="finishTime" />
+        <result column="self_delivery" property="selfDelivery" />
+        <result column="is_support_delivery" property="supportDelivery" />
         <result column="kry_shop_id" property="kryShopId" />
         <result column="delivery_shop_no" property="deliveryShopNo" />
     </resultMap>
@@ -38,7 +40,7 @@
         update_by,
         update_time,
         del_flag,
-        shop_name, avatar, province, city, district, province_id, city_id, district_id, address, lng, lat, linkman, shop_phone, shop_status,work_time,finish_time, kry_shop_id, delivery_shop_no
+        shop_name, avatar, province, city, district, province_id, city_id, district_id, address, lng, lat, linkman, shop_phone, shop_status,work_time,finish_time, self_delivery, is_support_delivery, kry_shop_id, delivery_shop_no
     </sql>
 
     <select id="getMinDistanceShop" resultType="Long">

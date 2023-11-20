@@ -14,6 +14,7 @@ import com.imdada.open.platform.client.order.QueryDeliverFeeAndAddOrderClient;
 import com.imdada.open.platform.client.order.ReAddOrderClient;
 import com.imdada.open.platform.config.Configuration;
 import com.imdada.open.platform.exception.RpcException;
+import com.pinet.core.exception.PinetException;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.mapper.OrdersMapper;
@@ -126,6 +127,13 @@ public class DaDaServiceImpl implements IDaDaService {
         if(!"prod".equals(active)){
             return null;
         }
+        Shop shop = shopService.getById(orders.getShopId());
+        if(shop.getSupportDelivery() == 0){
+            throw new PinetException("该门店暂不支持外卖订单");
+        }
+        if(shop.getSelfDelivery() == 1){
+            throw new PinetException("该商家自配送外卖订单");
+        }
         AddOrderReq req = addOrderReq(orders);
         AddOrderResp resp = AddOrderClient.execute(req);
         log.info("达达创建订单响应参数=====》{}",JSONObject.toJSONString(resp));
@@ -146,9 +154,9 @@ public class DaDaServiceImpl implements IDaDaService {
     @Override
     public AddOrderResp queryDeliverFee(AddOrderReq req) throws RpcException {
         if(!"prod".equals(active)){
-            return null;
+            return new AddOrderResp();
         }
-        return QueryDeliverFeeAndAddOrderClient.execute(req);
+        return QueryDeliverFeeAndAddOrderClient.queryDeliverFee(req);
     }
 
     @Override
