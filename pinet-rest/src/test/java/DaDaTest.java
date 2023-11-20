@@ -37,10 +37,10 @@ public class DaDaTest {
         //{"order_status":1,"cancel_reason":"","update_time":1694158211,"cancel_from":0,"signature":"d0c956211692ea68d11daf0d81bfdec0","dm_id":0,"is_finish_code":false,"order_id":"2131312311","client_id":"1526014050948743168"}
 //        createOrder();
 //        reAddOrder();
-//        cancelOrder();
+        cancelOrder();
 //        queryOrder();
 
-        queryDeliverFee();
+//        queryDeliverFee();
     }
 
     /**
@@ -90,7 +90,7 @@ public class DaDaTest {
      */
     private static void cancelOrder() throws RpcException {
         CancelOrderReq build = CancelOrderReq.builder()
-                .orderId("2131312313")
+                .orderId("1726495467536502784")
                 .cancelReasonId(4)
                 .cancelReason("顾客取消订单")
                 .build();
