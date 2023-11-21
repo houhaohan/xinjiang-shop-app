@@ -907,12 +907,22 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
-        takeoutOrderCreateDTO.setOutBizNo("" + order.getOrderNo());
         takeoutOrderCreateDTO.setRemark(order.getRemark());
         takeoutOrderCreateDTO.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         takeoutOrderCreateDTO.setPromoFee(BigDecimalUtil.yuanToFen(order.getDiscountAmount()));//优惠
         takeoutOrderCreateDTO.setActualFee(BigDecimalUtil.yuan2Fen(order.getOrderPrice()));//应付
         takeoutOrderCreateDTO.setTotalFee(BigDecimalUtil.yuanToFen(BigDecimalUtil.sum(order.getOrderPrice(), order.getDiscountAmount())));
+
+        PromoDetailRequest promoDetailRequest = new PromoDetailRequest();
+        promoDetailRequest.setOutPromoDetailId(UUID.randomUUID().toString());
+        promoDetailRequest.setPromoId(UUID.randomUUID().toString());
+        promoDetailRequest.setPromoName("优惠");
+        promoDetailRequest.setPromoFee(BigDecimalUtil.yuan2Fen(order.getDiscountAmount()));
+        promoDetailRequest.setPromoCategory("ORDER_DIMENSION");
+        promoDetailRequest.setPromoDiscount(null);
+        promoDetailRequest.setPromoType("THIRD_MERCHANT");
+        promoDetailRequest.setPromoDimension("TOATL_CART");
+        takeoutOrderCreateDTO.setPromoDetailRequestList(Arrays.asList(promoDetailRequest));
 
         DcOrderBizRequest dcOrderBizRequest = new DcOrderBizRequest();
         dcOrderBizRequest.setDinnerType("DELIVERY");//外送
@@ -985,7 +995,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
         takeoutOrderCreateDTO.setOrderDishRequestList(orderDishRequestList);
-        takeoutOrderCreateDTO.setDeliveryInfoRequestList(null);
 
         OrderAddress orderAddress = orderAddressService.getOrderAddress(order.getId());
         DeliveryInfoRequest deliveryInfoRequest = new DeliveryInfoRequest();
@@ -994,6 +1003,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         deliveryInfoRequest.setReceiverAddress(orderAddress.getAddress());
         deliveryInfoRequest.setReceiverGender(orderAddress.getSex() == null ? null : orderAddress.getSex() == 1 ? "MAN" : "WOMAN");
         deliveryInfoRequest.setReceiverPrimaryPhone(orderAddress.getTel());
+        deliveryInfoRequest.setReceiverName(orderAddress.getName());
         deliveryInfoRequest.setMapType(2);
         deliveryInfoRequest.setLatitude(new BigDecimal(orderAddress.getLat()));
         deliveryInfoRequest.setLongitude(new BigDecimal(orderAddress.getLng()));
