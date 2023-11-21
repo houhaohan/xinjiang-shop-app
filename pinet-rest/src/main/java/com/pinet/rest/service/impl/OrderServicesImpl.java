@@ -571,12 +571,15 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPay.setOutTradeNo(param.getOutTradeNo());
         orderPayService.updateById(orderPay);
 
+        //商家该订单收益= 用户支付总金额  - 配送费
+        BigDecimal shopEarnings = orderPay.getPayPrice().subtract(orders.getShippingFee());
+
         //资金流水
-        bCapitalFlowService.add(orderPay.getPayPrice(), orders.getId(), orders.getCreateTime(),
+        bCapitalFlowService.add(shopEarnings, orders.getId(), orders.getCreateTime(),
                 CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._1, orders.getShopId());
 
         //修改余额
-        ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice());
+        ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
 
 
         //判断订单状态  如果订单状态是已取消  就退款
@@ -671,6 +674,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Orders orders = getById(orderRefund.getOrderId());
         //订单支付信息
         OrderPay orderPay = orderPayService.getById(orderRefund.getOrderPayId());
+
+        //商家该订单收益= 用户支付总金额  - 配送费
+        BigDecimal shopEarnings = orderPay.getPayPrice().subtract(orders.getShippingFee());
+
+
+        //暂时退款配送费由商家承担
         //资金流水
         bCapitalFlowService.add(orderPay.getPayPrice().negate(), orders.getId(), orders.getCreateTime(),
                 CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2, orders.getShopId());
