@@ -132,7 +132,7 @@ public class DaDaServiceImpl implements IDaDaService {
             throw new PinetException("该门店暂不支持外卖订单");
         }
         if(shop.getSelfDelivery() == 1){
-            throw new PinetException("该商家自配送外卖订单");
+            return null;
         }
         AddOrderReq req = addOrderReq(orders);
         AddOrderResp resp = AddOrderClient.execute(req);

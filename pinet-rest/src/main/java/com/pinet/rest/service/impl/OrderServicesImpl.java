@@ -609,7 +609,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         } else {
             //推送客如云,订单状态  1外卖  2自提
             if (orders.getOrderType() == 1) {
-                //todo 暂未开放
                 orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
                 String kryOrderNo = takeoutOrderCreate(orders);
                 orders.setKryOrderNo(kryOrderNo);
