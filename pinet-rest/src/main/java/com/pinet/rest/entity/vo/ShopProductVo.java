@@ -44,4 +44,8 @@ public class ShopProductVo {
     @ApiModelProperty(value = "sku")
     private List<ShopProductSkuVo> skuList = new ArrayList<>();
 
+    @ApiModelProperty(value = "标签")
+    private String labels;
+
+
 }
