@@ -12,6 +12,7 @@ import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.ShopProductMapper;
+import com.pinet.rest.service.ILabelService;
 import com.pinet.rest.service.IProductGlanceOverService;
 import com.pinet.rest.service.IShopProductService;
 import com.pinet.rest.service.IShopService;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,20 +44,23 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Autowired
     private IProductGlanceOverService productGlanceOverService;
 
+    @Resource
+    private ILabelService labelService;
+
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
 //        if(param.getLat() == null || param.getLng() == null ){
 //            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
 //        }
         //根据经纬度获取最近的店铺ID
-        if(param.getShopId() == null){
+        if (param.getShopId() == null) {
             Long shopId = shopService.getMinDistanceShop(param.getLat(), param.getLng());
-            if(shopId == null){
+            if (shopId == null) {
                 return Collections.emptyList();
             }
             param.setShopId(shopId);
         }
-        List<HotProductVo> hotProductVos =  baseMapper.getProductByShopId(param.getShopId());
+        List<HotProductVo> hotProductVos = baseMapper.getProductByShopId(param.getShopId());
         return hotProductVos;
     }
 
@@ -64,11 +69,11 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 //        if(param.getLat() == null || param.getLng() == null ){
 //            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
 //        }
-        Page<RecommendProductVo> page = new Page<>(1,20);
+        Page<RecommendProductVo> page = new Page<>(1, 20);
         //根据经纬度获取最近的店铺ID
-        if(param.getShopId() == null){
+        if (param.getShopId() == null) {
             Long shopId = shopService.getMinDistanceShop(param.getLat(), param.getLng());
-            if(shopId == null){
+            if (shopId == null) {
                 return page;
             }
             param.setShopId(shopId);
@@ -80,9 +85,9 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         List<Long> prodIds = first8List.stream().map(RecommendProductVo::getProdId).collect(Collectors.toList());
 
         //后12条数据
-        List<RecommendProductVo> last12List = baseMapper.selectLast12RecommendList(param,prodIds);
+        List<RecommendProductVo> last12List = baseMapper.selectLast12RecommendList(param, prodIds);
 
-        List<RecommendProductVo> result = new ArrayList<>(first8List.size()+last12List.size());
+        List<RecommendProductVo> result = new ArrayList<>(first8List.size() + last12List.size());
         result.addAll(first8List);
         result.addAll(last12List);
         page.setRecords(result);
@@ -93,9 +98,11 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Override
     public ShopProductVo getDetailById(Long id) {
         ShopProductVo shopProductVo = baseMapper.getDetailById(id);
-        if(shopProductVo == null){
+        if (shopProductVo == null) {
             throw new PinetException("商品不存在");
         }
+        String labels = labelService.getByShopProdId(shopProductVo.getId());
+        shopProductVo.setLabels(labels);
         //更新商品浏览次数
         productGlanceOverService.updateGlanceOverTimes(id);
         return shopProductVo;
@@ -108,7 +115,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public List<ShopProductVo> search(ShopProductParam param) {
-        if(param.getShopId() == null || StringUtil.isEmpty(param.getProductName())){
+        if (param.getShopId() == null || StringUtil.isEmpty(param.getProductName())) {
             return Collections.EMPTY_LIST;
         }
         List<ShopProductVo> list = baseMapper.search(param);
@@ -122,14 +129,14 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public List<String> sellwell(Long shopId) {
-        if(shopId == null) return Collections.EMPTY_LIST;
+        if (shopId == null) return Collections.EMPTY_LIST;
         return baseMapper.sellwell(shopId);
     }
 
     @Override
     public GetShopProdIdByProdIdVo getShopIdAndShopProdId(GetShopIdAndShopProdIdDto dto) {
         GetShopProdIdByProdIdVo getShopProdIdByProdIdVo = baseMapper.selectShopIdAndShopProdId(dto);
-        if (ObjectUtil.isNull(getShopProdIdByProdIdVo)){
+        if (ObjectUtil.isNull(getShopProdIdByProdIdVo)) {
             throw new PinetException("附近店铺没有这个商品");
         }
         return getShopProdIdByProdIdVo;

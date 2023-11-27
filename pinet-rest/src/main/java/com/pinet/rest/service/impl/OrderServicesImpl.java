@@ -574,13 +574,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //商家该订单收益= 用户支付总金额  - 配送费
         BigDecimal shopEarnings = orderPay.getPayPrice().subtract(orders.getShippingFee());
 
-        //资金流水
-        bCapitalFlowService.add(shopEarnings, orders.getId(), orders.getCreateTime(),
-                CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._1, orders.getShopId());
 
         //修改余额
         ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
 
+        //资金流水
+        bCapitalFlowService.add(shopEarnings, orders.getId(), orders.getCreateTime(),
+                CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._1, orders.getShopId());
 
         //判断订单状态  如果订单状态是已取消  就退款
         if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {
