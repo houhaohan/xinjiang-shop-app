@@ -87,10 +87,10 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     }
 
     private String getCityInfo(BigDecimal lng,BigDecimal lat){
-        String city = getCityByIp();
-        if(StringUtil.isNotBlank(city) && !"[]".equals(city)){
-            return city;
-        }
+//        String city = getCityByIp();
+//        if(StringUtil.isNotBlank(city) && !"[]".equals(city)){
+//            return city;
+//        }
         return getCityByLocation(lng,lat);
     }
 
