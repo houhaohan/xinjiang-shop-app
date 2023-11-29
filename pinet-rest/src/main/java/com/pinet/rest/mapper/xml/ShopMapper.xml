@@ -66,7 +66,7 @@
     <select id="shopList" resultType="com.pinet.rest.entity.vo.ShopVo">
         select <include refid="Base_Column_List"/> ,
         <!-- 查询店铺未完成订单数量限8小时内订单 -->
-        (select count(id) from orders where shop_id = shop.id  and order_status in (20,30)
+        (select count(id) from orders where shop_id = shop.id  and order_status in (20,30,31,32)
             and (create_time BETWEEN subdate(now(), interval 8 hour)  AND now() and del_flag = 0)) as orderNum
         from shop
         where shop_status = 1 and city = #{city} and del_flag = 0
