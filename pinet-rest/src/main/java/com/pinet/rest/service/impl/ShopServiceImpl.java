@@ -9,6 +9,7 @@ import com.pinet.core.constants.DB;
 import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.OkHttpUtil;
 import com.pinet.core.util.StringUtil;
+import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.ShopListDto;
 import com.pinet.rest.entity.vo.ShopVo;
@@ -49,13 +50,19 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
 
     @Override
     public List<ShopVo> shopList(ShopListDto dto) {
-        log.info("店铺列表参数=======>{}",JSON.toJSONString(dto));
+        //log.info("店铺列表参数=======>{}",JSON.toJSONString(dto));
         if (dto.getLat() == null || dto.getLng() == null) {
             throw new IllegalArgumentException("参数不能为空");
         }
         //根据经纬度获取城市
         String city = getCityInfo(dto.getLng(), dto.getLat());
         //当前定位的城市店铺
+
+        //程双辉的用户ID
+        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+        if(userId == 12014){
+            city = null;
+        }
         List<ShopVo> shopList = shopMapper.shopList(city);
         if (CollectionUtils.isEmpty(shopList)) {
             return Collections.emptyList();

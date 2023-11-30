@@ -12,6 +12,7 @@
         <result column="del_flag" property="delFlag"/>
         <result column="order_no" property="orderNo"/>
         <result column="kry_order_no" property="kryOrderNo"/>
+        <result column="meal_code" property="mealCode"/>
         <result column="order_type" property="orderType"/>
         <result column="order_status" property="orderStatus"/>
         <result column="customer_id" property="customerId"/>
@@ -42,7 +43,7 @@
         update_by,
         update_time,
         del_flag,
-        order_no, kry_order_no, order_type, order_status, customer_id, shop_id, kry_shop_id, shop_name, order_price, order_prod_price,discount_amount, shipping_fee,package_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission, customer_coupon_id,order_source
+        order_no, kry_order_no, meal_code, order_type, order_status, customer_id, shop_id, kry_shop_id, shop_name, order_price, order_prod_price,discount_amount, shipping_fee,package_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission, customer_coupon_id,order_source
     </sql>
 
 

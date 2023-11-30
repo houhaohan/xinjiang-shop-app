@@ -105,7 +105,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
     @Override
     public TakeoutOrderCreateVo openTakeoutOrderCreate(Long orgId, String token, KryOpenTakeoutOrderCreateDTO dto) {
         String responseStr = super.postCall(KryAPI.TAKEOUT_ORDER_CREATE, AuthType.SHOP, orgId, token, dto);
-        System.err.println(responseStr);
+        log.info("客如云外卖订单同步结果=============>{}",responseStr);
         KryResponse<TakeoutOrderCreateVo> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<TakeoutOrderCreateVo>>() {
         });
         if (0 == response.getCode()) {
@@ -117,7 +117,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
     @Override
     public OrderDetailVO getOrderDetail(Long orgId, String token,KryOrderDetailDTO dto) {
         String responseStr = super.postCall(KryAPI.ORDER_DETAIL, AuthType.SHOP, orgId, token, dto);
-        System.err.println(responseStr);
+        log.info("客如云外卖订单同步结果=============>{}",responseStr);
         KryResponse<KryOrderDetailResult> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<KryOrderDetailResult>>() {
         });
         if (0 == response.getCode()) {

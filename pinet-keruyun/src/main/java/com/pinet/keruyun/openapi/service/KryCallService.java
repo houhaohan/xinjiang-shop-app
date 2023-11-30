@@ -30,7 +30,7 @@ public class KryCallService {
 
     private final KryApiParamConfig kryApiParamConfig;
 
-    @Cacheable(value = {"authTypeAndOrgIdMapToken"}, key = "#authType+'_'+#orgId")
+//    @Cacheable(value = {"authTypeAndOrgIdMapToken"}, key = "#authType+'_'+#orgId")
     public String getToken(AuthType authType, Long orgId) {
         String responseStr = getCall(KryAPI.GET_SHOP_TOKEN, authType, orgId, kryApiParamConfig.getAppSecret());
         KryResponse<ShopTokenVO> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<ShopTokenVO>>() {

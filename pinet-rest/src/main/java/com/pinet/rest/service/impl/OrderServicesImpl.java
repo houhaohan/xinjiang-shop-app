@@ -46,6 +46,7 @@ import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -67,6 +68,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @DS(DB.MASTER)
+@Slf4j
 public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> implements IOrdersService {
     @Resource
     private OrdersMapper ordersMapper;
@@ -210,7 +212,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
 
         Shop shop = shopService.getById(dto.getShopId());
-        if(shop.getSupportDelivery() == 0){
+        if(dto.getOrderType() == 1 && shop.getSupportDelivery() == 0){
             throw new PinetException("该门店暂不支持外卖");
         }
         OrderSettlementVo vo = new OrderSettlementVo();

@@ -15,6 +15,7 @@ import com.imdada.open.platform.client.order.ReAddOrderClient;
 import com.imdada.open.platform.config.Configuration;
 import com.imdada.open.platform.exception.RpcException;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.mapper.OrdersMapper;
@@ -126,6 +127,10 @@ public class DaDaServiceImpl implements IDaDaService {
     public AddOrderResp createOrder(Orders orders) throws RpcException {
         if(!"prod".equals(active)){
             return null;
+        }
+        if(StringUtil.isBlank(orders.getKryOrderNo())){
+            log.error("客如云单号为空，订单ID==========》{}",orders.getId());
+            throw new PinetException("客如云单号为空,订单ID======》"+orders.getId());
         }
         Shop shop = shopService.getById(orders.getShopId());
         if(shop.getSupportDelivery() == 0){
