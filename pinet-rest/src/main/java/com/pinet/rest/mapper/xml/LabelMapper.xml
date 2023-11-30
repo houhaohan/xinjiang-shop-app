@@ -24,7 +24,7 @@
         label_name
     </sql>
     <select id="selectByShopProdId" resultType="java.lang.String">
-        select group_concat(l.label_name)
+        select group_concat(CONCAT(l.label_name,'/',l.color))
         from label l
                  left join shop_product_label spl on spl.label_id = l.id
         where shop_product_id = #{shopProdId} and spl.del_flag = 0

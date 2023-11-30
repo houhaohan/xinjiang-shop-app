@@ -248,7 +248,7 @@
                          INNER JOIN (
                          SELECT
                              sp.*,
-                             GROUP_CONCAT( l.label_name ) labels
+                             GROUP_CONCAT(concat(l.label_name,'/',l.color)) labels
                          FROM
                              shop_product sp
                                  LEFT JOIN shop_product_label spl ON spl.shop_product_id = sp.id
