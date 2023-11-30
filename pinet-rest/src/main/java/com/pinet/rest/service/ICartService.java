@@ -6,6 +6,7 @@ import com.pinet.rest.entity.Cart;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
+import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.entity.vo.CartListVo;
@@ -52,4 +53,11 @@ public interface ICartService extends IService<Cart> {
      * @return
      */
     CartVo getCartByUserIdAndShopId(Long shopId, Long customerId);
+
+    /**
+     * 清空购物车
+     * @param dto
+     * @return
+     */
+    boolean clearCart(ClearCartDto dto);
 }

@@ -7,9 +7,11 @@ import com.pinet.core.ApiErrorEnum;
 import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
+import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.entity.vo.CartListVo;
@@ -193,6 +195,13 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Override
     public CartVo getCartByUserIdAndShopId(Long shopId, Long customerId) {
         return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
+    }
+
+    @Override
+    public boolean clearCart(ClearCartDto dto) {
+        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+        delCartByShopId(dto.getShopId(),userId);
+        return true;
     }
 
 

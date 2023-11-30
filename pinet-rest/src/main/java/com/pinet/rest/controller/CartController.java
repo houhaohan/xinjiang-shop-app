@@ -5,6 +5,7 @@ import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
+import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.entity.vo.CartListVo;
@@ -75,6 +76,17 @@ public class CartController extends BaseController {
         Boolean res = cartService.editCartProdNum(dto);
         if (!res) {
             return Result.error("添加失败");
+        }
+        return Result.ok();
+    }
+
+    @ApiOperation("清空购物车")
+    @PostMapping("/clearCart")
+    @ApiVersion(1)
+    public Result<?> clearCart(@RequestBody ClearCartDto dto){
+        boolean res = cartService.clearCart(dto);
+        if (!res) {
+            return Result.error("清空失败");
         }
         return Result.ok();
     }
