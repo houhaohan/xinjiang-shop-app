@@ -213,7 +213,7 @@
 
 
     <select id="getProductListByShopId" resultMap="ShopProductListMap">
-        select temp.id,
+        SELECT temp.id,
                temp.shop_id,
                temp.shop_name,
                temp.address,
@@ -226,8 +226,9 @@
                temp.lat,
                temp.product_desc,
                temp.labels,
+               temp.sort,
                sum(price)        as price
-        from (
+        FROM (
                  SELECT
                      sp.id,
                      s.lat,
@@ -241,6 +242,7 @@
                      sp.product_type_id,
                      sp.product_type,
                      sp.product_desc,
+                     pt.sort,
                      min( price ) AS price,
                      sp.labels
                  FROM
@@ -251,25 +253,24 @@
                              GROUP_CONCAT(concat(l.label_name,'/',l.color)) labels
                          FROM
                              shop_product sp
-                                 LEFT JOIN shop_product_label spl ON spl.shop_product_id = sp.id
-                                 AND spl.del_flag = 0
-                                 LEFT JOIN label l ON l.id = spl.label_id
-                                 AND l.del_flag = 0
+                                 LEFT JOIN shop_product_label spl ON spl.shop_product_id = sp.id AND spl.del_flag = 0
+                                 LEFT JOIN label l ON l.id = spl.label_id AND l.del_flag = 0
                          WHERE
                              sp.del_flag = 0
                            AND sp.shop_prod_status = 1
                          GROUP BY
                              sp.id
                      ) sp ON s.id = sp.shop_id
-                         INNER JOIN shop_product_spec sps ON sps.shop_prod_id = sp.id
-                         AND sps.del_flag = 0
+                         INNER JOIN shop_product_spec sps ON sps.shop_prod_id = sp.id AND sps.del_flag = 0
+                         INNER JOIN product_type pt ON  pt.id = sp.product_type_id
                  WHERE
                      s.id = #{shopId}
                    AND s.del_flag = 0
                  GROUP BY
                      sps.sku_id
              ) temp
-        group by temp.id
+        GROUP BY temp.id
+        ORDER BY temp.sort, temp.price
     </select>
 
     <select id="search" resultMap="ShopProductMap">
