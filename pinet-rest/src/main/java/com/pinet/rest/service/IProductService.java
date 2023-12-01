@@ -19,5 +19,5 @@ public interface IProductService extends IService<Product> {
      * 查询所有商品 并按照类型分组
      * @return
      */
-    List<ProductListVo> productList();
+    List<ProductListVo> productList(Long shopId);
 }

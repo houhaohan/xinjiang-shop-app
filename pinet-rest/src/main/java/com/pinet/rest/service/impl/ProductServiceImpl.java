@@ -21,7 +21,7 @@ import java.util.List;
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements IProductService {
 
     @Override
-    public List<ProductListVo> productList() {
-        return baseMapper.selectProductList();
+    public List<ProductListVo> productList(Long shopId) {
+        return baseMapper.selectProductList(shopId);
     }
 }

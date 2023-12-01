@@ -48,7 +48,7 @@
         from qingshi.shop_product p
         left join qingshi.shop_product_spec ps on ps.shop_prod_id = p.id and ps.del_flag = 0
         left join shop s on s.id = p.shop_id and s.del_flag = 0
-        where p.del_flag = 0 and s.shop_status = 1
+        where p.del_flag = 0 and s.shop_status = 1 and p.shop_id = #{shopId}
         GROUP BY p.id
     </select>
 

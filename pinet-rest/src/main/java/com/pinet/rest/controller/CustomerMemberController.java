@@ -18,12 +18,10 @@ import com.pinet.rest.service.payNotify.IPayNotifyService;
 import com.pinet.rest.service.payNotify.impl.RechargeNotifyServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
 
 import javax.annotation.Resource;
@@ -89,11 +87,10 @@ public class CustomerMemberController extends BaseController {
 
 
     @ApiOperation("更多商品")
-    @PostMapping("/prodList")
+    @GetMapping("/prodList")
     @ApiVersion(1)
-    @NotTokenSign
-    public Result<?> prodList(){
-        List<ProductListVo> productListVos = customerMemberService.productList();
+    public Result<?> prodList(@Param("shopId") Long shopId){
+        List<ProductListVo> productListVos = customerMemberService.productList(shopId);
         return Result.ok(productListVos);
     }
 

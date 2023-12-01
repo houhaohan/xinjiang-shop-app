@@ -173,8 +173,8 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
     }
 
     @Override
-    public List<ProductListVo> productList() {
-        List<ProductListVo> productListVos = productService.productList();
+    public List<ProductListVo> productList(Long shopId) {
+        List<ProductListVo> productListVos = productService.productList(shopId);
         return productListVos;
     }
 }

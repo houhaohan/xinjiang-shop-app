@@ -69,5 +69,5 @@ public interface ICustomerMemberService extends IService<CustomerMember> {
      */
     List<RecommendTimeBo> recommendIndexList();
 
-    List<ProductListVo> productList();
+    List<ProductListVo> productList(Long shopId);
 }

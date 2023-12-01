@@ -3,6 +3,7 @@ package com.pinet.rest.mapper;
 import com.pinet.rest.entity.Product;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.pinet.rest.entity.vo.ProductListVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,6 +17,6 @@ import java.util.List;
  */
 public interface ProductMapper extends BaseMapper<Product> {
 
-    List<ProductListVo> selectProductList();
+    List<ProductListVo> selectProductList(@Param("shopId") Long shopId);
 
 }

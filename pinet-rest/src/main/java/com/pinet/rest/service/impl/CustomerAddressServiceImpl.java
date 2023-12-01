@@ -58,6 +58,12 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
         entity.setAddress(sb.toString());
         entity.setCustomerId(userId);
         entity.setUpdateTime(System.currentTimeMillis());
+
+        //添加之前判断一下用户之前有没有地址  如果没有则设为默认
+        List<CustomerAddress> customerAddresses = getByCustomerId(userId);
+        if (customerAddresses == null || customerAddresses.size() == 0){
+            entity.setStatus(1);
+        }
         return this.save(entity);
     }
 
@@ -107,6 +113,13 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
         QueryWrapper<CustomerAddress> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("customer_id",customerId).eq("status",1).orderByDesc("id").last("limit 1");
         return getOne(queryWrapper);
+    }
+
+    @Override
+    public List<CustomerAddress> getByCustomerId(Long customerId) {
+        LambdaQueryWrapper<CustomerAddress> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CustomerAddress::getCustomerId,customerId);
+        return list(lambdaQueryWrapper);
     }
 
     private boolean equals(CustomerAddressDto customerAddressDto,CustomerAddress customerAddress){

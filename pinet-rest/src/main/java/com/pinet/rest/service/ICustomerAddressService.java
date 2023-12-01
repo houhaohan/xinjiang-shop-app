@@ -6,6 +6,8 @@ import com.pinet.rest.entity.CustomerAddress;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.CustomerAddressDto;
 
+import java.util.List;
+
 /**
 * @author Administrator
 * @description 针对表【customer_address(地址管理表)】的数据库操作Service
@@ -41,4 +43,11 @@ public interface ICustomerAddressService extends IService<CustomerAddress> {
      * @return
      */
     CustomerAddress getDefaultAddress(Long customerId);
+
+    /**
+     * 根据用户查询地址
+     * @param customerId 用户id
+     * @return
+     */
+    List<CustomerAddress> getByCustomerId(Long customerId);
 }
