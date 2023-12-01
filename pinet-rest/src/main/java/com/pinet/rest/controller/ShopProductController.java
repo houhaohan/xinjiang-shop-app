@@ -169,7 +169,7 @@ public class ShopProductController extends BaseController {
             response.setCode(0);
             return response;
         }
-        response.setCode(-1);
+        response.setCode(0);
         return response;
     }
 
