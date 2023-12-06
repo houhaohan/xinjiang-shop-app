@@ -2,6 +2,7 @@ package com.pinet.rest.service.impl;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.UserConstant;
@@ -21,7 +22,6 @@ import com.pinet.rest.service.ILoginService;
 import lombok.RequiredArgsConstructor;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +41,7 @@ public class PhoneLoginServiceImpl implements ILoginService {
     private final ICustomerBalanceService customerBalanceService;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
     public UserInfo login(LoginRequest loginRequest) throws WxErrorException {
         SmsLoginRequest smsLoginRequest = (SmsLoginRequest)loginRequest;
         String code = redisUtil.get(CommonConstant.SMS_CODE_LOGIN + smsLoginRequest.getPhone());

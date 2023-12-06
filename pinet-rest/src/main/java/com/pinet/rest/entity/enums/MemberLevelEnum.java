@@ -13,8 +13,8 @@ public enum MemberLevelEnum {
      * 订单状态
      */
     _0(0,"门客",new BigDecimal("1")),
-    _10(10,"会员",new BigDecimal("0.8")),
-    _20(20,"店帮主",new BigDecimal("0.5"));
+    _10(10,"会员",new BigDecimal("0.85")),
+    _20(20,"店帮主",new BigDecimal("0.7"));
 
 
     private Integer code;

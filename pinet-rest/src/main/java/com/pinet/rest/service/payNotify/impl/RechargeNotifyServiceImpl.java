@@ -77,7 +77,7 @@ public class RechargeNotifyServiceImpl implements IPayNotifyService {
 
         int memberLevel = 0;
         Date expireTime = null;
-        //判断累计充值   >100会员  >2000店帮主
+        //判断累计充值   >100会员  >500店帮主
         BigDecimal countRechargePrice;
         //有过期时间 并过期  说明的他的店帮主已经到期了  要重新充值
         if (ObjectUtil.isNotNull(customerMember) && customerMember.getExpireTime() != null && customerMember.getExpireTime().getTime() < System.currentTimeMillis()){
@@ -90,7 +90,7 @@ public class RechargeNotifyServiceImpl implements IPayNotifyService {
             memberLevel = 10;
         }
         //首次成为店帮主后设置过期时间  mq延迟一年后自动设置变为会员
-        if (countRechargePrice.compareTo(new BigDecimal("2000")) >= 0){
+        if (countRechargePrice.compareTo(new BigDecimal("500")) >= 0){
             memberLevel = 20;
             expireTime = DateUtil.offset(new Date(), DateField.YEAR,1);
             jmsUtil.delaySend(QueueConstants.QING_MEMBER_PAY_NAME, orderPay.getCustomerId().toString(), (long) (15 * 60 * 1000));

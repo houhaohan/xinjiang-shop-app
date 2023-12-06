@@ -27,4 +27,9 @@ public class QueueConstants {
      * 优惠券到期提醒
      */
     public static final String QING_COUPON_EXPIRE_WARN_NAME = "qingshi.coupon.expire.warn.queue";
+
+    /**
+     * 轻食自提订单发送短信给指定号码
+     */
+    public static final String QING_ORDER_SEND_SMS_NAME = "qingshi.order.send.sms.queue";
 }

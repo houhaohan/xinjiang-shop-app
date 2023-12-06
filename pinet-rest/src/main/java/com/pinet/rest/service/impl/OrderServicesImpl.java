@@ -633,6 +633,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 if (orders.getCommission().compareTo(BigDecimal.ZERO) > 0) {
                     jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), 15 * 60 * 1000L);
                 }
+
+                //自提订单发送短信
+                //先用mq异步发送  (后期可能会删除)
+                jmsUtil.sendMsgQueue(QueueConstants.QING_ORDER_SEND_SMS_NAME,JSONObject.toJSONString(orders));
+
             }
             return updateById(orders);
         }
@@ -1178,6 +1183,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         return scanCodePrePlaceOrderVo.getData().getOrderNo();
     }
+
 
     /**
      * 获取订单商品做法数据

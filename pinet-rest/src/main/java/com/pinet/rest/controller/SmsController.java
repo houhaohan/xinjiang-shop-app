@@ -2,19 +2,19 @@ package com.pinet.rest.controller;
 
 
 import com.pinet.core.constants.CommonConstant;
-import com.pinet.core.enums.ErrorCodeEnum;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.request.SmsSendRequest;
-import com.pinet.rest.entity.response.SmsSendResponse;
 import com.pinet.rest.service.ISmsService;
-import com.pinet.sms.enums.SmsTemplate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/{version}/sms")
@@ -28,15 +28,8 @@ public class SmsController {
     @NotTokenSign
     @ApiVersion(1)
     public Result sendSmsCode(@Validated @RequestBody SmsSendRequest request){
-        SmsTemplate smsTemplate = SmsTemplate.getTemplateByName(request.getType());
-        if(smsTemplate == null){
-            return Result.error(ErrorCodeEnum.FAILED);
-        }
-        SmsSendResponse result = smsService.send(request.getPhone(), smsTemplate, CommonConstant.SMS_CODE_LOGIN);
-        if("0".equals(result.getCode())){
-            return Result.ok(result);
-        }
-        return Result.error(result.getErrorMsg());
+        smsService.sendVerificationCode(request.getPhone(),CommonConstant.SMS_CODE_LOGIN);
+        return Result.ok();
     }
 
 
@@ -44,14 +37,7 @@ public class SmsController {
     @RequestMapping(value = "/sendForgetPayPasswordCode",method = RequestMethod.POST)
     @ApiVersion(1)
     public Result<?> sendForgetPayPasswordCode(@Validated @RequestBody SmsSendRequest request){
-        SmsTemplate smsTemplate = SmsTemplate.getTemplateByName(request.getType());
-        if(smsTemplate == null){
-            return Result.error(ErrorCodeEnum.FAILED);
-        }
-        SmsSendResponse result = smsService.send(request.getPhone(), smsTemplate,CommonConstant.SMS_CODE_FORGET_PAY_PASSWORD);
-        if("0".equals(result.getCode())){
-            return Result.ok(result);
-        }
-        return Result.error(result.getErrorMsg());
+        smsService.sendVerificationCode(request.getPhone(),CommonConstant.SMS_CODE_FORGET_PAY_PASSWORD);
+        return Result.ok();
     }
 }
