@@ -819,7 +819,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 .build();
         try {
             AddOrderResp addOrderResp =  daDaService.queryDeliverFee(addOrderReq);
-            return BigDecimal.valueOf(addOrderResp.getFee());
+            return BigDecimal.valueOf(addOrderResp.getDeliverFee());
         } catch (RpcException e) {
            throw new PinetException("查询配送费服务失败");
         }
@@ -1114,7 +1114,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishSkuCode(orderProduct.getSkuCode());
             request.setDishSkuName(orderProduct.getSkuName());
             request.setWeightDishFlag(false);
-            request.setUnitCode(orderProduct.getUnit());
+            request.setUnitCode(orderProduct.getUnitId());
             request.setUnitId(orderProduct.getUnitId());
             request.setUnitName(orderProduct.getUnit());
 

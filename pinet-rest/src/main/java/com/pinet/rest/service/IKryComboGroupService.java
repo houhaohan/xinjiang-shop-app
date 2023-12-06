@@ -12,5 +12,4 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2023-08-29
  */
 public interface IKryComboGroupService extends IService<KryComboGroup> {
-
 }

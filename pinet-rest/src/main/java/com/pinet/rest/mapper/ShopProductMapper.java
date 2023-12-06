@@ -48,6 +48,13 @@ public interface ShopProductMapper extends BaseMapper<ShopProduct> {
      */
     ShopProductVo getDetailById(@Param("id") Long id);
 
+    /**
+     * 套餐详情
+     * @param id
+     * @return
+     */
+    ShopProductVo getComboDetailById(@Param("id") Long id);
+
 
     /**
      * 根据店铺ID 查找商品列表

@@ -52,7 +52,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     public List<ShopVo> shopList(ShopListDto dto) {
         //log.info("店铺列表参数=======>{}",JSON.toJSONString(dto));
         if (dto.getLat() == null || dto.getLng() == null) {
-            throw new IllegalArgumentException("参数不能为空");
+            throw new IllegalArgumentException("经纬度不能为空");
         }
         //根据经纬度获取城市
         String city = getCityInfo(dto.getLng(), dto.getLat());
@@ -60,7 +60,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
 
         //程双辉的用户ID
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        if(userId == 12014){
+        if(userId == 12014 || userId == 12011){
             city = null;
         }
         List<ShopVo> shopList = shopMapper.shopList(city);
@@ -94,10 +94,10 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     }
 
     private String getCityInfo(BigDecimal lng,BigDecimal lat){
-        String city = getCityByIp();
-        if(StringUtil.isNotBlank(city) && !"[]".equals(city)){
-            return city;
-        }
+//        String city = getCityByIp();
+//        if(StringUtil.isNotBlank(city) && !"[]".equals(city)){
+//            return city;
+//        }
         return getCityByLocation(lng,lat);
     }
 

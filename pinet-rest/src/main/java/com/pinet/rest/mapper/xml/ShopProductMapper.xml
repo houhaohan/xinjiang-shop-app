@@ -34,6 +34,7 @@
         <result column="product_desc" property="productDesc"/>
         <result column="product_type_id" property="productTypeId"/>
         <result column="product_type" property="productType"/>
+        <result column="dish_type" property="dishType"/>
         <result column="price" property="price"/>
         <result column="market_price" property="marketPrice"/>
         <result column="shop_id" property="shopId"/>
@@ -51,6 +52,7 @@
         <result column="prod_spec_id" property="prodSpecId"/>
         <result column="shop_prod_spec_id" property="shopProdSpecId"/>
         <result column="spec_name" property="specName"/>
+        <result column="default_flag" property="defaultFlag"/>
         <result column="sku_id" property="skuId"/>
         <result column="spsPrice" property="price"/>
         <result column="spsMarketPrice" property="marketPrice"/>
@@ -199,17 +201,47 @@
         sp.shop_id,
         sp.product_type_id,
         sp.product_type,
+        sp.dish_type,
         sps.price as spsPrice,
         sps.sku_id as skuId,
         sps.sku_name as skuName,
         sps.id as shop_prod_spec_id,
         sps.spec_name,
+        sps.default_flag,
         sps.sku_id,
         sps.stock
         from shop_product sp
         left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
+        inner join product_sku ps on ps.id = sps.sku_id and ps.del_flag = 0
         where sp.id = #{id}
+        order by sps.sku_id,sps.id
     </select>
+
+    <select id="getComboDetailById" resultMap="ShopProductMap">
+        select sp.id,
+        sp.prod_id,
+        sp.product_name,
+        sp.product_img,
+        sp.product_desc,
+        sp.shop_id,
+        sp.product_type_id,
+        sp.product_type,
+        0 as spsPrice,
+        kcg.id as skuId,
+        kcg.group_name as skuName,
+        kcgd.id as shop_prod_spec_id,
+        kcgd.dish_name as spec_name,
+        kcgd.default_flag,
+        sps.stock
+        from shop_product sp
+        left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
+		left join kry_combo_group kcg on kcg.shop_prod_id = sp.id and kcg.del_flag = 0
+		left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+        where sp.id = #{id}
+        order by kcg.sort,kcgd.sort
+    </select>
+
+
 
 
     <select id="getProductListByShopId" resultMap="ShopProductListMap">

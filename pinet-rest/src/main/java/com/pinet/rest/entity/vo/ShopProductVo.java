@@ -32,6 +32,9 @@ public class ShopProductVo {
     @ApiModelProperty(value = "商品分类名称")
     private String productType;
 
+    @ApiModelProperty(value = "菜品类型。SINGLE：单菜 ，COMBO：套餐， SIDE：配料")
+    private String dishType;
+
     @ApiModelProperty(value = "商品售价")
     private BigDecimal price = BigDecimal.ZERO;
 

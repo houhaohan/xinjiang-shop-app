@@ -39,4 +39,7 @@ public class ShopProductSpecVo{
     @ApiModelProperty("店铺商品样式id")
     private Integer shopProdSpecId;
 
+    @ApiModelProperty("是否默认，Y-是，N-否")
+    private String defaultFlag;
+
 }

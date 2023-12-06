@@ -12,10 +12,7 @@ import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.ShopProductMapper;
-import com.pinet.rest.service.ILabelService;
-import com.pinet.rest.service.IProductGlanceOverService;
-import com.pinet.rest.service.IShopProductService;
-import com.pinet.rest.service.IShopService;
+import com.pinet.rest.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +40,8 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     private IShopService shopService;
     @Autowired
     private IProductGlanceOverService productGlanceOverService;
+    @Autowired
+    private IKryComboGroupService kryComboGroupService;
 
     @Resource
     private ILabelService labelService;
@@ -101,6 +100,10 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         if (shopProductVo == null) {
             throw new PinetException("商品不存在");
         }
+        if("COMBO".equalsIgnoreCase(shopProductVo.getDishType())){
+            shopProductVo = baseMapper.getComboDetailById(id);
+        }
+
         String labels = labelService.getByShopProdId(shopProductVo.getId());
         shopProductVo.setLabels(labels);
         //更新商品浏览次数
