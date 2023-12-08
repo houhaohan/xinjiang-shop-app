@@ -50,5 +50,8 @@ public class ShopProductVo {
     @ApiModelProperty(value = "标签")
     private String labels;
 
+    @ApiModelProperty(value = "销量")
+    private Long saleCount;
+
 
 }
