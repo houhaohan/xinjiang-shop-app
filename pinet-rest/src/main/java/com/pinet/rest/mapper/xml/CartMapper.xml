@@ -34,7 +34,8 @@
                sp.product_name prodName,
                sp.product_img  prodImg,
                c.prod_num      prodNum,
-               c.cart_status   cartStatus
+               c.cart_status   cartStatus,
+               c.shop_prod_id  shopProdId
         from qingshi.cart c
                  left join shop_product sp on sp.id = c.shop_prod_id
         where c.del_flag = 0

@@ -19,6 +19,9 @@ public class CartListVo {
     @ApiModelProperty(value = "购物车id",name = "cartId")
     private Long cartId;
 
+    @ApiModelProperty(value = "商品id",name = "shopProdId")
+    private Long shopProdId;
+
     @ApiModelProperty(value = "商品名称",name = "prodName")
     private String prodName;
 
