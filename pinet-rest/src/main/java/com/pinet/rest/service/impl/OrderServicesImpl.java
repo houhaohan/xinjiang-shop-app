@@ -52,6 +52,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -207,12 +208,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    public OrderSettlementVo orderSettlement(OrderSettlementDto dto){
+    public OrderSettlementVo orderSettlement(OrderSettlementDto dto) {
 
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
 
         Shop shop = shopService.getById(dto.getShopId());
-        if(dto.getOrderType() == 1 && shop.getSupportDelivery() == 0){
+        if (dto.getOrderType() == 1 && shop.getSupportDelivery() == 0) {
             throw new PinetException("该门店暂不支持外卖");
         }
         OrderSettlementVo vo = new OrderSettlementVo();
@@ -243,7 +244,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(), orderProdPrice,shop.getDeliveryShopNo(),shop.getSelfDelivery());
+        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(), orderProdPrice, shop.getDeliveryShopNo(), shop.getSelfDelivery());
         vo.setShippingFee(shippingFee);
 
         //设置订单原价 和 商品原价
@@ -252,14 +253,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //优惠信息初始化
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
-        //店帮主优惠计算
-        orderProdPrice = getDiscountedPrice(customerId, orderProdPrice, orderDiscounts);
-
         //使用完优惠券处理
         if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
             orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts, 1);
         }
 
+        //店帮主优惠计算
+        orderProdPrice = getDiscountedPrice(customerId, orderProdPrice, orderDiscounts);
 
         //计算订单优惠后现价
         BigDecimal orderPrice = orderProdPrice.add(shippingFee).add(packageFee);
@@ -304,7 +304,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //自提订单默认距离是0  外卖订单 校验距离 10公里以内
         double m = 0D;
         if (dto.getOrderType() == 1) {
-            if(shop.getSupportDelivery() == 0){
+            if (shop.getSupportDelivery() == 0) {
                 throw new PinetException("该店铺暂不支持外卖订单");
             }
 
@@ -355,17 +355,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(),orderProdOriginalPrice,shop.getDeliveryShopNo(),shop.getSelfDelivery());
+        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getSelfDelivery());
 
 
-        //店帮主商品折后价
-        BigDecimal orderProdPrice = getDiscountedPrice(userId, orderProdOriginalPrice, orderDiscounts);
-
+        //商品折后价
+        BigDecimal orderProdPrice = orderProdOriginalPrice;
 
         //使用完优惠券处理
         if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
             orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts, 2);
         }
+
+        //店帮主
+        orderProdPrice = getDiscountedPrice(userId, orderProdPrice, orderDiscounts);
+
 
         //优惠金额
         BigDecimal discountAmount = orderProdOriginalPrice.subtract(orderProdPrice);
@@ -636,7 +639,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
                 //自提订单发送短信
                 //先用mq异步发送  (后期可能会删除)
-                jmsUtil.sendMsgQueue(QueueConstants.QING_ORDER_SEND_SMS_NAME,JSONObject.toJSONString(orders));
+                jmsUtil.sendMsgQueue(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders));
 
             }
             return updateById(orders);
@@ -785,19 +788,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     /**
      * 获取配送费
      *
-     * @param orderType 订单类型( 1外卖  2自提)
+     * @param orderType    订单类型( 1外卖  2自提)
      * @param selfDelivery 是否商家自配送( 0-否，1-是)
      * @return BigDecimal
      */
-    private BigDecimal getShippingFee(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo,Integer selfDelivery) {
+    private BigDecimal getShippingFee(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo, Integer selfDelivery) {
         if (orderType == 2) {
             return new BigDecimal("0");
         }
         //测试环境默认4元吧
-        if(!"prod".equals(active)){
+        if (!"prod".equals(active)) {
             return new BigDecimal("4");
         }
-        if(StringUtil.isBlank(deliveryShopNo) || selfDelivery == 1){
+        if (StringUtil.isBlank(deliveryShopNo) || selfDelivery == 1) {
             //todo 商家没有对接外卖平台，自配送
             return new BigDecimal("5");
         }
@@ -823,10 +826,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 .receiverLng(customerAddress.getLng().doubleValue())
                 .build();
         try {
-            AddOrderResp addOrderResp =  daDaService.queryDeliverFee(addOrderReq);
+            AddOrderResp addOrderResp = daDaService.queryDeliverFee(addOrderReq);
             return BigDecimal.valueOf(addOrderResp.getDeliverFee());
         } catch (RpcException e) {
-           throw new PinetException("查询配送费服务失败");
+            throw new PinetException("查询配送费服务失败");
         }
 
     }
@@ -889,7 +892,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //取消配送
-        if(orders.getOrderType() == 1){
+        if (orders.getOrderType() == 1) {
             daDaService.cancelOrder(orders.getOrderNo());
         }
         return true;
@@ -917,7 +920,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @return
      */
     public String takeoutOrderCreate(Orders order) {
-        if (!Objects.equals(active, "prod")){
+        if (!Objects.equals(active, "prod")) {
             return "";
         }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
