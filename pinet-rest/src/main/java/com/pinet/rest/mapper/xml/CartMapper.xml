@@ -13,6 +13,7 @@
         <result column="customer_id" property="customerId"/>
         <result column="shop_id" property="shopId"/>
         <result column="dish_id" property="dishId"/>
+        <result column="dish_type" property="dishType"/>
         <result column="shop_prod_id" property="shopProdId"/>
         <result column="prod_num" property="prodNum"/>
         <result column="cart_status" property="cartStatus"/>
@@ -26,7 +27,7 @@
         update_by,
         update_time,
         del_flag,
-        customer_id, shop_id, dish_id, shop_prod_id, prod_num, cart_status
+        customer_id, shop_id, dish_id, dish_type, shop_prod_id, prod_num, cart_status
     </sql>
     <select id="selectCartList" resultType="com.pinet.rest.entity.vo.CartListVo"
             parameterType="com.pinet.rest.entity.dto.CartListDto">
@@ -34,6 +35,7 @@
                sp.product_name prodName,
                sp.product_img  prodImg,
                c.prod_num      prodNum,
+               c.dish_type      dishType,
                c.cart_status   cartStatus,
                c.shop_prod_id  shopProdId
         from qingshi.cart c
@@ -45,10 +47,13 @@
 
     <select id="getCartByUserIdAndShopId" resultType="com.pinet.rest.entity.vo.CartVo">
         select ifnull(SUM(prod_num),0) as prodNum,ifnull(sum(price),0) as price from (
-            select c.id,c.prod_num,(ifnull(sum(sps.price),0) * c.prod_num) as price
+            select c.id,c.prod_num,
+            (sum((case sp.dish_type when 'COMBO' then kcgd.price/100 else sps.price end)) * c.prod_num) as price
             from cart c
+            left join shop_product sp on sp.id = c.shop_prod_id and c.del_flag = 0
             left join cart_product_spec cps on c.id = cps.cart_id and cps.del_flag = 0
             left join shop_product_spec sps on  sps.id = cps.shop_prod_spec_id and sps.del_flag = 0
+            left join kry_combo_group_detail kcgd on kcgd.id = cps.shop_prod_spec_id and kcgd.del_flag = 0
             where c.shop_id = #{shopId} and c.customer_id = #{customerId}
             and c.cart_status = 1
             and c.del_flag= 0

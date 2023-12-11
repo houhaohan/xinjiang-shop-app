@@ -7,6 +7,7 @@ import com.pinet.core.ApiErrorEnum;
 import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.AddCartDto;
@@ -20,6 +21,7 @@ import com.pinet.rest.mapper.CartMapper;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +59,9 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Resource
     private IShopProductSpecService shopProductSpecService;
 
+    @Autowired
+    private IKryComboGroupDetailService kryComboGroupDetailService;
+
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
         //判断店铺是否存在  店铺状态
@@ -66,12 +71,16 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         }
         List<CartListVo> cartListVos = cartMapper.selectCartList(dto);
         cartListVos.forEach(k -> {
-            List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getCartId());
+            List<CartProductSpec> cartProductSpecs = null;
+            if("COMBO".equalsIgnoreCase(k.getDishType())){
+                cartProductSpecs = cartProductSpecService.getComboByCartId(k.getCartId());
+            }else {
+                cartProductSpecs = cartProductSpecService.getByCartId(k.getCartId());
+            }
             String prodSpecName = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecName).collect(Collectors.joining(","));
             k.setProdSpecName(prodSpecName);
             BigDecimal price = cartProductSpecs.stream().map(CartProductSpec::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
             k.setProdPrice(price);
-
             k.setAllPrice(price.multiply(new BigDecimal(k.getProdNum())).setScale(2, RoundingMode.DOWN));
 
         });
@@ -103,8 +112,10 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         cart.setCartStatus(1);
         cart.setCustomerId(customerId);
         cart.setDishId(shopProduct.getProdId());
+        cart.setDishType(shopProduct.getDishType());
         cart.setUnit(shopProduct.getUnit());
 
+        //单品
         //添加购物车选中的样式
         String[] shopProdSpecIds = dto.getShopProdSpecIds().split(",");
         //如果添加的商品样式在购物车已存在 num+1   如果num=shopProdSpecIds.length说明改商品样式已存在购物车;
@@ -120,11 +131,20 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
             CartProductSpec cartProductSpec = new CartProductSpec();
             cartProductSpec.setShopProdSpecId(Long.valueOf(shopProdSpecId));
-            ShopProductSpec shopProductSpec = shopProductSpecService.getById(Long.valueOf(shopProdSpecId));
-            if (shopProductSpec == null) {
-                throw new PinetException("样式不存在");
+            if("COMBO".equalsIgnoreCase(shopProduct.getDishType())){
+                KryComboGroupDetail kryComboGroupDetail = kryComboGroupDetailService.getById(shopProdSpecId);
+                if (kryComboGroupDetail == null) {
+                    throw new PinetException("样式不存在");
+                }
+                cartProductSpec.setShopProdSpecName(kryComboGroupDetail.getDishName());
+
+            }else {
+                ShopProductSpec shopProductSpec = shopProductSpecService.getById(Long.valueOf(shopProdSpecId));
+                if (shopProductSpec == null) {
+                    throw new PinetException("样式不存在");
+                }
+                cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
             }
-            cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
             cartProductSpecs.add(cartProductSpec);
         }
 
@@ -136,15 +156,18 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             cartQuery.setProdNum(cartQuery.getProdNum() + dto.getProdNum());
             updateById(cartQuery);
             addCartVo.setProdNum(cartQuery.getProdNum());
-
-            resCartProdSpec = cartProductSpecService.getByCartId(cartId);
         } else {
             addCartVo.setProdNum(cart.getProdNum());
             save(cart);
             cartProductSpecs.forEach(k->k.setCartId(cart.getId()));
             cartProductSpecService.saveBatch(cartProductSpecs);
+        }
+        if("COMBO".equalsIgnoreCase(shopProduct.getDishType())){
+            resCartProdSpec = cartProductSpecService.getComboByCartId(cart.getId());
+        }else {
             resCartProdSpec = cartProductSpecService.getByCartId(cart.getId());
         }
+
         BigDecimal price = resCartProdSpec.stream().map(CartProductSpec::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
         addCartVo.setPrice(price.multiply(new BigDecimal(addCartVo.getProdNum())).setScale(2, RoundingMode.DOWN));
         return addCartVo;

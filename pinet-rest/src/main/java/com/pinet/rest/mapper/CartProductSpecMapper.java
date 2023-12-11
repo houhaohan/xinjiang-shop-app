@@ -18,5 +18,12 @@ public interface CartProductSpecMapper extends BaseMapper<CartProductSpec> {
 
     List<CartProductSpec> selectByCartId(@Param("cartId") Long cartId);
 
+    /**
+     * 购物车套餐商品ID
+     * @param cartId
+     * @return
+     */
+    List<CartProductSpec> getComboByCartId(@Param("cartId") Long cartId);
+
     CartProductSpec selectByUserIdAndSpecId(@Param("userId") Long userId,@Param("shopProdSpecId") Long shopProdSpecId);
 }

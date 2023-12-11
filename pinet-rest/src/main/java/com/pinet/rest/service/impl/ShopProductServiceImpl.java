@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,9 +66,6 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public Page<RecommendProductVo> recommendList(RecommendProductParam param) {
-//        if(param.getLat() == null || param.getLng() == null ){
-//            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
-//        }
         Page<RecommendProductVo> page = new Page<>(1, 20);
         //根据经纬度获取最近的店铺ID
         if (param.getShopId() == null) {

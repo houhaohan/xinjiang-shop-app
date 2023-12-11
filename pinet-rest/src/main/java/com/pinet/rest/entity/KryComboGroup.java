@@ -33,6 +33,9 @@ public class KryComboGroup extends BaseEntity {
     @ApiModelProperty("分组名称")
     private String groupName;
 
+    @ApiModelProperty("客如云SKU ID")
+    private String krySkuId;
+
     @ApiModelProperty("套餐分组子菜的最大选择数")
     private Integer maxChoose;
 

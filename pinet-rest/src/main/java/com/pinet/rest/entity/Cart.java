@@ -31,6 +31,9 @@ public class Cart extends BaseEntity {
     @ApiModelProperty("菜品ID")
     private String dishId;
 
+    @ApiModelProperty("菜品类型。SINGLE：单菜 ，COMBO：套餐， SIDE：配料")
+    private String dishType;
+
     @ApiModelProperty("单位")
     private String unit;
 

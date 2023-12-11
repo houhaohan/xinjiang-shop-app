@@ -6,6 +6,7 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -334,14 +335,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
         //减少已购商品的库存(第一版暂不加锁 后期考虑加乐观锁或redis锁)
-        for (OrderProduct orderProduct : orderProducts) {
-            for (OrderProductSpec orderProductSpec : orderProduct.getOrderProductSpecs()) {
-                int res = shopProductSpecService.reduceStock(orderProductSpec.getShopProdSpecId(), orderProduct.getProdNum());
-                if (res != 1) {
-                    throw new PinetException("库存更新失败");
-                }
-            }
-        }
+//        for (OrderProduct orderProduct : orderProducts) {
+//            for (OrderProductSpec orderProductSpec : orderProduct.getOrderProductSpecs()) {
+//                int res = shopProductSpecService.reduceStock(orderProductSpec.getShopProdSpecId(), orderProduct.getProdNum());
+//                if (res != 1) {
+//                    throw new PinetException("库存更新失败");
+//                }
+//            }
+//        }
 
         //计算打包费
         BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -1136,6 +1137,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             } else if ("COMBO".equalsIgnoreCase(orderProduct.getDishType())) {
                 //套餐明细
                 List<KryComboGroupDetailVo> kryComboGroupDetailList = kryComboGroupDetailService.getByShopProdId(orderProduct.getId());
+                kryComboGroupDetailList = kryComboGroupDetailList.subList(0, 2);
                 for (KryComboGroupDetailVo groupDetail : kryComboGroupDetailList) {
                     ScanCodeDish dish = new ScanCodeDish();
                     dish.setOutDishNo(String.valueOf(groupDetail.getId()));
@@ -1168,6 +1170,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
+        System.err.println(JSON.toJSONString(dto));
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
         //记录日志
@@ -1185,6 +1188,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return null;
         }
         return scanCodePrePlaceOrderVo.getData().getOrderNo();
+//        return null;
     }
 
 

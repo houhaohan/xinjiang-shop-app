@@ -2,13 +2,16 @@ package com.pinet.rest.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.OrderProductDto;
 import com.pinet.rest.mapper.OrderProductMapper;
 import com.pinet.rest.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -45,6 +48,12 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
     @Resource
     private ICartProductSpecService cartProductSpecService;
 
+    @Resource
+    private IKryComboGroupDetailService kryComboGroupDetailService;
+
+    @Autowired
+    private IKryComboGroupService kryComboGroupService;
+
     @Override
     public List<OrderProduct> getByOrderId(Long orderId) {
         List<OrderProduct> orderProducts = orderProductMapper.selectByOrderId(orderId);
@@ -57,7 +66,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         List<OrderProduct> orderProducts = new ArrayList<>();
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shopId);
-        if (cartList == null ||  cartList.size() == 0){
+        if (CollectionUtils.isEmpty(cartList)){
             throw new PinetException("购物车内没有需要结算的商品");
         }
         cartList.forEach(k -> {
@@ -65,7 +74,13 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
                 throw new PinetException("购物车内有失效的商品,请删除后在结算");
             }
             //查询购物车商品样式
-            List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
+            List<CartProductSpec> cartProductSpecs;
+            if("COMBO".equalsIgnoreCase(k.getDishType())){
+                //套餐
+                cartProductSpecs = cartProductSpecService.getComboByCartId(k.getId());
+            }else {
+                cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
+            }
             List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
             QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds,orderType);
             OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
@@ -108,19 +123,30 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         BigDecimal prodUnitPrice = BigDecimal.ZERO;
         for (Long shopProdSpecId : queryOrderProductBo.getShopProdSpecIds()) {
             //查询具体的样式并且校验
-            ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
-            if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
-                throw new PinetException(shopProduct.getProductName() + ":" + shopProductSpec.getSpecName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
-            }
-            prodUnitPrice = prodUnitPrice.add(shopProductSpec.getPrice());
-
-            ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
             OrderProductSpec orderProductSpec = new OrderProductSpec();
-            orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
-            orderProductSpec.setProdSkuName(productSku.getSkuName());
-            orderProductSpec.setShopProdSpecId(shopProdSpecId);
-            orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
-            orderProductSpecs.add(orderProductSpec);
+            if("COMBO".equalsIgnoreCase(shopProduct.getDishType())){
+                KryComboGroupDetail kryComboGroupDetail = kryComboGroupDetailService.getById(shopProdSpecId);
+                prodUnitPrice = prodUnitPrice.add(BigDecimalUtil.fenToYuan(kryComboGroupDetail.getPrice()));
+
+                KryComboGroup kryComboGroup = kryComboGroupService.getById(kryComboGroupDetail.getComboGroupId());
+                orderProductSpec.setProdSkuId(kryComboGroup.getId());
+                orderProductSpec.setProdSkuName(kryComboGroup.getGroupName());
+                orderProductSpec.setShopProdSpecId(shopProdSpecId);
+                orderProductSpec.setProdSpecName(kryComboGroupDetail.getDishName());
+                orderProductSpecs.add(orderProductSpec);
+            }else {
+                ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
+                if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
+                    throw new PinetException(shopProduct.getProductName() + ":" + shopProductSpec.getSpecName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
+                }
+                prodUnitPrice = prodUnitPrice.add(shopProductSpec.getPrice());
+                ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
+                orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
+                orderProductSpec.setProdSkuName(productSku.getSkuName());
+                orderProductSpec.setShopProdSpecId(shopProdSpecId);
+                orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
+                orderProductSpecs.add(orderProductSpec);
+            }
         }
         orderProduct.setOrderProductSpecs(orderProductSpecs);
         orderProduct.setOrderProductSpecStr(orderProductSpecs.stream().map(OrderProductSpec::getProdSpecName).collect(Collectors.joining(",")));
