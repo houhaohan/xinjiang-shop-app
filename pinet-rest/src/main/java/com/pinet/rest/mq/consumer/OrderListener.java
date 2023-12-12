@@ -72,7 +72,7 @@ public class OrderListener {
     }
 
 
-    private static final String PHONE = "19706884735";
+    private static final String PHONE = "18162077139";
 //    private static final Long SHOP_ID = 22L;
     private static final Long SHOP_ID = 24L;
     /**
