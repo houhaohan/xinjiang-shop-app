@@ -137,6 +137,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Value("${spring.profiles.active}")
     private String active;
 
+    @Resource
+    private IShippingFeeRuleService shippingFeeRuleService;
+
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
@@ -216,6 +219,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (dto.getOrderType() == 1 && shop.getSupportDelivery() == 0) {
             throw new PinetException("该门店暂不支持外卖");
         }
+
+        double m = getDistance(dto.getCustomerAddressId(),dto.getOrderType(),shop);
+
+
         OrderSettlementVo vo = new OrderSettlementVo();
         vo.setShopName(shop.getShopName());
 
@@ -244,7 +251,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(), orderProdPrice, shop.getDeliveryShopNo(), shop.getSelfDelivery());
+        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), m);
         vo.setShippingFee(shippingFee);
 
         //设置订单原价 和 商品原价
@@ -301,20 +308,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Shop shop = shopService.getById(dto.getShopId());
 
         checkShop(shop);
-        //自提订单默认距离是0  外卖订单 校验距离 10公里以内
-        double m = 0D;
-        if (dto.getOrderType() == 1) {
-            if (shop.getSupportDelivery() == 0) {
-                throw new PinetException("该店铺暂不支持外卖订单");
-            }
-
-            m = LatAndLngUtils.getDistance(Double.parseDouble(dto.getLng()), Double.parseDouble(dto.getLat()),
-                    Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
-            if (m > 10000D) {
-                throw new PinetException("店铺距离过远,无法配送");
-            }
-        }
-
+        //自提订单默认距离是0  外卖订单 校验距离 4公里以内
+        double m = getDistance(dto.getCustomerAddressId(),dto.getOrderType(),shop);
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         if (dto.getSettlementType() == 1) {
@@ -354,8 +349,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
 
-        //配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getSelfDelivery());
+        //用户支付的配送费
+        BigDecimal shippingFee = getShippingFee(dto.getOrderType(),m);
+
+        //平台配送费
+        BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getSelfDelivery());
 
 
         //商品折后价
@@ -384,7 +382,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //邀请人必须是店帮主  被邀人不能是店帮主
 
         //创建订单基础信息
-        Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, discountAmount, shop, packageFee);
+        Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, discountAmount, shop, packageFee,shippingFeePlat);
         setOrdersCommission(order, orderProducts);
         //插入订单
         this.save(order);
@@ -432,13 +430,33 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return createOrderVo;
     }
 
+    /**
+     * 获取距离
+     */
+    private double getDistance(Long customerAddressId, Integer orderType, Shop shop) {
+        double distance = 0;
+        CustomerAddress customerAddress = customerAddressService.getById(customerAddressId);
+        if (orderType == 1) {
+            if (shop.getSupportDelivery() == 0) {
+                throw new PinetException("该店铺暂不支持外卖订单");
+            }
+
+            distance = LatAndLngUtils.getDistance(customerAddress.getLng().doubleValue(), customerAddress.getLat().doubleValue(),
+                    Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
+            if (distance > 4001D) {
+                throw new PinetException("店铺距离过远,无法配送");
+            }
+        }
+        return distance;
+
+    }
+
 
     private void checkShop(Shop shop) {
         //判断店铺是否营业
         if (!shopService.checkShopStatus(shop)) {
             throw new PinetException("店铺已经打烊了~");
         }
-
     }
 
 
@@ -576,8 +594,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPay.setOutTradeNo(param.getOutTradeNo());
         orderPayService.updateById(orderPay);
 
-        //商家该订单收益= 用户支付总金额  - 配送费
-        BigDecimal shopEarnings = orderPay.getPayPrice().subtract(orders.getShippingFee());
+        //商家该订单收益= 用户支付总金额  - 平台配送费
+        BigDecimal shopEarnings = orderPay.getPayPrice().subtract(orders.getShippingFeePlat());
 
 
         //修改余额
@@ -757,7 +775,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
 
-    private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, BigDecimal discountAmount, Shop shop, BigDecimal packageFee) {
+    private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, BigDecimal discountAmount, Shop shop, BigDecimal packageFee,BigDecimal shippingFeePlat) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Date now = new Date();
         Date estimateArrivalStartTime = DateUtil.offsetHour(now, 1);
@@ -783,18 +801,39 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         order.setShareId(dto.getShareId());
         order.setKryShopId(shop.getKryShopId());
         order.setOrderSource(dto.getOrderSource());
+        order.setShippingFeePlat(shippingFeePlat);
         return order;
     }
 
 
     /**
-     * 获取配送费
+     * 获取用户支付配送费
+     *
+     * @param orderType 订单类型( 1外卖  2自提)
+     * @return
+     */
+    private BigDecimal getShippingFee(Integer orderType, double distance) {
+        if (orderType == 2) {
+            return new BigDecimal("0");
+        }
+
+        BigDecimal shippingFee = shippingFeeRuleService.getByDistance(distance);
+        if (shippingFee == null) {
+            throw new PinetException("配送费查询失败");
+        }
+        return shippingFee;
+
+    }
+
+
+    /**
+     * 获取平台配送费
      *
      * @param orderType    订单类型( 1外卖  2自提)
      * @param selfDelivery 是否商家自配送( 0-否，1-是)
      * @return BigDecimal
      */
-    private BigDecimal getShippingFee(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo, Integer selfDelivery) {
+    private BigDecimal getShippingFeePlat(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo, Integer selfDelivery) {
         if (orderType == 2) {
             return new BigDecimal("0");
         }
@@ -804,7 +843,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         if (StringUtil.isBlank(deliveryShopNo) || selfDelivery == 1) {
             //todo 商家没有对接外卖平台，自配送
-            return new BigDecimal("5");
+            return BigDecimal.ZERO;
         }
         //查询收货地址
         CustomerAddress customerAddress = customerAddressService.getById(customerAddressId);

@@ -64,8 +64,11 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("优惠金额")
     private BigDecimal discountAmount;
 
-    @ApiModelProperty("配送费(初版固定为3元)")
+    @ApiModelProperty("配送费(用户支付的配送费)")
     private BigDecimal shippingFee;
+
+    @ApiModelProperty("平台配送费(支付给第三方的配送费)")
+    private BigDecimal shippingFeePlat;
 
     @ApiModelProperty("打包费")
     private BigDecimal packageFee;
