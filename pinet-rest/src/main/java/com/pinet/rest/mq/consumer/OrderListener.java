@@ -79,7 +79,7 @@ public class OrderListener {
      * 发送短信的时间
      */
     private static final String START_TIME = "07:00";
-    private static final String END_TIME = "09:00";
+    private static final String END_TIME = "10:00";
     /**
      * 保利店早上订单发送短信到手机号
      * @param message orders
