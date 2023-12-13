@@ -635,12 +635,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
                 //判断订单是否有佣金 如果有佣金 && 订单状态是已完成 设置佣金三天后到账
                 if (orders.getCommission().compareTo(BigDecimal.ZERO) > 0) {
-                    jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), 15 * 60 * 1000L);
+                    jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), 3 * 24 * 60 * 60 * 1000L);
                 }
 
                 //自提订单发送短信
                 //先用mq异步发送  (后期可能会删除)
-                jmsUtil.sendMsgQueue(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders));
+                jmsUtil.delaySend(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders), 10 * 1000L);
 
             }
             return updateById(orders);
@@ -672,7 +672,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
+    @DSTransactional
     public Boolean orderRefundNotify(OrderRefundNotifyParam param) {
+
         LambdaQueryWrapper<OrderRefund> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(OrderRefund::getRefundNo, param.getRefundNo()).eq(BaseEntity::getDelFlag, 0);
         OrderRefund orderRefund = orderRefundService.getOne(lambdaQueryWrapper);

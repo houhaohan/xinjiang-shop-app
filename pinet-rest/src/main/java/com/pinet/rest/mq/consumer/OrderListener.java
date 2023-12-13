@@ -72,14 +72,14 @@ public class OrderListener {
     }
 
 
-    private static final String PHONE = "19706884735";
+    private static final String PHONE = "18162077139";
 //    private static final Long SHOP_ID = 22L;
     private static final Long SHOP_ID = 24L;
     /**
      * 发送短信的时间
      */
     private static final String START_TIME = "07:00";
-    private static final String END_TIME = "09:00";
+    private static final String END_TIME = "10:00";
     /**
      * 保利店早上订单发送短信到手机号
      * @param message orders

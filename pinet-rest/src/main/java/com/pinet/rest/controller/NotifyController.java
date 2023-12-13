@@ -13,6 +13,7 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.pinet.core.controller.BaseController;
 import com.pinet.core.util.SpringContextUtils;
 import com.pinet.inter.annotation.NotTokenSign;
+import com.pinet.rest.annotation.SystemErrorLog;
 import com.pinet.rest.config.properties.AliAppProperties;
 import com.pinet.rest.entity.enums.PayTypeEnum;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
@@ -57,6 +58,7 @@ public class NotifyController extends BaseController {
     @RequestMapping("/order/wxApp/pay")
     @ApiOperation("微信app支付回调")
     @NotTokenSign
+    @SystemErrorLog
     public String wxAppPayNotify(HttpServletRequest request) {
         log.info("进入微信app支付回调");
         try {
@@ -82,6 +84,7 @@ public class NotifyController extends BaseController {
     @RequestMapping("/order/wxMini/pay")
     @ApiOperation("微信小程序支付回调")
     @NotTokenSign
+    @SystemErrorLog
     public String wxMiniPayNotify(HttpServletRequest request){
         log.info("进入微信小程序支付回调");
         try {
@@ -105,6 +108,7 @@ public class NotifyController extends BaseController {
     @RequestMapping("/order/aliApp/pay")
     @ApiOperation("支付宝支付回调")
     @NotTokenSign
+    @SystemErrorLog
     public String aliAppPayNotify(@RequestParam Map<String, String> params){
         log.info("支付宝支付通知,正在执行,通知参数:{}", JSON.toJSONString(params));
         String result = "failure";
@@ -161,6 +165,7 @@ public class NotifyController extends BaseController {
     @RequestMapping("/order/wxApp/refund")
     @ApiOperation("微信app退款回调")
     @NotTokenSign
+    @SystemErrorLog
     public String wxOrderRefund(HttpServletRequest request){
         log.info("进入微信App退款回调");
         try {
@@ -191,6 +196,7 @@ public class NotifyController extends BaseController {
     @RequestMapping("/order/wxMini/refund")
     @ApiOperation("微信小程序退款回调")
     @NotTokenSign
+    @SystemErrorLog
     public String wxMiniOrderRefund(HttpServletRequest request){
         log.info("进入微信小程序退款回调");
         try {
