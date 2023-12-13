@@ -94,12 +94,15 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public ShopProductVo getDetailById(Long id) {
-        ShopProductVo shopProductVo = baseMapper.getDetailById(id);
-        if (shopProductVo == null) {
+        ShopProduct shopProduct = getById(id);
+        if (shopProduct == null) {
             throw new PinetException("商品不存在");
         }
-        if("COMBO".equalsIgnoreCase(shopProductVo.getDishType())){
+        ShopProductVo shopProductVo = null;
+        if("COMBO".equalsIgnoreCase(shopProduct.getDishType())){
             shopProductVo = baseMapper.getComboDetailById(id);
+        }else {
+            shopProductVo = baseMapper.getDetailById(id);
         }
 
         String labels = labelService.getByShopProdId(shopProductVo.getId());

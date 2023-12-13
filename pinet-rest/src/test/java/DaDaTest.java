@@ -40,7 +40,11 @@ public class DaDaTest {
         cancelOrder();
 //        queryOrder();
 
+        long start = System.currentTimeMillis();
 //        queryDeliverFee();
+        long end = System.currentTimeMillis();
+
+        System.out.println("耗时"+(end-start));
     }
 
     /**
@@ -90,7 +94,7 @@ public class DaDaTest {
      */
     private static void cancelOrder() throws RpcException {
         CancelOrderReq build = CancelOrderReq.builder()
-                .orderId("1726495467536502784")
+                .orderId("1734773801248710656")
                 .cancelReasonId(4)
                 .cancelReason("顾客取消订单")
                 .build();
@@ -171,7 +175,7 @@ public class DaDaTest {
                 .receiverLng(120.212528)
                 .build();
 
-        AddOrderResp resp = QueryDeliverFeeAndAddOrderClient.execute(req);
+        AddOrderResp resp = QueryDeliverFeeAndAddOrderClient.queryDeliverFee(req);
         System.err.println(JSON.toJSONString(resp));
 
     }

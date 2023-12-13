@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.LatAndLngUtils;
+import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
@@ -165,7 +166,7 @@ public class ShopProductController extends BaseController {
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
         response.setMessageUuid(UUID.randomUUID().toString());
-        if("success".equals(validate)){
+        if(StringUtil.isBlank(validate) || "success".equals(validate)){
             response.setCode(0);
             return response;
         }
@@ -184,7 +185,7 @@ public class ShopProductController extends BaseController {
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
         response.setMessageUuid(UUID.randomUUID().toString());
-        if("success".equals(validate)){
+        if(StringUtil.isBlank(validate) ||  "success".equals(validate)){
             response.setCode(0);
             return response;
         }
@@ -203,7 +204,7 @@ public class ShopProductController extends BaseController {
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
         response.setMessageUuid(UUID.randomUUID().toString());
-        if("success".equals(validate)){
+        if(StringUtil.isBlank(validate) || "success".equals(validate)){
             response.setCode(0);
             return response;
         }

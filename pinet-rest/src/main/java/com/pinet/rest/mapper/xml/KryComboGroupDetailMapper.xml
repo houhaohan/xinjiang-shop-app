@@ -38,7 +38,7 @@
         dish_id, combo_group_id, single_dish_id, max_choose, min_choose, fix_choose, dish_sku_id, dish_sku_price, opt_type, default_flag, dish_name, spec_name, sell_price, multi_spec_flag, sort
     </sql>
 
-    <select id="getByShopProdId" resultType="com.pinet.rest.entity.vo.KryComboGroupDetailVo">
+    <select id="getByOrderProdId" resultType="com.pinet.rest.entity.vo.KryComboGroupDetailVo">
         select kcgd.id,
         kcgd.dish_id,
         kcgd.combo_group_id,
@@ -57,11 +57,13 @@
         kcgd.sort,
         sp.unit_id,
         sp.unit,
+        sp.dish_code,
         sp.product_img as imageUrl
         from kry_combo_group_detail kcgd
-        left join shop_product sp on sp.prod_id = kcgd.single_dish_id and sp.del_flag = 0
+        left join shop_product sp on sp.prod_id = kcgd.single_dish_id and sp.shop_id = #{shopId} and sp.del_flag = 0
         where kcgd.combo_group_id in
-        (select id from kry_combo_group where shop_prod_id = #{shopProdId} and del_flag = 0)
+        (select prod_sku_id from order_product_spec where order_prod_id = #{orderProdId} and prod_sku_name != '规格' and del_flag = 0)
         and kcgd.del_flag = 0
+        order by kcgd.id
     </select>
 </mapper>
