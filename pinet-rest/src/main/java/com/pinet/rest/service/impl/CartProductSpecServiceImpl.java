@@ -29,6 +29,11 @@ public class CartProductSpecServiceImpl extends ServiceImpl<CartProductSpecMappe
     }
 
     @Override
+    public List<CartProductSpec> getComboByCartId(Long cartId) {
+        return cartProductSpecMapper.getComboByCartId(cartId);
+    }
+
+    @Override
     public CartProductSpec getByUserIdAndSpecId(Long userId, Long shopProdSpecId) {
         CartProductSpec cartProductSpec = cartProductSpecMapper.selectByUserIdAndSpecId(userId,shopProdSpecId);
         return cartProductSpec;

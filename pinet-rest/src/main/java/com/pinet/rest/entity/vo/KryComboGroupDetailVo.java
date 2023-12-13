@@ -43,6 +43,9 @@ public class KryComboGroupDetailVo {
     @ApiModelProperty("子菜名称")
     private String dishName;
 
+    @ApiModelProperty("菜品编码")
+    private String dishCode;
+
     @ApiModelProperty("子菜规格名")
     private String specName;
 

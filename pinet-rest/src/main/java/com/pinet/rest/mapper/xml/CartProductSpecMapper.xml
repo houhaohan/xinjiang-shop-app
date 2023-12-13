@@ -32,6 +32,16 @@
         where cps.cart_id = #{cartId}
           and cps.del_flag = 0
     </select>
+
+    <select id="getComboByCartId" resultType="com.pinet.rest.entity.CartProductSpec">
+        select cps.*, (sps.price * 0.01) as price
+        from cart_product_spec cps
+        left join kry_combo_group_detail sps on cps.shop_prod_spec_id = sps.id
+        where cps.cart_id = #{cartId}
+        and cps.del_flag = 0
+    </select>
+
+
     <select id="selectByUserIdAndSpecId" resultType="com.pinet.rest.entity.CartProductSpec">
         select cps.*
         from qingshi.cart c

@@ -13,6 +13,7 @@
         <result column="shop_prod_id" property="shopProdId" />
         <result column="dish_id" property="dishId" />
         <result column="group_name" property="groupName" />
+        <result column="kry_sku_id" property="krySkuId" />
         <result column="max_choose" property="maxChoose" />
         <result column="min_choose" property="minChoose" />
         <result column="sort" property="sort" />
@@ -28,7 +29,7 @@
         update_by,
         update_time,
         del_flag,
-        shop_prod_id, dish_id, group_name, max_choose, min_choose, sort, repeatable, group_type
+        shop_prod_id, dish_id, group_name, kry_sku_id, max_choose, min_choose, sort, `repeatable`, group_type
     </sql>
 
 </mapper>

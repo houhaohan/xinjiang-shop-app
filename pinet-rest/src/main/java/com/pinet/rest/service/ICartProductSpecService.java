@@ -16,6 +16,13 @@ import java.util.List;
 public interface ICartProductSpecService extends IService<CartProductSpec> {
     List<CartProductSpec> getByCartId(Long cartId);
 
+    /**
+     * 购物车套餐商品规格
+     * @param cartId
+     * @return
+     */
+    List<CartProductSpec> getComboByCartId(Long cartId);
+
     CartProductSpec getByUserIdAndSpecId(Long userId,Long shopProdSpecId);
 
 }

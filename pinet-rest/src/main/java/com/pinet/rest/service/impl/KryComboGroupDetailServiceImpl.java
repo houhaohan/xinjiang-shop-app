@@ -1,12 +1,10 @@
 package com.pinet.rest.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.rest.entity.KryComboGroupDetail;
 import com.pinet.rest.entity.vo.KryComboGroupDetailVo;
 import com.pinet.rest.mapper.KryComboGroupDetailMapper;
 import com.pinet.rest.service.IKryComboGroupDetailService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -26,7 +24,7 @@ public class KryComboGroupDetailServiceImpl extends ServiceImpl<KryComboGroupDet
     private KryComboGroupDetailMapper kryComboGroupDetailMapper;
 
     @Override
-    public List<KryComboGroupDetailVo> getByShopProdId(Long shopProdId) {
-        return kryComboGroupDetailMapper.getByShopProdId(shopProdId);
+    public List<KryComboGroupDetailVo> getByOrderProdId(Long orderProdId,Long shopId) {
+        return kryComboGroupDetailMapper.getByOrderProdId(orderProdId,shopId);
     }
 }

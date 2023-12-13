@@ -40,6 +40,9 @@ public class CartListVo {
     @ApiModelProperty(value = "商品样式",name = "prodSpecName")
     private String prodSpecName;
 
+    @ApiModelProperty(value = "菜品类型。SINGLE：单菜 ，COMBO：套餐， SIDE：配料",name = "dishType")
+    private String dishType;
+
     @ApiModelProperty(value = "购物车状态 1正常  2失效",name = "cartStatus")
     private Integer cartStatus;
 

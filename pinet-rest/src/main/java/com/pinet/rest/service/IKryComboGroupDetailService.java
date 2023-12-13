@@ -16,6 +16,6 @@ import java.util.List;
  */
 public interface IKryComboGroupDetailService extends IService<KryComboGroupDetail> {
 
-    List<KryComboGroupDetailVo> getByShopProdId(Long shopProdId);
+    List<KryComboGroupDetailVo> getByOrderProdId(Long orderProdId,Long shopId);
 
 }

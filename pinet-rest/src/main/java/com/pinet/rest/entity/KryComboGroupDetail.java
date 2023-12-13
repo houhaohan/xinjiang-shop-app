@@ -63,6 +63,9 @@ public class KryComboGroupDetail extends BaseEntity {
     @ApiModelProperty("子菜售卖价，单位：分")
     private Long sellPrice;
 
+    @ApiModelProperty("小程序实际售价，单位：分")
+    private Long price;
+
     @ApiModelProperty("子菜是否为多规格 Y:是，N:否")
     private String multiSpecFlag;
 
