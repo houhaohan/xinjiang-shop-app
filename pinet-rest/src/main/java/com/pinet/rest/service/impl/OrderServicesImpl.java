@@ -584,6 +584,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             log.error("微信支付回调出现异常,订单号不存在:" + param.getOrderNo());
             return false;
         }
+        log.info("支付回调查询出订单信息为{}",JSONObject.toJSONString(orders));
 
 
         OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(), param.getChannelId());
@@ -658,6 +659,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 jmsUtil.delaySend(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders), 10 * 1000L);
 
             }
+            log.info("支付回调更新订单信息为{}",JSONObject.toJSONString(orders));
             return updateById(orders);
         }
     }
@@ -903,7 +905,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("kry_order_no", dto.getOrderBody().getRelatedOrderNo());
         Orders orders = getOne(queryWrapper);
-
+        log.info("客如云状态变更查询orders:{}",JSONObject.toJSONString(orders));
         //校验:
         //查看是否已经退款
         if (orders.getOrderStatus().equals(OrderStatusEnum.REFUND.getCode())) {
@@ -939,6 +941,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         payService.refund(refundParam);
         //更新订单状态
         orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
+        log.info("客如云状态变更 更新orders:{}",JSONObject.toJSONString(orders));
         updateById(orders);
 
 

@@ -67,6 +67,7 @@ public class DaDaServiceImpl implements IDaDaService {
             return;
         }
         Orders orders = ordersMapper.selectByOrderNo(Long.valueOf(callbackParam.getOrderId()));
+        log.info("~~~~~~~~~~~~~~~~~~~~dada回调查出订单数据{}",JSONObject.toJSONString(orders));
         OrderLogistics orderLogistics = orderLogisticsService.getByOrderId(Long.valueOf(callbackParam.getOrderId()));
         if(DaDaCallbackStatusEnum.WAIT_ACCEPT.getOrderStatusCode().equals(callbackParam.getOrderStatus())){
             orderLogistics = new OrderLogistics();
