@@ -8,6 +8,7 @@ import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.CustomerBalance;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
+import com.pinet.rest.entity.param.OrderRefundNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.param.RefundParam;
 import com.pinet.rest.service.*;
@@ -85,5 +86,10 @@ public class BalancePayServiceImpl implements IPayService {
 
         //插入资金流水
         customerBalanceRecordService.addCustomerBalanceRecord(param.getCustomerId(), new BigDecimal(param.getRefundFee()), BalanceRecordTypeEnum._7, param.getOrderRefundId());
+
+        OrderRefundNotifyParam orderRefundNotifyParam = new OrderRefundNotifyParam();
+        orderRefundNotifyParam.setRefundNo(Long.valueOf(param.getOutRefundNo()));
+        orderRefundNotifyParam.setOutTradeNo("");
+        ordersService.orderRefundNotify(orderRefundNotifyParam);
     }
 }

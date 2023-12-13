@@ -837,9 +837,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return new BigDecimal("0");
         }
         //测试环境默认4元吧
-        if (!"prod".equals(active)) {
-            return new BigDecimal("4");
-        }
+//        if (!"prod".equals(active)) {
+//            return new BigDecimal("4");
+//        }
         if (StringUtil.isBlank(deliveryShopNo) || selfDelivery == 1) {
             //todo 商家没有对接外卖平台，自配送
             return BigDecimal.ZERO;
