@@ -2,6 +2,9 @@ package com.pinet.rest.mapper;
 
 import com.pinet.rest.entity.ProductType;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.vo.ProductTypeVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface ProductTypeMapper extends BaseMapper<ProductType> {
 
+    /**
+     * 根据店铺查找分类
+     * @param shopId
+     * @return
+     */
+    List<ProductTypeVo> getByShopId(Long shopId);
 }

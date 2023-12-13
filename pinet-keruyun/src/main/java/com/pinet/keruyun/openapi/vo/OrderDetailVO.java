@@ -147,7 +147,7 @@ public class OrderDetailVO {
         @ApiModelProperty("商品收入")
         private String itemReceivedAmt;
         @ApiModelProperty("子节点")
-        private OrderItemVo children;
+        private List<OrderItemVo> children;
     }
 
     @Data

@@ -2,6 +2,9 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.ProductType;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.ProductTypeVo;
+
+import java.util.List;
 
 
 /**
@@ -14,4 +17,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IProductTypeService extends IService<ProductType> {
 
+    /**
+     * 根据店铺ID 查找商品分类
+     * @param shopId
+     * @return
+     */
+    List<ProductTypeVo> getByShopId(Long shopId);
 }

@@ -1,10 +1,13 @@
 package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.StringUtil;
+import com.pinet.rest.entity.ProductType;
+import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.HomeProductParam;
@@ -16,6 +19,7 @@ import com.pinet.rest.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -42,7 +46,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Autowired
     private IProductGlanceOverService productGlanceOverService;
     @Autowired
-    private IKryComboGroupService kryComboGroupService;
+    private IProductTypeService productTypeService;
 
     @Resource
     private ILabelService labelService;
