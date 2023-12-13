@@ -23,6 +23,7 @@
         <result column="order_prod_price" property="orderProdPrice"/>
         <result column="discount_amount" property="discountAmount"/>
         <result column="shipping_fee" property="shippingFee"/>
+        <result column="shipping_fee_plat" property="shippingFeePlat"/>
         <result column="package_fee" property="packageFee"/>
         <result column="estimate_arrival_start_time" property="estimateArrivalStartTime"/>
         <result column="estimate_arrival_end_time" property="estimateArrivalEndTime"/>
@@ -43,7 +44,7 @@
         update_by,
         update_time,
         del_flag,
-        order_no, kry_order_no, meal_code, order_type, order_status, customer_id, shop_id, kry_shop_id, shop_name, order_price, order_prod_price,discount_amount, shipping_fee,package_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission, customer_coupon_id,order_source
+        order_no, kry_order_no, meal_code, order_type, order_status, customer_id, shop_id, kry_shop_id, shop_name, order_price, order_prod_price,discount_amount,shipping_fee_plat shipping_fee,package_fee, estimate_arrival_start_time, estimate_arrival_end_time, actual_arrival_time, order_distance, remark,share_id,commission, customer_coupon_id,order_source
     </sql>
 
 
