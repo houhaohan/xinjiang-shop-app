@@ -839,9 +839,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return new BigDecimal("0");
         }
         //测试环境默认4元吧
-//        if (!"prod".equals(active)) {
-//            return new BigDecimal("4");
-//        }
+        if (!"prod".equals(active)) {
+            return new BigDecimal("4");
+        }
         if (StringUtil.isBlank(deliveryShopNo) || selfDelivery == 1) {
             //todo 商家没有对接外卖平台，自配送
             return BigDecimal.ZERO;
@@ -873,18 +873,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         } catch (RpcException e) {
             throw new PinetException("查询配送费服务失败");
         }
-
-//        if(distance <= 1000d){
-//            return new BigDecimal("4");
-//        }else if(distance > 1000 && distance <= 2000){
-//            return new BigDecimal("4.5");
-//        }else if(distance > 2000 && distance <= 3000){
-//            return new BigDecimal("5");
-//        }else if(distance > 3000 && distance <= 4000){
-//            return new BigDecimal("6.5");
-//        }else {
-//            throw new PinetException("距离超过配送范围");
-//        }
     }
 
     /**
@@ -996,11 +984,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         promoDetailRequest.setPromoDimension("TOATL_CART");
         takeoutOrderCreateDTO.setPromoDetailRequestList(Arrays.asList(promoDetailRequest));
 
+        //todo 打包费暂时传了没用，先把它放到 ExtraFeeRequest 对象里面把
         DcOrderBizRequest dcOrderBizRequest = new DcOrderBizRequest();
         dcOrderBizRequest.setDinnerType("DELIVERY");//外送
-        dcOrderBizRequest.setTakeoutFee(BigDecimalUtil.yuan2Fen(order.getPackageFee()));
-        dcOrderBizRequest.setTableWareFee(0L);
-        dcOrderBizRequest.setTakeMealType("SELF_TAKE");
+//        dcOrderBizRequest.setTakeoutFee(BigDecimalUtil.yuan2Fen(order.getPackageFee()));
+//        dcOrderBizRequest.setTableWareFee(0L);
+//        dcOrderBizRequest.setTakeMealType("SELF_TAKE");
         takeoutOrderCreateDTO.setDcOrderBizRequest(dcOrderBizRequest);
 
         OrderStrategyRequest orderStrategyRequest = new OrderStrategyRequest();
@@ -1018,6 +1007,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         takeoutOrderCreateDTO.setPaymentDetailRequestList(Arrays.asList(paymentDetailRequest));
 
         //订单附加费列表,可不填
+        //配送费
+        List<ExtraFeeRequest> extraFeeRequestList = new ArrayList<>();
         ExtraFeeRequest extraFeeRequest = new ExtraFeeRequest();
         extraFeeRequest.setOutExtraFeeDetailNo(UUID.randomUUID().toString());
         extraFeeRequest.setExtraFeeType("DELIVERY_FEE");
@@ -1030,7 +1021,22 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         extraFeeRequest.setParticipateSplitFlag(false);
         extraFeeRequest.setExtraRuleId("");
         //extraFeeRequest.setExtraCalValue("");
-        takeoutOrderCreateDTO.setExtraFeeRequestList(Arrays.asList(extraFeeRequest));
+        extraFeeRequestList.add(extraFeeRequest);
+
+        //打包费
+        ExtraFeeRequest packageFeeRequest = new ExtraFeeRequest();
+        packageFeeRequest.setOutExtraFeeDetailNo(UUID.randomUUID().toString());
+        packageFeeRequest.setExtraFeeType("PRACTICE_RAISE_FEE");
+        packageFeeRequest.setCustomExtraFeeName("打包费");
+        packageFeeRequest.setExtraTotalFee(BigDecimalUtil.yuan2Fen(order.getPackageFee()));
+        packageFeeRequest.setExtraActualFee(BigDecimalUtil.yuan2Fen(order.getPackageFee()));
+        packageFeeRequest.setExtraPromoFee(0L);
+        packageFeeRequest.setExtraCalType("CALCULATE_BY_FIXED");
+        packageFeeRequest.setParticipateDiscountFlag(false);
+        packageFeeRequest.setParticipateSplitFlag(false);
+        packageFeeRequest.setExtraRuleId("");
+        extraFeeRequestList.add(packageFeeRequest);
+        takeoutOrderCreateDTO.setExtraFeeRequestList(extraFeeRequestList);
 
         List<OrderProductDto> orderProducts = orderProductService.selectByOrderId(order.getId());
         List<OrderDishRequest> orderDishRequestList = new ArrayList<>(orderProducts.size());
@@ -1043,19 +1049,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequest.setDishQuantity(orderProduct.getProdNum());
             orderDishRequest.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             orderDishRequest.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
-            orderDishRequest.setTotalFee(BigDecimalUtil.yuanToFen(BigDecimalUtil.sum(orderProduct.getProdPrice(), orderProduct.getPackageFee())));
+            orderDishRequest.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             orderDishRequest.setPromoFee(0L);
-            orderDishRequest.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            orderDishRequest.setActualFee(orderDishRequest.getTotalFee());
             orderDishRequest.setUnitId(orderProduct.getUnitId());
             orderDishRequest.setUnitName(orderProduct.getUnit());
             orderDishRequest.setUnitCode(orderProduct.getUnitId());
-            //附加项（加料、做法）列表
-
             orderDishRequest.setDishSkuId(orderProduct.getKrySkuId());
             orderDishRequest.setWeightDishFlag(false);
             orderDishRequest.setDishImgUrl(orderProduct.getProductImg());
             orderDishRequest.setIsPack(true);
-            orderDishRequest.setPackageFee(BigDecimalUtil.yuan2FenStr(orderProduct.getPackageFee()));
+            //todo 打包费暂时不用
+            orderDishRequest.setPackageFee("0");
+            //orderDishRequest.setPackageFee(BigDecimalUtil.yuan2FenStr(orderProduct.getPackageFee()));
             List<ScanCodeDish> dishList = new ArrayList<>();
             if ("SINGLE".equalsIgnoreCase(orderProduct.getDishType())) {
                 orderDishRequest.setItemOriginType("SINGLE");
@@ -1084,7 +1090,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setPackageFee("0");
                     dish.setWeightDishFlag("0");
                     dish.setDishImgUrl(groupDetail.getImageUrl());
-                    dish.setIsPack("false");
+                    dish.setIsPack("true");
                     dish.setDishGiftFlag("false");
                     dish.setItemOriginType("SINGLE");
                     dish.setDishSkuId(orderProduct.getKrySkuId());
@@ -1096,7 +1102,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             }
             orderDishRequestList.add(orderDishRequest);
         }
-
         takeoutOrderCreateDTO.setOrderDishRequestList(orderDishRequestList);
 
         OrderAddress orderAddress = orderAddressService.getOrderAddress(order.getId());
@@ -1111,6 +1116,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         deliveryInfoRequest.setLatitude(new BigDecimal(orderAddress.getLat()));
         deliveryInfoRequest.setLongitude(new BigDecimal(orderAddress.getLng()));
         takeoutOrderCreateDTO.setDeliveryInfoRequestList(Arrays.asList(deliveryInfoRequest));
+
+
+        System.err.println(JSONObject.toJSONString(takeoutOrderCreateDTO));
         String token = kryApiService.getToken(AuthType.SHOP, order.getKryShopId());
         TakeoutOrderCreateVo takeoutOrderCreateVo = kryApiService.openTakeoutOrderCreate(order.getKryShopId(), token, takeoutOrderCreateDTO);
         //记录日志

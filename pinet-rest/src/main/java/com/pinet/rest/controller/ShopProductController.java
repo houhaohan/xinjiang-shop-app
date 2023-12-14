@@ -5,14 +5,11 @@ import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson.JSONObject;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.result.Result;
-import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.keruyun.openapi.vo.KryResponse;
-import com.pinet.rest.entity.CustomerAddress;
-import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.CartVo;
@@ -56,9 +53,6 @@ public class ShopProductController extends BaseController {
 
     @Autowired
     private ICartService cartService;
-
-    @Autowired
-    private ICustomerAddressService customerAddressService;
 
     @Resource
     private IShopBrowseLogService shopBrowseLogService;
