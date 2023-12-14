@@ -117,6 +117,7 @@
         ) temp
         LEFT JOIN shop s ON s.id = temp.shop_id
         GROUP BY temp.id
+        HAVING price > 5
         ORDER BY sellnum DESC
         LIMIT 16
 
@@ -161,6 +162,7 @@
                           group by sps.sku_id
                       ) temp
                  group by temp.prod_id
+                 having price > 5
                  order by RAND()
                  limit 12
              ) t
@@ -176,6 +178,7 @@
                         temp.product_img,
                         temp.product_type_id,
                         sum(temp.price)        as price,
+                        sum(temp.market_price)        as marketPrice,
                         (select ifnull(sum(pgo.times),0)  from product_glance_over pgo where temp.prod_id = pgo.prod_id and pgo.del_flag = 0) as times
 
                  from (
@@ -185,15 +188,18 @@
                                  sp.product_name,
                                  sp.product_img,
                                  sp.product_type_id,
+                                 max(sps.market_price) as market_price,
                                  ifnull(min(sps.price), 0)       as price
                           from shop_product sp
                           left join shop_product_spec sps on  sps.shop_prod_id = sp.id and sps.del_flag = 0
                           where sp.shop_id = #{shopId}
                             and sp.shop_prod_status = 1
+                            and sp.dish_type = 'SINGLE'
                             and sp.del_flag = 0
                           group by sps.sku_id
                       ) temp
                  group by temp.prod_id
+                 having price > 5
                  order by times desc
                  limit 8
              ) t

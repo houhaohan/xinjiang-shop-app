@@ -30,8 +30,8 @@ public class RecommendProductVo {
     @ApiModelProperty(value = "商品销售价格")
     private BigDecimal price;
 
-//    @ApiModelProperty(value = "商品市场价")
-//    private BigDecimal marketPrice;
+    @ApiModelProperty(value = "商品市场价")
+    private BigDecimal marketPrice;
 
 
     @ApiModelProperty(value = "商品类型ID")
