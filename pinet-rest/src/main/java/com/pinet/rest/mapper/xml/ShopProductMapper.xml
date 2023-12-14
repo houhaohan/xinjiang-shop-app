@@ -249,64 +249,75 @@
         order by kcg.sort,kcgd.sort
     </select>
 
+    <select id="getProductListByShopId" resultMap="ProdTypeMap">
+        select temp.id,
+			 temp.shop_id,
+			 temp.prod_id,
+			 temp.dish_type,
+			 temp.product_name,
+			 temp.product_img,
+			 temp.product_type_id,
+			 temp.product_type,
+			 temp.product_desc,
+			 temp.sort,
+			 temp.sale_count,
+			 sum(temp.price) as price,
+			 sum(temp.market_price) as market_price,
+			 (select GROUP_CONCAT(label_name,'/',color) from label where FIND_IN_SET(id,temp.lable_id) > 0 and del_flag = 0) as labels
+        from (
+                <!-- 单品 -->
+                select sp.id,
+                       sp.shop_id,
+                       sp.prod_id,
+                       sp.dish_type,
+                       sp.product_name,
+                       sp.product_img,
+                       sp.product_type_id,
+                       sp.product_type,
+                       sp.product_desc,
+                       sp.lable_id,
+                       pt.sort,
+                       sp.sale_count,
+                       min(sps.price) as price,
+                       max(sps.market_price) as market_price
+                from shop_product sp
+                inner join product_type pt on pt.id = sp.product_type_id and pt.del_flag = 0
+                inner join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
+                where sp.shop_id = #{shopId}
+                and sp.shop_prod_status = 1
+                and sp.dish_type = 'SINGLE'
+                and sp.del_flag = 0
+                group by sps.sku_id
+
+                union all
 
 
-
-    <select id="getProductListByShopId" resultMap="ShopProductListMap">
-        SELECT temp.id,
-               temp.shop_id,
-               temp.shop_name,
-               temp.address,
-               temp.prod_id,
-               temp.product_name,
-               temp.product_img,
-               temp.product_type_id,
-               temp.product_type,
-               temp.lng,
-               temp.lat,
-               temp.product_desc,
-               temp.labels,
-               temp.sort,
-               sum(price) as   price,
-               temp.sale_count saleCount
-        FROM (
-                 SELECT sp.id,
-                        s.lat,
-                        s.lng,
-                        s.id                                              AS shop_id,
-                        s.shop_name,
-                        concat(s.province, s.city, s.district, s.address) AS address,
-                        sp.prod_id,
-                        sp.product_name,
-                        sp.product_img,
-                        sp.product_type_id,
-                        sp.product_type,
-                        sp.product_desc,
-                        pt.sort,
-                        (CASE sp.dish_type WHEN 'COMBO' THEN MIN(kcgd.price/100) ELSE MIN(sps.price) END) as price,
-                        sp.labels,
-                        sp.sale_count
-                 FROM shop s
-                          INNER JOIN (
-                     SELECT sp.*,
-                            GROUP_CONCAT(concat(l.label_name, '/', l.color) order by spl.id) labels
-                     FROM shop_product sp
-                              LEFT JOIN shop_product_label spl ON spl.shop_product_id = sp.id AND spl.del_flag = 0
-                              LEFT JOIN label l ON l.id = spl.label_id AND l.del_flag = 0
-                     WHERE sp.del_flag = 0
-                       AND sp.shop_prod_status = 1
-                     GROUP BY sp.id
-                 ) sp ON s.id = sp.shop_id
-                          INNER JOIN product_type pt ON pt.id = sp.product_type_id
-                          LEFT JOIN shop_product_spec sps ON sps.shop_prod_id = sp.id AND sps.del_flag = 0
-                          LEFT JOIN kry_combo_group_detail kcgd ON kcgd.dish_id = sp.prod_id AND kcgd.del_flag = 0
-                 WHERE s.id = #{shopId}
-                   AND s.del_flag = 0
-                 GROUP BY
-                     sps.sku_id,kcgd.combo_group_id
-             ) temp
-        GROUP BY temp.id
-        ORDER BY temp.sort, temp.price
+                <!-- 套餐-->
+                select sp.id,
+                       sp.shop_id,
+                       sp.prod_id,
+                       sp.dish_type,
+                       sp.product_name,
+                       sp.product_img,
+                       sp.product_type_id,
+                       sp.product_type,
+                       sp.product_desc,
+                       sp.lable_id,
+                       pt.sort,
+                       sp.sale_count,
+                       min(kcgd.price/100) as price,
+                       max(kcgd.sell_price/100) as market_price
+                from shop_product sp
+                inner join product_type pt on pt.id = sp.product_type_id and pt.del_flag = 0
+                inner join kry_combo_group_detail kcgd on kcgd.dish_id = sp.prod_id and kcgd.del_flag = 0
+                where sp.shop_id = #{shopId}
+                and sp.shop_prod_status = 1
+                and sp.dish_type = 'COMBO'
+                and sp.del_flag = 0
+                group by kcgd.combo_group_id
+        ) temp
+        group by temp.id
+        order by temp.sort,temp.price
     </select>
 
     <select id="search" resultMap="ShopProductMap">

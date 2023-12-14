@@ -85,26 +85,16 @@ public class ShopProductController extends BaseController {
                 return Result.ok();
             }
         }
-        Shop shop = shopService.getById(shopId);
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        ShopProductListVo result = shopProductService.productListByShopId(shopId);
+        ShopProductListVo result = shopProductService.productListByShopId(shopId,lat,lng);
         if(result != null){
-            double distance =  LatAndLngUtils.getDistance(lng.doubleValue(),lat.doubleValue(),
-                    Double.parseDouble(shop.getLng()),Double.parseDouble(shop.getLat()));
-            result.setDistance(BigDecimal.valueOf(distance));
             //当前用户在这个店铺加的购物车
-
             if(userId != null && userId != 0){
                 CartVo cartVo = cartService.getCartByUserIdAndShopId(shopId, userId);
                 result.setTotalPrice(cartVo.getPrice());
                 result.setProdNum(cartVo.getProdNum());
             }
-            CustomerAddress defaultAddress = customerAddressService.getDefaultAddress(userId);
-            result.setDefaultAddress(defaultAddress);
-            shop.setDistance(distance);
-            result.setShopInfo(shop);
         }
-
         //判断下已登录的用户插入店铺浏览记录表
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         if (customerId != null && customerId > 0){

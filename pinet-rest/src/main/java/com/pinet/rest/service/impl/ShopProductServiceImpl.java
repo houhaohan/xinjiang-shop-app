@@ -1,12 +1,13 @@
 package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.util.StringUtil;
-import com.pinet.rest.entity.ProductType;
+import com.pinet.core.util.ThreadLocalUtil;
+import com.pinet.rest.entity.CustomerAddress;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
@@ -19,7 +20,6 @@ import com.pinet.rest.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -46,7 +46,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Autowired
     private IProductGlanceOverService productGlanceOverService;
     @Autowired
-    private IProductTypeService productTypeService;
+    private ICustomerAddressService customerAddressService;
 
     @Resource
     private ILabelService labelService;
@@ -117,8 +117,32 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     }
 
     @Override
-    public ShopProductListVo productListByShopId(Long shopId) {
-        return baseMapper.getProductListByShopId(shopId);
+    public ShopProductListVo productListByShopId(Long shopId,BigDecimal lat,BigDecimal lng) {
+        ShopProductListVo result = new ShopProductListVo();
+        Shop shop = shopService.getById(shopId);
+        double distance = LatAndLngUtils.getDistance(lng.doubleValue(), lat.doubleValue(), Double.valueOf(shop.getLng()), Double.valueOf(shop.getLat()));
+        shop.setDistance(distance);
+        result.setShopInfo(shop);
+        result.setShopId(shop.getId());
+        result.setShopName(shop.getShopName());
+        result.setLat(shop.getLat());
+        result.setLng(shop.getLng());
+        result.setDistance(BigDecimal.valueOf(distance));
+
+        String address = new StringBuilder()
+                .append(shop.getProvince())
+                .append(shop.getCity())
+                .append(shop.getDistrict())
+                .append(shop.getAddress())
+                .toString();
+        result.setAddress(address);
+        List<ProdTypeVo> typeList = baseMapper.getProductListByShopId(shopId);
+        result.setTypeList(typeList);
+
+        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+        CustomerAddress defaultAddress = customerAddressService.getDefaultAddress(userId);
+        result.setDefaultAddress(defaultAddress);
+        return result;
     }
 
     @Override
@@ -149,4 +173,5 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         }
         return getShopProdIdByProdIdVo;
     }
+
 }

@@ -9,6 +9,7 @@ import com.pinet.rest.entity.param.RecommendProductParam;
 import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -43,7 +44,7 @@ public interface IShopProductService extends IService<ShopProduct> {
     /**
      * 店铺商品列表
      */
-    ShopProductListVo productListByShopId(Long shopId);
+    ShopProductListVo productListByShopId(Long shopId, BigDecimal lat,BigDecimal lng);
 
     /**
      * 店铺商品搜索
