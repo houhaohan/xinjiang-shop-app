@@ -12,13 +12,11 @@ import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.JwtTokenUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Customer;
+import com.pinet.rest.entity.CustomerMember;
 import com.pinet.rest.entity.request.LoginRequest;
 import com.pinet.rest.entity.request.SmsLoginRequest;
 import com.pinet.rest.entity.vo.UserInfo;
-import com.pinet.rest.service.ICustomerBalanceService;
-import com.pinet.rest.service.ICustomerCouponService;
-import com.pinet.rest.service.ICustomerService;
-import com.pinet.rest.service.ILoginService;
+import com.pinet.rest.service.*;
 import lombok.RequiredArgsConstructor;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
@@ -39,6 +37,8 @@ public class PhoneLoginServiceImpl implements ILoginService {
     private final ICustomerCouponService customerCouponService;
 
     private final ICustomerBalanceService customerBalanceService;
+
+    private final ICustomerMemberService customerMemberService;
 
     @Override
     @DSTransactional
@@ -86,6 +86,7 @@ public class PhoneLoginServiceImpl implements ILoginService {
             customerBalanceService.addByCustomerId(customer.getCustomerId());
         }
 
+        CustomerMember customerMember = customerMemberService.getByCustomerId(customer.getCustomerId());
         String userId = "" + customer.getCustomerId();
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());
         redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,userId,JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
@@ -95,6 +96,7 @@ public class PhoneLoginServiceImpl implements ILoginService {
         userInfo.setAccess_token(token);
         userInfo.setExpireTime(LocalDateTime.now().plusSeconds(JwtTokenUtils.EXPIRE_TIME/1000));
         userInfo.setUser(customer);
+        userInfo.setCustomerMember(customerMember);
         return userInfo;
     }
 }

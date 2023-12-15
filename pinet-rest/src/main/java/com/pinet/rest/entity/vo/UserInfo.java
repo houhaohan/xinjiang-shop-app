@@ -1,6 +1,7 @@
 package com.pinet.rest.entity.vo;
 
 import com.pinet.rest.entity.Customer;
+import com.pinet.rest.entity.CustomerMember;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,6 +16,10 @@ public class UserInfo {
      */
     @ApiModelProperty("用户信息")
     private Customer user;
+
+    @ApiModelProperty("会员信息")
+    private CustomerMember customerMember;
+
 
     /**
      * token

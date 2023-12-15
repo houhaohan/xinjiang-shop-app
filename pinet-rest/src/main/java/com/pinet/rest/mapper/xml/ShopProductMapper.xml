@@ -241,6 +241,7 @@
         sp.shop_id,
         sp.product_type_id,
         sp.product_type,
+        sp.dish_type,
         (kcgd.price/100) as spsPrice,
         kcg.id as skuId,
         kcg.group_name as skuName,
