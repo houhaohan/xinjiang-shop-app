@@ -214,12 +214,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
 
         Shop shop = shopService.getById(dto.getShopId());
+        //判断店铺是否营业
+        checkShop(shop);
         if (dto.getOrderType() == 1 && shop.getSupportDelivery() == 0) {
             throw new PinetException("该门店暂不支持外卖");
         }
 
         double m = getDistance(dto.getCustomerAddressId(),dto.getOrderType(),shop);
-
 
         OrderSettlementVo vo = new OrderSettlementVo();
         vo.setShopName(shop.getShopName());
@@ -239,10 +240,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
         vo.setPackageFee(packageFee);
         vo.setOrderProductBoList(orderProducts);
-
-        //判断店铺是否营业
-        checkShop(shop);
-
         vo.setOrderMakeCount(countShopOrderMakeNum(dto.getShopId()));
         //计算商品总金额
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);

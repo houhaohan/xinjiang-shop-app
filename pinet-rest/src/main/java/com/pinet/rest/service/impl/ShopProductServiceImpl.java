@@ -108,9 +108,6 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         }else {
             shopProductVo = baseMapper.getDetailById(id);
         }
-
-        String labels = labelService.getByShopProdId(shopProductVo.getId());
-        shopProductVo.setLabels(labels);
         //更新商品浏览次数
         productGlanceOverService.updateGlanceOverTimes(id);
         return shopProductVo;

@@ -34,7 +34,7 @@ public class ShopProductSpecVo{
     private BigDecimal marketPrice;
 
     @ApiModelProperty("库存")
-    private Integer stock;
+    private Integer stock = 9999;
 
     @ApiModelProperty("店铺商品样式id")
     private Integer shopProdSpecId;
