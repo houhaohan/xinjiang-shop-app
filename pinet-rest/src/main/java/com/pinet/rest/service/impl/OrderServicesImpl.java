@@ -138,6 +138,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Resource
     private IShippingFeeRuleService shippingFeeRuleService;
 
+    @Resource
+    private IShopProductService shopProductService;
+
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
@@ -220,7 +223,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new PinetException("该门店暂不支持外卖");
         }
 
-        double m = getDistance(dto.getCustomerAddressId(),dto.getOrderType(),shop);
+        double m = getDistance(dto.getCustomerAddressId(), dto.getOrderType(), shop);
 
         OrderSettlementVo vo = new OrderSettlementVo();
         vo.setShopName(shop.getShopName());
@@ -255,13 +258,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //优惠信息初始化
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
+        //店帮主优惠计算
+        orderProdPrice = getDiscountedPrice(orderProducts,orderDiscounts,customerId,orderProdPrice);
+
         //使用完优惠券处理
         if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
             orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts, 1);
         }
-
-        //店帮主优惠计算
-        orderProdPrice = getDiscountedPrice(customerId, orderProdPrice, orderDiscounts);
 
         //计算订单优惠后现价
         BigDecimal orderPrice = orderProdPrice.add(shippingFee).add(packageFee);
@@ -304,7 +307,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         checkShop(shop);
         //自提订单默认距离是0  外卖订单 校验距离 4公里以内
-        double m = getDistance(dto.getCustomerAddressId(),dto.getOrderType(),shop);
+        double m = getDistance(dto.getCustomerAddressId(), dto.getOrderType(), shop);
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         if (dto.getSettlementType() == 1) {
@@ -337,31 +340,26 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
 
 
-        //优惠信息初始化
-        List<OrderDiscount> orderDiscounts = new ArrayList<>();
-
         //订单商品原价
         BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-
         //用户支付的配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(),m);
+        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), m);
 
         //配送费
-        BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getSelfDelivery(),m);
+        BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getSelfDelivery(), m);
 
 
-        //商品折后价
-        BigDecimal orderProdPrice = orderProdOriginalPrice;
+        //优惠信息初始化
+        List<OrderDiscount> orderDiscounts = new ArrayList<>();
+
+        //店帮主计算后价格
+        BigDecimal orderProdPrice = getDiscountedPrice(orderProducts,orderDiscounts,userId,orderProdOriginalPrice);
 
         //使用完优惠券处理
         if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
             orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts, 2);
         }
-
-        //店帮主
-        orderProdPrice = getDiscountedPrice(userId, orderProdPrice, orderDiscounts);
-
 
         //优惠金额
         BigDecimal discountAmount = orderProdOriginalPrice.subtract(orderProdPrice);
@@ -377,7 +375,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //邀请人必须是店帮主  被邀人不能是店帮主
 
         //创建订单基础信息
-        Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, discountAmount, shop, packageFee,shippingFeePlat);
+        Orders order = createOrder(dto, shippingFee, m, orderPrice, orderProdPrice, discountAmount, shop, packageFee, shippingFeePlat);
         setOrdersCommission(order, orderProducts);
         //插入订单
         this.save(order);
@@ -581,7 +579,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             log.error("微信支付回调出现异常,订单号不存在:" + param.getOrderNo());
             return false;
         }
-        log.info("支付回调查询出订单信息为{}",JSONObject.toJSONString(orders));
+        log.info("支付回调查询出订单信息为{}", JSONObject.toJSONString(orders));
 
 
         OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(), param.getChannelId());
@@ -656,7 +654,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 jmsUtil.delaySend(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders), 10 * 1000L);
 
             }
-            log.info("支付回调更新订单信息为{}",JSONObject.toJSONString(orders));
+            log.info("支付回调更新订单信息为{}", JSONObject.toJSONString(orders));
             return updateById(orders);
         }
     }
@@ -757,6 +755,54 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return discountedPrice;
     }
 
+    /**
+     * 店帮主优惠计算 每个商品分开计算优惠 套餐不参与
+     *
+     * @param orderProducts  订单商品信息
+     * @param orderDiscounts 订单优惠明细
+     * @param customerId     用户id
+     * @param originalPrice  原价
+     * @return 折后价
+     */
+    private BigDecimal getDiscountedPrice(List<OrderProduct> orderProducts, List<OrderDiscount> orderDiscounts, Long customerId, BigDecimal originalPrice) {
+        Integer memberLevel = customerMemberService.getMemberLevel(customerId);
+        MemberLevelEnum memberLevelEnum = MemberLevelEnum.getEnumByCode(memberLevel);
+        //门客不优惠  直接return
+        if (memberLevel.equals(MemberLevelEnum._0.getCode())) {
+            return originalPrice;
+        }
+
+        boolean isCombo = false;
+
+        for (OrderProduct orderProduct : orderProducts) {
+            ShopProduct shopProduct = shopProductService.getById(orderProduct.getShopProdId());
+            if ("COMBO".equals(shopProduct.getDishType())) {
+                isCombo = true;
+            } else {
+                orderProduct.setProdPrice(orderProduct.getProdPrice().multiply(memberLevelEnum.getDiscount()).setScale(2, RoundingMode.HALF_UP));
+            }
+        }
+        //计算折后总价
+        BigDecimal discountedPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        //添加优惠明细
+        OrderDiscount orderDiscount = new OrderDiscount();
+        String discountMsg = memberLevelEnum.getMsg() + memberLevelEnum.getDiscount().multiply(new BigDecimal(10)) + "优惠";
+        orderDiscount.setDiscountMsg(discountMsg)
+                .setDiscountAmount(originalPrice.subtract(discountedPrice)).setType(1);
+        orderDiscounts.add(orderDiscount);
+
+
+        if (isCombo){
+            OrderDiscount orderDiscount1 = new OrderDiscount();
+            orderDiscount1.setDiscountMsg("特价团餐商品无法参与会员优惠").setDiscountAmount(BigDecimal.ZERO).setType(1);
+            orderDiscounts.add(orderDiscount1);
+        }
+
+        return discountedPrice;
+    }
+
+
     @Override
     public List<PickUpListVo> pickUpList() {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
@@ -772,7 +818,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
 
-    private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, BigDecimal discountAmount, Shop shop, BigDecimal packageFee,BigDecimal shippingFeePlat) {
+    private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, BigDecimal discountAmount, Shop shop, BigDecimal packageFee, BigDecimal shippingFeePlat) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Date now = new Date();
         Date estimateArrivalStartTime = DateUtil.offsetHour(now, 1);
@@ -828,10 +874,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      *
      * @param orderType    订单类型( 1外卖  2自提)
      * @param selfDelivery 是否商家自配送( 0-否，1-是)
-     * @param distance 距离 单位m
+     * @param distance     距离 单位m
      * @return BigDecimal
      */
-    private BigDecimal getShippingFeePlat(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo, Integer selfDelivery,Double distance) {
+    private BigDecimal getShippingFeePlat(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo, Integer selfDelivery, Double distance) {
         if (orderType == 2) {
             return new BigDecimal("0");
         }
@@ -890,7 +936,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("kry_order_no", dto.getOrderBody().getRelatedOrderNo());
         Orders orders = getOne(queryWrapper);
-        log.info("客如云状态变更查询orders:{}",JSONObject.toJSONString(orders));
+        log.info("客如云状态变更查询orders:{}", JSONObject.toJSONString(orders));
         //校验:
         //查看是否已经退款
         if (orders.getOrderStatus().equals(OrderStatusEnum.REFUND.getCode())) {
@@ -926,7 +972,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         payService.refund(refundParam);
         //更新订单状态
         orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
-        log.info("客如云状态变更 更新orders:{}",JSONObject.toJSONString(orders));
+        log.info("客如云状态变更 更新orders:{}", JSONObject.toJSONString(orders));
         updateById(orders);
 
 
@@ -1067,7 +1113,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             } else if ("COMBO".equalsIgnoreCase(orderProduct.getDishType())) {
                 orderDishRequest.setItemOriginType("COMBO");
                 orderDishRequest.setDishType("COMBO_DISH");
-                List<KryComboGroupDetailVo> kryComboGroupDetailList = kryComboGroupDetailService.getByOrderProdId(orderProduct.getOrderProductId(),order.getShopId());
+                List<KryComboGroupDetailVo> kryComboGroupDetailList = kryComboGroupDetailService.getByOrderProdId(orderProduct.getOrderProductId(), order.getShopId());
                 for (KryComboGroupDetailVo groupDetail : kryComboGroupDetailList) {
                     ScanCodeDish dish = new ScanCodeDish();
                     dish.setOutDishNo(String.valueOf(groupDetail.getId()));
@@ -1094,7 +1140,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dishList.add(dish);
                 }
             }
-            if(!CollectionUtils.isEmpty(dishList)){
+            if (!CollectionUtils.isEmpty(dishList)) {
                 orderDishRequest.setDishList(dishList);
             }
             orderDishRequestList.add(orderDishRequest);
@@ -1221,7 +1267,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 request.setDishType("COMBO_DISH");
                 request.setItemOriginType("COMBO");
                 //套餐明细
-                List<KryComboGroupDetailVo> kryComboGroupDetailList = kryComboGroupDetailService.getByOrderProdId(orderProduct.getOrderProductId(),orders.getShopId());
+                List<KryComboGroupDetailVo> kryComboGroupDetailList = kryComboGroupDetailService.getByOrderProdId(orderProduct.getOrderProductId(), orders.getShopId());
                 for (KryComboGroupDetailVo groupDetail : kryComboGroupDetailList) {
                     ScanCodeDish dish = new ScanCodeDish();
                     dish.setOutDishNo(String.valueOf(groupDetail.getId()));
