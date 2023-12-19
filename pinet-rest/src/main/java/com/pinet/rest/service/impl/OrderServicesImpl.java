@@ -1,12 +1,13 @@
 package com.pinet.rest.service.impl;
 
+import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -32,6 +33,7 @@ import com.pinet.keruyun.openapi.vo.OrderDetailVO;
 import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
 import com.pinet.keruyun.openapi.vo.TakeoutOrderCreateVo;
 import com.pinet.rest.entity.*;
+import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
@@ -48,6 +50,7 @@ import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -195,7 +198,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderDetailVo.setProdTotalNum(prodTotalNum);
         orderDetailVo.setOrderDiscounts(orderDiscountService.getByOrderId(orderDetailVo.getOrderId()));
 
-        if (StringUtil.isBlank(orderDetailVo.getMealCode()) && StringUtil.isNotBlank(orderDetailVo.getKryOrderNo())) {
+        if (StringUtil.isBlank(orderDetailVo.getMealCode())) {
             String token = kryApiService.getToken(AuthType.SHOP, orderDetailVo.getKryShopId());
             KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
             kryOrderDetailDTO.setOrderId(orderDetailVo.getKryOrderNo());
@@ -995,6 +998,44 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         return true;
     }
+    @Autowired
+    private WxMaService wxMaService;
+
+    @Autowired
+    private ICustomerService customerService;
+
+
+
+    @Override
+    public void performanceCall(PerformanceCallDTO dto) {
+        if(!"OPEN_PLATFORM".equalsIgnoreCase(dto.getOrderSource())){
+            return;
+        }
+        try {
+            QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("kry_order_no",dto.getOrderId());
+            Orders orders = getOne(queryWrapper);
+            Customer customer = customerService.getById(orders.getCustomerId());
+            List<OrderProduct> orderProducts = orderProductService.getByOrderId(orders.getId());
+
+            String prodNames = orderProducts.stream().map(OrderProduct::getProdName).collect(Collectors.joining(",\n"));
+            ArrayList<WxMaSubscribeMessage.MsgData> msgDataList = new ArrayList<>(5);
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("date15",DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS,orders.getCreateTime())));//下单时间
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing11",prodNames));//餐品详情
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("amount13",String.valueOf(orders.getOrderPrice())));//订单金额
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("character_string19",orders.getMealCode()));//取餐号
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing7","您的餐品已制作完成，请到前台领取"));//温馨提醒
+
+            WxMaSubscribeMessage wxMaSubscribeMessage = WxMaSubscribeMessage.builder()
+                    .templateId("UQ9ksqAUuRgVLgii5aE3lsfsoO3ciByyED3R9WKZsCA")
+                    .data(msgDataList)
+                    .toUser(customer.getQsOpenId())
+                    .build();
+            wxMaService.getMsgService().sendSubscribeMsg(wxMaSubscribeMessage);
+        } catch (WxErrorException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     /**
@@ -1160,7 +1201,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         deliveryInfoRequest.setLongitude(new BigDecimal(orderAddress.getLng()));
         takeoutOrderCreateDTO.setDeliveryInfoRequestList(Arrays.asList(deliveryInfoRequest));
 
-
         System.err.println(JSONObject.toJSONString(takeoutOrderCreateDTO));
         String token = kryApiService.getToken(AuthType.SHOP, order.getKryShopId());
         TakeoutOrderCreateVo takeoutOrderCreateVo = kryApiService.openTakeoutOrderCreate(order.getKryShopId(), token, takeoutOrderCreateDTO);
@@ -1302,6 +1342,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
+        System.err.println(JSONObject.toJSONString(dto));
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
         //记录日志

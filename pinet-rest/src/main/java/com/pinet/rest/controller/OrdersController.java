@@ -218,11 +218,15 @@ public class OrdersController extends BaseController {
     @NotTokenSign
     public KryResponse performanceCall(@RequestParam(required = false) String validate, @RequestBody PerformanceCallDTO dto){
         log.info("履约叫号触达参数===============>{}",JSONObject.toJSONString(dto));
+        if(!"OPEN_PLATFORM".equalsIgnoreCase(dto.getOrderSource())){
+            return null;
+        }
 
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
         response.setMessageUuid(UUID.randomUUID().toString());
-        if("success".equals(validate)){
+        if(StringUtil.isBlank(validate) || "success".equals(validate)){
+            ordersService.performanceCall(dto);
             response.setCode(0);
             return response;
         }

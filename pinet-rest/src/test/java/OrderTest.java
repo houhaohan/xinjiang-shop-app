@@ -2,6 +2,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.pinet.PinetApplication;
 import com.pinet.keruyun.openapi.dto.KryOrderDetailDTO;
+import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
 import com.pinet.keruyun.openapi.param.DetailDishParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.keruyun.openapi.type.AuthType;
@@ -54,5 +55,18 @@ public class OrderTest {
         param.setDishIds(Arrays.asList("1065757360555"));
         KryResult<List<DetailDishVO>> listKryResult = kryApiService.listQueryDetailDish(13290197L, token, param);
         System.err.println(JSON.toJSONString(listKryResult));
+    }
+
+
+    /**
+     * 叫号
+     */
+    @Test
+    public void performanceCall(){
+        PerformanceCallDTO dto = new PerformanceCallDTO();
+        dto.setOrderSource("OPEN_PLATFORM");
+        dto.setOrderId("20231219061316000113113935200184");
+
+        ordersService.performanceCall(dto);
     }
 }

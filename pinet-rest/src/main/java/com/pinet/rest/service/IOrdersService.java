@@ -2,6 +2,7 @@ package com.pinet.rest.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.keruyun.openapi.dto.OrderSyncDTO;
+import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.dto.*;
@@ -95,4 +96,10 @@ public interface IOrdersService extends IService<Orders> {
      * @return
      */
     boolean completeOrder(Long orderId);
+
+    /**
+     * 履约叫号
+     * @param dto
+     */
+    void performanceCall(PerformanceCallDTO dto);
 }
