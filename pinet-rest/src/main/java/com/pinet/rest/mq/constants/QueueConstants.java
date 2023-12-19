@@ -29,11 +29,6 @@ public class QueueConstants {
     public static final String QING_COUPON_EXPIRE_WARN_NAME = "qingshi.coupon.expire.warn.queue";
 
     /**
-     * 订单履约叫号(出餐叫号)
-     */
-    public static final String QING_ORDER_PREFORMANCE_CALL = "qingshi.order.preformance.call.queue";
-
-    /**
      * 轻食自提订单发送短信给指定号码
      */
     public static final String QING_ORDER_SEND_SMS_NAME = "qingshi.order.send.sms.queue";
