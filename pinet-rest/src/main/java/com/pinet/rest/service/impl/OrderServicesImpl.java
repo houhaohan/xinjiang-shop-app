@@ -1023,7 +1023,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             msgDataList.add(new WxMaSubscribeMessage.MsgData("date15",DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS,orders.getCreateTime())));//下单时间
             msgDataList.add(new WxMaSubscribeMessage.MsgData("thing11",prodNames));//餐品详情
             msgDataList.add(new WxMaSubscribeMessage.MsgData("amount13",String.valueOf(orders.getOrderPrice())));//订单金额
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("character_string19","100003"));//取餐号
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("character_string19",orders.getMealCode()));//取餐号
             msgDataList.add(new WxMaSubscribeMessage.MsgData("thing7","您的餐品已制作完成，请到前台领取"));//温馨提醒
 
             WxMaSubscribeMessage wxMaSubscribeMessage = WxMaSubscribeMessage.builder()

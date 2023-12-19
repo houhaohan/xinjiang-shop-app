@@ -34,10 +34,11 @@ public class krytest {
 
     @Test
     public void test(){
+        String token = kryApiService.getToken(AuthType.SHOP, 13290197L);
         DetailDishParam param = new DetailDishParam();
 //        param.setDishIds(Arrays.asList("958810830555"));
 //        param.setDishIds(Arrays.asList("959210910555"));
-        param.setDishIds(Arrays.asList("959210910555"));
+//        param.setDishIds(Arrays.asList("959210910555"));
 
 //        String s = kryCallService.postCall(KryAPI.BRAND_SHOP_DISH, AuthType.SHOP, 13290197L, "97b6428f0aa494666462dd0dc92f6f9d", null);
 //        System.out.println(s);
@@ -53,10 +54,10 @@ public class krytest {
 
 
 
-//        KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
-//        kryOrderDetailDTO.setOrderId("20230901061316000169538099230184");
-//        OrderDetailVO orderDetail = kryApiService.getOrderDetail(13290197L, "97b6428f0aa494666462dd0dc92f6f9d", kryOrderDetailDTO);
-//        System.out.println(JsonUtil.toJson(orderDetail));
+        KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
+        kryOrderDetailDTO.setOrderId("20231213121416000104275669620184");
+        OrderDetailVO orderDetail = kryApiService.getOrderDetail(13290197L, token, kryOrderDetailDTO);
+        System.out.println(JsonUtil.toJson(orderDetail));
 
     }
 }
