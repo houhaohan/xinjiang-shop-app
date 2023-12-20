@@ -198,19 +198,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderDetailVo.setProdTotalNum(prodTotalNum);
         orderDetailVo.setOrderDiscounts(orderDiscountService.getByOrderId(orderDetailVo.getOrderId()));
 
-        if (StringUtil.isBlank(orderDetailVo.getMealCode())) {
-            String token = kryApiService.getToken(AuthType.SHOP, orderDetailVo.getKryShopId());
-            KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
-            kryOrderDetailDTO.setOrderId(orderDetailVo.getKryOrderNo());
-            OrderDetailVO orderDetail = kryApiService.getOrderDetail(orderDetailVo.getKryShopId(), token, kryOrderDetailDTO);
-            if (orderDetail != null) {
-                Orders orders = new Orders();
-                orders.setId(orderId);
-                orders.setMealCode(orderDetail.getOrderBaseVO().getSerialNo());
-                updateById(orders);
-                orderDetailVo.setMealCode(orders.getMealCode());
-            }
-        }
+//        if (StringUtil.isBlank(orderDetailVo.getMealCode())) {
+//            String token = kryApiService.getToken(AuthType.SHOP, orderDetailVo.getKryShopId());
+//            KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
+//            kryOrderDetailDTO.setOrderId(orderDetailVo.getKryOrderNo());
+//            OrderDetailVO orderDetail = kryApiService.getOrderDetail(orderDetailVo.getKryShopId(), token, kryOrderDetailDTO);
+//            if (orderDetail != null) {
+//                Orders orders = new Orders();
+//                orders.setId(orderId);
+//                orders.setMealCode(orderDetail.getOrderBaseVO().getSerialNo());
+//                updateById(orders);
+//                orderDetailVo.setMealCode(orders.getMealCode());
+//            }
+//        }
         return orderDetailVo;
     }
 
@@ -1135,8 +1135,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequest.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             orderDishRequest.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             orderDishRequest.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
-            orderDishRequest.setPromoFee(0L);
-            orderDishRequest.setActualFee(orderDishRequest.getTotalFee());
+            orderDishRequest.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            orderDishRequest.setPromoFee(orderDishRequest.getTotalFee().longValue() - orderDishRequest.getActualFee().longValue());
             orderDishRequest.setUnitId(orderProduct.getUnitId());
             orderDishRequest.setUnitName(orderProduct.getUnit());
             orderDishRequest.setUnitCode(orderProduct.getUnitId());
@@ -1178,7 +1178,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setIsPack("true");
                     dish.setDishGiftFlag("false");
                     dish.setItemOriginType("SINGLE");
-                    dish.setDishSkuId(orderProduct.getKrySkuId());
+                    dish.setDishSkuId(groupDetail.getDishSkuId());
                     dishList.add(dish);
                 }
             }
@@ -1284,9 +1284,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishQuantity(orderProduct.getProdNum());
             request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
-            request.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
-            request.setPromoFee(0L);
-            request.setActualFee(request.getTotalFee().intValue() - request.getPromoFee().intValue());
+            request.setTotalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
+            request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
+            request.setPromoFee(request.getTotalFee().longValue() - request.getActualFee().longValue());
             request.setPackageFee("0");
             request.setDishSkuId(orderProduct.getKrySkuId());
             request.setDishSkuCode(orderProduct.getSkuCode());
@@ -1320,7 +1320,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setDishQuantity(new BigDecimal(String.valueOf(orderProduct.getProdNum())));
                     dish.setDishFee(BigDecimalUtil.yuan2Fen(orderProduct.getProdUnitPrice()));
                     dish.setUnitId(groupDetail.getUnitId());
-                    dish.setUnitCode(groupDetail.getUnit());
+                    dish.setUnitCode(groupDetail.getUnitId());
                     dish.setUnitName(groupDetail.getUnit());
                     dish.setDishOriginalFee(groupDetail.getSellPrice());
                     dish.setTotalFee(groupDetail.getSellPrice());
@@ -1332,7 +1332,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     dish.setIsPack("false");
                     dish.setDishGiftFlag("false");
                     dish.setItemOriginType("SINGLE");
-                    dish.setDishSkuId(orderProduct.getKrySkuId());
+                    dish.setDishSkuId(groupDetail.getDishSkuId());
                     dishList.add(dish);
                 }
             }

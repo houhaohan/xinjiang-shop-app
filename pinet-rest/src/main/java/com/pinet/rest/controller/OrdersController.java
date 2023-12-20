@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.pinet.core.controller.BaseController;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
@@ -14,6 +15,7 @@ import com.pinet.keruyun.openapi.dto.OrderChangeEventDTO;
 import com.pinet.keruyun.openapi.dto.OrderSyncDTO;
 import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
 import com.pinet.keruyun.openapi.vo.KryResponse;
+import com.pinet.rest.entity.Orders;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderPayDto;
@@ -146,15 +148,22 @@ public class OrdersController extends BaseController {
     @NotTokenSign
     public KryResponse syncOrderStatus(@RequestParam(required = false) String validate,@RequestBody OrderSyncDTO dto){
         log.info("订单状态同步参数===========>{}",JSONObject.toJSONString(dto));
-
         OrderBodyDTO orderBody = dto.getOrderBody();
         if(orderBody != null){
+            if(StringUtil.isNotBlank(orderBody.getMealCode())){
+                UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
+                wrapper.eq("order_no", orderBody.getOutBizId());
+                Orders orders = new Orders();
+                orders.setMealCode(orderBody.getMealCode());
+                ordersService.update(orders,wrapper);
+            }
             if("ORDER".equalsIgnoreCase(dto.getDomain())
                     && "ORDER_SUCCESS".equalsIgnoreCase(dto.getEventCode())
                     && "ORDER_REFUND".equalsIgnoreCase(orderBody.getRefundAction())){
                 ordersService.syncOrderStatus(dto);
             }
         }
+
 
         KryResponse response = new KryResponse();
         if(StringUtil.isBlank(validate)){
