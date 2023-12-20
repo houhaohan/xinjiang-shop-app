@@ -53,6 +53,7 @@
         kcgd.dish_name,
         kcgd.spec_name,
         kcgd.sell_price,
+        kcgd.price,
         kcgd.multi_spec_flag,
         kcgd.sort,
         sp.unit_id,

@@ -138,6 +138,7 @@ public class DaDaServiceImpl implements IDaDaService {
             throw new PinetException("该门店暂不支持外卖订单");
         }
         if(DeliveryPlatformEnum.ZPS.getCode().equals(shop.getDeliveryPlatform())){
+            orders.setOrderStatus(OrderStatusEnum.MAKE.getCode());
             return null;
         }
         AddOrderReq req = addOrderReq(orders);

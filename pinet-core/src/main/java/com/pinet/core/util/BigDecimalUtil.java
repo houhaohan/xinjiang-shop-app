@@ -50,6 +50,7 @@ public class BigDecimalUtil {
     public static BigDecimal sum(BigDecimal amount1,BigDecimal amount2) {
         return amount1.add(amount2);
     }
+
     /**
      * 两数之差
      * @param amount1
@@ -59,5 +60,17 @@ public class BigDecimalUtil {
     public static BigDecimal subtract(BigDecimal amount1,BigDecimal amount2) {
         return amount1.subtract(amount2);
     }
+
+    /**
+     * 两数之积
+     * @param unitPrice (单位元)
+     * @param num
+     * @return 单位分
+     */
+    public static Integer multiply(BigDecimal unitPrice, Integer num) {
+        BigDecimal yuan = unitPrice.multiply(new BigDecimal(num));
+        return yuanToFen(yuan);
+    }
+
 
 }

@@ -49,8 +49,11 @@ public class KryComboGroupDetailVo {
     @ApiModelProperty("子菜规格名")
     private String specName;
 
-    @ApiModelProperty("子菜售卖价，单位：分")
+    @ApiModelProperty("子菜客如云售卖价，单位：分")
     private Long sellPrice;
+
+    @ApiModelProperty("子菜小程序售卖价，单位：分")
+    private Long price;
 
     @ApiModelProperty("子菜是否为多规格 Y:是，N:否")
     private String multiSpecFlag;
