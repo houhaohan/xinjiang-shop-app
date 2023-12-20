@@ -36,10 +36,7 @@ import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.*;
-import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
-import com.pinet.rest.entity.enums.CapitalFlowWayEnum;
-import com.pinet.rest.entity.enums.MemberLevelEnum;
-import com.pinet.rest.entity.enums.OrderStatusEnum;
+import com.pinet.rest.entity.enums.*;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.OrderRefundNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
@@ -198,19 +195,15 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderDetailVo.setProdTotalNum(prodTotalNum);
         orderDetailVo.setOrderDiscounts(orderDiscountService.getByOrderId(orderDetailVo.getOrderId()));
 
-//        if (StringUtil.isBlank(orderDetailVo.getMealCode())) {
-//            String token = kryApiService.getToken(AuthType.SHOP, orderDetailVo.getKryShopId());
-//            KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
-//            kryOrderDetailDTO.setOrderId(orderDetailVo.getKryOrderNo());
-//            OrderDetailVO orderDetail = kryApiService.getOrderDetail(orderDetailVo.getKryShopId(), token, kryOrderDetailDTO);
-//            if (orderDetail != null) {
-//                Orders orders = new Orders();
-//                orders.setId(orderId);
-//                orders.setMealCode(orderDetail.getOrderBaseVO().getSerialNo());
-//                updateById(orders);
-//                orderDetailVo.setMealCode(orders.getMealCode());
-//            }
-//        }
+        if (StringUtil.isBlank(orderDetailVo.getMealCode())) {
+            String token = kryApiService.getToken(AuthType.SHOP, orderDetailVo.getKryShopId());
+            KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
+            kryOrderDetailDTO.setOrderId(orderDetailVo.getKryOrderNo());
+            OrderDetailVO orderDetail = kryApiService.getOrderDetail(orderDetailVo.getKryShopId(), token, kryOrderDetailDTO);
+            if (orderDetail != null) {
+                orderDetailVo.setMealCode(orderDetail.getOrderBaseVO().getSerialNo());
+            }
+        }
         return orderDetailVo;
     }
 
@@ -350,7 +343,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         BigDecimal shippingFee = getShippingFee(dto.getOrderType(), m);
 
         //配送费
-        BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getSelfDelivery(), m);
+        BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getDeliveryPlatform());
 
 
         //优惠信息初始化
@@ -876,11 +869,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * 获取平台配送费
      *
      * @param orderType    订单类型( 1外卖  2自提)
-     * @param selfDelivery 是否商家自配送( 0-否，1-是)
-     * @param distance     距离 单位m
+     * @param deliveryPlatform 配送平台( ZPS-自配送，DADA-达达)
      * @return BigDecimal
      */
-    private BigDecimal getShippingFeePlat(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo, Integer selfDelivery, Double distance) {
+    private BigDecimal getShippingFeePlat(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo, String deliveryPlatform) {
         if (orderType == 2) {
             return new BigDecimal("0");
         }
@@ -888,7 +880,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (!"prod".equals(active)) {
             return new BigDecimal("4");
         }
-        if (StringUtil.isBlank(deliveryShopNo) || selfDelivery == 1) {
+        if (StringUtil.isBlank(deliveryShopNo) || deliveryPlatform.equals(DeliveryPlatformEnum.ZPS.getCode())) {
             //todo 商家没有对接外卖平台，自配送
             return BigDecimal.ZERO;
         }

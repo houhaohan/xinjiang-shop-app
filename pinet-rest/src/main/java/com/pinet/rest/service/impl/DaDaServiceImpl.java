@@ -17,6 +17,7 @@ import com.imdada.open.platform.exception.RpcException;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.*;
+import com.pinet.rest.entity.enums.DeliveryPlatformEnum;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
@@ -28,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -137,7 +137,7 @@ public class DaDaServiceImpl implements IDaDaService {
         if(shop.getSupportDelivery() == 0){
             throw new PinetException("该门店暂不支持外卖订单");
         }
-        if(shop.getSelfDelivery() == 1){
+        if(DeliveryPlatformEnum.ZPS.getCode().equals(shop.getDeliveryPlatform())){
             return null;
         }
         AddOrderReq req = addOrderReq(orders);

@@ -47,14 +47,14 @@ public class OrderTest {
     @Test
     public void test2(){
         String token = kryApiService.getToken(AuthType.SHOP, 13290197L);
-//        KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
-//        kryOrderDetailDTO.setOrderId("20231122061316000176021590390183");
-//        OrderDetailVO orderDetail = kryApiService.getOrderDetail(13290198L, token, kryOrderDetailDTO);
+        KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
+        kryOrderDetailDTO.setOrderId("20231220061316000116975405200184");
+        OrderDetailVO orderDetail = kryApiService.getOrderDetail(13290197L, token, kryOrderDetailDTO);
 
-        DetailDishParam param = new DetailDishParam();
-        param.setDishIds(Arrays.asList("1065757360555"));
-        KryResult<List<DetailDishVO>> listKryResult = kryApiService.listQueryDetailDish(13290197L, token, param);
-        System.err.println(JSON.toJSONString(listKryResult));
+//        DetailDishParam param = new DetailDishParam();
+//        param.setDishIds(Arrays.asList("1065757360555"));
+//        KryResult<List<DetailDishVO>> listKryResult = kryApiService.listQueryDetailDish(13290197L, token, param);
+        System.err.println(JSON.toJSONString(orderDetail));
     }
 
 
@@ -65,7 +65,7 @@ public class OrderTest {
     public void performanceCall(){
         PerformanceCallDTO dto = new PerformanceCallDTO();
         dto.setOrderSource("OPEN_PLATFORM");
-        dto.setOrderId("20231219061316000113113935200184");
+        dto.setOrderId("20231219061316000109039670780184");
 
         ordersService.performanceCall(dto);
     }
