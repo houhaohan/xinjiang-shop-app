@@ -323,6 +323,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderProducts.add(orderProduct);
         }
 
+        //todo 暂时不考虑库存
         //减少已购商品的库存(第一版暂不加锁 后期考虑加乐观锁或redis锁)
 //        for (OrderProduct orderProduct : orderProducts) {
 //            for (OrderProductSpec orderProductSpec : orderProduct.getOrderProductSpecs()) {
@@ -339,6 +340,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //订单商品原价
         BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if(dto.getOrderType() == 1 && shop.getMinDeliveryPrice().compareTo(orderProdOriginalPrice) > 0){
+            throw new PinetException("餐品价格低于"+shop.getMinDeliveryPrice()+"元，无法配送");
+        }
 
         //用户支付的配送费
         BigDecimal shippingFee = getShippingFee(dto.getOrderType(), distance,shop.getDeliveryPlatform());
@@ -374,6 +379,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //创建订单基础信息
         Orders order = createOrder(dto, shippingFee, distance, orderPrice, orderProdPrice, discountAmount, shop, packageFee, shippingFeePlat);
         setOrdersCommission(order, orderProducts);
+
         //插入订单
         this.save(order);
 
@@ -435,7 +441,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
             distance = LatAndLngUtils.getDistance(customerAddress.getLng().doubleValue(), customerAddress.getLat().doubleValue(),
                     Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
-            if (distance > 4000D) {
+            if (distance > shop.getDeliveryDistance()) {
                 throw new PinetException("店铺距离过远,无法配送");
             }
         }

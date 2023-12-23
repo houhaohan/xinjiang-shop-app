@@ -338,9 +338,9 @@
                temp.lng,
                temp.product_type_id,
                temp.product_type,
-               sum(price)        as price
+               sum(price) as price
         from (
-                 select s.id                 as shopId,
+                 select s.id  as shopId,
                         s.shop_name,
                         sp.id,
                         sp.prod_id,
@@ -350,14 +350,37 @@
                         s.lat,
                         sp.product_type_id,
                         sp.product_type,
-                        min(sps.price)       as price
+                        min(sps.price) as price
                  from shop s
-                          left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
-                          left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
+                 left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
+                 left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
                  where s.id = #{shopId}
                    and sp.product_name like concat('%', #{productName}, '%')
                    and s.del_flag = 0
                  group by sps.sku_id
+
+                 union all
+
+                 select s.id as shopId,
+                       s.shop_name,
+                       sp.id,
+                       sp.prod_id,
+                       sp.product_name,
+                       sp.product_img,
+					   s.lng,
+                       s.lat,
+                       sp.product_type_id,
+                       sp.product_type,
+                       min(kcgd.price/100) as price
+                from shop s
+				inner join shop_product sp on s.id = sp.shop_id
+                inner join kry_combo_group_detail kcgd on kcgd.dish_id = sp.prod_id and kcgd.del_flag = 0
+                where sp.shop_id = #{shopId}
+                and sp.shop_prod_status = 1
+                and sp.dish_type = 'COMBO'
+				and sp.product_name like concat('%', #{productName}, '%')
+                and sp.del_flag = 0
+                group by kcgd.combo_group_id
              ) temp
         group by temp.id
     </select>
@@ -365,7 +388,7 @@
     <select id="sellwell" resultType="String">
         select sp.product_name
         from shop_product sp
-                 inner join orders o on o.shop_id = sp.shop_id and o.del_flag = 0
+        inner join orders o on o.shop_id = sp.shop_id and o.del_flag = 0
         where o.shop_id = #{shopId}
           and o.order_status = 100
           and sp.del_flag = 0

@@ -14,5 +14,13 @@ public interface ILoginService {
      */
     public UserInfo login(LoginRequest request) throws WxErrorException;
 
+    /**
+     * 根据code 获取token
+     * @param code
+     * @return
+     * @throws WxErrorException
+     */
+    public UserInfo oldUserLogin(String code) throws WxErrorException;
+
 
 }
