@@ -40,5 +40,8 @@ public class CustomerBalance{
     @ApiModelProperty("冻结余额")
     private BigDecimal blockedBalance;
 
+    @ApiModelProperty("积分")
+    private Integer score;
+
 
 }

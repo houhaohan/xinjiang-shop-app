@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.ScoreRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.ScoreRecord">
+        <result column="id" property="id"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="shop_name" property="shopName"/>
+        <result column="score_title" property="scoreTitle"/>
+        <result column="score" property="score"/>
+        <result column="fk_id" property="fkId"/>
+        <result column="score_type" property="scoreType"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,
+        create_by,
+        create_time,
+        update_by,
+        update_time,
+        del_flag,
+        customer_id,shop_id, shop_name, score_title, score, fk_id, score_type
+    </sql>
+    <select id="selectPageList" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from score_record where del_flag = 0 and customer_id = #{customerId} order by id desc
+    </select>
+
+</mapper>

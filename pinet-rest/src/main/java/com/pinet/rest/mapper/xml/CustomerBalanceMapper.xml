@@ -8,11 +8,12 @@
         <result column="balance" property="balance" />
         <result column="available_balance" property="availableBalance" />
         <result column="blocked_balance" property="blockedBalance" />
+        <result column="score" property="score" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        customer_id, balance, available_balance, blocked_balance
+        customer_id, balance, available_balance, blocked_balance,score
     </sql>
 
 </mapper>

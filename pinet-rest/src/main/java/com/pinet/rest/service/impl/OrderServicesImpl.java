@@ -801,6 +801,18 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return discountedPrice;
     }
 
+    /**
+     * 获取积分
+     * @param customerId 用户id
+     * @param orderPrice 订单价格
+     * @return 积分
+     */
+    private Integer getScore(Long customerId,BigDecimal orderPrice){
+        Integer memberLevel = customerMemberService.getMemberLevel(customerId);
+
+        return 0;
+    }
+
 
     @Override
     public List<PickUpListVo> pickUpList() {
