@@ -93,6 +93,12 @@ public class Shop extends BaseEntity {
     @ApiModelProperty("配送平台 店铺编码")
     private String deliveryShopNo;
 
+    @ApiModelProperty("起送价")
+    private BigDecimal minDeliveryPrice;
+
+    @ApiModelProperty("配送距离")
+    private Double deliveryDistance;
+
     @ApiModelProperty("距离")
     @TableField(exist = false)
     private Double distance;

@@ -9,8 +9,7 @@ import javax.validation.constraints.NotBlank;
 @ApiModel(value = "WxLoginRequest",description = "微信登入参数")
 public class WxLoginRequest extends LoginRequest {
 
-    @NotBlank(message = "code不能为空")
-    @ApiModelProperty(value = "code",required = true)
+    @ApiModelProperty(value = "code")
     private String code;
 
     @NotBlank(message = "参数encryptedData不能为空")
@@ -29,4 +28,10 @@ public class WxLoginRequest extends LoginRequest {
 
     @ApiModelProperty("性别： 0：未知、1：男、2：女")
     private Integer gender;
+
+    @ApiModelProperty("sessionKey")
+    private String sessionKey;
+
+    @ApiModelProperty("openid")
+    private String openid;
 }

@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,13 @@ public class LoginController {
     @Autowired
     private RedisUtil redisUtil;
 
+    @Autowired
+    @Qualifier("wxLoginService")
+    private ILoginService wxLoginService;
+
+    @Autowired
+    @Qualifier("phoneLoginService")
+    private ILoginService phoneLoginService;
 
     /**
      * 参考：https://blog.csdn.net/weixin_45411101/article/details/124491929
@@ -41,8 +49,27 @@ public class LoginController {
     @ApiVersion(1)
     public Result<UserInfo> wxLogin(@Validated @RequestBody WxLoginRequest request){
         try{
-            ILoginService loginService = SpringContextUtils.getBean("wxLoginService", ILoginService.class);
-            UserInfo userInfo = loginService.login(request);
+            UserInfo userInfo = wxLoginService.login(request);
+            return Result.ok(userInfo);
+        }
+        catch (Exception e){
+            log.error("微信登入失败，失败原因=======》{}",e);
+        }
+        return Result.error(500,"登入失败");
+    }
+
+
+    /**
+     * 老用户登入
+     * @param request
+     * @return
+     */
+    @PostMapping("/oldUserLogin")
+    @ApiOperation("老用户登入")
+    @ApiVersion(1)
+    public Result<UserInfo> oldUserLogin(@RequestBody WxLoginRequest request){
+        try{
+            UserInfo userInfo = wxLoginService.oldUserLogin(request.getCode());
             return Result.ok(userInfo);
         }
         catch (WxErrorException e){
@@ -65,8 +92,7 @@ public class LoginController {
     @ApiVersion(1)
     public Result<?> smsLogin(@Validated @RequestBody SmsLoginRequest request){
         try{
-            ILoginService loginService = SpringContextUtils.getBean("phoneLoginService", ILoginService.class);
-            UserInfo response = loginService.login(request);
+            UserInfo response = phoneLoginService.login(request);
             return Result.ok(response);
         }catch (LoginException e){
             return Result.error(500,e.getMsg());

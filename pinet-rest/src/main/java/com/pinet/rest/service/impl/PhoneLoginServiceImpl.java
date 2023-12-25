@@ -75,6 +75,8 @@ public class PhoneLoginServiceImpl implements ILoginService {
                     .lastLoginIp(ip)
                     .lastLoginTime(System.currentTimeMillis())
                     .phone(smsLoginRequest.getPhone())
+                    .avatar(UserConstant.DEFAULT_USER_AVATAR)
+                    .nickname(UserConstant.DEFAULT_USER_NAME)
                     .qsOpenId(openid)
                     .active(1)
                     .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
@@ -98,5 +100,10 @@ public class PhoneLoginServiceImpl implements ILoginService {
         userInfo.setUser(customer);
         userInfo.setCustomerMember(customerMember);
         return userInfo;
+    }
+
+    @Override
+    public UserInfo oldUserLogin(String code) throws WxErrorException {
+        return null;
     }
 }

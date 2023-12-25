@@ -1,5 +1,6 @@
 package com.pinet.rest.entity.vo;
 
+import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.CustomerMember;
 import io.swagger.annotations.ApiModel;
@@ -32,4 +33,7 @@ public class UserInfo {
      */
     @ApiModelProperty("失效时间")
     private LocalDateTime expireTime;
+
+    @ApiModelProperty("微信session信息")
+    private WxMaJscode2SessionResult sessionInfo;
 }
