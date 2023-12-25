@@ -258,6 +258,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //店帮主优惠计算
         orderProdPrice = getDiscountedPrice(orderProducts,orderDiscounts,customerId,orderProdPrice);
 
+        //店帮主优惠后价格 该价格用来优惠券是否可用
+        BigDecimal customerMemberPrice = orderProdPrice;
+
         //使用完优惠券处理
         if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
             orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts, 1);
@@ -281,7 +284,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         List<CustomerCoupon> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));
         for (CustomerCoupon customerCoupon : customerCoupons) {
-            Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), vo.getOriginalOrderProductPrice());
+            Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), customerMemberPrice);
             customerCoupon.setIsUsable(isUsable);
         }
         vo.setCustomerCoupons(customerCoupons);
