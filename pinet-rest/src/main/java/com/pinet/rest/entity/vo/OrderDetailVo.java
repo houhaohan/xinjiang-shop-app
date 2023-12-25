@@ -112,4 +112,7 @@ public class OrderDetailVo {
     @ApiModelProperty(value = "打包费",name = "packageFee")
     private BigDecimal packageFee;
 
+    @ApiModelProperty(value = "积分",name = "score")
+    private Integer score;
+
 }

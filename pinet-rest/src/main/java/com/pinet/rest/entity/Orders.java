@@ -94,6 +94,9 @@ public class Orders extends BaseEntity {
     @ApiModelProperty("佣金")
     private BigDecimal commission;
 
+    @ApiModelProperty("积分")
+    private Integer score;
+
     @ApiModelProperty("使用的优惠券id  0表示未使用")
     private Long customerCouponId;
 

@@ -34,5 +34,8 @@ public class BUserBalance extends BaseEntity {
     @ApiModelProperty("余额")
     private BigDecimal amount;
 
+    @ApiModelProperty("积分")
+    private Integer score;
+
 
 }

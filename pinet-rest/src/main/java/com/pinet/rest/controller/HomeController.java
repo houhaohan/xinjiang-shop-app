@@ -82,7 +82,7 @@ public class HomeController extends BaseController {
     @ApiOperation("我的页面上方统计")
     @RequestMapping("/topCount")
     @ApiVersion(1)
-    public Result<?> topCount() {
+    public Result<TopCountDto> topCount() {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         TopCountDto topCountDto = new TopCountDto();
         Integer couponCount = customerCouponService.countByCustomerId(customerId);
@@ -92,6 +92,7 @@ public class HomeController extends BaseController {
         CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
         if (ObjectUtil.isNotNull(customerBalance)){
             topCountDto.setBalance(customerBalance.getAvailableBalance());
+            topCountDto.setPoint(customerBalance.getScore());
         }
         return Result.ok(topCountDto);
     }
@@ -102,7 +103,7 @@ public class HomeController extends BaseController {
     @PostMapping("/balance")
     @ApiOperation("余额")
     @ApiVersion(1)
-    public Result<?> balance(){
+    public Result<BalanceVo> balance(){
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         BalanceVo vo = new BalanceVo();
         CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
