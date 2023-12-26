@@ -26,23 +26,45 @@ public class CustomerBalanceServiceImpl extends ServiceImpl<CustomerBalanceMappe
 
     @Override
     public boolean addAvailableBalance(Long customerId, BigDecimal availableBalance) {
+        return addAvailableBalance(customerId,availableBalance,0);
+    }
+
+    @Override
+    public boolean addAvailableBalance(Long customerId, Integer score) {
+        return addAvailableBalance(customerId,BigDecimal.ZERO,score);
+    }
+
+    @Override
+    public boolean addAvailableBalance(Long customerId, BigDecimal availableBalance, Integer score) {
         CustomerBalance customerBalance = getById(customerId);
         if (ObjectUtil.isNull(customerBalance)) {
             return false;
         }
         customerBalance.setAvailableBalance(customerBalance.getAvailableBalance().add(availableBalance));
         customerBalance.setBalance(customerBalance.getBalance().add(availableBalance));
+        customerBalance.setScore(customerBalance.getScore() + score);
         return updateById(customerBalance);
     }
 
     @Override
     public boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance) {
+        return subtractAvailableBalance(customerId,availableBalance,0);
+    }
+
+    @Override
+    public boolean subtractAvailableBalance(Long customerId, Integer score) {
+        return subtractAvailableBalance(customerId,BigDecimal.ZERO,score);
+    }
+
+    @Override
+    public boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance, Integer score) {
         CustomerBalance customerBalance = getById(customerId);
         if (ObjectUtil.isNull(customerBalance)) {
             return false;
         }
         customerBalance.setAvailableBalance(customerBalance.getAvailableBalance().subtract(availableBalance));
         customerBalance.setBalance(customerBalance.getBalance().subtract(availableBalance));
+        customerBalance.setScore(customerBalance.getScore() - score);
         return updateById(customerBalance);
     }
 
@@ -61,8 +83,7 @@ public class CustomerBalanceServiceImpl extends ServiceImpl<CustomerBalanceMappe
             return true;
         }
         CustomerBalance customerBalance = new CustomerBalance();
-        customerBalance.setCustomerId(customerId);
-        customerBalance.setBalance(BigDecimal.ZERO);
+                                                                                                                                                                                                                                                                                                                                                            customerBalance.setBalance(BigDecimal.ZERO);
         customerBalance.setAvailableBalance(BigDecimal.ZERO);
         customerBalance.setBlockedBalance(BigDecimal.ZERO);
         return save(customerBalance);

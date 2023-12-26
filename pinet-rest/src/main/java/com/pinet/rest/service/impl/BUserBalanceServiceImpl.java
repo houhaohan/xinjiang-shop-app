@@ -32,17 +32,11 @@ public class BUserBalanceServiceImpl extends ServiceImpl<BUserBalanceMapper, BUs
 
     @Override
     public boolean addAmount(Long shopId, BigDecimal amount) {
-        return addAmount(shopId,amount,0);
-    }
-
-    @Override
-    public boolean addAmount(Long shopId, BigDecimal amount, Integer score) {
         BUserBalance bUserBalance = getByShopId(shopId);
         if (ObjectUtil.isNull(bUserBalance)){
             throw new PinetException("商家账户出现异常");
         }
         bUserBalance.setAmount(bUserBalance.getAmount().add(amount));
-        bUserBalance.setScore(bUserBalance.getScore() + score);
         return updateById(bUserBalance);
     }
 }

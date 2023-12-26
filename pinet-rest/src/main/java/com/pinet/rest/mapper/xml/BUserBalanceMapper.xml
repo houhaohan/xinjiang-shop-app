@@ -13,7 +13,6 @@
         <result column="user_id" property="userId" />
         <result column="shop_id" property="shopId" />
         <result column="amount" property="amount" />
-        <result column="score" property="score" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -24,7 +23,7 @@
         update_by,
         update_time,
         del_flag,
-        user_id, shop_id, amount,score
+        user_id, shop_id, amount
     </sql>
 
 </mapper>

@@ -145,6 +145,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Resource
     private IScoreRecordService scoreRecordService;
 
+    @Resource
+    private ICustomerBalanceService customerBalanceService;
+
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
 
@@ -615,7 +618,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 score,orders.getId(),ScoreRecordTypeEnum._1);
 
         //修改余额 和 积分
-        ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings,score);
+        ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
+        customerBalanceService.addAvailableBalance(orders.getCustomerId(),score);
 
         //判断订单状态  如果订单状态是已取消  就退款
         if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {
@@ -731,7 +735,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 ,orders.getId(),ScoreRecordTypeEnum._2);
 
         //修改余额
-        ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate(),-orders.getScore());
+        ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());
+
+        //修改积分
+        customerBalanceService.subtractAvailableBalance(orders.getCustomerId(),orders.getScore());
 
         orderRefund.setRefundStatus(2);
         orderRefund.setOutTradeNo(param.getOutTradeNo());
@@ -844,7 +851,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
         //门客 0.5倍积分
-        if (memberLevel.equals(MemberLevelEnum._10.getCode())) {
+        if (memberLevel.equals(MemberLevelEnum._0.getCode())) {
             score = orderPrice.multiply(new BigDecimal("0.5")).setScale(0, RoundingMode.DOWN).intValue();
         }
 
@@ -905,6 +912,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @return
      */
     private BigDecimal getShippingFee(Integer orderType, double distance,String deliveryPlatform) {
+        if (orderType == 2) {
+            return new BigDecimal("0");
+        }
+
         if (!"prod".equals(active)) {
             return new BigDecimal("4");
         }
@@ -912,9 +923,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             //todo 商家没有对接外卖平台，自配送
             return BigDecimal.ZERO;
         }
-        if (orderType == 2) {
-            return new BigDecimal("0");
-        }
+
 
         BigDecimal shippingFee = shippingFeeRuleService.getByDistance(distance);
         if (shippingFee == null) {

@@ -52,27 +52,38 @@ public class WxLoginServiceImpl implements ILoginService {
         if(phoneNoInfo == null || StringUtil.isBlank(phoneNoInfo.getPhoneNumber())){
             throw new LoginException("获取手机号失败");
         }
-        //创建新用户
-        String ip = IPUtils.getIpAddr();
-        Customer customer = Customer.builder()
-                .createTime(System.currentTimeMillis())
-                .createIp(ip)
-                .lastLoginIp(ip)
-                .lastLoginTime(System.currentTimeMillis())
-                .qsOpenId(wxLoginRequest.getOpenid())
-                .nickname(UserConstant.DEFAULT_USER_NAME)
-                .avatar(UserConstant.DEFAULT_USER_AVATAR)
-                .sex(wxLoginRequest.getGender())
-                .phone(phoneNoInfo.getPhoneNumber())
-                .active(1)
-                .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
-                .build();
-        customerService.save(customer);
-        //发放新人优惠券
-        customerCouponService.grantNewCustomerCoupon(customer.getCustomerId());
-        //添加用户账户表
-        customerBalanceService.addByCustomerId(customer.getCustomerId());
 
+        Customer customer = customerService.getByPhone(phoneNoInfo.getPhoneNumber());
+        if (customer != null){
+            if(customer.getActive() == 0){
+                throw new LoginException("该用户已禁用");
+            }
+            customer.setLastLoginIp(IPUtils.getIpAddr());
+            customer.setLastLoginTime(System.currentTimeMillis());
+            customer.setQsOpenId(wxLoginRequest.getOpenid());
+            customerService.updateById(customer);
+        }else {
+            //创建新用户
+            String ip = IPUtils.getIpAddr();
+             customer = Customer.builder()
+                    .createTime(System.currentTimeMillis())
+                    .createIp(ip)
+                    .lastLoginIp(ip)
+                    .lastLoginTime(System.currentTimeMillis())
+                    .qsOpenId(wxLoginRequest.getOpenid())
+                    .nickname(UserConstant.DEFAULT_USER_NAME)
+                    .avatar(UserConstant.DEFAULT_USER_AVATAR)
+                    .sex(wxLoginRequest.getGender())
+                    .phone(phoneNoInfo.getPhoneNumber())
+                    .active(1)
+                    .uuid(String.valueOf((int)((Math.random()*9+1)*Math.pow(10,7))))
+                    .build();
+            customerService.save(customer);
+            //发放新人优惠券
+            customerCouponService.grantNewCustomerCoupon(customer.getCustomerId());
+            //添加用户账户表
+            customerBalanceService.addByCustomerId(customer.getCustomerId());
+        }
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());
         redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,String.valueOf(customer.getCustomerId()),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
         UserInfo userInfo = new UserInfo();

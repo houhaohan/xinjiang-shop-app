@@ -21,6 +21,22 @@ public interface ICustomerBalanceService extends IService<CustomerBalance> {
      */
     boolean addAvailableBalance(Long customerId, BigDecimal availableBalance);
 
+    /**
+     * 增加积分
+     * @param customerId 用户id
+     * @param score 积分
+     * @return
+     */
+    boolean addAvailableBalance(Long customerId, Integer score);
+
+    /**
+     * 增加可用金额和积分
+     * @param availableBalance 增加的可用金额
+     * @param score 增加积分
+     * @return 是否成功
+     */
+    boolean addAvailableBalance(Long customerId, BigDecimal availableBalance,Integer score);
+
 
     /**
      * 减少可用余额
@@ -29,6 +45,23 @@ public interface ICustomerBalanceService extends IService<CustomerBalance> {
      * @return 是否成功
      */
     boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance);
+
+    /**
+     * 减少积分
+     * @param customerId 用户id
+     * @param score 积分
+     * @return
+     */
+    boolean subtractAvailableBalance(Long customerId, Integer score);
+
+    /**
+     * 减少可用余额 和 积分
+     * @param customerId 用户id
+     * @param availableBalance 减少的可用金额
+     * @param score 减少的积分
+     * @return
+     */
+    boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance,Integer score);
 
 
 

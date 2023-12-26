@@ -24,13 +24,4 @@ public interface IBUserBalanceService extends IService<BUserBalance> {
      * @return
      */
     boolean addAmount(Long shopId, BigDecimal amount);
-
-    /**
-     * 根据店铺id增加/扣减余额 积分
-     * @param shopId 店铺id
-     * @param amount 金额  扣减传负数
-     * @param score 积分 扣减传负数
-     * @return
-     */
-    boolean addAmount(Long shopId, BigDecimal amount,Integer score);
 }
