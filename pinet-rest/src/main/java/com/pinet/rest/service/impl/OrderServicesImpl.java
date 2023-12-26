@@ -1025,7 +1025,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         try {
             QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("kry_order_no",dto.getOrderId());
+            queryWrapper.eq("order_no",dto.getOutBizNo());
             Orders orders = getOne(queryWrapper);
             Customer customer = customerService.getById(orders.getCustomerId());
             List<OrderProduct> orderProducts = orderProductService.getByOrderId(orders.getId());
