@@ -600,12 +600,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         BigDecimal shopEarnings = orderPay.getPayPrice().subtract(orders.getShippingFeePlat());
 
 
-        //修改余额
-        ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
-
         //资金流水
         bCapitalFlowService.add(shopEarnings, orders.getId(), orders.getCreateTime(),
                 CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._1, orders.getShopId());
+
+
+        //修改余额
+        ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
 
         //判断订单状态  如果订单状态是已取消  就退款
         if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {

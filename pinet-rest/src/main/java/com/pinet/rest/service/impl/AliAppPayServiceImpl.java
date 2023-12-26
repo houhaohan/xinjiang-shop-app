@@ -143,7 +143,7 @@ public class AliAppPayServiceImpl implements IPayService {
                 OrderPay orderPay = orderPayService.getById(orderRefund.getOrderPayId());
 
                 //更新资金流水和余额
-                ibCapitalFlowService.add(orderPay.getPayPrice(), orders.getId(), orders.getCreateTime(),
+                ibCapitalFlowService.add(orderPay.getPayPrice().negate(), orders.getId(), orders.getCreateTime(),
                         CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2, orders.getShopId());
 
                 //修改余额
