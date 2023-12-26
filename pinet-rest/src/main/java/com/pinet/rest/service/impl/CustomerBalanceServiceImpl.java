@@ -83,9 +83,11 @@ public class CustomerBalanceServiceImpl extends ServiceImpl<CustomerBalanceMappe
             return true;
         }
         CustomerBalance customerBalance = new CustomerBalance();
-                                                                                                                                                                                                                                                                                                                                                            customerBalance.setBalance(BigDecimal.ZERO);
+        customerBalance.setCustomerId(customerId);
+        customerBalance.setBalance(BigDecimal.ZERO);
         customerBalance.setAvailableBalance(BigDecimal.ZERO);
         customerBalance.setBlockedBalance(BigDecimal.ZERO);
+        customerBalance.setScore(0);
         return save(customerBalance);
     }
 }

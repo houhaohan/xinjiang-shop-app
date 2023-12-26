@@ -4,6 +4,7 @@ import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.api.WxMaUserService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.UserConstant;
 import com.pinet.core.exception.LoginException;
@@ -45,6 +46,7 @@ public class WxLoginServiceImpl implements ILoginService {
      * @return
      */
     @Override
+    @DSTransactional
     public UserInfo login(LoginRequest loginRequest)  throws WxErrorException {
         WxLoginRequest wxLoginRequest = (WxLoginRequest)loginRequest;
         WxMaUserService userService = wxMaService.getUserService();
