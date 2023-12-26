@@ -259,7 +259,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
         //店帮主优惠计算
-        orderProdPrice = getDiscountedPrice(orderProducts, orderDiscounts, customerId, orderProdPrice);
+        orderProdPrice = getDiscountedPrice(orderProducts,orderDiscounts,customerId,orderProdPrice);
 
         //店帮主优惠后价格 该价格用来优惠券是否可用
         BigDecimal customerMemberPrice = orderProdPrice;
@@ -352,7 +352,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
         //用户支付的配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), distance, shop.getDeliveryPlatform());
+        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), distance,shop.getDeliveryPlatform());
 
         //配送费
         BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getDeliveryPlatform());
@@ -362,7 +362,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
         //店帮主计算后价格
-        BigDecimal orderProdPrice = getDiscountedPrice(orderProducts, orderDiscounts, userId, orderProdOriginalPrice);
+        BigDecimal orderProdPrice = getDiscountedPrice(orderProducts,orderDiscounts,userId,orderProdOriginalPrice);
 
         //使用完优惠券处理
         if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
@@ -605,8 +605,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Integer score = getScore(orders.getCustomerId(),orders.getOrderPrice());
         orders.setScore(score);
 
-        //修改余额 和 积分
-        ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings,score);
 
         //资金流水
         bCapitalFlowService.add(shopEarnings, orders.getId(), orders.getCreateTime(),
@@ -615,6 +613,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //积分流水
         scoreRecordService.addScoreRecord(orders.getShopId(),"消费"+orders.getOrderPrice().toString()+"元",
                 score,orders.getId(),ScoreRecordTypeEnum._1);
+
+        //修改余额 和 积分
+        ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings,score);
 
         //判断订单状态  如果订单状态是已取消  就退款
         if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {
@@ -725,12 +726,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         bCapitalFlowService.add(orderPay.getPayPrice().negate(), orders.getId(), orders.getCreateTime(),
                 CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2, orders.getShopId());
 
-        //修改余额
-        ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate(),-orders.getScore());
-
         //积分流水
         scoreRecordService.addScoreRecord(orders.getShopId(),"退款"+orders.getOrderPrice().toString()+"元",orders.getScore()
-        ,orders.getId(),ScoreRecordTypeEnum._2);
+                ,orders.getId(),ScoreRecordTypeEnum._2);
+
+        //修改余额
+        ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate(),-orders.getScore());
 
         orderRefund.setRefundStatus(2);
         orderRefund.setOutTradeNo(param.getOutTradeNo());
@@ -813,7 +814,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderDiscounts.add(orderDiscount);
 
 
-        if (isCombo) {
+        if (isCombo){
             OrderDiscount orderDiscount1 = new OrderDiscount();
             orderDiscount1.setDiscountMsg("特价团餐商品无法参与会员优惠").setDiscountAmount(BigDecimal.ZERO).setType(1);
             orderDiscounts.add(orderDiscount1);
@@ -903,7 +904,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param orderType 订单类型( 1外卖  2自提)
      * @return
      */
-    private BigDecimal getShippingFee(Integer orderType, double distance, String deliveryPlatform) {
+    private BigDecimal getShippingFee(Integer orderType, double distance,String deliveryPlatform) {
         if (!"prod".equals(active)) {
             return new BigDecimal("4");
         }
@@ -927,7 +928,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     /**
      * 获取平台配送费
      *
-     * @param orderType        订单类型( 1外卖  2自提)
+     * @param orderType    订单类型( 1外卖  2自提)
      * @param deliveryPlatform 配送平台( ZPS-自配送，DADA-达达)
      * @return BigDecimal
      */
@@ -1057,31 +1058,32 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private ICustomerService customerService;
 
 
+
     @Override
     public void performanceCall(PerformanceCallDTO dto) {
-        if (!"OPEN_PLATFORM".equalsIgnoreCase(dto.getOrderSource())) {
+        if(!"OPEN_PLATFORM".equalsIgnoreCase(dto.getOrderSource())){
             return;
         }
         try {
             QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("kry_order_no", dto.getOrderId());
+            queryWrapper.eq("kry_order_no",dto.getOrderId());
             Orders orders = getOne(queryWrapper);
             Customer customer = customerService.getById(orders.getCustomerId());
             List<OrderProduct> orderProducts = orderProductService.getByOrderId(orders.getId());
 
             String prodNames = orderProducts.stream().map(OrderProduct::getProdName).collect(Collectors.joining(",\n"));
             ArrayList<WxMaSubscribeMessage.MsgData> msgDataList = new ArrayList<>(5);
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("date15", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, orders.getCreateTime())));//下单时间
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing11", prodNames));//餐品详情
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("amount13", String.valueOf(orders.getOrderPrice())));//订单金额
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("character_string19", orders.getMealCode()));//取餐号
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing7", "您的餐品已制作完成，请到前台领取"));//温馨提醒
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("date15",DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS,orders.getCreateTime())));//下单时间
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing11",prodNames));//餐品详情
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("amount13",String.valueOf(orders.getOrderPrice())));//订单金额
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("character_string19",orders.getMealCode()));//取餐号
+            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing7","您的餐品已制作完成，请到前台领取"));//温馨提醒
 
             WxMaSubscribeMessage wxMaSubscribeMessage = WxMaSubscribeMessage.builder()
                     .templateId("UQ9ksqAUuRgVLgii5aE3lsfsoO3ciByyED3R9WKZsCA")
                     .data(msgDataList)
                     .toUser(customer.getQsOpenId())
-                    .page("packageA/orderClose/orderDetails?orderId=" + orders.getId())
+                    .page("packageA/orderClose/orderDetails?orderId="+orders.getId())
                     .build();
             wxMaService.getMsgService().sendSubscribeMsg(wxMaSubscribeMessage);
         } catch (WxErrorException e) {
@@ -1175,7 +1177,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishQuantity(orderProduct.getProdNum());
             request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
-            request.setTotalFee(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum()));
+            request.setTotalFee(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),orderProduct.getProdNum()));
             request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
             request.setPromoFee(request.getTotalFee().longValue() - request.getActualFee().longValue());
             request.setUnitId(orderProduct.getUnitId());
@@ -1189,11 +1191,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setPackageFee("0");
             //orderDishRequest.setPackageFee(BigDecimalUtil.yuan2FenStr(orderProduct.getPackageFee()));
             List<ScanCodeDish> dishList = new ArrayList<>();
-            if (Objects.equals(DishType.SINGLE, orderProduct.getDishType())) {
+            if (Objects.equals(DishType.SINGLE,orderProduct.getDishType())) {
                 request.setItemOriginType(DishType.SINGLE);
                 request.setDishType(DishType.SINGLE_DISH);
                 request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
-            } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
+            } else if(Objects.equals(DishType.COMBO,orderProduct.getDishType())){
                 request.setItemOriginType(DishType.COMBO);
                 request.setDishType(DishType.COMBO_DISH);
                 dishList.addAll(getComboGroupDetail(orderProduct, order.getShopId()));
@@ -1210,7 +1212,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         deliveryInfoRequest.setDeliveryType("RECIPIENT_ADDRESS");
         deliveryInfoRequest.setOutBizId(String.valueOf(order.getOrderNo()));
         deliveryInfoRequest.setReceiverAddress(orderAddress.getAddress());
-        deliveryInfoRequest.setReceiverGender(orderAddress.getSex() == null || orderAddress.getSex() == 0 || orderAddress.getSex() == 1 ? "MAN" : "WOMAN");
+        deliveryInfoRequest.setReceiverGender(orderAddress.getSex() == null || orderAddress.getSex() == 0  || orderAddress.getSex() == 1 ?  "MAN" : "WOMAN");
         deliveryInfoRequest.setReceiverPrimaryPhone(orderAddress.getTel());
         deliveryInfoRequest.setReceiverName(orderAddress.getName());
         deliveryInfoRequest.setMapType(2);
@@ -1288,7 +1290,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishQuantity(orderProduct.getProdNum());
             request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
-            request.setTotalFee(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum()));
+            request.setTotalFee(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),orderProduct.getProdNum()));
             request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
             request.setPromoFee(request.getTotalFee().longValue() - request.getActualFee().longValue());
             request.setPackageFee("0");
@@ -1302,13 +1304,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
             List<ScanCodeDish> dishList = new ArrayList<>();
             //配料明细 或者 套餐明细
-            if (Objects.equals(DishType.SINGLE, orderProduct.getDishType())) {
+            if(Objects.equals(DishType.SINGLE,orderProduct.getDishType())){
                 //配料明细
                 //附加项（加料、做法）列表
                 request.setDishType(DishType.SINGLE_DISH);
                 request.setItemOriginType(DishType.SINGLE);
                 request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
-            } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
+            }else if(Objects.equals(DishType.COMBO,orderProduct.getDishType())){
                 request.setDishType(DishType.COMBO_DISH);
                 request.setItemOriginType(DishType.COMBO);
                 //套餐明细
@@ -1343,21 +1345,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 优惠明细
-     *
      * @param orderId
      * @return
      */
-    private List<PromoDetailRequest> getPromoDetailRequestList(Long orderId) {
+    private List<PromoDetailRequest>  getPromoDetailRequestList(Long orderId){
         QueryWrapper<OrderDiscount> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("order_id", orderId);
-        queryWrapper.gt("discount_amount", 0);
+        queryWrapper.eq("order_id",orderId);
+        queryWrapper.gt("discount_amount",0);
         List<OrderDiscount> orderDiscounts = orderDiscountService.list(queryWrapper);
-        if (CollectionUtils.isEmpty(orderDiscounts)) {
+        if(CollectionUtils.isEmpty(orderDiscounts)){
             return null;
         }
 
         List<PromoDetailRequest> promoDetailRequestList = new ArrayList<>(orderDiscounts.size());
-        for (OrderDiscount orderDiscount : orderDiscounts) {
+        for(OrderDiscount orderDiscount : orderDiscounts){
             PromoDetailRequest promoDetailRequest = new PromoDetailRequest();
             promoDetailRequest.setOutPromoDetailId(UUID.randomUUID().toString());
             promoDetailRequest.setPromoId(String.valueOf(orderDiscount.getId()));
@@ -1374,11 +1375,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 套餐明细
-     *
      * @param orderProduct
      * @param shopId
      */
-    private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct, Long shopId) {
+    private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct,Long shopId){
         List<KryComboGroupDetailVo> kryComboGroupDetailList = kryComboGroupDetailService.getByOrderProdId(orderProduct.getOrderProductId(), shopId);
         List<ScanCodeDish> dishList = new ArrayList<>(kryComboGroupDetailList.size());
         for (KryComboGroupDetailVo groupDetail : kryComboGroupDetailList) {
