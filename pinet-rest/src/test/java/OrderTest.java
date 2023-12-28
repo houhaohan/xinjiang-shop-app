@@ -11,6 +11,7 @@ import com.pinet.keruyun.openapi.vo.KryResult;
 import com.pinet.keruyun.openapi.vo.OrderDetailVO;
 import com.pinet.rest.entity.CustomerMember;
 import com.pinet.rest.entity.Orders;
+import com.pinet.rest.service.ICustomerCouponService;
 import com.pinet.rest.service.ICustomerMemberService;
 import com.pinet.rest.service.IOrdersService;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,9 @@ public class OrderTest {
     @Autowired
     private IKryApiService kryApiService;
 
+    @Resource
+    private ICustomerCouponService customerCouponService;
+
     @Test
     public void test() {
         CustomerMember customerMember =  customerMemberService.getByCustomerId(12011L);
@@ -55,6 +59,12 @@ public class OrderTest {
 //        param.setDishIds(Arrays.asList("1065757360555"));
 //        KryResult<List<DetailDishVO>> listKryResult = kryApiService.listQueryDetailDish(13290197L, token, param);
         System.err.println(JSON.toJSONString(orderDetail));
+    }
+
+
+    @Test
+    public void test3(){
+        customerCouponService.grantNewCustomerCoupon(12588L);
     }
 
 

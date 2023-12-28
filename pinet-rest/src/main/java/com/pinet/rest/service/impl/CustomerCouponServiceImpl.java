@@ -7,11 +7,13 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.common.redis.util.RedisUtil;
+import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.page.PageRequest;
 import com.pinet.core.util.StringUtil;
@@ -49,6 +51,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
+@DS(DB.MASTER)
 public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper, CustomerCoupon> implements ICustomerCouponService {
     @Resource
     private RedisUtil redisUtil;
@@ -232,6 +235,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
             customerCoupon.setThresholdAmount(setNewCustomerCouponDto.getThresholdAmount());
             customerCoupon.setCouponAmount(setNewCustomerCouponDto.getCouponAmount());
             customerCoupon.setCouponStatus(1);
+            log.info("插入新人优惠券bean{}",JSONObject.toJSONString(customerCoupon));
             save(customerCoupon);
         }
     }
