@@ -49,8 +49,18 @@ public class WxLoginServiceImpl implements ILoginService {
     @DSTransactional
     public UserInfo login(LoginRequest loginRequest)  throws WxErrorException {
         WxLoginRequest wxLoginRequest = (WxLoginRequest)loginRequest;
+        if(StringUtil.isBlank(wxLoginRequest.getOpenid())){
+            throw new LoginException("openId为空");
+        }
+
         WxMaUserService userService = wxMaService.getUserService();
-        WxMaPhoneNumberInfo phoneNoInfo = userService.getPhoneNoInfo(wxLoginRequest.getSessionKey(), wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
+        String sessionKey = wxLoginRequest.getSessionKey();
+        if(StringUtil.isNotBlank(wxLoginRequest.getSessionKey())){
+            WxMaJscode2SessionResult sessionInfo = userService.getSessionInfo(wxLoginRequest.getCode());
+            sessionKey = sessionInfo.getSessionKey();
+        }
+
+        WxMaPhoneNumberInfo phoneNoInfo = userService.getPhoneNoInfo(sessionKey, wxLoginRequest.getEncryptedData(), wxLoginRequest.getIv());
         if(phoneNoInfo == null || StringUtil.isBlank(phoneNoInfo.getPhoneNumber())){
             throw new LoginException("获取手机号失败");
         }
