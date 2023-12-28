@@ -55,7 +55,7 @@ public class WxLoginServiceImpl implements ILoginService {
 
         WxMaUserService userService = wxMaService.getUserService();
         String sessionKey = wxLoginRequest.getSessionKey();
-        if(StringUtil.isNotBlank(wxLoginRequest.getSessionKey())){
+        if(StringUtil.isNotBlank(wxLoginRequest.getCode())){
             WxMaJscode2SessionResult sessionInfo = userService.getSessionInfo(wxLoginRequest.getCode());
             sessionKey = sessionInfo.getSessionKey();
         }
