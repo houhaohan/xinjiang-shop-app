@@ -49,6 +49,7 @@ public class OrderAddressServiceImpl extends ServiceImpl<OrderAddressMapper, Ord
         orderAddress.setId(null);
         orderAddress.setLat(customerAddress.getLat().toString());
         orderAddress.setLng(customerAddress.getLng().toString());
+        orderAddress.setAddress(customerAddress.getAddress() + customerAddress.getHouseNumber());
         orderAddress.setCreateBy(userId);
         orderAddress.setCreateTime(now);
         orderAddress.setUpdateBy(userId);
