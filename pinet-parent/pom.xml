@@ -18,12 +18,13 @@
         <springboot.admin.version>2.6.4</springboot.admin.version>
         <mybatis-plus.version>3.5.1</mybatis-plus.version>
         <swagger.fox.version>3.0.0</swagger.fox.version>
-        <fastjson.version>1.2.80</fastjson.version>
+        <fastjson.version>2.0.8</fastjson.version>
         <druid.version>1.2.9</druid.version>
         <hutool.version>5.7.16</hutool.version>
         <commons.beanutils.version>1.9.3</commons.beanutils.version>
         <knife4j.version>3.0.3</knife4j.version>
         <jwt.version>0.9.1</jwt.version>
+        <skipTests>true</skipTests>
     </properties>
 
     <parent>

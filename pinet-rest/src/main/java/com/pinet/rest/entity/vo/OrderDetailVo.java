@@ -32,7 +32,7 @@ public class OrderDetailVo {
     private String kryOrderNo;
 
     @ApiModelProperty(value = "取餐号",name = "mealCode")
-    private String mealCode;
+    private String mealCode = "";
 
     @ApiModelProperty(value = "订单状态  1外卖  2自提",name = "orderType")
     private Integer orderType;

@@ -54,7 +54,8 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
         sb.append(entity.getProvince())
                 .append(entity.getCity())
                 .append(entity.getDistrict())
-                .append(customerAddressDto.getAddressName());
+                .append(customerAddressDto.getAddressName())
+                .append(customerAddressDto.getHouseNumber());
         entity.setAddress(sb.toString());
         entity.setCustomerId(userId);
         entity.setUpdateTime(System.currentTimeMillis());
@@ -69,23 +70,28 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
 
     @Override
     public boolean edit(CustomerAddressDto customerAddressDto,Long userId) {
-        CustomerAddress customerAddress = getById(customerAddressDto.getId());
-
-        CustomerAddress entity = new CustomerAddress();
-        BeanUtils.copyProperties(customerAddressDto,entity);
-        entity.setCreateTime(System.currentTimeMillis());
-        if(!equals(customerAddressDto,customerAddress)){
-            AddressIdVo addressIdVo = addressService.selectIdByName(customerAddressDto.getProvince(), customerAddressDto.getCity(), customerAddressDto.getDistrict());
-            entity.setProvinceId(addressIdVo.getProvinceId());
-            entity.setCityId(addressIdVo.getCityId());
-            entity.setDistrictId(addressIdVo.getDistrictId());
-            StringBuffer sb = new StringBuffer();
-            sb.append(entity.getProvince())
-                    .append(entity.getCity())
-                    .append(entity.getDistrict())
-                    .append(customerAddressDto.getAddressName());
-            entity.setAddress(sb.toString());
-        }
+        CustomerAddress entity = getById(customerAddressDto.getId());
+        entity.setName(customerAddressDto.getName());
+        entity.setPhone(customerAddressDto.getPhone());
+        entity.setStatus(customerAddressDto.getStatus());
+        entity.setProvince(customerAddressDto.getProvince());
+        entity.setCity(customerAddressDto.getCity());
+        entity.setDistrict(customerAddressDto.getDistrict());
+        entity.setLat(customerAddressDto.getLat());
+        entity.setLng(customerAddressDto.getLng());
+        entity.setHouseNumber(customerAddressDto.getHouseNumber());
+        entity.setAddress(customerAddressDto.getAddressName());
+        AddressIdVo addressIdVo = addressService.selectIdByName(customerAddressDto.getProvince(), customerAddressDto.getCity(), customerAddressDto.getDistrict());
+        entity.setProvinceId(addressIdVo.getProvinceId());
+        entity.setCityId(addressIdVo.getCityId());
+        entity.setDistrictId(addressIdVo.getDistrictId());
+        StringBuffer sb = new StringBuffer();
+        sb.append(entity.getProvince())
+                .append(entity.getCity())
+                .append(entity.getDistrict())
+                .append(customerAddressDto.getAddressName())
+                .append(customerAddressDto.getHouseNumber());
+        entity.setAddress(sb.toString());
         entity.setCustomerId(userId);
         entity.setUpdateTime(System.currentTimeMillis());
         return this.updateById(entity);
@@ -122,12 +128,6 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
         return list(lambdaQueryWrapper);
     }
 
-    private boolean equals(CustomerAddressDto customerAddressDto,CustomerAddress customerAddress){
-        return customerAddressDto.getProvince().equals(customerAddress.getProvince())
-                && customerAddressDto.getCity().equals(customerAddress.getCity())
-                && customerAddressDto.getDistrict().equals(customerAddress.getDistrict())
-                && customerAddressDto.getAddressName().equals(customerAddress.getAddressName());
-    }
 
 }
 
