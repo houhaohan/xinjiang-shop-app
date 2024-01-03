@@ -56,6 +56,7 @@ public class OrderAddressServiceImpl extends ServiceImpl<OrderAddressMapper, Ord
         orderAddress.setTel(customerAddress.getPhone());
         orderAddress.setUpdateTime(now);
         orderAddress.setDelFlag(0);
+        orderAddress.setAddress(customerAddress.getAddress()+customerAddress.getHouseNumber());
         return orderAddress;
     }
 }
