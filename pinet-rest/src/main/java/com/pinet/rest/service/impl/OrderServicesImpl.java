@@ -694,14 +694,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         orders.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
         boolean res = updateById(orders);
-
-        //判断是否使用了优惠券
-        if (orders.getCustomerCouponId() != null && orders.getCustomerCouponId() > 0) {
-            CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
-            customerCoupon.setCouponStatus(2);
-            customerCouponService.updateById(customerCoupon);
-        }
-
         return res;
     }
 
@@ -739,6 +731,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //修改积分
         customerBalanceService.subtractAvailableBalance(orders.getCustomerId(), orders.getScore());
+
+
+        //退款退回优惠券
+        CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
+        if (ObjectUtil.isNotNull(customerCoupon)){
+            customerCoupon.setCouponStatus(2);
+            customerCouponService.updateById(customerCoupon);
+        }
 
         orderRefund.setRefundStatus(2);
         orderRefund.setOutTradeNo(param.getOutTradeNo());

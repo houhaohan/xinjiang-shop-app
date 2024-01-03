@@ -38,7 +38,8 @@ public class SmsServiceImpl implements ISmsService {
 
     @Override
     public void sendSmsMsg(String tel, String msg) {
-        SmsSendRequest smsSendRequest = new SmsSendRequest("N7468275",
+        SmsSendRequest smsSendRequest = new
+                SmsSendRequest("N7468275",
                 "8yGSghzre", msg,
                 tel,
                 "true");
