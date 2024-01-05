@@ -52,7 +52,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     public List<ShopVo> shopList(ShopListDto dto) {
         //log.info("店铺列表参数=======>{}",JSON.toJSONString(dto));
         if (dto.getLat() == null || dto.getLng() == null) {
-            throw new IllegalArgumentException("经纬度不能为空");
+            throw new IllegalArgumentException("定位异常，请检查网络环境和定位是否开启");
         }
         //根据经纬度获取城市
         String city = getCityInfo(dto.getLng(), dto.getLat());

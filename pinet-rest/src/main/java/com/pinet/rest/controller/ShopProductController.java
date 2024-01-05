@@ -69,8 +69,8 @@ public class ShopProductController extends BaseController {
     @ApiOperation("商品列表")
     @ApiVersion(1)
     public Result<ShopProductListVo> list(@RequestParam(value = "shopId",required = false) Long shopId,
-                                          @RequestParam(value = "lat",defaultValue = CommonConstant.DEFAULT_LAT) BigDecimal lat,
-                                          @RequestParam(value = "lng",defaultValue = CommonConstant.DEFAULT_LNG) BigDecimal lng){
+                                          @RequestParam(value = "lat") BigDecimal lat,
+                                          @RequestParam(value = "lng") BigDecimal lng){
       log.info("商品列表参数:shopId={},lat={},lng={}",shopId,lat,lng);
 
         if(shopId == null){

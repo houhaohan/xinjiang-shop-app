@@ -1179,7 +1179,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         List<OrderDishRequest> orderDishRequestList = new ArrayList<>(orderProducts.size());
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
-            request.setOutDishNo(String.valueOf(orderProduct.getId()));
+            request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
             request.setDishId(orderProduct.getProdId());
             request.setDishCode(orderProduct.getDishCode());
             request.setDishName(orderProduct.getProductName());
@@ -1292,7 +1292,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         List<OrderDishRequest> orderDishRequestList = new ArrayList<>();
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
-            request.setOutDishNo(String.valueOf(orderProduct.getId()));
+            request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
             request.setDishId(orderProduct.getProdId());
             request.setDishName(orderProduct.getProductName());
             request.setDishCode(orderProduct.getDishCode());
