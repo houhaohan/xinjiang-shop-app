@@ -31,9 +31,4 @@
         parent_id, name, short_name, longitude, latitude, level, sort, status
     </sql>
 
-
-    <select id="treeList" resultType="com.pinet.rest.entity.vo.AreaTree">
-        select id, parent_id, `name`, `level` from area where status = 1 and `level` in (1,2,3) and del_flag = 0
-    </select>
-
 </mapper>

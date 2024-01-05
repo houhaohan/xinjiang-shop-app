@@ -1,5 +1,6 @@
 package com.pinet.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
@@ -18,6 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @ApiModel(value = "Area对象", description = "地址区域表")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Area extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -44,7 +46,10 @@ public class Area extends BaseEntity {
     private Integer sort;
 
     @ApiModelProperty("状态 0 无效 1 有效")
-    private Boolean status;
+    private Integer status;
+
+    @ApiModelProperty("字母")
+    private String letter;
 
 
 }
