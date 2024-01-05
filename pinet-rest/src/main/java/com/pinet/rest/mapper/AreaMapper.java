@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+
 /**
  * <p>
  * 地址区域表 Mapper 接口
@@ -23,4 +24,5 @@ public interface AreaMapper extends BaseMapper<Area> {
      * @return
      */
     List<AreaTree> treeList(@Param("levels") List<Integer> levels);
+
 }

@@ -3,6 +3,7 @@ package com.pinet.rest.service;
 import com.pinet.rest.entity.Area;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.vo.AreaTree;
+import com.pinet.rest.entity.vo.AreaPyGroupVo;
 
 import java.util.List;
 
@@ -17,4 +18,6 @@ import java.util.List;
 public interface IAreaService extends IService<Area> {
 
     List<AreaTree> treeList(List<Integer> levels);
+
+    List<AreaPyGroupVo>  cityPyGroupList(String name);
 }
