@@ -59,31 +59,35 @@ public class ShopProductController extends BaseController {
 
     /**
      * 商品列表，经纬度默认是杭州滨江的经纬度
+     *
      * @param shopId 店铺Id
-     * @param lat 纬度
-     * @param lng 经度
+     * @param lat    纬度
+     * @param lng    经度
      * @return
      */
-    @RequestMapping(value = "/list",method = RequestMethod.GET)
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
     @NotTokenSign
     @ApiOperation("商品列表")
     @ApiVersion(1)
-    public Result<ShopProductListVo> list(@RequestParam(value = "shopId",required = false) Long shopId,
-                                          @RequestParam(value = "lat") BigDecimal lat,
-                                          @RequestParam(value = "lng") BigDecimal lng){
-      log.info("商品列表参数:shopId={},lat={},lng={}",shopId,lat,lng);
-
-        if(shopId == null){
+    public Result<ShopProductListVo> list(Long shopId,
+                                          BigDecimal lat,
+                                          BigDecimal lng) {
+        log.info("商品列表参数:shopId={},lat={},lng={}", shopId, lat, lng);
+        if (shopId == null && lat == null && lng == null) {
+            shopId = 24L;//默认保利店
+        }
+        if(shopId == null && lat != null && lng != null ){
             shopId = shopService.getMinDistanceShop(lat, lng);
-            if(shopId == null){
+            if (shopId == null) {
                 return Result.ok();
             }
         }
+
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        ShopProductListVo result = shopProductService.productListByShopId(shopId,lat,lng);
-        if(result != null){
+        ShopProductListVo result = shopProductService.productListByShopId(shopId, lat, lng);
+        if (result != null) {
             //当前用户在这个店铺加的购物车
-            if(userId != null && userId != 0){
+            if (userId != null && userId != 0) {
                 CartVo cartVo = cartService.getCartByUserIdAndShopId(shopId, userId);
                 result.setTotalPrice(cartVo.getPrice());
                 result.setProdNum(cartVo.getProdNum());
@@ -91,41 +95,42 @@ public class ShopProductController extends BaseController {
         }
         //判断下已登录的用户插入店铺浏览记录表
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
-        if (customerId != null && customerId > 0){
-            shopBrowseLogService.addBrowseLog(shopId,customerId);
+        if (customerId != null && customerId > 0) {
+            shopBrowseLogService.addBrowseLog(shopId, customerId);
         }
         return Result.ok(result);
     }
 
 
-    @RequestMapping(value = "/search",method = RequestMethod.GET)
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
     @NotTokenSign
     @ApiOperation(("店铺商品搜索"))
     @ApiVersion(1)
-    public Result<List<ShopProductVo>> search(ShopProductParam param){
+    public Result<List<ShopProductVo>> search(ShopProductParam param) {
         List<ShopProductVo> list = shopProductService.search(param);
         return Result.ok(list);
     }
 
-    @RequestMapping(value = "/sellwell",method = RequestMethod.GET)
+    @RequestMapping(value = "/sellwell", method = RequestMethod.GET)
     @NotTokenSign
     @ApiOperation("店铺畅销商品")
     @ApiVersion(1)
-    public Result<List<String>> sellwell(@RequestParam Long shopId){
+    public Result<List<String>> sellwell(@RequestParam Long shopId) {
         List<String> list = shopProductService.sellwell(shopId);
         return Result.ok(list);
     }
 
     /**
      * 商品详情
+     *
      * @param id 商品ID
      * @return
      */
-    @RequestMapping(value = "/getById",method = RequestMethod.GET)
+    @RequestMapping(value = "/getById", method = RequestMethod.GET)
     @NotTokenSign
     @ApiOperation("商品详情")
     @ApiVersion(1)
-    public Result<ShopProductVo> getById(@RequestParam Long id){
+    public Result<ShopProductVo> getById(@RequestParam Long id) {
         ShopProductVo shopProductVo = shopProductService.getDetailById(id);
         return Result.ok(shopProductVo);
     }
@@ -134,7 +139,7 @@ public class ShopProductController extends BaseController {
     @ApiVersion(1)
     @ApiOperation("根据商品id获取店铺id和店铺商品id")
     @NotTokenSign
-    public Result<GetShopProdIdByProdIdVo> getShopIdAndShopProdId(@Validated @RequestBody GetShopIdAndShopProdIdDto dto){
+    public Result<GetShopProdIdByProdIdVo> getShopIdAndShopProdId(@Validated @RequestBody GetShopIdAndShopProdIdDto dto) {
         GetShopProdIdByProdIdVo getShopProdIdByProdIdVo = shopProductService.getShopIdAndShopProdId(dto);
         return Result.ok(getShopProdIdByProdIdVo);
     }
@@ -143,14 +148,14 @@ public class ShopProductController extends BaseController {
     @ApiOperation("品牌商品开放消息")
     @ApiVersion(1)
     @NotTokenSign
-    public KryResponse brandDishOpenMsg(@RequestParam(required = false) String validate, @RequestBody Map<String,Object> map){
+    public KryResponse brandDishOpenMsg(@RequestParam(required = false) String validate, @RequestBody Map<String, Object> map) {
         System.out.println("品牌商品开放消息");
         System.out.println(JSONObject.toJSONString(map));
 
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
         response.setMessageUuid(UUID.randomUUID().toString());
-        if(StringUtil.isBlank(validate) || "success".equals(validate)){
+        if (StringUtil.isBlank(validate) || "success".equals(validate)) {
             response.setCode(0);
             return response;
         }
@@ -162,14 +167,14 @@ public class ShopProductController extends BaseController {
     @ApiOperation("门店商品开放消息")
     @ApiVersion(1)
     @NotTokenSign
-    public KryResponse shopDishOpenMsg(@RequestParam(required = false) String validate, @RequestBody Map<String,Object> map){
+    public KryResponse shopDishOpenMsg(@RequestParam(required = false) String validate, @RequestBody Map<String, Object> map) {
         System.out.println("门店商品开放消息");
         System.out.println(JSONObject.toJSONString(map));
 
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
         response.setMessageUuid(UUID.randomUUID().toString());
-        if(StringUtil.isBlank(validate) ||  "success".equals(validate)){
+        if (StringUtil.isBlank(validate) || "success".equals(validate)) {
             response.setCode(0);
             return response;
         }
@@ -181,14 +186,14 @@ public class ShopProductController extends BaseController {
     @ApiOperation("商品库存信息变更")
     @ApiVersion(1)
     @NotTokenSign
-    public KryResponse updateDishStock(@RequestParam(required = false) String validate, @RequestBody Map<String,Object> map){
+    public KryResponse updateDishStock(@RequestParam(required = false) String validate, @RequestBody Map<String, Object> map) {
         System.out.println("门店商品开放消息");
         System.out.println(JSONObject.toJSONString(map));
 
         KryResponse response = new KryResponse();
         response.setMessage("成功[OK]");
         response.setMessageUuid(UUID.randomUUID().toString());
-        if(StringUtil.isBlank(validate) || "success".equals(validate)){
+        if (StringUtil.isBlank(validate) || "success".equals(validate)) {
             response.setCode(0);
             return response;
         }

@@ -7,6 +7,7 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
+import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.CustomerAddress;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.ShopProduct;
@@ -49,9 +50,6 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
-//        if(param.getLat() == null || param.getLng() == null ){
-//            throw new IllegalArgumentException("获取经纬度失败，请检查定位是否开启");
-//        }
         //根据经纬度获取最近的店铺ID
         if (param.getShopId() == null) {
             Long shopId = shopService.getMinDistanceShop(param.getLat(), param.getLng());
@@ -99,7 +97,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
             throw new PinetException("商品不存在");
         }
         ShopProductVo shopProductVo = null;
-        if("COMBO".equalsIgnoreCase(shopProduct.getDishType())){
+        if(DishType.COMBO.equalsIgnoreCase(shopProduct.getDishType())){
             shopProductVo = baseMapper.getComboDetailById(id);
         }else {
             shopProductVo = baseMapper.getDetailById(id);
@@ -113,15 +111,17 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     public ShopProductListVo productListByShopId(Long shopId,BigDecimal lat,BigDecimal lng) {
         ShopProductListVo result = new ShopProductListVo();
         Shop shop = shopService.getById(shopId);
-        double distance = LatAndLngUtils.getDistance(lng.doubleValue(), lat.doubleValue(), Double.valueOf(shop.getLng()), Double.valueOf(shop.getLat()));
-        shop.setDistance(distance);
+        if(lat != null && lng != null){
+            double distance = LatAndLngUtils.getDistance(lng.doubleValue(), lat.doubleValue(), Double.valueOf(shop.getLng()), Double.valueOf(shop.getLat()));
+            shop.setDistance(distance);
+            result.setDistance(BigDecimal.valueOf(distance));
+        }
+
         result.setShopInfo(shop);
         result.setShopId(shop.getId());
         result.setShopName(shop.getShopName());
         result.setLat(shop.getLat());
         result.setLng(shop.getLng());
-        result.setDistance(BigDecimal.valueOf(distance));
-
         String address = new StringBuilder()
                 .append(shop.getProvince())
                 .append(shop.getCity())
@@ -143,13 +143,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         if (param.getShopId() == null || StringUtil.isEmpty(param.getProductName())) {
             return Collections.EMPTY_LIST;
         }
-        List<ShopProductVo> list = baseMapper.search(param);
-//        pageList.getRecords().forEach(item->{
-//            //距离
-//            double distance = LatAndLngUtils.getDistance(param.getLng().doubleValue(), param.getLat().doubleValue(), Double.valueOf(item.getLng()), Double.valueOf(item.getLat()));
-//            item.setDistance(BigDecimal.valueOf(distance));
-//        });
-        return list;
+        return baseMapper.search(param);
     }
 
     @Override

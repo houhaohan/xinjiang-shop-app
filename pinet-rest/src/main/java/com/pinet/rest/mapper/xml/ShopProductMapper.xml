@@ -352,9 +352,11 @@
                         sp.product_type,
                         min(sps.price) as price
                  from shop s
-                 left join shop_product sp on s.id = sp.shop_id and sp.shop_prod_status = 1 and sp.del_flag = 0
+                 left join shop_product sp on s.id = sp.shop_id  and sp.del_flag = 0
                  left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
                  where s.id = #{shopId}
+                   and sp.dish_type = 'SINGLE'
+                   and sp.shop_prod_status = 1
                    and sp.product_name like concat('%', #{productName}, '%')
                    and s.del_flag = 0
                  group by sps.sku_id
