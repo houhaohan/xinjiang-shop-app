@@ -14,12 +14,14 @@ import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.ShopListDto;
 import com.pinet.rest.entity.vo.ShopVo;
 import com.pinet.rest.mapper.ShopMapper;
+import com.pinet.rest.service.IAreaService;
 import com.pinet.rest.service.IShopService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +43,9 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Autowired
     private ShopMapper shopMapper;
 
+    @Resource
+    private IAreaService areaService;
+
     private static final String key = "d6f83cc59d2e545ce0f6daf28e80d85f";
 
     @Override
@@ -51,29 +56,35 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Override
     public List<ShopVo> shopList(ShopListDto dto) {
         //log.info("店铺列表参数=======>{}",JSON.toJSONString(dto));
-        if (dto.getLat() == null || dto.getLng() == null) {
+        if ((dto.getLat() == null || dto.getLng() == null) && dto.getCityId() == null) {
             throw new IllegalArgumentException("定位异常，请检查网络环境和定位是否开启");
         }
-        //根据经纬度获取城市
-        String city = getCityInfo(dto.getLng(), dto.getLat());
-        //当前定位的城市店铺
 
-        //程双辉的用户ID
-        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        if(userId == 12014 || userId == 12011){
-            city = null;
+        String city;
+        //手动选择城市 以手动选择为准
+        if (dto.getCityId() != null){
+            city = areaService.getById(dto.getCityId()).getName();
+        }else {
+            //当前定位的城市店铺
+            city = getCityInfo(dto.getLng(), dto.getLat());
         }
+
         List<ShopVo> shopList = shopMapper.shopList(city);
         if (CollectionUtils.isEmpty(shopList)) {
             return Collections.emptyList();
         }
         //计算距离,单位Km
-        for (ShopVo shopVo : shopList) {
-            double distance = getDistance(dto.getLng().doubleValue(), dto.getLat().doubleValue(), Double.parseDouble(shopVo.getLng()), Double.parseDouble(shopVo.getLat()), 2);
-            shopVo.setDistance(distance);
+        //判断是否有经纬度  没有经纬度不计算距离和排序
+        if (dto.getLat() != null && dto.getLng() != null){
+            for (ShopVo shopVo : shopList) {
+                double distance = getDistance(dto.getLng().doubleValue(), dto.getLat().doubleValue(), Double.parseDouble(shopVo.getLng()), Double.parseDouble(shopVo.getLat()), 2);
+                shopVo.setDistance(distance);
+            }
+            shopList = shopList.stream().sorted(Comparator.comparing(ShopVo::getDistance)).collect(Collectors.toList());
         }
+
         //根据距离排序
-        return shopList.stream().sorted(Comparator.comparing(ShopVo::getDistance)).collect(Collectors.toList());
+        return shopList;
     }
 
     @Override
