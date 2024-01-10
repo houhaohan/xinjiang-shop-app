@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 @Data
 @ApiModel(value = "AddCartDto",description = "添加购物车dto")
 public class AddCartDto {
-    @NotNull(message = "店铺id不能为空")
     @ApiModelProperty(value = "店铺id",name = "shopId")
     private Long shopId;
 

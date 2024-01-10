@@ -22,6 +22,8 @@ public class GetShopIdAndShopProdIdDto {
     private String lng = CommonConstant.DEFAULT_LAT;
 
     @NotNull(message = "商品id不能为空")
-    @ApiModelProperty(value = "商品id",name = "productId")
-    private Long productId;
+    @ApiModelProperty(value = "商品id",name = "shopProdId")
+    private Long shopProdId;
+
+    private String shopProdName;
 }

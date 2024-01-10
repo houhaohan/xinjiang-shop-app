@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +48,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     private IProductGlanceOverService productGlanceOverService;
     @Autowired
     private ICustomerAddressService customerAddressService;
+
 
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
@@ -154,6 +156,11 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
 
     @Override
     public GetShopProdIdByProdIdVo getShopIdAndShopProdId(GetShopIdAndShopProdIdDto dto) {
+        ShopProduct shopProduct = getById(dto.getShopProdId());
+        if (ObjectUtil.isNull(shopProduct)){
+            throw new PinetException("分享商品不存在");
+        }
+        dto.setShopProdName(shopProduct.getProductName().trim());
         GetShopProdIdByProdIdVo getShopProdIdByProdIdVo = baseMapper.selectShopIdAndShopProdId(dto);
         if (ObjectUtil.isNull(getShopProdIdByProdIdVo)) {
             throw new PinetException("附近店铺没有这个商品");

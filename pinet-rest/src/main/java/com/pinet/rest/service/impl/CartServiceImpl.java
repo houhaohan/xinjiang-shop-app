@@ -93,19 +93,11 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Transactional(rollbackFor = Exception.class)
     public AddCartVo addCart(AddCartDto dto) {
         ShopProduct shopProduct = shopProductService.getById(dto.getShopProdId());
-        if(dto.getShareFlag() == 1){
-            Long shopId = shopService.getMinDistanceShop(dto.getLat(), dto.getLng());
-            dto.setShopId(shopId);
-            boolean exist = verificationProductIsExist(shopId, shopProduct.getProdId(), shopProduct.getProductName());
-            if(!exist){
-                throw new PinetException("最近店铺没有该商品，请跳转首页购买其他商品", ApiErrorEnum.ERROR_TO_INDEX.getCode());
-            }
-        }
         //校验店铺商品id是否存在
         if (shopProduct == null){
             throw new PinetException("店铺商品不存在");
         }
-
+        dto.setShopId(shopProduct.getShopId());
         Long customerId = dto.getCustomerId();
         Cart cart = new Cart();
         BeanUtils.copyProperties(dto, cart);
