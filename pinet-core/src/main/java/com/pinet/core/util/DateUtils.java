@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import cn.hutool.core.date.DateUtil;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 /**
@@ -151,5 +152,17 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         LocalDateTime localDateTime = LocalDateTime.of(temporalAccessor, LocalTime.of(0, 0, 0));
         ZonedDateTime zdt = localDateTime.atZone(ZoneId.systemDefault());
         return Date.from(zdt.toInstant());
+    }
+
+    /**
+     * date 23:59:59
+     * @param date
+     * @return
+     */
+    public static Date endOfDay(Date date){
+        if(date == null){
+            return null;
+        }
+        return DateUtil.endOfDay(date).toJdkDate();
     }
 }

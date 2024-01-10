@@ -71,4 +71,10 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * @return
      */
     Integer countByCustomerId(Long customerId);
+
+    /**
+     * 优惠券领取
+     * @param couponId
+     */
+    void receive(Long couponId);
 }

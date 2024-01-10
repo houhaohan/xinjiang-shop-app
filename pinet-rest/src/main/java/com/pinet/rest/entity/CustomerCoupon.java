@@ -39,6 +39,9 @@ public class CustomerCoupon extends BaseEntity {
     @ApiModelProperty("用户id")
     private Long customerId;
 
+    @ApiModelProperty("优惠券ID")
+    private Long couponId;
+
     @ApiModelProperty("过期时间")
     @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date expireTime;
@@ -46,25 +49,25 @@ public class CustomerCoupon extends BaseEntity {
     @ApiModelProperty("优惠券名称")
     private String couponName;
 
-    @ApiModelProperty("优惠券类型  1满减券")
+    @ApiModelProperty("优惠券类型  1满减券 2-折扣券")
     private Integer couponType;
 
-    @ApiModelProperty("店铺id  0表示所有店可用")
-    private Long shopId;
-
-    @ApiModelProperty("店铺名称")
-    @TableField(exist = false)
-    private String shopName;
+//    @ApiModelProperty("店铺id  0表示所有店可用")
+//    private Long shopId;
+//
+//    @ApiModelProperty("店铺名称")
+//    @TableField(exist = false)
+//    private String shopName;
 
     @ApiModelProperty("是否可用")
     @TableField(exist = false)
     private Boolean isUsable;
 
-    @ApiModelProperty("门槛金额")
-    private BigDecimal thresholdAmount;
-
-    @ApiModelProperty("优惠券金额")
-    private BigDecimal couponAmount;
+//    @ApiModelProperty("门槛金额")
+//    private BigDecimal thresholdAmount;
+//
+//    @ApiModelProperty("优惠券金额")
+//    private BigDecimal couponAmount;
 
     @ApiModelProperty("1未领取  2已领取  3已放弃 4已使用")
     private Integer couponStatus;

@@ -113,6 +113,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private ICustomerCouponService customerCouponService;
 
     @Resource
+    private ICouponService couponService;
+
+    @Resource
     private IOrderDiscountService orderDiscountService;
 
     @Autowired
@@ -514,16 +517,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private BigDecimal processCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice,
                                      List<OrderDiscount> orderDiscounts) {
         CustomerCoupon customerCoupon = customerCouponService.getById(customerCouponId);
-        Boolean checkFlag = customerCouponService.checkCoupon(customerCoupon, shopId, orderProdPrice);
+        Boolean checkFlag = customerCouponService.checkCoupon(customerCoupon.getId(), shopId, orderProdPrice);
         if (!checkFlag) {
             throw new PinetException("优惠券不可用");
         }
 
         //添加优惠明细信息
+        Coupon coupon = couponService.getById(customerCoupon.getCouponId());
         OrderDiscount orderDiscount = new OrderDiscount();
-        orderDiscount.setDiscountMsg("满减优惠券").setType(2).setDiscountAmount(customerCoupon.getCouponAmount());
+        orderDiscount.setDiscountMsg(CouponTypeEnum.getDescByCode(coupon.getType()));
+        orderDiscount.setType(DiscountTypeEnum.COUPON.getCode());
+        orderDiscount.setDiscountAmount(coupon.getCouponPrice());
         orderDiscounts.add(orderDiscount);
-        return orderProdPrice.subtract(customerCoupon.getCouponAmount());
+        return orderProdPrice.subtract(coupon.getCouponPrice());
     }
 
 

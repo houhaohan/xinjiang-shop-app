@@ -89,4 +89,12 @@ public class CustomerCouponController extends BaseController {
         customerCouponService.couponWarn(customerCouponId);
         return Result.ok();
     }
+
+    @RequestMapping("/优惠券领取")
+    @ApiOperation("优惠券领取")
+    @ApiVersion(1)
+    public Result<?> receive(Long couponId){
+        customerCouponService.receive(couponId);
+        return Result.ok();
+    }
 }
