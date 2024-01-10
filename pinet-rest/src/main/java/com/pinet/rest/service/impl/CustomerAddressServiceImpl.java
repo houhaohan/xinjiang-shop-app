@@ -92,6 +92,7 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
                 .append(customerAddressDto.getAddressName())
                 .append(customerAddressDto.getHouseNumber());
         entity.setAddress(sb.toString());
+        entity.setAddressName(customerAddressDto.getAddressName());
         entity.setCustomerId(userId);
         entity.setUpdateTime(System.currentTimeMillis());
         return this.updateById(entity);
