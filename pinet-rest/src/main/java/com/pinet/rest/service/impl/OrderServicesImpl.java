@@ -21,6 +21,7 @@ import com.imdada.open.platform.client.internal.req.order.AddOrderReq;
 import com.imdada.open.platform.client.internal.resp.order.AddOrderResp;
 import com.imdada.open.platform.exception.RpcException;
 import com.pinet.common.mq.util.JmsUtil;
+import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
@@ -136,9 +137,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Resource
     private ICustomerAddressService customerAddressService;
 
-    @Value("${spring.profiles.active}")
-    private String active;
-
     @Resource
     private IShippingFeeRuleService shippingFeeRuleService;
 
@@ -205,7 +203,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderDetailVo.setProdTotalNum(prodTotalNum);
         orderDetailVo.setOrderDiscounts(orderDiscountService.getByOrderId(orderDetailVo.getOrderId()));
 
-        if (StringUtil.isBlank(orderDetailVo.getMealCode()) && "prod".equals(active)) {
+        if (StringUtil.isBlank(orderDetailVo.getMealCode()) && Environment.isProd()) {
             String token = kryApiService.getToken(AuthType.SHOP, orderDetailVo.getKryShopId());
             KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
             kryOrderDetailDTO.setOrderId(orderDetailVo.getKryOrderNo());
@@ -514,7 +512,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param orderProdPrice   实付金额
      * @return 使用完优惠券后的价格
      */
-    private BigDecimal processCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice,
+    private BigDecimal processCoupon(Long customerCouponId,
+                                     Long shopId,
+                                     BigDecimal orderProdPrice,
                                      List<OrderDiscount> orderDiscounts) {
         CustomerCoupon customerCoupon = customerCouponService.getById(customerCouponId);
         Boolean checkFlag = customerCouponService.checkCoupon(customerCoupon.getId(), shopId, orderProdPrice);
@@ -922,8 +922,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (orderType == 2) {
             return new BigDecimal("0");
         }
-
-        if (!"prod".equals(active)) {
+        if(!Environment.isProd()){
             return new BigDecimal("4");
         }
         if (deliveryPlatform.equals(DeliveryPlatformEnum.ZPS.getCode())) {
@@ -953,7 +952,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return new BigDecimal("0");
         }
         //测试环境默认4元吧
-        if (!"prod".equals(active)) {
+        if(!Environment.isProd()){
             return new BigDecimal("4");
         }
         if (StringUtil.isBlank(deliveryShopNo) || deliveryPlatform.equals(DeliveryPlatformEnum.ZPS.getCode())) {
@@ -1095,7 +1094,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             msgDataList.add(new WxMaSubscribeMessage.MsgData("thing7", "您的餐品已制作完成，请到前台领取"));//温馨提醒
 
             WxMaSubscribeMessage wxMaSubscribeMessage = WxMaSubscribeMessage.builder()
-                    .templateId("UQ9ksqAUuRgVLgii5aE3lsfsoO3ciByyED3R9WKZsCA")
+                    .templateId(CommonConstant.PERFORMANCE_CALL_TEMPLATE_ID)
                     .data(msgDataList)
                     .toUser(customer.getQsOpenId())
                     .page("packageA/orderClose/orderDetails?orderId=" + orders.getId())
@@ -1115,7 +1114,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @return
      */
     public String takeoutOrderCreate(Orders order) {
-        if (!Objects.equals(active, "prod")) {
+        if(!Environment.isProd()){
             return "";
         }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
@@ -1263,7 +1262,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders) {
         //生产环境才推单，其他环境就不推了吧
-        if (!"prod".equals(active)) {
+        if(!Environment.isProd()){
             return null;
         }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();

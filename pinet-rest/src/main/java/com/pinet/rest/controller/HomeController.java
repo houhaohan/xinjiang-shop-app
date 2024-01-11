@@ -85,7 +85,7 @@ public class HomeController extends BaseController {
     public Result<TopCountDto> topCount() {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         TopCountDto topCountDto = new TopCountDto();
-        Integer couponCount = customerCouponService.countByCustomerId(customerId);
+        Long couponCount = customerCouponService.countByCustomerId(customerId);
         topCountDto.setCouponCount(couponCount);
 
         //余额

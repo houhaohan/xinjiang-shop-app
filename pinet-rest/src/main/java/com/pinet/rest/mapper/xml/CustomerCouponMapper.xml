@@ -73,13 +73,6 @@
           and cc.id > #{lastId}
         order by cc.id desc
     </select>
-    <select id="countByCustomerId" resultType="java.lang.Integer">
-        select ifnull(count(1),0)
-        from qingshi.customer_coupon
-        where customer_id = #{customerId}
-          and coupon_status &lt;= 2
-          and del_flag = 0
-          and expire_time > now()
-    </select>
+
 
 </mapper>

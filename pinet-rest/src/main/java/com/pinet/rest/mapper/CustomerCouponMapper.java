@@ -25,5 +25,4 @@ public interface CustomerCouponMapper extends BaseMapper<CustomerCoupon> {
 
     List<CustomerCoupon> selectIndexCouponList(@Param("lastId") Long lastId,@Param("userId") Long userId);
 
-    Integer countByCustomerId(@Param("customerId") Long customerId);
 }

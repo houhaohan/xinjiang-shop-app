@@ -5,10 +5,10 @@ import lombok.Getter;
 @Getter
 public enum ApiExceptionEnum {
     FAILED(500,"操作失败"),
-    COUPON_EXPIRED(6001,"优惠券未生效"),
-    COUPON_NOT_STARTED(6002,"优惠券失效"),
-    COUPON_NO_QUANTITY(6003,"优惠券已领完"),
-    COUPON_RECEIVE_UPPER_LIMIT(6003,"您领取的数量已达上限，请勿重复操作"),
+    COUPON_EXPIRED(1001,"优惠券未生效"),
+    COUPON_NOT_STARTED(1002,"该优惠券活动未开始"),
+    COUPON_NO_QUANTITY(1003,"优惠券已领完，无法再领取"),
+    COUPON_RECEIVE_UPPER_LIMIT(1004,"您领取的数量已达上限，请勿重复操作"),
     ;
 
     private int code;
@@ -19,7 +19,7 @@ public enum ApiExceptionEnum {
         this.message = message;
     }
 
-    public static ApiExceptionEnum get(int code){
+    public static ApiExceptionEnum getByCode(int code){
         for (ApiExceptionEnum enums: ApiExceptionEnum.values()){
             if (enums.getCode() == code){
                 return enums;

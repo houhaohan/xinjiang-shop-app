@@ -78,7 +78,7 @@ public class Coupon extends BaseEntity {
     private Integer claimedType;
 
     @ApiModelProperty("限领数量")
-    private Integer restrictNum;
+    private int restrictNum;
 
     @ApiModelProperty("领取周期")
     private Integer getDay;
