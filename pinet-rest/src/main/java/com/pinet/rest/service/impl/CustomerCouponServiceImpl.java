@@ -23,14 +23,17 @@ import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Coupon;
 import com.pinet.rest.entity.CustomerCoupon;
+import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.SetNewCustomerCouponDto;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
+import com.pinet.rest.entity.vo.CustomerCouponListVo;
 import com.pinet.rest.mapper.CustomerCouponMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -65,17 +68,11 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     @Resource
     private ICouponShopService couponShopService;
 
-    @Resource
-    private ICustomerService customerService;
 
     @Override
-    public List<CustomerCoupon> customerCouponList(PageRequest pageRequest) {
+    public List<CustomerCouponListVo> customerCouponList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-
-        IPage<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
-        IPage<CustomerCoupon> pageList = baseMapper.selectCustomerCouponList(page, userId);
-        pageList.getRecords().forEach(this::setRule);
-        return pageList.getRecords();
+        return baseMapper.selectCustomerCouponList(pageRequest.getPageNum()-1, pageRequest.getPageSize(), userId);
     }
 
     @Override
@@ -94,21 +91,15 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     @Override
-    public List<CustomerCoupon> customerCouponListDetailList(PageRequest pageRequest) {
+    public List<CustomerCouponListVo> customerCouponListDetailList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        IPage<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
-        IPage<CustomerCoupon> pageList = baseMapper.selectCustomerCouponDetailList(page, userId);
-        pageList.getRecords().forEach(this::setRule);
-        return pageList.getRecords();
+        return baseMapper.selectCustomerCouponDetailList(pageRequest.getPageNum()-1,pageRequest.getPageSize(), userId);
     }
 
     @Override
-    public List<CustomerCoupon> customerCouponInvalidList(PageRequest pageRequest) {
+    public List<CustomerCouponListVo> customerCouponInvalidList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        IPage<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
-        IPage<CustomerCoupon> pageList = baseMapper.selectcustomerCouponInvalidList(page, userId);
-        pageList.getRecords().forEach(this::setRule);
-        return pageList.getRecords();
+        return baseMapper.selectcustomerCouponInvalidList(pageRequest.getPageNum()-1, pageRequest.getPageSize(), userId);
     }
 
     @Override
@@ -273,10 +264,11 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         customerCoupon.setCustomerId(userId);
         customerCoupon.setCouponId(couponId);
         if(coupon.getEffectType() == 1){
-            customerCoupon.setExpireTime(DateUtils.endOfDay(DateUtils.addDays(new Date(),coupon.getGetDay())));
+            customerCoupon.setExpireTime(DateUtils.endOfDay(DateUtils.addDays(new Date(),coupon.getEffectDay())));
         }else if(coupon.getEffectType() == 2){
             customerCoupon.setExpireTime(coupon.getPastTime());
         }
+        customerCoupon.setCouponGrantId(0L);
         customerCoupon.setCouponName(coupon.getName());
         customerCoupon.setCouponType(coupon.getType());
         customerCoupon.setCouponStatus(CouponReceiveStatusEnum.RECEIVED.getCode());
@@ -299,22 +291,20 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
 
-    private void setRule(CustomerCoupon customerCoupon) {
-//        String msg2 = "2、本券一次使用一张,不限制商品,不可抵扣配送费及零星选配的辅料等附加费用";
-//        String msg3 = "3、本券不于其他优惠同享。(店帮主可与本券同使用)";
-//
-//
-//        StringBuilder msg = new StringBuilder();
-//        if (customerCoupon.getShopId() != null && customerCoupon.getShopId() > 0) {
-//            Shop shop = shopService.getById(customerCoupon.getShopId());
-//            msg.append("1、本券可用于").append(shop.getShopName()).append("使用,享受门店所有优惠。").append("\r\n").append(msg2)
-//                    .append("\r\n").append(msg3);
-//        } else {
-//            msg.append("1、本券全国门店通用,(部分特殊活动门店除外),下单前可与客服确认门店是否支持使用。").append("\r\n").append(msg2)
-//                    .append("\r\n").append(msg3);
-//        }
-//
-//        customerCoupon.setRule(msg.toString());
+    private String getRule(Long couponId) {
+        String msg2 = "2、本券一次使用一张,不限制商品,不可抵扣配送费及零星选配的辅料等附加费用";
+        String msg3 = "3、本券不于其他优惠同享。(店帮主可与本券同使用)";
+
+        Coupon coupon = couponService.getById(couponId);
+        StringBuilder msg = new StringBuilder();
+        if (coupon.getUseShop() == 2) {
+            msg.append("1、本券可用于部分门店使用,享受门店所有优惠。").append("\r\n").append(msg2)
+                    .append("\r\n").append(msg3);
+        } else {
+            msg.append("1、本券全国门店通用,(部分特殊活动门店除外),下单前可与客服确认门店是否支持使用。").append("\r\n").append(msg2)
+                    .append("\r\n").append(msg3);
+        }
+        return msg.toString();
     }
 
     /**
@@ -355,14 +345,14 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("customer_id",userId);
         queryWrapper.eq("coupon_id",coupon.getId());
-        if(coupon.getClaimedType() == CouponClaimedTypeEnum.USER_LIMIT.getCode()){
+        if(coupon.getRecType() == CouponClaimedTypeEnum.USER_LIMIT.getCode()){
             long count = count(queryWrapper);
             if(count >= coupon.getRestrictNum()){
                 throw new PinetException(ApiExceptionEnum.COUPON_RECEIVE_UPPER_LIMIT);
             }
-        }else if(coupon.getClaimedType() == CouponClaimedTypeEnum.TIME_LIMIT.getCode()){
+        }else if(coupon.getRecType() == CouponClaimedTypeEnum.TIME_LIMIT.getCode()){
             Date firstCouponReceiveTime = getFirstCouponReceiveTime(userId, coupon.getId());
-            queryWrapper.le("create_time", DateUtils.endOfDay(DateUtils.addDays(firstCouponReceiveTime,coupon.getGetDay())));
+            queryWrapper.le("create_time", DateUtils.endOfDay(DateUtils.addDays(firstCouponReceiveTime,coupon.getRecCycle())));
             long count = count(queryWrapper);
             if(count >= coupon.getRestrictNum()){
                 throw new PinetException(ApiExceptionEnum.COUPON_RECEIVE_UPPER_LIMIT);

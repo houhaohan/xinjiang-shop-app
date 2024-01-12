@@ -7,15 +7,13 @@ import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
+import com.pinet.rest.entity.vo.CustomerCouponListVo;
 import com.pinet.rest.service.ICustomerCouponService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
 
 import javax.annotation.Resource;
@@ -39,11 +37,10 @@ public class CustomerCouponController extends BaseController {
     @PostMapping("/customerCouponList")
     @ApiOperation("优惠券列表")
     @ApiVersion(1)
-    public Result<?> customerCouponList(@RequestBody PageRequest pageRequest){
-        List<CustomerCoupon> customerCouponList = customerCouponService.customerCouponList(pageRequest);
+    public Result<List<CustomerCouponListVo>> customerCouponList(@RequestBody PageRequest pageRequest){
+        List<CustomerCouponListVo> customerCouponList = customerCouponService.customerCouponList(pageRequest);
         return Result.ok(customerCouponList);
     }
-
 
     @PostMapping("/updateCouponStatus")
     @ApiOperation("更新优惠券状态")
@@ -60,16 +57,16 @@ public class CustomerCouponController extends BaseController {
     @PostMapping("/customerCouponListDetailList")
     @ApiOperation("优惠券明细列表")
     @ApiVersion(1)
-    public Result<?> customerCouponListDetailList(@RequestBody PageRequest pageRequest){
-        List<CustomerCoupon> customerCouponList = customerCouponService.customerCouponListDetailList(pageRequest);
+    public Result<List<CustomerCouponListVo>> customerCouponListDetailList(@RequestBody PageRequest pageRequest){
+        List<CustomerCouponListVo> customerCouponList = customerCouponService.customerCouponListDetailList(pageRequest);
         return Result.ok(customerCouponList);
     }
 
     @PostMapping("/customerCouponInvalidList")
     @ApiOperation("优惠券失效列表")
     @ApiVersion(1)
-    public Result<?> customerCouponInvalidList(@RequestBody PageRequest pageRequest){
-        List<CustomerCoupon> customerCouponList = customerCouponService.customerCouponInvalidList(pageRequest);
+    public Result<List<CustomerCouponListVo>> customerCouponInvalidList(@RequestBody PageRequest pageRequest){
+        List<CustomerCouponListVo> customerCouponList = customerCouponService.customerCouponInvalidList(pageRequest);
         return Result.ok(customerCouponList);
     }
 
@@ -82,7 +79,7 @@ public class CustomerCouponController extends BaseController {
     }
 
 
-    @RequestMapping("/couponWarn")
+    @RequestMapping(value = "/couponWarn",method = RequestMethod.GET)
     @ApiOperation("优惠券过期提醒")
     @ApiVersion(1)
     public Result<?> couponWarn(Long customerCouponId){
@@ -90,10 +87,10 @@ public class CustomerCouponController extends BaseController {
         return Result.ok();
     }
 
-    @RequestMapping("/优惠券领取")
+    @RequestMapping(value = "/receive",method = RequestMethod.POST)
     @ApiOperation("优惠券领取")
     @ApiVersion(1)
-    public Result<?> receive(Long couponId){
+    public Result<?> receive(@RequestParam("couponId") Long couponId){
         customerCouponService.receive(couponId);
         return Result.ok();
     }

@@ -1,14 +1,9 @@
 package com.pinet.rest.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.core.entity.BaseEntity;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Date;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -54,27 +49,7 @@ public class CustomerCoupon extends BaseEntity {
     @ApiModelProperty("优惠券类型  1满减券 2-折扣券")
     private Integer couponType;
 
-//    @ApiModelProperty("店铺id  0表示所有店可用")
-//    private Long shopId;
-//
-//    @ApiModelProperty("店铺名称")
-//    @TableField(exist = false)
-//    private String shopName;
-
-    @ApiModelProperty("是否可用")
-    @TableField(exist = false)
-    private Boolean isUsable;
-
-//    @ApiModelProperty("门槛金额")
-//    private BigDecimal thresholdAmount;
-//
-//    @ApiModelProperty("优惠券金额")
-//    private BigDecimal couponAmount;
-
     @ApiModelProperty("1未领取  2已领取  3已放弃 4已使用")
     private Integer couponStatus;
 
-    @ApiModelProperty("使用规则")
-    @TableField(exist = false)
-    private String rule;
 }

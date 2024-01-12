@@ -24,9 +24,10 @@
         <result column="use_shop" property="useShop" />
         <result column="use_product" property="useProduct" />
         <result column="status" property="status" />
-        <result column="claimed_type" property="claimedType" />
+        <result column="disable_flag" property="disableFlag" />
+        <result column="rec_type" property="recType" />
         <result column="restrict_num" property="restrictNum" />
-        <result column="get_day" property="getDay" />
+        <result column="rec_cycle" property="recCycle" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -37,7 +38,7 @@
         update_by,
         update_time,
         del_flag,
-        name, type, use_price, coupon_price, discount, quantity, claimed_num, effect_type, effect_day, use_time, past_time, use_shop, use_product, status, claimed_type, restrict_num, get_day
+        `name`, `type`, use_price, coupon_price, discount, quantity, claimed_num, effect_type, effect_day, use_time, past_time, use_shop, use_product, status, disable_flag, rec_type, restrict_num, rec_cycle
     </sql>
 
 </mapper>

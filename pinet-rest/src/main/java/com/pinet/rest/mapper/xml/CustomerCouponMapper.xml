@@ -16,57 +16,49 @@
         <result column="expire_time" property="expireTime"/>
         <result column="coupon_name" property="couponName"/>
         <result column="coupon_type" property="couponType"/>
-        <result column="shop_id" property="shopId"/>
-        <result column="threshold_amount" property="thresholdAmount"/>
-        <result column="coupon_amount" property="couponAmount"/>
         <result column="coupon_status" property="couponStatus"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id,
-        create_by,
-        create_time,
-        update_by,
-        update_time,
-        del_flag,
-        coupon_grant_id, coupon_grant_record_id, customer_id, expire_time, coupon_name, coupon_type, shop_id, threshold_amount, coupon_amount, coupon_status
+        cc.id,
+        cc.create_by,
+        cc.create_time,
+        cc.update_by,
+        cc.update_time,
+        cc.del_flag,
+        cc.coupon_grant_id, cc.coupon_grant_record_id, cc.customer_id, cc.expire_time, cc.coupon_name, cc.coupon_type, cc.coupon_status
     </sql>
-    <select id="selectCustomerCouponList" resultType="com.pinet.rest.entity.CustomerCoupon">
-        select cc.*,
-               s.shop_name shopName
+    <select id="selectCustomerCouponList" resultType="com.pinet.rest.entity.vo.CustomerCouponListVo">
+        select <include refid="Base_Column_List"/>
         from qingshi.customer_coupon cc
-                 left join shop s on s.id = cc.shop_id
         where cc.customer_id = #{userId}
           and cc.coupon_status &lt;= 2
           and cc.del_flag = 0
           and cc.expire_time > now()
         order by cc.coupon_status, cc.create_time desc
+        limit #{pageNo},#{pageSize}
     </select>
-    <select id="selectCustomerCouponDetailList" resultType="com.pinet.rest.entity.CustomerCoupon">
-        select cc.*,
-               s.shop_name shopName
+    <select id="selectCustomerCouponDetailList" resultType="com.pinet.rest.entity.vo.CustomerCouponListVo">
+        select <include refid="Base_Column_List"/>
         from qingshi.customer_coupon cc
-                 left join shop s on s.id = cc.shop_id
         where cc.del_flag = 0
           and cc.customer_id = #{userId}
         order by cc.create_time desc
+        limit #{pageNo},#{pageSize}
     </select>
-    <select id="selectcustomerCouponInvalidList" resultType="com.pinet.rest.entity.CustomerCoupon">
-        select cc.*,
-               s.shop_name shopName
+    <select id="selectcustomerCouponInvalidList" resultType="com.pinet.rest.entity.vo.CustomerCouponListVo">
+        select <include refid="Base_Column_List"/>
         from qingshi.customer_coupon cc
-                 left join shop s on s.id = cc.shop_id
         where cc.del_flag = 0
           and cc.customer_id = #{userId}
           and cc.expire_time &lt; now()
         order by cc.create_time desc
+        limit #{pageNo},#{pageSize}
     </select>
     <select id="selectIndexCouponList" resultType="com.pinet.rest.entity.CustomerCoupon">
-        select cc.*,
-               s.shop_name shopName
+        select <include refid="Base_Column_List"/>
         from qingshi.customer_coupon cc
-                 left join shop s on s.id = cc.shop_id
         where cc.del_flag = 0
           and cc.customer_id = #{userId}
           and cc.expire_time > now()

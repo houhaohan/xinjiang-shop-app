@@ -1,5 +1,6 @@
 package com.pinet.rest.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
@@ -29,9 +30,11 @@ public class Coupon extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("优惠券名称")
+    @TableField("`name`")
     private String name;
 
     @ApiModelProperty("优惠券类型，1-满减券，2-折扣券")
+    @TableField("`type`")
     private Integer type;
 
     @ApiModelProperty("优惠券使用门槛")
@@ -56,13 +59,13 @@ public class Coupon extends BaseEntity {
     private Integer effectDay;
 
     @ApiModelProperty("优惠券生效时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
     private Date useTime;
 
     @ApiModelProperty("优惠券失效时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
     private Date pastTime;
 
     @ApiModelProperty("1-全部店铺，2-部分店铺")
@@ -74,14 +77,17 @@ public class Coupon extends BaseEntity {
     @ApiModelProperty("1-未开始，2-进行中，3-已失效")
     private Integer status;
 
+    @ApiModelProperty("0-禁用，1-启用")
+    private Integer disableFlag;
+
     @ApiModelProperty("优惠券领取类型 1.用户领取 2.时间周期")
-    private Integer claimedType;
+    private Integer recType;
 
     @ApiModelProperty("限领数量")
-    private int restrictNum;
+    private Integer restrictNum;
 
     @ApiModelProperty("领取周期")
-    private Integer getDay;
+    private Integer recCycle;
 
 
 }

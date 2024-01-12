@@ -4,6 +4,7 @@ import com.pinet.core.page.PageRequest;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
+import com.pinet.rest.entity.vo.CustomerCouponListVo;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,13 +19,13 @@ import java.util.List;
  */
 public interface ICustomerCouponService extends IService<CustomerCoupon> {
 
-    List<CustomerCoupon> customerCouponList(PageRequest pageRequest);
+    List<CustomerCouponListVo> customerCouponList(PageRequest pageRequest);
 
     boolean updateCouponStatus(UpdateCouponStatusDto dto);
 
-    List<CustomerCoupon> customerCouponListDetailList(PageRequest pageRequest);
+    List<CustomerCouponListVo> customerCouponListDetailList(PageRequest pageRequest);
 
-    List<CustomerCoupon> customerCouponInvalidList(PageRequest pageRequest);
+    List<CustomerCouponListVo> customerCouponInvalidList(PageRequest pageRequest);
 
     List<CustomerCoupon> indexCouponList();
 
