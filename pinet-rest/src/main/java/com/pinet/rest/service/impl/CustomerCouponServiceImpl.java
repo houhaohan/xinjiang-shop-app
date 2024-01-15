@@ -8,8 +8,6 @@ import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.common.redis.util.RedisUtil;
@@ -23,17 +21,16 @@ import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Coupon;
 import com.pinet.rest.entity.CustomerCoupon;
-import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.SetNewCustomerCouponDto;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
-import com.pinet.rest.entity.vo.CustomerCouponListVo;
+import com.pinet.rest.entity.vo.CustomerCouponVo;
 import com.pinet.rest.mapper.CustomerCouponMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -70,9 +67,15 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
 
     @Override
-    public List<CustomerCouponListVo> customerCouponList(PageRequest pageRequest) {
+    public List<CustomerCouponVo> customerCouponList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        return baseMapper.selectCustomerCouponList(pageRequest.getPageNum()-1, pageRequest.getPageSize(), userId);
+
+        QueryWrapper<CustomerCoupon> queryWrapper = initWrapper(userId,true);
+        queryWrapper.eq("cc.coupon_status",2)
+                .orderByAsc("cc.coupon_status")
+                .orderByDesc("cc.id")
+                .last("limit "+(pageRequest.getPageNum()-1)+","+pageRequest.getPageSize());
+        return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
     @Override
@@ -91,19 +94,27 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     @Override
-    public List<CustomerCouponListVo> customerCouponListDetailList(PageRequest pageRequest) {
+    public List<CustomerCouponVo> customerCouponListDetailList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        return baseMapper.selectCustomerCouponDetailList(pageRequest.getPageNum()-1,pageRequest.getPageSize(), userId);
+        QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("cc.customer_id",userId);
+        queryWrapper.eq("cc.del_flag",0);
+        queryWrapper.orderByDesc("cc.id");
+        queryWrapper.last("limit "+(pageRequest.getPageNum() - 1)+","+pageRequest.getPageSize());
+        return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
     @Override
-    public List<CustomerCouponListVo> customerCouponInvalidList(PageRequest pageRequest) {
+    public List<CustomerCouponVo> customerCouponInvalidList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        return baseMapper.selectcustomerCouponInvalidList(pageRequest.getPageNum()-1, pageRequest.getPageSize(), userId);
+        QueryWrapper queryWrapper = initWrapper(userId,false);
+        queryWrapper.orderByDesc("cc.id");
+        queryWrapper.last("limit "+(pageRequest.getPageNum() - 1)+","+pageRequest.getPageSize());
+        return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
     @Override
-    public List<CustomerCoupon> indexCouponList() {
+    public List<CustomerCouponVo> indexCouponList() {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         String redisKey = "qingshi:coupon:index:" + userId;
         String lastIdStr = redisUtil.get(redisKey);
@@ -113,24 +124,29 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         if (!StringUtil.isBlank(lastIdStr)) {
             lastId = Long.parseLong(lastIdStr);
         }
-
-        List<CustomerCoupon> customerCoupons = baseMapper.selectIndexCouponList(lastId, userId);
+        QueryWrapper queryWrapper = initWrapper(userId,true);
+        queryWrapper.gt("cc.id",lastId);
+        queryWrapper.orderByDesc("cc.id");
+        List<CustomerCouponVo> customerCoupons = baseMapper.selectCustomerCouponList(queryWrapper);
 
         if (CollUtil.isNotEmpty(customerCoupons)) {
             redisUtil.set(redisKey, customerCoupons.get(0).getId().toString());
         }
-        customerCoupons.forEach(this::setRule);
         return customerCoupons;
     }
+
+
 
     @Override
     public Boolean checkCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice) {
         CustomerCoupon customerCoupon = getById(customerCouponId);
-        return checkCoupon(customerCoupon, shopId, orderProdPrice);
+        CustomerCouponVo customerCouponVo = new CustomerCouponVo();
+        BeanUtils.copyProperties(customerCoupon,customerCouponVo);
+        return checkCoupon(customerCouponVo, shopId, orderProdPrice);
     }
 
     @Override
-    public Boolean checkCoupon(CustomerCoupon customerCoupon, Long shopId, BigDecimal orderProdPrice) {
+    public Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, BigDecimal orderProdPrice) {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         //优惠券不存在
         if (ObjectUtil.isNull(customerCoupon)) {
@@ -276,6 +292,24 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     /**
+     * 初始化优惠券查询条件
+     * @param userId
+     * @param flag 失效时间 > 当前时间？
+     * @return
+     */
+    private QueryWrapper initWrapper(Long userId,boolean flag){
+        QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("cc.customer_id",userId);
+        if(flag){
+            queryWrapper.gt("cc.expire_time",new Date());
+        }else {
+            queryWrapper.lt("cc.expire_time",new Date());
+        }
+        queryWrapper.eq("cc.del_flag",0);
+        return queryWrapper;
+    }
+
+    /**
      * 获取这个优惠券第一张的领取时间
      * @param userId
      * @param couponId
@@ -290,22 +324,6 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         return time == null ? new Date() : time;
     }
 
-
-    private String getRule(Long couponId) {
-        String msg2 = "2、本券一次使用一张,不限制商品,不可抵扣配送费及零星选配的辅料等附加费用";
-        String msg3 = "3、本券不于其他优惠同享。(店帮主可与本券同使用)";
-
-        Coupon coupon = couponService.getById(couponId);
-        StringBuilder msg = new StringBuilder();
-        if (coupon.getUseShop() == 2) {
-            msg.append("1、本券可用于部分门店使用,享受门店所有优惠。").append("\r\n").append(msg2)
-                    .append("\r\n").append(msg3);
-        } else {
-            msg.append("1、本券全国门店通用,(部分特殊活动门店除外),下单前可与客服确认门店是否支持使用。").append("\r\n").append(msg2)
-                    .append("\r\n").append(msg3);
-        }
-        return msg.toString();
-    }
 
     /**
      * 校验优惠券是否有效

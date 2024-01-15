@@ -57,5 +57,5 @@ public class OrderSettlementVo {
     @ApiModelProperty(value = "订单优惠明细", name = "orderDiscounts")
     private List<OrderDiscount> orderDiscounts;
 
-    private List<CustomerCoupon> customerCoupons;
+    private List<CustomerCouponVo> customerCoupons;
 }

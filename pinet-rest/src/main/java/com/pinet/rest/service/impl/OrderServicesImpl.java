@@ -51,7 +51,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -289,8 +288,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setOrderProductNum(orderProductNum);
         vo.setOrderDiscounts(orderDiscounts);
 
-        List<CustomerCoupon> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));
-        for (CustomerCoupon customerCoupon : customerCoupons) {
+        List<CustomerCouponVo> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));
+        for (CustomerCouponVo customerCoupon : customerCoupons) {
             Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), customerMemberPrice);
             customerCoupon.setIsUsable(isUsable);
         }

@@ -4,10 +4,9 @@ package com.pinet.rest.controller;
 import com.pinet.core.page.PageRequest;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
-import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
-import com.pinet.rest.entity.vo.CustomerCouponListVo;
+import com.pinet.rest.entity.vo.CustomerCouponVo;
 import com.pinet.rest.service.ICustomerCouponService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,8 +36,8 @@ public class CustomerCouponController extends BaseController {
     @PostMapping("/customerCouponList")
     @ApiOperation("优惠券列表")
     @ApiVersion(1)
-    public Result<List<CustomerCouponListVo>> customerCouponList(@RequestBody PageRequest pageRequest){
-        List<CustomerCouponListVo> customerCouponList = customerCouponService.customerCouponList(pageRequest);
+    public Result<List<CustomerCouponVo>> customerCouponList(@RequestBody PageRequest pageRequest){
+        List<CustomerCouponVo> customerCouponList = customerCouponService.customerCouponList(pageRequest);
         return Result.ok(customerCouponList);
     }
 
@@ -57,16 +56,16 @@ public class CustomerCouponController extends BaseController {
     @PostMapping("/customerCouponListDetailList")
     @ApiOperation("优惠券明细列表")
     @ApiVersion(1)
-    public Result<List<CustomerCouponListVo>> customerCouponListDetailList(@RequestBody PageRequest pageRequest){
-        List<CustomerCouponListVo> customerCouponList = customerCouponService.customerCouponListDetailList(pageRequest);
+    public Result<List<CustomerCouponVo>> customerCouponListDetailList(@RequestBody PageRequest pageRequest){
+        List<CustomerCouponVo> customerCouponList = customerCouponService.customerCouponListDetailList(pageRequest);
         return Result.ok(customerCouponList);
     }
 
     @PostMapping("/customerCouponInvalidList")
     @ApiOperation("优惠券失效列表")
     @ApiVersion(1)
-    public Result<List<CustomerCouponListVo>> customerCouponInvalidList(@RequestBody PageRequest pageRequest){
-        List<CustomerCouponListVo> customerCouponList = customerCouponService.customerCouponInvalidList(pageRequest);
+    public Result<List<CustomerCouponVo>> customerCouponInvalidList(@RequestBody PageRequest pageRequest){
+        List<CustomerCouponVo> customerCouponList = customerCouponService.customerCouponInvalidList(pageRequest);
         return Result.ok(customerCouponList);
     }
 
@@ -74,7 +73,7 @@ public class CustomerCouponController extends BaseController {
     @ApiOperation("首页优惠券列表弹窗")
     @ApiVersion(1)
     public Result<?> indexCouponList(){
-        List<CustomerCoupon> customerCouponList = customerCouponService.indexCouponList();
+        List<CustomerCouponVo> customerCouponList = customerCouponService.indexCouponList();
         return Result.ok(customerCouponList);
     }
 
