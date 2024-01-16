@@ -141,8 +141,9 @@ public class JwtTokenUtils implements Serializable {
     }
 
 	public static void main(String[] args) {
-		String token = generateToken(3967L);
+		String token = generateToken(12014L);
 		System.out.println(token);
+
 
 	}
 

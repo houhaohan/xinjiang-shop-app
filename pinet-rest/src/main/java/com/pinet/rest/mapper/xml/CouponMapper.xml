@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.CouponMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.Coupon">
+        <result column="id" property="id" />
+        <result column="create_by" property="createBy" />
+        <result column="create_time" property="createTime" />
+        <result column="update_by" property="updateBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="del_flag" property="delFlag" />
+        <result column="name" property="name" />
+        <result column="type" property="type" />
+        <result column="use_price" property="usePrice" />
+        <result column="coupon_price" property="couponPrice" />
+        <result column="discount" property="discount" />
+        <result column="quantity" property="quantity" />
+        <result column="claimed_num" property="claimedNum" />
+        <result column="effect_type" property="effectType" />
+        <result column="effect_day" property="effectDay" />
+        <result column="use_time" property="useTime" />
+        <result column="past_time" property="pastTime" />
+        <result column="use_shop" property="useShop" />
+        <result column="use_product" property="useProduct" />
+        <result column="status" property="status" />
+        <result column="disable_flag" property="disableFlag" />
+        <result column="rec_type" property="recType" />
+        <result column="restrict_num" property="restrictNum" />
+        <result column="rec_cycle" property="recCycle" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,
+        create_by,
+        create_time,
+        update_by,
+        update_time,
+        del_flag,
+        `name`, `type`, use_price, coupon_price, discount, quantity, claimed_num, effect_type, effect_day, use_time, past_time, use_shop, use_product, status, disable_flag, rec_type, restrict_num, rec_cycle
+    </sql>
+
+</mapper>

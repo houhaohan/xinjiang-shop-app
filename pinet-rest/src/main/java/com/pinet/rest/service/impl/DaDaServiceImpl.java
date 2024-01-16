@@ -15,6 +15,7 @@ import com.imdada.open.platform.client.order.ReAddOrderClient;
 import com.imdada.open.platform.config.Configuration;
 import com.imdada.open.platform.exception.RpcException;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.Environment;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.DeliveryPlatformEnum;
@@ -23,7 +24,6 @@ import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,8 +51,6 @@ public class DaDaServiceImpl implements IDaDaService {
     @Autowired
     private IShopService shopService;
 
-    @Value("${spring.profiles.active}")
-    private String active;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -63,7 +61,7 @@ public class DaDaServiceImpl implements IDaDaService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void syncOrderStatus(CallbackParam callbackParam) throws RpcException {
-        if(!"prod".equals(active)){
+        if(!Environment.isProd()){
             return;
         }
         Orders orders = ordersMapper.selectByOrderNo(Long.valueOf(callbackParam.getOrderId()));
@@ -126,7 +124,7 @@ public class DaDaServiceImpl implements IDaDaService {
 
     @Override
     public AddOrderResp createOrder(Orders orders) throws RpcException {
-        if(!"prod".equals(active)){
+        if(!Environment.isProd()){
             return null;
         }
         if(StringUtil.isBlank(orders.getKryOrderNo())){
@@ -149,7 +147,7 @@ public class DaDaServiceImpl implements IDaDaService {
 
     @Override
     public AddOrderResp reAddOrder(Orders orders) throws RpcException {
-        if(!"prod".equals(active)){
+        if(!Environment.isProd()){
             return null;
         }
         AddOrderReq req = addOrderReq(orders);
@@ -160,7 +158,7 @@ public class DaDaServiceImpl implements IDaDaService {
 
     @Override
     public AddOrderResp queryDeliverFee(AddOrderReq req) throws RpcException {
-        if(!"prod".equals(active)){
+        if(!Environment.isProd()){
             return new AddOrderResp();
         }
         return QueryDeliverFeeAndAddOrderClient.queryDeliverFee(req);
@@ -168,7 +166,7 @@ public class DaDaServiceImpl implements IDaDaService {
 
     @Override
     public void cancelOrder(Long orderNo) throws RpcException {
-        if(!"prod".equals(active)){
+        if(!Environment.isProd()){
             return;
         }
         CancelOrderReq req = CancelOrderReq.builder()

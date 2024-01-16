@@ -1,5 +1,8 @@
 package com.pinet.core.exception;
 
+import com.pinet.core.enums.ApiExceptionEnum;
+import com.pinet.core.enums.ErrorCodeEnum;
+
 /**
  * 自定义异常
  */
@@ -30,6 +33,12 @@ public class PinetException extends RuntimeException {
 		super(msg, e);
 		this.msg = msg;
 		this.code = code;
+	}
+
+	public PinetException(ApiExceptionEnum e) {
+		super(e.getMessage());
+		this.msg = e.getMessage();
+		this.code = e.getCode();
 	}
 
 	public String getMsg() {

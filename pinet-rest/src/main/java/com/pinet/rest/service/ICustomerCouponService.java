@@ -4,6 +4,7 @@ import com.pinet.core.page.PageRequest;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
+import com.pinet.rest.entity.vo.CustomerCouponVo;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,15 +19,15 @@ import java.util.List;
  */
 public interface ICustomerCouponService extends IService<CustomerCoupon> {
 
-    List<CustomerCoupon> customerCouponList(PageRequest pageRequest);
+    List<CustomerCouponVo> customerCouponList(PageRequest pageRequest);
 
     boolean updateCouponStatus(UpdateCouponStatusDto dto);
 
-    List<CustomerCoupon> customerCouponListDetailList(PageRequest pageRequest);
+    List<CustomerCouponVo> customerCouponListDetailList(PageRequest pageRequest);
 
-    List<CustomerCoupon> customerCouponInvalidList(PageRequest pageRequest);
+    List<CustomerCouponVo> customerCouponInvalidList(PageRequest pageRequest);
 
-    List<CustomerCoupon> indexCouponList();
+    List<CustomerCouponVo> indexCouponList();
 
     /**
      * 判断优惠券是否可用
@@ -44,7 +45,7 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * @param orderProdPrice 实付金额
      * @return 是否可用
      */
-    Boolean checkCoupon(CustomerCoupon customerCoupon, Long shopId, BigDecimal orderProdPrice);
+    Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, BigDecimal orderProdPrice);
 
     /**
      * 优惠券过期提醒
@@ -70,5 +71,11 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * @param customerId
      * @return
      */
-    Integer countByCustomerId(Long customerId);
+    Long countByCustomerId(Long customerId);
+
+    /**
+     * 优惠券领取
+     * @param couponId
+     */
+    void receive(Long couponId);
 }

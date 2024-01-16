@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  **/
 @Data
 public class TopCountDto {
-    private Integer couponCount;
+    private Long couponCount;
 
     private BigDecimal balance = BigDecimal.ZERO;
 

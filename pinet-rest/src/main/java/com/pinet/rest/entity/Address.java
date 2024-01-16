@@ -18,9 +18,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @ApiModel(value = "Address对象", description = "地址表")
-public class Address extends BaseEntity {
+public class Address{
 
     private static final long serialVersionUID = 1L;
+    private Integer id;
 
     private String name;
 
@@ -34,7 +35,7 @@ public class Address extends BaseEntity {
     private String pinyin;
 
     @ApiModelProperty("是否删除")
-    private Boolean isDeleted;
+    private Integer isDeleted;
 
     @ApiModelProperty("下次版本发部的地址名称")
     private String updateName;
@@ -47,7 +48,7 @@ public class Address extends BaseEntity {
 
     private String updatePinyin;
 
-    private Boolean updateIsDeleted;
+    private Integer updateIsDeleted;
 
     @ApiModelProperty("地址全称")
     private String address;

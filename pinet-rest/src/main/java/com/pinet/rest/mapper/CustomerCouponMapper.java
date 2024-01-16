@@ -1,8 +1,10 @@
 package com.pinet.rest.mapper;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.vo.CustomerCouponVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -17,13 +19,8 @@ import java.util.List;
  */
 public interface CustomerCouponMapper extends BaseMapper<CustomerCoupon> {
 
-    IPage<CustomerCoupon> selectCustomerCouponList(@Param("page") IPage<CustomerCoupon> page, @Param("userId") Long userId);
+    List<CustomerCouponVo> selectCustomerCouponList(@Param(Constants.WRAPPER) Wrapper<CustomerCoupon> wrapper);
 
-    IPage<CustomerCoupon> selectCustomerCouponDetailList(@Param("page")IPage<CustomerCoupon> page,@Param("userId") Long userId);
+    CustomerCouponVo selectCustomerCouponVoById(@Param("id") Long id);
 
-    IPage<CustomerCoupon> selectcustomerCouponInvalidList(@Param("page")IPage<CustomerCoupon> page,@Param("userId") Long userId);
-
-    List<CustomerCoupon> selectIndexCouponList(@Param("lastId") Long lastId,@Param("userId") Long userId);
-
-    Integer countByCustomerId(@Param("customerId") Long customerId);
 }
