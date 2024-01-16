@@ -2,6 +2,7 @@ package com.pinet.rest.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.rest.entity.Coupon;
+import com.pinet.rest.entity.enums.DiscountEnums;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -49,6 +50,9 @@ public class CustomerCouponVo {
     @ApiModelProperty("折扣比例%")
     private Integer discount;
 
+    @ApiModelProperty("N折")
+    private String discountStr;
+
     @ApiModelProperty("1未领取  2已领取  3已放弃 4已使用")
     private Integer couponStatus;
 
@@ -65,6 +69,10 @@ public class CustomerCouponVo {
         list.add("2、本券一次使用一张,不限制商品,不可抵扣配送费及零星选配的辅料等附加费用");
         list.add("3、本券不与其他优惠同享。(店帮主可与本券同使用)");
         return list.stream().collect(Collectors.joining("\r\n"));
+    }
+
+    public String getDiscountStr() {
+        return DiscountEnums.getDescriptionByDiscount(this.discount);
     }
 
 }

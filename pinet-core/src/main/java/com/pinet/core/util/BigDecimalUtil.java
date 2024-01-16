@@ -88,6 +88,16 @@ public class BigDecimalUtil {
      * @param val 折扣
      * @return 单位元
      */
+    public static BigDecimal multiply(BigDecimal amount, BigDecimal val,Integer scale) {
+        return amount.multiply(val).setScale(scale,BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * 两数之积
+     * @param amount (单位元)
+     * @param val 折扣
+     * @return 单位元
+     */
     public static BigDecimal multiply(BigDecimal amount, BigDecimal val) {
         return amount.multiply(val).setScale(2,BigDecimal.ROUND_HALF_UP);
     }

@@ -19,9 +19,9 @@ import java.util.List;
 @Component
 public class OrderPreferentialManager {
 
-    private ICouponService couponService;
+    private final ICouponService couponService;
 
-    private ICustomerMemberService customerMemberService;
+    private final ICustomerMemberService customerMemberService;
 
     public OrderPreferentialManager(ICouponService couponService,ICustomerMemberService customerMemberService){
         this.couponService =  couponService;
@@ -33,62 +33,71 @@ public class OrderPreferentialManager {
         PreferentialVo preferentialVo = new PreferentialVo();
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
-        BigDecimal discountAmount = BigDecimal.ZERO;
         CustomerMember customerMember = customerMemberService.getByCustomerId(customerId);
         //店帮主、会员 折扣
         if(customerMember != null){
             //优惠后金额
             MemberLevelEnum e = MemberLevelEnum.getEnumByCode(customerMember.getMemberLevel());
             BigDecimal discountedPrice = BigDecimalUtil.multiply(orderProductPrice, MemberLevelEnum._10.getDiscount());
-            discountAmount = BigDecimalUtil.subtract(orderProductPrice,discountedPrice);
             OrderDiscount orderDiscount = new OrderDiscount();
-            orderDiscount.setDiscountMsg(e.getMsg() + e.getDiscount().multiply(new BigDecimal(10)) + "折优惠")
-                    .setDiscountAmount(discountAmount)
+            orderDiscount.setDiscountMsg(e.getMsg() + BigDecimalUtil.stripTrailingZeros(BigDecimalUtil.multiply(e.getDiscount(),new BigDecimal("10"))) + "折优惠")
+                    .setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountedPrice))
                     .setType(DiscountTypeEnum.VIP_1.getCode());
             orderDiscounts.add(orderDiscount);
+            preferentialVo.setOrderDiscounts(orderDiscounts);
+            preferentialVo.setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountedPrice));
+            preferentialVo.setProductDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,preferentialVo.getDiscountAmount()));
+            preferentialVo.setOrderProductPrice(orderProductPrice);
         }
 
         //优惠券折扣
         if(customerCouponId == null){
-            preferentialVo.setOrderDiscounts(orderDiscounts);
-            preferentialVo.setOrderProductPrice(orderProductPrice);
-            preferentialVo.setDiscountAmount(discountAmount);
-            preferentialVo.setProductDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountAmount));
            return preferentialVo;
         }
         //清空店帮主的优惠数据
-        orderDiscounts.clear();
         Coupon coupon = couponService.getByCustomerCouponId(customerCouponId);
-        //校验
-        if(coupon.getType() == 1){
-            //满减券
-            OrderDiscount orderDiscount = new OrderDiscount();
-            orderDiscount.setDiscountMsg("满减优惠券")
-                    .setDiscountAmount(coupon.getCouponPrice())
-                    .setType(DiscountTypeEnum.VIP_1.getCode());
-            orderDiscounts.add(orderDiscount);
-
-            preferentialVo.setOrderProductPrice(orderProductPrice);
-            preferentialVo.setOrderDiscounts(orderDiscounts);
-            preferentialVo.setDiscountAmount(coupon.getCouponPrice());
-            preferentialVo.setProductDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,coupon.getCouponPrice()));
-        }else if(coupon.getType() == 2){
-            //折扣券
-            BigDecimal productDiscountAmount = BigDecimalUtil.multiply(orderProductPrice, new BigDecimal(coupon.getDiscount() * 0.01));
-            discountAmount = BigDecimalUtil.subtract(orderProductPrice,productDiscountAmount);
-            OrderDiscount orderDiscount = new OrderDiscount();
-            orderDiscount.setDiscountMsg("折扣优惠券")
-                    .setDiscountAmount(discountAmount)
-                    .setType(DiscountTypeEnum.VIP_1.getCode());
-            orderDiscounts.add(orderDiscount);
-
-            preferentialVo.setOrderDiscounts(orderDiscounts);
-            preferentialVo.setOrderProductPrice(orderProductPrice);
-            preferentialVo.setDiscountAmount(discountAmount);
-            preferentialVo.setProductDiscountAmount(productDiscountAmount);
+        if(coupon.getUseVip() == 0){
+            orderDiscounts.clear();
+            if(coupon.getType() == 1){
+                //满减券
+                OrderDiscount orderDiscount = new OrderDiscount();
+                orderDiscount.setDiscountMsg("满减优惠券")
+                        .setDiscountAmount(coupon.getCouponPrice())
+                        .setType(DiscountTypeEnum.VIP_1.getCode());
+                orderDiscounts.add(orderDiscount);
+            }else if(coupon.getType() == 2){
+                //折扣券
+                BigDecimal productDiscountAmount = BigDecimalUtil.multiply(orderProductPrice, new BigDecimal(coupon.getDiscount() * 0.01));
+                OrderDiscount orderDiscount = new OrderDiscount();
+                orderDiscount.setDiscountMsg("折扣优惠券")
+                        .setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,productDiscountAmount))
+                        .setType(DiscountTypeEnum.VIP_1.getCode());
+                orderDiscounts.add(orderDiscount);
+            }
+        }else {
+            //会员同享,先享受会员折扣再享受优惠券折扣
+            if(coupon.getType() == 1){
+                //满减券
+                OrderDiscount orderDiscount = new OrderDiscount();
+                orderDiscount.setDiscountMsg("满减优惠券")
+                        .setDiscountAmount(coupon.getCouponPrice())
+                        .setType(DiscountTypeEnum.VIP_1.getCode());
+                orderDiscounts.add(orderDiscount);
+            }else if(coupon.getType() == 2){
+                //折扣券
+                BigDecimal productDiscountAmount = BigDecimalUtil.multiply(orderProductPrice, new BigDecimal(coupon.getDiscount() * 0.01));
+                OrderDiscount orderDiscount = new OrderDiscount();
+                orderDiscount.setDiscountMsg("折扣优惠券")
+                        .setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,productDiscountAmount))
+                        .setType(DiscountTypeEnum.VIP_1.getCode());
+                orderDiscounts.add(orderDiscount);
+            }
         }
+        preferentialVo.setOrderDiscounts(orderDiscounts);
+        BigDecimal discountAmount = orderDiscounts.stream().map(OrderDiscount::getDiscountAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        preferentialVo.setDiscountAmount(discountAmount);
+        preferentialVo.setProductDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountAmount));
+        preferentialVo.setOrderProductPrice(orderProductPrice);
         return preferentialVo;
     }
-
-
 }

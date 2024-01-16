@@ -28,6 +28,7 @@
         <result column="rec_type" property="recType" />
         <result column="restrict_num" property="restrictNum" />
         <result column="rec_cycle" property="recCycle" />
+        <result column="use_vip" property="useVip" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -38,7 +39,7 @@
         update_by,
         update_time,
         del_flag,
-        `name`, `type`, use_price, coupon_price, discount, quantity, claimed_num, effect_type, effect_day, use_time, past_time, use_shop, use_product, status, disable_flag, rec_type, restrict_num, rec_cycle
+        `name`, `type`, use_price, coupon_price, discount, quantity, claimed_num, effect_type, effect_day, use_time, past_time, use_shop, use_product, status, disable_flag, rec_type, restrict_num, rec_cycle, use_vip
     </sql>
 
 </mapper>

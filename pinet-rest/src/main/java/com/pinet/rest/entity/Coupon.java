@@ -89,5 +89,7 @@ public class Coupon extends BaseEntity {
     @ApiModelProperty("领取周期")
     private Integer recCycle;
 
+    @ApiModelProperty("会员同享 0-否,1-是")
+    private Integer useVip;
 
 }
