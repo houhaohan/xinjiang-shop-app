@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.pinet.rest.mapper.ScoreRecordMapper">
+<mapper namespace="com.pinet.rest.mapper.ExchangeProductMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.ScoreRecord">
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.ExchangeProduct">
         <result column="id" property="id"/>
         <result column="create_by" property="createBy"/>
         <result column="create_time" property="createTime"/>
         <result column="update_by" property="updateBy"/>
         <result column="update_time" property="updateTime"/>
         <result column="del_flag" property="delFlag"/>
-        <result column="customer_id" property="customerId"/>
+        <result column="prod_name" property="prodName"/>
         <result column="shop_id" property="shopId"/>
         <result column="shop_name" property="shopName"/>
-        <result column="score_title" property="scoreTitle"/>
         <result column="score" property="score"/>
-        <result column="customer_member" property="customerMember"/>
-        <result column="fk_id" property="fkId"/>
-        <result column="score_type" property="scoreType"/>
-        <result column="customer_score" property="customerScore"/>
+        <result column="prod_status" property="prodStatus"/>
+        <result column="prod_type" property="prodType"/>
+        <result column="img_url" property="imgUrl"/>
+        <result column="coupon_id" property="couponId"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -29,12 +28,12 @@
         update_by,
         update_time,
         del_flag,
-        customer_id,shop_id, shop_name, score_title, score, fk_id, score_type,customer_member,customer_score
+        prod_name, shop_id, shop_name, score, prod_status, prod_type, img_url, coupon_id
     </sql>
-    <select id="selectPageList" resultMap="BaseResultMap">
+    <select id="selectExchangeProductList" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from score_record where del_flag = 0 and customer_id = #{customerId} order by id desc
+        from exchange_product ep where ep.shop_id = #{dto.shopId} and ep.prod_status = 1 order by ep.create_time desc
     </select>
 
 </mapper>
