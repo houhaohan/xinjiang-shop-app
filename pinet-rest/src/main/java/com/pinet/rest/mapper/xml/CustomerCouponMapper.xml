@@ -50,5 +50,22 @@
     </select>
 
 
+    <select id="selectCustomerCouponVoById" resultType="com.pinet.rest.entity.vo.CustomerCouponVo">
+        select
+        cc.id,
+        cc.customer_id,
+        cc.coupon_id,
+        cc.expire_time,
+        cc.coupon_status,
+        c.name as couponName,
+        c.type as couponType,
+        c.use_price as thresholdAmount,
+        c.coupon_price as couponAmount,
+        c.use_shop,
+        c.discount
+        from customer_coupon cc
+        left join coupon c on c.id = cc.coupon_id
+        where cc.id = #{id}
+    </select>
 
 </mapper>

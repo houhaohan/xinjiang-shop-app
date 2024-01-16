@@ -13,4 +13,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ICouponService extends IService<Coupon> {
 
+    /**
+     * 根据customer_coupon表 主键id 查询优惠券
+     * @param customerCouponId
+     * @return
+     */
+    Coupon getByCustomerCouponId(Long customerCouponId);
 }

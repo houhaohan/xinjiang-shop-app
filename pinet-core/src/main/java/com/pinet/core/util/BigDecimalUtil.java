@@ -1,6 +1,7 @@
 package com.pinet.core.util;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 public class BigDecimalUtil {
 
@@ -52,6 +53,15 @@ public class BigDecimalUtil {
     }
 
     /**
+     * 多数之和
+     * @param amounts
+     * @return
+     */
+    public static BigDecimal sum(BigDecimal... amounts) {
+        return Arrays.stream(amounts).reduce(BigDecimal.ZERO,BigDecimal::add);
+    }
+
+    /**
      * 两数之差
      * @param amount1
      * @param amount2
@@ -72,5 +82,23 @@ public class BigDecimalUtil {
         return yuanToFen(yuan);
     }
 
+    /**
+     * 两数之积
+     * @param amount (单位元)
+     * @param val 折扣
+     * @return 单位元
+     */
+    public static BigDecimal multiply(BigDecimal amount, BigDecimal val) {
+        return amount.multiply(val).setScale(2,BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * 去掉最末尾的0
+     * @param amount (单位元)
+     * @return 单位元
+     */
+    public static String stripTrailingZeros(BigDecimal amount) {
+        return amount.stripTrailingZeros().toPlainString();
+    }
 
 }

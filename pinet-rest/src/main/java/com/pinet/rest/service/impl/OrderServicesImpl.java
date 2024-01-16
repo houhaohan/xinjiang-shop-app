@@ -113,9 +113,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private ICustomerCouponService customerCouponService;
 
     @Resource
-    private ICouponService couponService;
-
-    @Resource
     private IOrderDiscountService orderDiscountService;
 
     @Autowired
@@ -147,6 +144,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Resource
     private ICustomerBalanceService customerBalanceService;
+
+    @Autowired
+    private OrderPreferentialManager orderPreferentialManager;
 
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
@@ -250,31 +250,17 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //计算商品总金额
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-
         //配送费
         BigDecimal shippingFee = getShippingFee(dto.getOrderType(), distance, shop.getDeliveryPlatform());
         vo.setShippingFee(shippingFee);
 
         //设置订单原价 和 商品原价
-        vo.setOriginalPrice(orderProdPrice.add(shippingFee).add(packageFee));
+        vo.setOriginalPrice(BigDecimalUtil.sum(orderProdPrice, shippingFee, packageFee));
         vo.setOriginalOrderProductPrice(orderProdPrice);
-        //优惠信息初始化
-        List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
-        //店帮主优惠计算
-        orderProdPrice = getDiscountedPrice(orderProducts, orderDiscounts, customerId, orderProdPrice);
-
-        //店帮主优惠后价格 该价格用来优惠券是否可用
-        BigDecimal customerMemberPrice = orderProdPrice;
-
-        //使用完优惠券处理
-        if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
-            orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts);
-        }
-
-        //计算订单优惠后现价
-        BigDecimal orderPrice = orderProdPrice.add(shippingFee).add(packageFee);
-        vo.setOrderPrice(orderPrice);
+        //订单优惠处理
+        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderProdPrice);
+        vo.setOrderPrice(preferentialVo.getProductDiscountAmount());
 
         //返回预计送达时间
         Date now = new Date();
@@ -286,11 +272,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         Integer orderProductNum = orderProducts.stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
         vo.setOrderProductNum(orderProductNum);
-        vo.setOrderDiscounts(orderDiscounts);
+        vo.setOrderDiscounts(preferentialVo.getOrderDiscounts());
 
         List<CustomerCouponVo> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));
         for (CustomerCouponVo customerCoupon : customerCoupons) {
-            Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), customerMemberPrice);
+            Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), vo.getOriginalOrderProductPrice());
             customerCoupon.setIsUsable(isUsable);
         }
         vo.setCustomerCoupons(customerCoupons);
@@ -322,8 +308,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
             //删除购物车已购商品
             cartService.delCartByShopId(dto.getShopId(), userId);
-
-
         } else {
             //直接结算（通过具体的商品样式、商品数量进行结算）
             List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
@@ -346,7 +330,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //计算打包费
         BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-
         //订单商品原价
         BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -360,22 +343,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //配送费
         BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getDeliveryPlatform());
 
-
-        //优惠信息初始化
-        List<OrderDiscount> orderDiscounts = new ArrayList<>();
-
-        //店帮主计算后价格
-        BigDecimal orderProdPrice = getDiscountedPrice(orderProducts, orderDiscounts, userId, orderProdOriginalPrice);
-
-        //使用完优惠券处理
-        if (dto.getCustomerCouponId() != null && dto.getCustomerCouponId() > 0) {
-            orderProdPrice = processCoupon(dto.getCustomerCouponId(), dto.getShopId(), orderProdPrice, orderDiscounts);
-        }
-
-        //优惠金额
-        BigDecimal discountAmount = orderProdOriginalPrice.subtract(orderProdPrice);
-        //总金额
-        BigDecimal orderPrice = orderProdPrice.add(shippingFee).add(packageFee);
+        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(userId, dto.getCustomerCouponId(), orderProdOriginalPrice);
+        BigDecimal orderPrice = BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),shippingFee,packageFee);
 
         //对比订单总金额和结算的总金额  如果不相同说明商品价格有调整
         if (dto.getOrderSource() != 3 && orderPrice.compareTo(dto.getOrderPrice()) != 0) {
@@ -386,7 +355,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //邀请人必须是店帮主  被邀人不能是店帮主
 
         //创建订单基础信息
-        Orders order = createOrder(dto, shippingFee, distance, orderPrice, orderProdPrice, discountAmount, shop, packageFee, shippingFeePlat);
+        Orders order = createOrder(dto, shippingFee, distance, orderPrice, preferentialVo.getProductDiscountAmount(), preferentialVo.getDiscountAmount(), shop, packageFee, shippingFeePlat);
         setOrdersCommission(order, orderProducts);
 
         //插入订单
@@ -407,13 +376,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         });
 
         //插入优惠明细表
-        if (orderDiscounts.size() > 0) {
-            orderDiscounts.forEach(k -> {
-                k.setOrderId(order.getId());
-            });
+        List<OrderDiscount> orderDiscounts = preferentialVo.getOrderDiscounts();
+        if(!CollectionUtils.isEmpty(orderDiscounts)){
+            orderDiscounts.forEach(item-> item.setOrderId(order.getId()));
             orderDiscountService.saveBatch(orderDiscounts);
         }
-
 
         //外卖订单插入订单地址表
         if (dto.getOrderType() == 1) {
@@ -501,36 +468,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         }
     }
-
-
-    /**
-     * 处理优惠券
-     *
-     * @param customerCouponId 使用的优惠券id
-     * @param shopId           店铺id
-     * @param orderProdPrice   实付金额
-     * @return 使用完优惠券后的价格
-     */
-    private BigDecimal processCoupon(Long customerCouponId,
-                                     Long shopId,
-                                     BigDecimal orderProdPrice,
-                                     List<OrderDiscount> orderDiscounts) {
-        CustomerCoupon customerCoupon = customerCouponService.getById(customerCouponId);
-        Boolean checkFlag = customerCouponService.checkCoupon(customerCoupon.getId(), shopId, orderProdPrice);
-        if (!checkFlag) {
-            throw new PinetException("优惠券不可用");
-        }
-
-        //添加优惠明细信息
-        Coupon coupon = couponService.getById(customerCoupon.getCouponId());
-        OrderDiscount orderDiscount = new OrderDiscount();
-        orderDiscount.setDiscountMsg(CouponTypeEnum.getDescByCode(coupon.getType()));
-        orderDiscount.setType(DiscountTypeEnum.COUPON.getCode());
-        orderDiscount.setDiscountAmount(coupon.getCouponPrice());
-        orderDiscounts.add(orderDiscount);
-        return orderProdPrice.subtract(coupon.getCouponPrice());
-    }
-
 
     private Long getExpireTime(Date createTime) {
         Date expireTime = DateUtil.offsetMinute(createTime, 15);

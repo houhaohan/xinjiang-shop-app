@@ -139,9 +139,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     @Override
     public Boolean checkCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice) {
-        CustomerCoupon customerCoupon = getById(customerCouponId);
-        CustomerCouponVo customerCouponVo = new CustomerCouponVo();
-        BeanUtils.copyProperties(customerCoupon,customerCouponVo);
+        CustomerCouponVo customerCouponVo = baseMapper.selectCustomerCouponVoById(customerCouponId);
         return checkCoupon(customerCouponVo, shopId, orderProdPrice);
     }
 

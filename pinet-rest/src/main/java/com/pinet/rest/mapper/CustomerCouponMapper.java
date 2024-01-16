@@ -21,4 +21,6 @@ public interface CustomerCouponMapper extends BaseMapper<CustomerCoupon> {
 
     List<CustomerCouponVo> selectCustomerCouponList(@Param(Constants.WRAPPER) Wrapper<CustomerCoupon> wrapper);
 
+    CustomerCouponVo selectCustomerCouponVoById(@Param("id") Long id);
+
 }

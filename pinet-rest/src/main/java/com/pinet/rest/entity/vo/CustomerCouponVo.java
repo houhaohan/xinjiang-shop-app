@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class CustomerCouponVo {
@@ -36,9 +37,6 @@ public class CustomerCouponVo {
     @ApiModelProperty("优惠券类型  1满减券 2-折扣券")
     private Integer couponType;
 
-//    @ApiModelProperty("店铺id  0表示所有店可用")
-//    private List<Long shopId;
-
     @ApiModelProperty("是否可用")
     private Boolean isUsable;
 
@@ -55,9 +53,9 @@ public class CustomerCouponVo {
     private Integer couponStatus;
 
     @ApiModelProperty("使用规则")
-    private List<String> rule;
+    private String rule;
 
-    private List<String> getRule() {
+    public String getRule() {
         List<String> list = new ArrayList<>();
         if (this.useShop == 1) {
             list.add("1、本券全国门店通用,(部分特殊活动门店除外),下单前可与客服确认门店是否支持使用。");
@@ -65,7 +63,8 @@ public class CustomerCouponVo {
             list.add("1、本券可用于部分门店使用,享受门店所有优惠。");
         }
         list.add("2、本券一次使用一张,不限制商品,不可抵扣配送费及零星选配的辅料等附加费用");
-        list.add("3、本券不于其他优惠同享。(店帮主可与本券同使用)");
-        return list;
+        list.add("3、本券不与其他优惠同享。(店帮主可与本券同使用)");
+        return list.stream().collect(Collectors.joining("\r\n"));
     }
+
 }
