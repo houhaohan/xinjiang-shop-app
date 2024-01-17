@@ -1,9 +1,11 @@
 package com.pinet.rest.controller;
 
 
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.ExchangeProduct;
+import com.pinet.rest.entity.dto.ExchangeDto;
 import com.pinet.rest.entity.dto.ExchangeProductListDto;
 import com.pinet.rest.service.IExchangeProductService;
 import io.swagger.annotations.Api;
@@ -43,9 +45,18 @@ public class ExchangeProductController extends BaseController {
     @GetMapping("/exchangeProductDetail")
     @ApiVersion(1)
     @ApiOperation("兑换商品详情")
-    public Result<ExchangeProduct> exchangeProductDetail(Long id){
-        ExchangeProduct exchangeProduct = exchangeProductService.exchangeProductDetail(id);
+    public Result<ExchangeProduct> exchangeProductDetail(Long exchangeProductId){
+        ExchangeProduct exchangeProduct = exchangeProductService.exchangeProductDetail(exchangeProductId);
         return Result.ok(exchangeProduct);
+    }
+
+
+    @PostMapping("/exchange")
+    @ApiVersion(1)
+    @ApiOperation("兑换")
+    public Result<?> exchange(@Validated @RequestBody ExchangeDto dto){
+        exchangeProductService.exchange(dto);
+        return Result.ok();
     }
 
 }

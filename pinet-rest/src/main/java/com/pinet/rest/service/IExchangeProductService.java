@@ -2,6 +2,7 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.ExchangeProduct;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.dto.ExchangeDto;
 import com.pinet.rest.entity.dto.ExchangeProductListDto;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface IExchangeProductService extends IService<ExchangeProduct> {
     List<ExchangeProduct> exchangeProductList(ExchangeProductListDto dto);
 
     ExchangeProduct exchangeProductDetail(Long id);
+
+    void exchange(ExchangeDto dto);
 }
