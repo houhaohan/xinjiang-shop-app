@@ -76,6 +76,9 @@ public enum DiscountEnums {
             return null;
         }
         for (DiscountEnums enums : DiscountEnums.values()) {
+            if(discount == 0){
+                return "免费";
+            }
             if (enums.getDiscount().equals(discount)) {
                 return enums.getDescription().substring(0,enums.getDescription().length() -1);
             }

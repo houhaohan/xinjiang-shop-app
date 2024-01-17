@@ -56,6 +56,9 @@ public class CustomerCouponVo {
     @ApiModelProperty("1未领取  2已领取  3已放弃 4已使用")
     private Integer couponStatus;
 
+    @ApiModelProperty("会员同享 0-否，1-是")
+    private Integer useVip;
+
     @ApiModelProperty("使用规则")
     private String rule;
 

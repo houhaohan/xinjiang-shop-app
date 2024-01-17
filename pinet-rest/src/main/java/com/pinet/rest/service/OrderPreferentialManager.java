@@ -33,6 +33,11 @@ public class OrderPreferentialManager {
         PreferentialVo preferentialVo = new PreferentialVo();
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
+        preferentialVo.setOrderDiscounts(orderDiscounts);
+        preferentialVo.setDiscountAmount(BigDecimal.ZERO);
+        preferentialVo.setProductDiscountAmount(orderProductPrice);
+        preferentialVo.setOrderProductPrice(orderProductPrice);
+
         CustomerMember customerMember = customerMemberService.getByCustomerId(customerId);
         //店帮主、会员 折扣
         if(customerMember != null){
@@ -96,7 +101,8 @@ public class OrderPreferentialManager {
         preferentialVo.setOrderDiscounts(orderDiscounts);
         BigDecimal discountAmount = orderDiscounts.stream().map(OrderDiscount::getDiscountAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         preferentialVo.setDiscountAmount(discountAmount);
-        preferentialVo.setProductDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountAmount));
+        BigDecimal productDiscountAmount = BigDecimalUtil.subtract(orderProductPrice,discountAmount);
+        preferentialVo.setProductDiscountAmount(productDiscountAmount.compareTo(BigDecimal.ZERO) < 0 ? new BigDecimal("0.01") : productDiscountAmount);
         preferentialVo.setOrderProductPrice(orderProductPrice);
         return preferentialVo;
     }
