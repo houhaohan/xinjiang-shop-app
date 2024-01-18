@@ -79,4 +79,6 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * @param couponId
      */
     void receive(Long couponId);
+
+    void receive(Long customerId, Long couponId);
 }
