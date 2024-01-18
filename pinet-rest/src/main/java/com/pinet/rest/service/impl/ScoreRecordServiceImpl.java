@@ -3,10 +3,13 @@ package com.pinet.rest.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.page.PageRequest;
 import com.pinet.core.util.ThreadLocalUtil;
+import com.pinet.rest.entity.CustomerBalance;
 import com.pinet.rest.entity.ScoreRecord;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.enums.ScoreRecordTypeEnum;
 import com.pinet.rest.mapper.ScoreRecordMapper;
+import com.pinet.rest.service.ICustomerBalanceService;
+import com.pinet.rest.service.ICustomerMemberService;
 import com.pinet.rest.service.IScoreRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.rest.service.IShopService;
@@ -28,6 +31,12 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     @Resource
     private IShopService shopService;
 
+    @Resource
+    private ICustomerMemberService customerMemberService;
+
+    @Resource
+    private ICustomerBalanceService customerBalanceService;
+
     @Override
     public void addScoreRecord(Long shopId, String scoreTitle, Integer score, Long fkId, ScoreRecordTypeEnum scoreRecordTypeEnum) {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
@@ -40,6 +49,10 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
         scoreRecord.setScore(score);
         scoreRecord.setFkId(fkId);
         scoreRecord.setScoreType(scoreRecordTypeEnum.getCode());
+        scoreRecord.setCustomerMember(customerMemberService.getMemberLevel(customerId));
+        CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
+        scoreRecord.setCustomerScore(customerBalance.getScore() + score);
+
         save(scoreRecord);
     }
 

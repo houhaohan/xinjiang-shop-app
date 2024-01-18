@@ -125,18 +125,18 @@ social:
       grant_type: client_credential
       secret: 8599ea2219b5653ea14a530d830f272a
       mch_id: 1502776411
-      notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxApp/pay
+      notify_url: https://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxApp/pay
       key: ZHANGSHUOwudi1234567891011121314
       p12url: /www/cert/apiclient_cert.p12
-      refund_notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxApp/refund
+      refund_notify_url: https://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxApp/refund
     mini:
       appid: wx2cf61e93a478f54f
       secret: 8cb2cf16e9334e123de200549a7e3afb
       mch_id: 1502776411
-      notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxMini/pay
+      notify_url: https://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxMini/pay
       key: ZHANGSHUOwudi1234567891011121314
       p12url: /www/cert/apiclient_cert.p12
-      refund_notify_url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxMini/refund
+      refund_notify_url: https://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/wxMini/refund
   alipay:
     app:
       appid: 2018042302596042
@@ -144,7 +144,7 @@ social:
       private-key: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCEDMo3XdmKkcq3gaOLU+oyXjPJzkLW9Oc88rItifrW/ai339oV2XGj+GhlF6w40G2OZSFPgXAECWrIAFNroRTuCwHNPiEq2BotmRrfd9oEd33RcgACiZ78H3hSsm1C2x/o0Pmy40jjogAHkhnuITteLQNgY2+6QVpcwyB1U6iLrDo7VCgK625ZRmBTvtJatiOeHvph7G6IYIDzRW9SvtMCWKn7Epr2WBlrmngQELJr3/KGuFN9LZhJhJFs5ZniET+38LwUf5Ap09vvCyrSxDt71G/llyvVh9wm7eS82OIscJK7997y4ZNNsXUjCEWG5OpwMtkCgnMFLLFHczr/24kXAgMBAAECggEAf4ZGh7/Hxg3UIvI8ueJZazkUdJEQdb1fz7lmH5qAN74SgTjayX0MRVkxoGeDN/75vqmlyL1tK0jY6bt+1JNkvhq9K7QTnefDKEQS8rsxPl0TkgCxR8IWWtAdiGeuIwGxSEsAyiS7kLIzqxwKlLFdPy7jcuO008AnfywmHYikXfWWt5TNwYkEih3gO6OJk90YFLPpZrHf9UUDPjz3f4pTGy17dCa6c7XWS9tDojlgZO368CEXSS3hwg3oTwu+8FOCfoX1I262DkpsQg1N+pzghsvynkJAra5vvGsp44hu/DZN834NWLnem3rq/FUR8c8rViNN87HX7h7ZuWRATunMMQKBgQDZr+2PiTeWllv3TvqW18UEmsYlCIzsyZBcmTmgeTnLp+kuO9C+4atwA31itbPm+PIBttqkzTxQGcnYzCqgn/FTP9MNorOLIdtBFZS2gbbOCSWdterx6hhbF8sbt42yGb2YBh2LJu1pqAKiNd5I3TSdaV0cI9Jd/l3vyDz2bPI8+QKBgQCbSmgbbHGkIPz3ZdnY2EfUdso4mit3u99igufrY0dJQNh77Cl4mdg2USMG/OYnaAwivZuJMuqygScZswyQy/lZXhHQuQKt4bWWmLDfl+bjVdNHfjDsry8CCmM/AUOGWrMZmv3CsKiUfUoQ3Am+ot1X4bigfdLVJaZzMD3BiqfKjwKBgCaHzTSqxPwSgRS1FgW9C1JVUt0bNlZzFupM9LZCvsgdYFiencQrjXy2IWtnXgBz7+H9y5V//jzvU5rcCG+F3+EsWt7+/WiTBYvvlfL34rN1SwMvP/axyL3W6ExvoNT1WWmfK3uF2F/rLQwpHL8o6Dc0fxaMAKBCdb4LYz766aWBAoGBAIEUQSMCaheeYAcYfxLS/Cnrr72K0LTO0ijlXPd450lJgGjJbdNUNbc4jCAD2R9KSkQaTQ2m6BUGa8Td4oT9Nz+EhNR05Hg6VCFgvCyu6/ltXphfmTUzjKRqlAJL/5/PBm4zOdk51HbRCd6nt+XhJJEnC7tDuxr3F7tJjxuwMDabAoGBAL7qoOQCyGoiDef6Ig1g1hi0AGvgaR4/8k6X6imt+gY7yy/wQJbnCVYWpVrKoIyIz0f5sWKfzaBCNoWiFwrzYCVYFngQ+/CJ1kkiN/3ruZ2T84uW0D9DG22NjkABuraQ33MC8jv+QIOlfMyeR5IZ31+jcZ4JxCyysFuM8DBrxjj+
       sellerid: 13399722222@163.com
       partnerid: 2088031797087204
-      notify-url: http://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/aliApp/pay
+      notify-url: https://testxingjianghouse.ypxlbz.com/house/qingshi/api/notify/order/aliApp/pay
       app-cert-url: /www/cert/appCertPublicKey_2018042302596042.crt
       root-cert-url: /www/cert/alipayRootCert.crt
       public-cert-url: /www/cert/alipayCertPublicKey_RSA2.crt

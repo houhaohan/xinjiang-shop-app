@@ -399,6 +399,7 @@
         limit 10
     </select>
     <select id="selectShopIdAndShopProdId" resultType="com.pinet.rest.entity.vo.GetShopProdIdByProdIdVo">
+        select * from (
         SELECT s.id shopId,sp.id shopProductId,
                ROUND(
                            6378.138 * 2 * ASIN(
@@ -409,10 +410,10 @@
                    ) AS distance
         FROM shop s
                  left join shop_product sp on s.id = sp.shop_id
-        WHERE s.del_flag = 0 and sp.del_flag = 0 and sp.prod_id = #{productId}
+        WHERE s.del_flag = 0 and sp.del_flag = 0 and sp.product_name = #{shopProdName}
         ORDER BY
             distance ASC
-        LIMIT 1
+        LIMIT 1) a where distance &lt; 20000
     </select>
 
 

@@ -12,5 +12,6 @@ import lombok.Data;
 public class GetShopProdIdByProdIdVo {
     private Long shopId;
 
+
     private Long shopProductId;
 }

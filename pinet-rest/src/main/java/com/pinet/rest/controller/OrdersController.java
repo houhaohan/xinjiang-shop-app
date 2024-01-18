@@ -56,7 +56,7 @@ public class OrdersController extends BaseController {
     }
 
 
-    @RequestMapping("/orderDetail")
+    @RequestMapping(value = "/orderDetail",method = RequestMethod.GET)
     @ApiOperation("订单详情")
     @ApiVersion(1)
     @NotTokenSign
@@ -119,7 +119,7 @@ public class OrdersController extends BaseController {
     }
 
 
-    @RequestMapping("/recurOrder")
+    @RequestMapping(value = "/recurOrder",method = RequestMethod.GET)
     @ApiOperation("再来一单")
     @ApiVersion(1)
     public Result<?> recurOrder(Long orderId){
@@ -128,7 +128,7 @@ public class OrdersController extends BaseController {
     }
 
 
-    @RequestMapping("/pickUpList")
+    @RequestMapping(value = "/pickUpList")
     @ApiOperation("自提兑换码")
     @ApiVersion(1)
     public Result<List<PickUpListVo>> pickUpList(){

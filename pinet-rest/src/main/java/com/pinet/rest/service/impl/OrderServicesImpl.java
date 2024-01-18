@@ -665,7 +665,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2, orders.getShopId());
 
         //积分流水
-        scoreRecordService.addScoreRecord(orders.getShopId(), "退款" + orders.getOrderPrice().toString() + "元", orders.getScore()
+        scoreRecordService.addScoreRecord(orders.getShopId(), "退款" + orders.getOrderPrice().toString() + "元", -orders.getScore()
                 , orders.getId(), ScoreRecordTypeEnum._2);
 
         //修改余额

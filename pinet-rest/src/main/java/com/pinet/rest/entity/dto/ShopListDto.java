@@ -19,4 +19,7 @@ public class ShopListDto {
 
     @ApiModelProperty(value = "经度")
     private BigDecimal lng;
+
+    @ApiModelProperty(value = "城市id")
+    private Long cityId;
 }
