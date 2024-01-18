@@ -70,11 +70,11 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     public List<CustomerCouponVo> customerCouponList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
-        QueryWrapper<CustomerCoupon> queryWrapper = initWrapper(userId,true);
-        queryWrapper.eq("cc.coupon_status",2)
+        QueryWrapper<CustomerCoupon> queryWrapper = initWrapper(userId, true);
+        queryWrapper.eq("cc.coupon_status", 2)
                 .orderByAsc("cc.coupon_status")
                 .orderByDesc("cc.id")
-                .last("limit "+(pageRequest.getPageNum()-1)+","+pageRequest.getPageSize());
+                .last("limit " + (pageRequest.getPageNum() - 1) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
@@ -97,19 +97,19 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     public List<CustomerCouponVo> customerCouponListDetailList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("cc.customer_id",userId);
-        queryWrapper.eq("cc.del_flag",0);
+        queryWrapper.eq("cc.customer_id", userId);
+        queryWrapper.eq("cc.del_flag", 0);
         queryWrapper.orderByDesc("cc.id");
-        queryWrapper.last("limit "+(pageRequest.getPageNum() - 1)+","+pageRequest.getPageSize());
+        queryWrapper.last("limit " + (pageRequest.getPageNum() - 1) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
     @Override
     public List<CustomerCouponVo> customerCouponInvalidList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        QueryWrapper queryWrapper = initWrapper(userId,false);
+        QueryWrapper queryWrapper = initWrapper(userId, false);
         queryWrapper.orderByDesc("cc.id");
-        queryWrapper.last("limit "+(pageRequest.getPageNum() - 1)+","+pageRequest.getPageSize());
+        queryWrapper.last("limit " + (pageRequest.getPageNum() - 1) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
@@ -124,8 +124,8 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         if (!StringUtil.isBlank(lastIdStr)) {
             lastId = Long.parseLong(lastIdStr);
         }
-        QueryWrapper queryWrapper = initWrapper(userId,true);
-        queryWrapper.gt("cc.id",lastId);
+        QueryWrapper queryWrapper = initWrapper(userId, true);
+        queryWrapper.gt("cc.id", lastId);
         queryWrapper.orderByDesc("cc.id");
         List<CustomerCouponVo> customerCoupons = baseMapper.selectCustomerCouponList(queryWrapper);
 
@@ -134,7 +134,6 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         }
         return customerCoupons;
     }
-
 
 
     @Override
@@ -158,17 +157,17 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
         Coupon coupon = couponService.getById(customerCoupon.getCouponId());
         //校验优惠券是否有效
-        try{
+        try {
             validateCouponEffective(coupon);
-        }catch (PinetException e){
+        } catch (PinetException e) {
             return false;
         }
 
 
         //校验店铺
-        if(coupon.getUseShop() == CouponShopEnum.SOME_SHOP.getCode()){
+        if (coupon.getUseShop() == CouponShopEnum.SOME_SHOP.getCode()) {
             boolean exists = couponShopService.isExistsInShop(customerCoupon.getCouponId(), shopId);
-            if(!exists){
+            if (!exists) {
                 return false;
             }
         }
@@ -237,49 +236,42 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     @Override
     public void grantNewCustomerCoupon(Long customerId) {
-        String redisKey = "qingshi:coupon:newCustomer:" + 0L;
-        String json = redisUtil.get(redisKey);
-        if (StringUtil.isNotBlank(json)) {
-            SetNewCustomerCouponDto setNewCustomerCouponDto = JSONObject.parseObject(json, SetNewCustomerCouponDto.class);
-            CustomerCoupon customerCoupon = new CustomerCoupon();
-            customerCoupon.setCouponGrantId(setNewCustomerCouponDto.getCouponGrantId());
-            customerCoupon.setCouponGrantRecordId(0L);
-            customerCoupon.setCustomerId(customerId);
-            customerCoupon.setExpireTime(DateUtils.endOfDay(setNewCustomerCouponDto.getExpireTime()));
-            customerCoupon.setCouponName(setNewCustomerCouponDto.getCouponName());
-            customerCoupon.setCouponType(CouponTypeEnum.FULL_REDUC.getCode());
-//            customerCoupon.setShopId(0L);
-//            customerCoupon.setThresholdAmount(setNewCustomerCouponDto.getThresholdAmount());
-//            customerCoupon.setCouponAmount(setNewCustomerCouponDto.getCouponAmount());
-            customerCoupon.setCouponStatus(CouponReceiveStatusEnum.NOT_RECEIVE.getCode());
-            log.info("插入新人优惠券bean{}",JSONObject.toJSONString(customerCoupon));
-            save(customerCoupon);
+        String redisKey = "qingshi:coupon:newCustomer2:" + 0L;
+        String couponIdStr = redisUtil.get(redisKey);
+        if (StringUtil.isNotBlank(couponIdStr)) {
+            Long couponId = Long.valueOf(couponIdStr);
+            receive(customerId,couponId);
         }
     }
 
     @Override
     public Long countByCustomerId(Long customerId) {
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("customer_id",customerId);
-        queryWrapper.in("coupon_status",1,2);
-        queryWrapper.gt("expire_time",new Date());
+        queryWrapper.eq("customer_id", customerId);
+        queryWrapper.in("coupon_status", 1, 2);
+        queryWrapper.gt("expire_time", new Date());
         return count(queryWrapper);
     }
 
     @Override
     public void receive(Long couponId) {
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+        receive(customerId,couponId);
+    }
+
+    @Override
+    public void receive(Long customerId, Long couponId) {
         Coupon coupon = couponService.getById(couponId);
         //1、用户是否还能领取
-        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        validateIsCanBeClaimed(coupon,userId);
+        validateIsCanBeClaimed(coupon, customerId);
 
         //2、添加到用户优惠券表
         CustomerCoupon customerCoupon = new CustomerCoupon();
-        customerCoupon.setCustomerId(userId);
+        customerCoupon.setCustomerId(customerId);
         customerCoupon.setCouponId(couponId);
-        if(coupon.getEffectType() == 1){
-            customerCoupon.setExpireTime(DateUtils.endOfDay(DateUtils.addDays(new Date(),coupon.getEffectDay())));
-        }else if(coupon.getEffectType() == 2){
+        if (coupon.getEffectType() == 1) {
+            customerCoupon.setExpireTime(DateUtils.endOfDay(DateUtils.addDays(new Date(), coupon.getEffectDay())));
+        } else if (coupon.getEffectType() == 2) {
             customerCoupon.setExpireTime(coupon.getPastTime());
         }
         customerCoupon.setCouponGrantId(0L);
@@ -291,33 +283,35 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     /**
      * 初始化优惠券查询条件
+     *
      * @param userId
-     * @param flag 失效时间 > 当前时间？
+     * @param flag   失效时间 > 当前时间？
      * @return
      */
-    private QueryWrapper initWrapper(Long userId,boolean flag){
+    private QueryWrapper initWrapper(Long userId, boolean flag) {
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("cc.customer_id",userId);
-        if(flag){
-            queryWrapper.gt("cc.expire_time",new Date());
-        }else {
-            queryWrapper.lt("cc.expire_time",new Date());
+        queryWrapper.eq("cc.customer_id", userId);
+        if (flag) {
+            queryWrapper.gt("cc.expire_time", new Date());
+        } else {
+            queryWrapper.lt("cc.expire_time", new Date());
         }
-        queryWrapper.eq("cc.del_flag",0);
+        queryWrapper.eq("cc.del_flag", 0);
         return queryWrapper;
     }
 
     /**
      * 获取这个优惠券第一张的领取时间
+     *
      * @param userId
      * @param couponId
      * @return
      */
-    private Date getFirstCouponReceiveTime(Long userId,Long couponId){
+    private Date getFirstCouponReceiveTime(Long userId, Long couponId) {
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("min(create_time)");
-        queryWrapper.eq("customer_id",userId);
-        queryWrapper.eq("coupon_id",couponId);
+        queryWrapper.eq("customer_id", userId);
+        queryWrapper.eq("coupon_id", couponId);
         Date time = getObj(queryWrapper, o -> (Date) o);
         return time == null ? new Date() : time;
     }
@@ -325,22 +319,23 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     /**
      * 校验优惠券是否有效
+     *
      * @param coupon
      */
-    private void validateCouponEffective(Coupon coupon){
-        if(coupon == null || coupon.getDelFlag() == 1){
+    private void validateCouponEffective(Coupon coupon) {
+        if (coupon == null || coupon.getDelFlag() == 1) {
             throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
         }
-        if(CouponStatusEnum.NOT_STARTED.getCode() == coupon.getStatus()){
+        if (CouponStatusEnum.NOT_STARTED.getCode() == coupon.getStatus()) {
             throw new PinetException(ApiExceptionEnum.COUPON_NOT_STARTED);
         }
-        if(CouponStatusEnum.EXPIRED.getCode() == coupon.getStatus()){
+        if (CouponStatusEnum.EXPIRED.getCode() == coupon.getStatus()) {
             throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
         }
-        if(coupon.getUseTime() != null && DateUtil.compare(new Date(),coupon.getUseTime()) < 0){
+        if (coupon.getUseTime() != null && DateUtil.compare(new Date(), coupon.getUseTime()) < 0) {
             throw new PinetException(ApiExceptionEnum.COUPON_NOT_STARTED);
         }
-        if(coupon.getPastTime() != null && DateUtil.compare(new Date(),coupon.getPastTime()) > 0){
+        if (coupon.getPastTime() != null && DateUtil.compare(new Date(), coupon.getPastTime()) > 0) {
             throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
         }
     }
@@ -348,29 +343,30 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     /**
      * 校验优惠券是否可继续领取
+     *
      * @param coupon
      * @param userId
      */
-    private void validateIsCanBeClaimed(Coupon coupon,Long userId){
+    private void validateIsCanBeClaimed(Coupon coupon, Long userId) {
         //优惠券是否有效
         validateCouponEffective(coupon);
         //校验优惠券是否已领取完
-        if(coupon.getClaimedNum() - coupon.getQuantity() == 0){
+        if (coupon.getClaimedNum() - coupon.getQuantity() == 0) {
             throw new PinetException(ApiExceptionEnum.COUPON_NO_QUANTITY);
         }
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("customer_id",userId);
-        queryWrapper.eq("coupon_id",coupon.getId());
-        if(coupon.getRecType() == CouponClaimedTypeEnum.USER_LIMIT.getCode()){
+        queryWrapper.eq("customer_id", userId);
+        queryWrapper.eq("coupon_id", coupon.getId());
+        if (coupon.getRecType() == CouponClaimedTypeEnum.USER_LIMIT.getCode()) {
             long count = count(queryWrapper);
-            if(count >= coupon.getRestrictNum()){
+            if (count >= coupon.getRestrictNum()) {
                 throw new PinetException(ApiExceptionEnum.COUPON_RECEIVE_UPPER_LIMIT);
             }
-        }else if(coupon.getRecType() == CouponClaimedTypeEnum.TIME_LIMIT.getCode()){
+        } else if (coupon.getRecType() == CouponClaimedTypeEnum.TIME_LIMIT.getCode()) {
             Date firstCouponReceiveTime = getFirstCouponReceiveTime(userId, coupon.getId());
-            queryWrapper.le("create_time", DateUtils.endOfDay(DateUtils.addDays(firstCouponReceiveTime,coupon.getRecCycle())));
+            queryWrapper.le("create_time", DateUtils.endOfDay(DateUtils.addDays(firstCouponReceiveTime, coupon.getRecCycle())));
             long count = count(queryWrapper);
-            if(count >= coupon.getRestrictNum()){
+            if (count >= coupon.getRestrictNum()) {
                 throw new PinetException(ApiExceptionEnum.COUPON_RECEIVE_UPPER_LIMIT);
             }
         }

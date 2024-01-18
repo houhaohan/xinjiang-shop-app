@@ -31,17 +31,19 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
 
     /**
      * 判断优惠券是否可用
+     *
      * @param customerCouponId 优惠券id
-     * @param shopId 店铺id
-     * @param orderProdPrice 实付金额
+     * @param shopId           店铺id
+     * @param orderProdPrice   实付金额
      * @return 是否可用
      */
     Boolean checkCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice);
 
     /**
      * 判断优惠券是否可用
+     *
      * @param customerCoupon 优惠券bean
-     * @param shopId 店铺id
+     * @param shopId         店铺id
      * @param orderProdPrice 实付金额
      * @return 是否可用
      */
@@ -49,6 +51,7 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
 
     /**
      * 优惠券过期提醒
+     *
      * @param customerCouponId 优惠券id
      */
     void couponWarn(Long customerCouponId);
@@ -56,18 +59,20 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
     /**
      * 推送优惠券过期提醒
      */
-    void pushCouponExpireMsg(String data1,String data2,String data3,String data4,String data5,String openId);
+    void pushCouponExpireMsg(String data1, String data2, String data3, String data4, String data5, String openId);
 
     void pushCouponExpireMsg(Long customerCouponId);
 
     /**
      * 发放新人优惠券
+     *
      * @param customerId
      */
     void grantNewCustomerCoupon(Long customerId);
 
     /**
      * 根据用户id统计可用优惠券数量
+     *
      * @param customerId
      * @return
      */
@@ -75,7 +80,10 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
 
     /**
      * 优惠券领取
+     *
      * @param couponId
      */
     void receive(Long couponId);
+
+    void receive(Long customerId, Long couponId);
 }
