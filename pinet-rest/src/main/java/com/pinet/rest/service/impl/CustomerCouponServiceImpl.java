@@ -16,11 +16,14 @@ import com.pinet.core.constants.DB;
 import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.page.PageRequest;
+import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Coupon;
+import com.pinet.rest.entity.CouponProduct;
 import com.pinet.rest.entity.CustomerCoupon;
+import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.SetNewCustomerCouponDto;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
@@ -31,12 +34,14 @@ import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -64,6 +69,9 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     @Resource
     private ICouponShopService couponShopService;
+
+    @Autowired
+    private ICouponProductService couponProductService;
 
 
     @Override
@@ -135,16 +143,15 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         return customerCoupons;
     }
 
-
-
     @Override
-    public Boolean checkCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice) {
+    public Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProduct> orderProducts) {
         CustomerCouponVo customerCouponVo = baseMapper.selectCustomerCouponVoById(customerCouponId);
-        return checkCoupon(customerCouponVo, shopId, orderProdPrice);
+        return checkCoupon(customerCouponVo, shopId, orderProducts);
     }
 
     @Override
-    public Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, BigDecimal orderProdPrice) {
+    public Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts) {
+        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         //优惠券不存在
         if (ObjectUtil.isNull(customerCoupon)) {
@@ -173,9 +180,22 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
             }
         }
 
-        //校验使用门槛
-        if (coupon.getUsePrice().compareTo(orderProdPrice) >= 0) {
-            return false;
+        //校验商品 //校验使用门槛
+        if(coupon.getUseProduct() == 1){
+            if (coupon.getUsePrice().compareTo(orderProdPrice) >= 0) {
+                return false;
+            }
+        }else {
+            List<Long> shopProdIds = orderProducts.stream().map(OrderProduct::getShopProdId).collect(Collectors.toList());
+            QueryWrapper<CouponProduct> queryWrapper = new QueryWrapper<>();
+            queryWrapper.select("product_id");
+            queryWrapper.eq("coupon_id",coupon.getId());
+            queryWrapper.in("product_id",shopProdIds);
+            List<Long> productIds = couponProductService.listObjs(queryWrapper,productId-> Long.valueOf(productId.toString()));
+            BigDecimal sumPrice = orderProducts.stream().filter(item -> productIds.contains(item.getShopProdId())).map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+            if(BigDecimalUtil.lt(sumPrice,coupon.getUsePrice())){
+                return false;
+            }
         }
         return true;
     }

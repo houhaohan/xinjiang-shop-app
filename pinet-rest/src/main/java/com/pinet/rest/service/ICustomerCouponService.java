@@ -3,6 +3,7 @@ package com.pinet.rest.service;
 import com.pinet.core.page.PageRequest;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.vo.CustomerCouponVo;
 
@@ -33,19 +34,19 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * 判断优惠券是否可用
      * @param customerCouponId 优惠券id
      * @param shopId 店铺id
-     * @param orderProdPrice 实付金额
+     * @param orderProducts 订单商品
      * @return 是否可用
      */
-    Boolean checkCoupon(Long customerCouponId, Long shopId, BigDecimal orderProdPrice);
+    Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProduct> orderProducts);
 
     /**
      * 判断优惠券是否可用
      * @param customerCoupon 优惠券bean
      * @param shopId 店铺id
-     * @param orderProdPrice 实付金额
+     * @param orderProducts 订单商品
      * @return 是否可用
      */
-    Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, BigDecimal orderProdPrice);
+    Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts);
 
     /**
      * 优惠券过期提醒

@@ -1,17 +1,17 @@
 package com.pinet.rest.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.util.BigDecimalUtil;
-import com.pinet.rest.entity.Coupon;
-import com.pinet.rest.entity.CustomerMember;
-import com.pinet.rest.entity.OrderDiscount;
+import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.DiscountTypeEnum;
 import com.pinet.rest.entity.enums.MemberLevelEnum;
 import com.pinet.rest.entity.vo.PreferentialVo;
+import com.pinet.rest.factory.PromotionStrategyFactory;
 import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 订单优惠
@@ -20,16 +20,18 @@ import java.util.List;
 public class OrderPreferentialManager {
 
     private final ICouponService couponService;
-
     private final ICustomerMemberService customerMemberService;
+    private final ICouponProductService couponProductService;
 
-    public OrderPreferentialManager(ICouponService couponService,ICustomerMemberService customerMemberService){
+    public OrderPreferentialManager(ICouponService couponService,
+                                    ICustomerMemberService customerMemberService,
+                                    ICouponProductService couponProductService){
         this.couponService =  couponService;
         this.customerMemberService =  customerMemberService;
+        this.couponProductService =  couponProductService;
     }
 
-
-    public PreferentialVo doPreferential(Long customerId, Long customerCouponId, BigDecimal orderProductPrice){
+    public PreferentialVo doPreferential(Long customerId, Long customerCouponId, BigDecimal orderProductPrice,List<OrderProduct> orderProducts){
         PreferentialVo preferentialVo = new PreferentialVo();
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
@@ -59,45 +61,27 @@ public class OrderPreferentialManager {
         if(customerCouponId == null){
            return preferentialVo;
         }
-        //清空店帮主的优惠数据
+
         Coupon coupon = couponService.getByCustomerCouponId(customerCouponId);
         if(coupon.getUseVip() == 0){
             orderDiscounts.clear();
-            if(coupon.getType() == 1){
-                //满减券
-                OrderDiscount orderDiscount = new OrderDiscount();
-                orderDiscount.setDiscountMsg("满减优惠券")
-                        .setDiscountAmount(coupon.getCouponPrice())
-                        .setType(DiscountTypeEnum.VIP_1.getCode());
-                orderDiscounts.add(orderDiscount);
-            }else if(coupon.getType() == 2){
-                //折扣券
-                BigDecimal productDiscountAmount = BigDecimalUtil.multiply(orderProductPrice, new BigDecimal(coupon.getDiscount() * 0.01));
-                OrderDiscount orderDiscount = new OrderDiscount();
-                orderDiscount.setDiscountMsg("折扣优惠券")
-                        .setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,productDiscountAmount))
-                        .setType(DiscountTypeEnum.VIP_1.getCode());
-                orderDiscounts.add(orderDiscount);
-            }
-        }else {
-            //会员同享,先享受会员折扣再享受优惠券折扣
-            if(coupon.getType() == 1){
-                //满减券
-                OrderDiscount orderDiscount = new OrderDiscount();
-                orderDiscount.setDiscountMsg("满减优惠券")
-                        .setDiscountAmount(coupon.getCouponPrice())
-                        .setType(DiscountTypeEnum.VIP_1.getCode());
-                orderDiscounts.add(orderDiscount);
-            }else if(coupon.getType() == 2){
-                //折扣券
-                BigDecimal productDiscountAmount = BigDecimalUtil.multiply(orderProductPrice, new BigDecimal(coupon.getDiscount() * 0.01));
-                OrderDiscount orderDiscount = new OrderDiscount();
-                orderDiscount.setDiscountMsg("折扣优惠券")
-                        .setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,productDiscountAmount))
-                        .setType(DiscountTypeEnum.VIP_1.getCode());
-                orderDiscounts.add(orderDiscount);
-            }
         }
+        PromotionStrategyFactory promotionStrategyFactory = new PromotionStrategyFactory(coupon);
+        if(coupon.getUseProduct() == 1){
+            //全部商品
+            orderDiscounts.addAll(promotionStrategyFactory.create().apply(orderProductPrice));
+        }else if(coupon.getUseProduct() == 2){
+            //部分商品
+            List<Long> shopProdIds = orderProducts.stream().map(OrderProduct::getShopProdId).collect(Collectors.toList());
+            QueryWrapper<CouponProduct> queryWrapper = new QueryWrapper<>();
+            queryWrapper.select("product_id");
+            queryWrapper.eq("coupon_id",coupon.getId());
+            queryWrapper.in("product_id",shopProdIds);
+            List<Long> productIds = couponProductService.listObjs(queryWrapper,productId-> Long.valueOf(productId.toString()));
+            orderProducts = orderProducts.stream().filter(item -> productIds.contains(item.getShopProdId())).collect(Collectors.toList());
+            orderDiscounts.addAll(promotionStrategyFactory.create().apply(orderProducts));
+        }
+
         preferentialVo.setOrderDiscounts(orderDiscounts);
         BigDecimal discountAmount = orderDiscounts.stream().map(OrderDiscount::getDiscountAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         preferentialVo.setDiscountAmount(discountAmount);

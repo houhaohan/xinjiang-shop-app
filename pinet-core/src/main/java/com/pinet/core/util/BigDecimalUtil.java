@@ -84,6 +84,16 @@ public class BigDecimalUtil {
 
     /**
      * 两数之积
+     * @param val
+     * @param multiplier
+     * @return
+     */
+    public static BigDecimal multiply(BigDecimal val, Double multiplier) {
+        return val.multiply(BigDecimal.valueOf(multiplier)).setScale(2,BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * 两数之积
      * @param amount (单位元)
      * @param val 折扣
      * @return 单位元
@@ -109,6 +119,66 @@ public class BigDecimalUtil {
      */
     public static String stripTrailingZeros(BigDecimal amount) {
         return amount.stripTrailingZeros().toPlainString();
+    }
+
+    /**
+     * 区两数最大数
+     * @param val1
+     * @param val2
+     * @return
+     */
+    public static BigDecimal max(BigDecimal val1,BigDecimal val2) {
+        return val1.compareTo(val2) > 0 ? val1 : val2;
+    }
+
+    /**
+     * 区两数最小数
+     * @param val1
+     * @param val2
+     * @returnmin
+     */
+    public static BigDecimal min(BigDecimal val1,BigDecimal val2) {
+        return val1.compareTo(val2) < 0 ? val1 : val2;
+    }
+
+    /**
+     * val1 大于 val2
+     * @param val1
+     * @param val2
+     * @return
+     */
+    public static boolean gt(BigDecimal val1,BigDecimal val2) {
+        return val1.compareTo(val2) > 0;
+    }
+
+    /**
+     * val1 大于 val2
+     * @param val1
+     * @param val2
+     * @return
+     */
+    public static boolean ge(BigDecimal val1,BigDecimal val2) {
+        return val1.compareTo(val2) >= 0;
+    }
+
+    /**
+     * val1 小于 val2
+     * @param val1
+     * @param val2
+     * @return
+     */
+    public static boolean lt(BigDecimal val1,BigDecimal val2) {
+        return val1.compareTo(val2) < 0;
+    }
+
+    /**
+     * val1 小于等于 val2
+     * @param val1
+     * @param val2
+     * @return
+     */
+    public static boolean le(BigDecimal val1,BigDecimal val2) {
+        return val1.compareTo(val2) <= 0;
     }
 
 }

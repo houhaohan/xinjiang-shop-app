@@ -259,7 +259,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setOriginalOrderProductPrice(orderProdPrice);
 
         //订单优惠处理
-        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderProdPrice);
+        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderProdPrice,orderProducts);
         vo.setOrderPrice(preferentialVo.getProductDiscountAmount());
 
         //返回预计送达时间
@@ -276,7 +276,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         List<CustomerCouponVo> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));
         for (CustomerCouponVo customerCoupon : customerCoupons) {
-            Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), vo.getOriginalOrderProductPrice());
+            Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), orderProducts);
             customerCoupon.setIsUsable(isUsable);
         }
         vo.setCustomerCoupons(customerCoupons);
@@ -343,7 +343,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //配送费
         BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getDeliveryPlatform());
 
-        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(userId, dto.getCustomerCouponId(), orderProdOriginalPrice);
+        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(userId, dto.getCustomerCouponId(), orderProdOriginalPrice,orderProducts);
         BigDecimal orderPrice = BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),shippingFee,packageFee);
 
         //对比订单总金额和结算的总金额  如果不相同说明商品价格有调整
