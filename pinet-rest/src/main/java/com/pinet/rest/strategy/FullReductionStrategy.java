@@ -33,7 +33,7 @@ public class FullReductionStrategy implements PromotionStrategy {
             OrderDiscount orderDiscount = new OrderDiscount();
             orderDiscount.setDiscountMsg(couponName);
             orderDiscount.setDiscountAmount(couponPrice);
-            orderDiscount.setType(DiscountTypeEnum.VIP_1.getCode());
+            orderDiscount.setType(DiscountTypeEnum.COUPON.getCode());
             orderDiscounts.add(orderDiscount);
         }
         return orderDiscounts;
@@ -48,7 +48,7 @@ public class FullReductionStrategy implements PromotionStrategy {
         BigDecimal couponPrice = this.couponPrice;
         for(OrderProduct orderProduct : orderProducts){
             OrderDiscount orderDiscount = new OrderDiscount();
-            orderDiscount.setType(DiscountTypeEnum.VIP_1.getCode());
+            orderDiscount.setType(DiscountTypeEnum.COUPON.getCode());
             if(BigDecimalUtil.ge(orderProduct.getProdPrice(),couponPrice)){
                 orderDiscount.setDiscountAmount(couponPrice);
                 orderDiscount.setDiscountMsg(orderProduct.getProdName());

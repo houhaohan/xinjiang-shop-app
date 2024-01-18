@@ -31,7 +31,7 @@ public class DiscountStrategy implements PromotionStrategy {
         OrderDiscount orderDiscount = new OrderDiscount();
         orderDiscount.setDiscountMsg(couponName);
         orderDiscount.setDiscountAmount(BigDecimalUtil.subtract(amount,discountAmount));
-        orderDiscount.setType(DiscountTypeEnum.VIP_1.getCode());
+        orderDiscount.setType(DiscountTypeEnum.COUPON.getCode());
         orderDiscounts.add(orderDiscount);
         return orderDiscounts;
     }
@@ -46,7 +46,7 @@ public class DiscountStrategy implements PromotionStrategy {
             OrderDiscount orderDiscount = new OrderDiscount();
             orderDiscount.setDiscountMsg(orderProduct.getProdName());
             orderDiscount.setDiscountAmount(BigDecimalUtil.subtract(orderProduct.getProdPrice(),discountAmount));
-            orderDiscount.setType(DiscountTypeEnum.VIP_1.getCode());
+            orderDiscount.setType(DiscountTypeEnum.COUPON.getCode());
             orderDiscounts.add(orderDiscount);
         }
 
