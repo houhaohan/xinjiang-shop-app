@@ -5,7 +5,6 @@ import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
@@ -16,12 +15,14 @@ import com.pinet.core.constants.DB;
 import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.page.PageRequest;
+import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Coupon;
+import com.pinet.rest.entity.CouponProduct;
 import com.pinet.rest.entity.CustomerCoupon;
-import com.pinet.rest.entity.dto.SetNewCustomerCouponDto;
+import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
 import com.pinet.rest.entity.vo.CustomerCouponVo;
@@ -30,7 +31,6 @@ import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -342,6 +342,9 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
      */
     private void validateCouponEffective(Coupon coupon){
         if(coupon == null || coupon.getDelFlag() == 1){
+            throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
+        }
+        if(coupon.getDisableFlag() == 0){
             throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
         }
         if(CouponStatusEnum.NOT_STARTED.getCode() == coupon.getStatus()){
