@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,8 +53,7 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
         sb.append(entity.getProvince())
                 .append(entity.getCity())
                 .append(entity.getDistrict())
-                .append(customerAddressDto.getAddressName())
-                .append(customerAddressDto.getHouseNumber());
+                .append(customerAddressDto.getAddressName());
         entity.setAddress(sb.toString());
         entity.setCustomerId(userId);
         entity.setUpdateTime(System.currentTimeMillis());
@@ -89,8 +87,7 @@ public class CustomerAddressServiceImpl extends ServiceImpl<CustomerAddressMappe
         sb.append(entity.getProvince())
                 .append(entity.getCity())
                 .append(entity.getDistrict())
-                .append(customerAddressDto.getAddressName())
-                .append(customerAddressDto.getHouseNumber());
+                .append(customerAddressDto.getAddressName());
         entity.setAddress(sb.toString());
         entity.setAddressName(customerAddressDto.getAddressName());
         entity.setCustomerId(userId);
