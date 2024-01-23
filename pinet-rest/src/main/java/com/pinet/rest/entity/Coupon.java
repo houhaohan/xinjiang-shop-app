@@ -92,4 +92,7 @@ public class Coupon extends BaseEntity {
     @ApiModelProperty("会员同享 0-否,1-是")
     private Integer useVip;
 
+    @ApiModelProperty("背景图")
+    private String imageUrl;
+
 }
