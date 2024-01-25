@@ -89,8 +89,8 @@ public class CustomerCouponController extends BaseController {
     @RequestMapping(value = "/receive",method = RequestMethod.POST)
     @ApiOperation("优惠券领取")
     @ApiVersion(1)
-    public Result<?> receive(@RequestParam("couponId") Long couponId){
-        customerCouponService.receive(couponId);
+    public Result<?> receive(@RequestBody CustomerCoupon customerCoupon){
+        customerCouponService.receive(customerCoupon.getCouponId());
         return Result.ok();
     }
 }

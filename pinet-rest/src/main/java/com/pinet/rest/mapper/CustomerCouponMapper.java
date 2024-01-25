@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.pinet.rest.entity.vo.CustomerCouponVo;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,5 +23,7 @@ public interface CustomerCouponMapper extends BaseMapper<CustomerCoupon> {
     List<CustomerCouponVo> selectCustomerCouponList(@Param(Constants.WRAPPER) Wrapper<CustomerCoupon> wrapper);
 
     CustomerCouponVo selectCustomerCouponVoById(@Param("id") Long id);
+
+    Date getFirstCouponReceiveTime(@Param("customerId") Long customerId,@Param("couponId") Long couponId);
 
 }

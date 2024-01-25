@@ -69,4 +69,8 @@
         where cc.id = #{id}
     </select>
 
+    <select id="getFirstCouponReceiveTime" resultType="java.util.Date">
+        select min(create_time) from customer_coupon where customer_id = #{customerId} and coupon_id = #{couponId} and del_flag = 0
+    </select>
+
 </mapper>

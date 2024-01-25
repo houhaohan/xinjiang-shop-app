@@ -326,11 +326,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
      * @return
      */
     private Date getFirstCouponReceiveTime(Long userId, Long couponId) {
-        QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("min(create_time)");
-        queryWrapper.eq("customer_id", userId);
-        queryWrapper.eq("coupon_id", couponId);
-        Date time = getObj(queryWrapper, o -> (Date) o);
+        Date time  = baseMapper.getFirstCouponReceiveTime(userId,couponId);
         return time == null ? new Date() : time;
     }
 
