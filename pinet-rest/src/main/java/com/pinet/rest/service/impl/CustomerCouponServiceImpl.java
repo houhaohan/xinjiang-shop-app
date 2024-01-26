@@ -79,7 +79,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         queryWrapper.in("cc.coupon_status", 1,2)
                 .orderByAsc("cc.coupon_status")
                 .orderByDesc("cc.id")
-                .last("limit " + (pageRequest.getPageNum() - 1) + "," + pageRequest.getPageSize());
+                .last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
@@ -105,7 +105,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         queryWrapper.eq("cc.customer_id", userId);
         queryWrapper.eq("cc.del_flag", 0);
         queryWrapper.orderByDesc("cc.id");
-        queryWrapper.last("limit " + (pageRequest.getPageNum() - 1) + "," + pageRequest.getPageSize());
+        queryWrapper.last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
@@ -114,7 +114,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         QueryWrapper queryWrapper = initWrapper(userId, false);
         queryWrapper.orderByDesc("cc.id");
-        queryWrapper.last("limit " + (pageRequest.getPageNum() - 1) + "," + pageRequest.getPageSize());
+        queryWrapper.last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(queryWrapper);
     }
 
