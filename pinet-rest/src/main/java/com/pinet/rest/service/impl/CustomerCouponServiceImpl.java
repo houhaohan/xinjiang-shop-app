@@ -76,7 +76,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
         QueryWrapper<CustomerCoupon> queryWrapper = initWrapper(userId, true);
-        queryWrapper.eq("cc.coupon_status", 2)
+        queryWrapper.in("cc.coupon_status", 1,2)
                 .orderByAsc("cc.coupon_status")
                 .orderByDesc("cc.id")
                 .last("limit " + (pageRequest.getPageNum() - 1) + "," + pageRequest.getPageSize());
