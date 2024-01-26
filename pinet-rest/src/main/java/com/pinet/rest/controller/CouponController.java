@@ -34,7 +34,7 @@ public class CouponController extends BaseController {
     @ApiVersion(1)
     public Result<Coupon> getImageUrl(@RequestParam("id") Long id) {
         QueryWrapper<Coupon> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("id","quantity","claimed_num","image_url");
+        queryWrapper.select("id","name","quantity","claimed_num","image_url");
         queryWrapper.eq("id",id);
         Coupon coupon = couponService.getOne(queryWrapper);
         return Result.ok(coupon);

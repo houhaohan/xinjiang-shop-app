@@ -89,7 +89,7 @@ public class BigDecimalUtil {
      * @return
      */
     public static BigDecimal multiply(BigDecimal val, Double multiplier) {
-        return val.multiply(BigDecimal.valueOf(multiplier)).setScale(2,BigDecimal.ROUND_HALF_UP);
+        return multiply(val,BigDecimal.valueOf(multiplier),2);
     }
 
     /**
@@ -109,7 +109,7 @@ public class BigDecimalUtil {
      * @return 单位元
      */
     public static BigDecimal multiply(BigDecimal amount, BigDecimal val) {
-        return amount.multiply(val).setScale(2,BigDecimal.ROUND_HALF_UP);
+        return multiply(amount,val,2);
     }
 
     /**
@@ -122,7 +122,7 @@ public class BigDecimalUtil {
     }
 
     /**
-     * 区两数最大数
+     * 取两数最大数
      * @param val1
      * @param val2
      * @return
@@ -132,7 +132,7 @@ public class BigDecimalUtil {
     }
 
     /**
-     * 区两数最小数
+     * 取两数最小数
      * @param val1
      * @param val2
      * @returnmin
@@ -152,7 +152,7 @@ public class BigDecimalUtil {
     }
 
     /**
-     * val1 大于 val2
+     * val1 大于等于 val2
      * @param val1
      * @param val2
      * @return
