@@ -105,6 +105,6 @@ public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMappe
 
         //添加积分记录
         scoreRecordService.addScoreRecord(exchangeProduct.getShopId(), "兑换" + exchangeProduct.getProdName(),
-                exchangeProduct.getScore(), exchangeRecordId, ScoreRecordTypeEnum._3);
+                exchangeProduct.getScore(), exchangeRecordId, ScoreRecordTypeEnum._3,customerId);
     }
 }

@@ -38,8 +38,7 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     private ICustomerBalanceService customerBalanceService;
 
     @Override
-    public void addScoreRecord(Long shopId, String scoreTitle, Integer score, Long fkId, ScoreRecordTypeEnum scoreRecordTypeEnum) {
-        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+    public void addScoreRecord(Long shopId, String scoreTitle, Integer score, Long fkId, ScoreRecordTypeEnum scoreRecordTypeEnum,Long customerId) {
         Shop shop = shopService.getById(shopId);
         ScoreRecord scoreRecord = new ScoreRecord();
         scoreRecord.setCustomerId(customerId);

@@ -259,7 +259,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setOriginalOrderProductPrice(orderProdPrice);
 
         //订单优惠处理
-        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderProdPrice,orderProducts);
+        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderProdPrice, orderProducts);
         vo.setOrderPrice(preferentialVo.getProductDiscountAmount());
 
         //返回预计送达时间
@@ -343,8 +343,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //配送费
         BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getDeliveryPlatform());
 
-        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(userId, dto.getCustomerCouponId(), orderProdOriginalPrice,orderProducts);
-        BigDecimal orderPrice = BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),shippingFee,packageFee);
+        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(userId, dto.getCustomerCouponId(), orderProdOriginalPrice, orderProducts);
+        BigDecimal orderPrice = BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(), shippingFee, packageFee);
 
         //对比订单总金额和结算的总金额  如果不相同说明商品价格有调整
         if (dto.getOrderSource() != 3 && orderPrice.compareTo(dto.getOrderPrice()) != 0) {
@@ -377,8 +377,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //插入优惠明细表
         List<OrderDiscount> orderDiscounts = preferentialVo.getOrderDiscounts();
-        if(!CollectionUtils.isEmpty(orderDiscounts)){
-            orderDiscounts.forEach(item-> item.setOrderId(order.getId()));
+        if (!CollectionUtils.isEmpty(orderDiscounts)) {
+            orderDiscounts.forEach(item -> item.setOrderId(order.getId()));
             orderDiscountService.saveBatch(orderDiscounts);
         }
 
@@ -550,7 +550,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //积分流水
         scoreRecordService.addScoreRecord(orders.getShopId(), "消费" + orders.getOrderPrice().toString() + "元",
-                score, orders.getId(), ScoreRecordTypeEnum._1);
+                score, orders.getId(), ScoreRecordTypeEnum._1, orders.getCustomerId());
 
         //修改余额 和 积分
         ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
@@ -558,69 +558,68 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //更新优惠券状态
         CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
-        if (ObjectUtil.isNotNull(customerCoupon)){
+        if (ObjectUtil.isNotNull(customerCoupon)) {
             customerCoupon.setCouponStatus(4);
             customerCouponService.updateById(customerCoupon);
         }
 
-        //判断订单状态  如果订单状态是已取消  就退款
-        if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {
-
-            IPayService payService = SpringContextUtils.getBean(orderPay.getChannelId() + "_" + "service", IPayService.class);
-            //构造退款记录
-            Snowflake snowflake = IdUtil.getSnowflake();
-
-            OrderRefund orderRefund = new OrderRefund();
-            orderRefund.setRefundNo(snowflake.nextId());
-            orderRefund.setOrderId(orders.getId());
-            orderRefund.setOrderPayId(orderPay.getId());
-            orderRefund.setRefundPrice(orders.getOrderPrice());
-            orderRefund.setOrderPrice(orders.getOrderPrice());
-            orderRefund.setIsAllRefund(true);
-            orderRefund.setRefundDesc("订单超时支付,系统默认退款");
-            orderRefund.setRefundStatus(1);
-            orderRefundService.save(orderRefund);
-
-            //调用退款方法
-            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(),
-                    orders.getOrderNo().toString(),
-                    orderRefund.getRefundNo().toString(),
-                    orders.getOrderPrice().toString(),
-                    orderRefund.getId(), orders.getCustomerId());
-            payService.refund(refundParam);
-            orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
-            return updateById(orders);
-        } else {
-            //推送客如云,订单状态  1外卖  2自提
-            if (orders.getOrderType() == 1) {
-                orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
-                String kryOrderNo = takeoutOrderCreate(orders);
-                orders.setKryOrderNo(kryOrderNo);
-                orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
-                //创建配送订单
-                try {
-                    daDaService.createOrder(orders);
-                } catch (RpcException e) {
-                    throw new PinetException("外卖订单创建异常，请联系商家处理");
-                }
-            } else {
-                //自提单
-                String kryOrderNo = scanCodePrePlaceOrder(orders);
-                orders.setKryOrderNo(kryOrderNo);
-                orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
-                //判断订单是否有佣金 如果有佣金 && 订单状态是已完成 设置佣金三天后到账
-                if (orders.getCommission().compareTo(BigDecimal.ZERO) > 0) {
-                    jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), 3 * 24 * 60 * 60 * 1000L);
-                }
-
-                //自提订单发送短信
-                //先用mq异步发送  (后期可能会删除)
-                jmsUtil.delaySend(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders), 10 * 1000L);
-
+//        //判断订单状态  如果订单状态是已取消  就退款
+//        if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {
+//
+//            IPayService payService = SpringContextUtils.getBean(orderPay.getChannelId() + "_" + "service", IPayService.class);
+//            //构造退款记录
+//            Snowflake snowflake = IdUtil.getSnowflake();
+//
+//            OrderRefund orderRefund = new OrderRefund();
+//            orderRefund.setRefundNo(snowflake.nextId());
+//            orderRefund.setOrderId(orders.getId());
+//            orderRefund.setOrderPayId(orderPay.getId());
+//            orderRefund.setRefundPrice(orders.getOrderPrice());
+//            orderRefund.setOrderPrice(orders.getOrderPrice());
+//            orderRefund.setIsAllRefund(true);
+//            orderRefund.setRefundDesc("订单超时支付,系统默认退款");
+//            orderRefund.setRefundStatus(1);
+//            orderRefundService.save(orderRefund);
+//
+//            //调用退款方法
+//            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(),
+//                    orders.getOrderNo().toString(),
+//                    orderRefund.getRefundNo().toString(),
+//                    orders.getOrderPrice().toString(),
+//                    orderRefund.getId(), orders.getCustomerId());
+//            payService.refund(refundParam);
+//            orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
+//            return updateById(orders);
+//        } else {
+        //推送客如云,订单状态  1外卖  2自提
+        if (orders.getOrderType() == 1) {
+            orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
+            String kryOrderNo = takeoutOrderCreate(orders);
+            orders.setKryOrderNo(kryOrderNo);
+            orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
+            //创建配送订单
+            try {
+                daDaService.createOrder(orders);
+            } catch (RpcException e) {
+                throw new PinetException("外卖订单创建异常，请联系商家处理");
             }
-            log.info("支付回调更新订单信息为{}", JSONObject.toJSONString(orders));
-            return updateById(orders);
+        } else {
+            //自提单
+            String kryOrderNo = scanCodePrePlaceOrder(orders);
+            orders.setKryOrderNo(kryOrderNo);
+            orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
+            //判断订单是否有佣金 如果有佣金 && 订单状态是已完成 设置佣金三天后到账
+            if (orders.getCommission().compareTo(BigDecimal.ZERO) > 0) {
+                jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), 3 * 24 * 60 * 60 * 1000L);
+            }
+
+            //自提订单发送短信
+            //先用mq异步发送  (后期可能会删除)
+            jmsUtil.delaySend(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders), 10 * 1000L);
+
         }
+        log.info("支付回调更新订单信息为{}", JSONObject.toJSONString(orders));
+        return updateById(orders);
     }
 
     @Override
@@ -666,7 +665,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //积分流水
         scoreRecordService.addScoreRecord(orders.getShopId(), "退款" + orders.getOrderPrice().toString() + "元", -orders.getScore()
-                , orders.getId(), ScoreRecordTypeEnum._2);
+                , orders.getId(), ScoreRecordTypeEnum._2, orders.getCustomerId());
 
         //修改余额
         ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());
@@ -677,7 +676,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //退款退回优惠券
         CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
-        if (ObjectUtil.isNotNull(customerCoupon)){
+        if (ObjectUtil.isNotNull(customerCoupon)) {
             customerCoupon.setCouponStatus(2);
             customerCouponService.updateById(customerCoupon);
         }
@@ -858,7 +857,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (orderType == 2) {
             return new BigDecimal("0");
         }
-        if(!Environment.isProd()){
+        if (!Environment.isProd()) {
             return new BigDecimal("4");
         }
         if (deliveryPlatform.equals(DeliveryPlatformEnum.ZPS.getCode())) {
@@ -888,7 +887,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return new BigDecimal("0");
         }
         //测试环境默认4元吧
-        if(!Environment.isProd()){
+        if (!Environment.isProd()) {
             return new BigDecimal("4");
         }
         if (StringUtil.isBlank(deliveryShopNo) || deliveryPlatform.equals(DeliveryPlatformEnum.ZPS.getCode())) {
@@ -1050,7 +1049,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @return
      */
     public String takeoutOrderCreate(Orders order) {
-        if(!Environment.isProd()){
+        if (!Environment.isProd()) {
             return "";
         }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
@@ -1198,7 +1197,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders) {
         //生产环境才推单，其他环境就不推了吧
-        if(!Environment.isProd()){
+        if (!Environment.isProd()) {
             return null;
         }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();

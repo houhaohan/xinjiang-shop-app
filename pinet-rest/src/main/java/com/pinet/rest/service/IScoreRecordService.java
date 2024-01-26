@@ -24,8 +24,9 @@ public interface IScoreRecordService extends IService<ScoreRecord> {
      * @param score 积分(扣减传负数)
      * @param fkId 外键id
      * @param scoreRecordTypeEnum 积分类型枚举
+     * @param customerId 用户id
      */
-    void addScoreRecord(Long shopId, String scoreTitle, Integer score, Long fkId, ScoreRecordTypeEnum scoreRecordTypeEnum);
+    void addScoreRecord(Long shopId, String scoreTitle, Integer score, Long fkId, ScoreRecordTypeEnum scoreRecordTypeEnum,Long customerId);
 
     /**
      * 积分明细列表
