@@ -5,10 +5,12 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Coupon;
+import com.pinet.rest.entity.CustomerCoupon;
 import com.pinet.rest.entity.ExchangeProduct;
 import com.pinet.rest.entity.dto.ExchangeDto;
 import com.pinet.rest.entity.dto.ExchangeProductListDto;
@@ -46,6 +48,9 @@ public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMappe
 
     @Resource
     private IScoreRecordService scoreRecordService;
+
+    @Resource
+    private RedisUtil redisUtil;
 
     @Override
     public List<ExchangeProduct> exchangeProductList(ExchangeProductListDto dto) {
@@ -86,7 +91,11 @@ public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMappe
         //判断是否是优惠券
         if (exchangeProduct.getProdType() == 2) {
             //发放优惠券
-            customerCouponService.receive(exchangeProduct.getCouponId());
+            CustomerCoupon customerCoupon = customerCouponService.receive(exchangeProduct.getCouponId());
+
+            //处理下首页优惠券弹窗
+            String redisKey = "qingshi:coupon:index:" + customerId;
+            redisUtil.set(redisKey, customerCoupon.getId().toString());
         }
 
         //添加兑换记录
@@ -95,7 +104,7 @@ public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMappe
                 exchangeProduct.getShopId(), exchangeProduct.getShopName());
 
         //添加积分记录
-        scoreRecordService.addScoreRecord(exchangeProduct.getShopId(),"兑换"+exchangeProduct.getProdName(),
-                exchangeProduct.getScore(),exchangeRecordId, ScoreRecordTypeEnum._3);
+        scoreRecordService.addScoreRecord(exchangeProduct.getShopId(), "兑换" + exchangeProduct.getProdName(),
+                exchangeProduct.getScore(), exchangeRecordId, ScoreRecordTypeEnum._3);
     }
 }

@@ -77,8 +77,9 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
     /**
      * 优惠券领取
      * @param couponId
+     * @return CustomerCoupon 领取的优惠券CustomerCoupon数据
      */
-    void receive(Long couponId);
+    CustomerCoupon receive(Long couponId);
 
-    void receive(Long customerId, Long couponId);
+    CustomerCoupon receive(Long customerId, Long couponId);
 }
