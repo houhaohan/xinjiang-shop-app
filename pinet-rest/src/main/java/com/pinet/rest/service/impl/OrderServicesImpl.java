@@ -260,7 +260,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //订单优惠处理
         PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderProdPrice, orderProducts);
-        vo.setOrderPrice(preferentialVo.getProductDiscountAmount());
+        vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),packageFee,shippingFee));
 
         //返回预计送达时间
         Date now = new Date();
