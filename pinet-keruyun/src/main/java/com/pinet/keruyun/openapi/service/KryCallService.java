@@ -13,10 +13,10 @@ import com.pinet.keruyun.openapi.vo.ShopTokenVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zhaobo
@@ -25,8 +25,6 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class KryCallService {
-
-    private final OkHttpClient okHttpClient;
 
     private final KryApiParamConfig kryApiParamConfig;
 
@@ -83,6 +81,8 @@ public class KryCallService {
         Response response = null;
         try {
 //            log.info("kry_request:{}", JsonUtil.toJson(request));
+
+            OkHttpClient okHttpClient = new OkHttpClient.Builder().retryOnConnectionFailure(true).connectTimeout(30, TimeUnit.SECONDS).build();
             response = okHttpClient.newCall(request).execute();
             if (response.isSuccessful()) {
                 String responseStr = response.body().string();

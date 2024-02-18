@@ -23,8 +23,8 @@ import java.util.List;
 @Slf4j
 public class KryApiServiceImpl extends KryCallService implements IKryApiService {
 
-    public KryApiServiceImpl(OkHttpClient okHttpClient, KryApiParamConfig kryApiParamConfig) {
-        super(okHttpClient, kryApiParamConfig);
+    public KryApiServiceImpl(KryApiParamConfig kryApiParamConfig) {
+        super(kryApiParamConfig);
     }
 
     @Override
