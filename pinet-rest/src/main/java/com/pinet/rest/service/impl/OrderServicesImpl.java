@@ -47,15 +47,14 @@ import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -72,81 +71,34 @@ import java.util.stream.Collectors;
 @Service
 @DS(DB.MASTER)
 @Slf4j
+@RequiredArgsConstructor
 public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> implements IOrdersService {
-    @Resource
-    private OrdersMapper ordersMapper;
-
-    @Resource
-    private IOrderProductService orderProductService;
-
-    @Resource
-    private IOrderAddressService orderAddressService;
-
-    @Resource
-    private IShopService shopService;
-
-    @Resource
-    private ICartService cartService;
-
-    @Resource
-    private JmsUtil jmsUtil;
-
-    @Resource
-    private IOrderPayService orderPayService;
-
-    @Resource
-    private IOrderProductSpecService orderProductSpecService;
-
-    @Resource
-    private IOrderRefundService orderRefundService;
-
-    @Resource
-    private ICustomerMemberService customerMemberService;
-
-    @Resource
-    private IBCapitalFlowService bCapitalFlowService;
-
-    @Resource
-    private IBUserBalanceService ibUserBalanceService;
-
-    @Resource
-    private ICustomerCouponService customerCouponService;
-
-    @Resource
-    private IOrderDiscountService orderDiscountService;
-
-    @Autowired
-    private IKryApiService kryApiService;
-
-    @Autowired
-    private IKryComboGroupDetailService kryComboGroupDetailService;
-
-    @Autowired
-    private IKryOrderCompensateService kryOrderCompensateService;
-
-    @Autowired
-    private IKryOrderPushLogService kryOrderPushLogService;
-
-    @Resource
-    private IDaDaService daDaService;
-
-    @Resource
-    private ICustomerAddressService customerAddressService;
-
-    @Resource
-    private IShippingFeeRuleService shippingFeeRuleService;
-
-    @Resource
-    private IShopProductService shopProductService;
-
-    @Resource
-    private IScoreRecordService scoreRecordService;
-
-    @Resource
-    private ICustomerBalanceService customerBalanceService;
-
-    @Autowired
-    private OrderPreferentialManager orderPreferentialManager;
+    private final IOrderProductService orderProductService;
+    private final IOrderAddressService orderAddressService;
+    private final IShopService shopService;
+    private final ICartService cartService;
+    private final JmsUtil jmsUtil;
+    private final IOrderPayService orderPayService;
+    private final IOrderProductSpecService orderProductSpecService;
+    private final IOrderRefundService orderRefundService;
+    private final ICustomerMemberService customerMemberService;
+    private final IBCapitalFlowService bCapitalFlowService;
+    private final IBUserBalanceService ibUserBalanceService;
+    private final ICustomerCouponService customerCouponService;
+    private final IOrderDiscountService orderDiscountService;
+    private final IKryApiService kryApiService;
+    private final IKryComboGroupDetailService kryComboGroupDetailService;
+    private final IKryOrderCompensateService kryOrderCompensateService;
+    private final IKryOrderPushLogService kryOrderPushLogService;
+    private final IDaDaService daDaService;
+    private final ICustomerAddressService customerAddressService;
+    private final IShippingFeeRuleService shippingFeeRuleService;
+    private final IShopProductService shopProductService;
+    private final IScoreRecordService scoreRecordService;
+    private final ICustomerBalanceService customerBalanceService;
+    private final OrderPreferentialManager orderPreferentialManager;
+    private final WxMaService wxMaService;
+    private final ICustomerService customerService;
 
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
@@ -154,7 +106,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         Page<OrderListVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
 
-        IPage<OrderListVo> orderListVos = ordersMapper.selectOrderList(page, customerId);
+        IPage<OrderListVo> orderListVos = baseMapper.selectOrderList(page, customerId);
         orderListVos.getRecords().forEach(k -> {
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
             //如果是自提订单并且是配送中 修改状态状态str为可领取
@@ -170,7 +122,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     public OrderDetailVo orderDetail(Long orderId) {
-        OrderDetailVo orderDetailVo = ordersMapper.selectOrderDetail(orderId);
+        OrderDetailVo orderDetailVo = baseMapper.selectOrderDetail(orderId);
         if (orderDetailVo == null) {
             throw new PinetException("订单不存在");
         }
@@ -287,7 +239,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     public Integer countShopOrderMakeNum(Long shopId) {
         Date date = new Date();
         Date queryDate = DateUtil.offsetHour(date, -8);
-        return ordersMapper.countShopOrderMakeNum(shopId, queryDate);
+        return baseMapper.countShopOrderMakeNum(shopId, queryDate);
     }
 
     @Override
@@ -1001,13 +953,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return true;
     }
 
-    @Autowired
-    private WxMaService wxMaService;
-
-    @Autowired
-    private ICustomerService customerService;
-
-
     @Override
     public void performanceCall(PerformanceCallDTO dto) {
         if (!"OPEN_PLATFORM".equalsIgnoreCase(dto.getOrderSource())) {
@@ -1073,7 +1018,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderStrategyRequest.setValidateDishStock(true);
         takeoutOrderCreateDTO.setOrderStrategyRequest(orderStrategyRequest);
 
-        OrderPay orderPay = orderPayService.getByOrderNo(order.getOrderNo());
+        OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(order.getId(),"weixin_mini");
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
         paymentDetailRequest.setOutBizId(String.valueOf(orderPay.getId()));
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orderPay.getPayPrice()));

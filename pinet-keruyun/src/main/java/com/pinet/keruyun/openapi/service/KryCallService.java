@@ -13,6 +13,7 @@ import com.pinet.keruyun.openapi.vo.ShopTokenVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -28,7 +29,7 @@ public class KryCallService {
 
     private final KryApiParamConfig kryApiParamConfig;
 
-//    @Cacheable(value = {"authTypeAndOrgIdMapToken"}, key = "#authType+'_'+#orgId")
+    @Cacheable(value = {"authTypeAndOrgIdMapToken"}, key = "#authType+'_'+#orgId")
     public String getToken(AuthType authType, Long orgId) {
         String responseStr = getCall(KryAPI.GET_SHOP_TOKEN, authType, orgId, kryApiParamConfig.getAppSecret());
         KryResponse<ShopTokenVO> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<ShopTokenVO>>() {
