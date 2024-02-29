@@ -7,6 +7,7 @@ import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.ProductType;
 import com.pinet.rest.entity.bo.RecommendTimeBo;
+import com.pinet.rest.entity.dto.MemberRecommendProdDto;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.RecommendListDto;
@@ -80,8 +81,8 @@ public class CustomerMemberController extends BaseController {
     @ApiOperation("推荐商品")
     @PostMapping("/memberRecommendProd")
     @ApiVersion(1)
-    public Result<?> recommendProd(PageRequest request){
-        List<MemberRecommendProdVo> memberRecommendProdVos = customerMemberService.memberRecommendProd(request);
+    public Result<?> recommendProd(@RequestBody MemberRecommendProdDto dto){
+        List<MemberRecommendProdVo> memberRecommendProdVos = customerMemberService.memberRecommendProd(dto);
         return Result.ok(memberRecommendProdVos);
     }
 

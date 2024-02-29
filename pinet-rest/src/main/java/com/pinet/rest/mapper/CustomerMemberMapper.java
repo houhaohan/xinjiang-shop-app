@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.rest.entity.CustomerMember;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.dto.MemberRecommendProdDto;
 import com.pinet.rest.entity.vo.MemberRecommendProdVo;
 import com.pinet.rest.entity.vo.OrderListVo;
 import org.apache.ibatis.annotations.Param;
@@ -18,7 +19,7 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface CustomerMemberMapper extends BaseMapper<CustomerMember> {
 
-    IPage<MemberRecommendProdVo> selectMemberRecommendProd(Page<OrderListVo> page);
+    IPage<MemberRecommendProdVo> selectMemberRecommendProd(Page<OrderListVo> page, @Param("dto") MemberRecommendProdDto dto);
 
     CustomerMember selectByCustomerId(@Param("customerId") Long customerId);
 }

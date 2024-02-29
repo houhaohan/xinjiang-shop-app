@@ -18,6 +18,7 @@ import com.pinet.rest.entity.CustomerMember;
 import com.pinet.rest.entity.OrderPay;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.bo.RecommendTimeBo;
+import com.pinet.rest.entity.dto.MemberRecommendProdDto;
 import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
@@ -155,9 +156,9 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
     }
 
     @Override
-    public List<MemberRecommendProdVo> memberRecommendProd(PageRequest request) {
-        Page<OrderListVo> page = new Page<>(request.getPageNum(), request.getPageSize());
-        IPage<MemberRecommendProdVo> memberRecommendProd = baseMapper.selectMemberRecommendProd(page);
+    public List<MemberRecommendProdVo> memberRecommendProd(MemberRecommendProdDto dto) {
+        Page<OrderListVo> page = new Page<>(dto.getPageNum(), dto.getPageSize());
+        IPage<MemberRecommendProdVo> memberRecommendProd = baseMapper.selectMemberRecommendProd(page,dto);
         return memberRecommendProd.getRecords();
     }
 

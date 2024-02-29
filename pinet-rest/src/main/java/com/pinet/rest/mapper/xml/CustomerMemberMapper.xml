@@ -36,6 +36,9 @@
                 left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
                 left join shop s on s.id = sp.shop_id and s.del_flag = 0
                 where sp.del_flag = 0 and sp.shop_prod_status = 1 and s.shop_status = 1
+                <if test="dto.shopId != null">
+                    and sp.shop_id = #{dto.shopId}
+                </if>
                 group by sp.id
         ) p
         left join (
