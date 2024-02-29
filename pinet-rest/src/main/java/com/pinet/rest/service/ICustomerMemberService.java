@@ -59,7 +59,7 @@ public interface ICustomerMemberService extends IService<CustomerMember> {
 
     /**
      * 推荐商品
-     * @param request
+     * @param dto
      * @return
      */
     List<MemberRecommendProdVo> memberRecommendProd(MemberRecommendProdDto dto);
