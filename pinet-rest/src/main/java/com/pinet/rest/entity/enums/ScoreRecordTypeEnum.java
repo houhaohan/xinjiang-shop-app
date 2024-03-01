@@ -10,9 +10,9 @@ public enum ScoreRecordTypeEnum {
     /**
      * 订单状态
      */
-    _1(1,"下单"),
-    _2(2,"退款"),
-    _3(3,"兑换");
+    ORDER(1,"下单"),
+    REFUND(2,"退款"),
+    EXCHANGE(3,"兑换");
 
 
     private Integer code;

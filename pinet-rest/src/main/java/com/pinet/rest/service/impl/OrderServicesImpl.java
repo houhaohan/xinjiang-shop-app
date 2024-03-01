@@ -502,7 +502,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //积分流水
         scoreRecordService.addScoreRecord(orders.getShopId(), "消费" + orders.getOrderPrice().toString() + "元",
-                score, orders.getId(), ScoreRecordTypeEnum._1, orders.getCustomerId());
+                score, orders.getId(), ScoreRecordTypeEnum.ORDER, orders.getCustomerId());
 
         //修改余额 和 积分
         ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
@@ -617,7 +617,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //积分流水
         scoreRecordService.addScoreRecord(orders.getShopId(), "退款" + orders.getOrderPrice().toString() + "元", -orders.getScore()
-                , orders.getId(), ScoreRecordTypeEnum._2, orders.getCustomerId());
+                , orders.getId(), ScoreRecordTypeEnum.REFUND, orders.getCustomerId());
 
         //修改余额
         ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());
