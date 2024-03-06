@@ -45,7 +45,7 @@ public class OrderPreferentialManager {
         if(customerMember != null){
             //优惠后金额
             MemberLevelEnum e = MemberLevelEnum.getEnumByCode(customerMember.getMemberLevel());
-            BigDecimal discountedPrice = BigDecimalUtil.multiply(orderProductPrice, MemberLevelEnum._10.getDiscount());
+            BigDecimal discountedPrice = BigDecimalUtil.multiply(orderProductPrice, e.getDiscount());
             OrderDiscount orderDiscount = new OrderDiscount();
             orderDiscount.setDiscountMsg(e.getMsg() + BigDecimalUtil.stripTrailingZeros(BigDecimalUtil.multiply(e.getDiscount(),new BigDecimal("10"))) + "折优惠")
                     .setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountedPrice))
