@@ -44,7 +44,8 @@
         c.coupon_price as couponAmount,
         c.use_shop,
         c.discount,
-        c.use_vip
+        c.use_vip,
+        c.coupon_desc
         from customer_coupon cc
         left join coupon c on c.id = cc.coupon_id
         ${ew.customSqlSegment}

@@ -95,4 +95,7 @@ public class Coupon extends BaseEntity {
     @ApiModelProperty("背景图")
     private String imageUrl;
 
+    @ApiModelProperty("优惠券描述")
+    private String couponDesc;
+
 }

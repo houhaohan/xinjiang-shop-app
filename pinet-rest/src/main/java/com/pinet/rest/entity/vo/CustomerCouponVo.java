@@ -62,6 +62,9 @@ public class CustomerCouponVo {
     @ApiModelProperty("使用规则")
     private String rule;
 
+    @ApiModelProperty("优惠券描述")
+    private String couponDesc;
+
     public String getRule() {
         List<String> list = new ArrayList<>();
         if (this.useShop == 1) {
