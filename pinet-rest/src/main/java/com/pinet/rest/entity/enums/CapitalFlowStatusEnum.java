@@ -10,9 +10,9 @@ public enum CapitalFlowStatusEnum {
     /**
      * 资金状态
      */
-    _1(1,"交易成功"),
-    _2(2,"商家退款"),
-    _3(3,"提现扣减");
+    SUCCESS(1,"交易成功"),
+    REFUND(2,"商家退款"),
+    WITHDRAWAL(3,"提现扣减");
 
     private Integer code;
     private String msg;

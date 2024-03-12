@@ -144,7 +144,7 @@ public class AliAppPayServiceImpl implements IPayService {
 
                 //更新资金流水和余额
                 ibCapitalFlowService.add(orderPay.getPayPrice().negate(), orders.getId(), orders.getCreateTime(),
-                        CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum._2, orders.getShopId());
+                        CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum.REFUND, orders.getShopId());
 
                 //修改余额
                 ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());

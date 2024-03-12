@@ -32,4 +32,9 @@ public class QueueConstants {
      * 轻食自提订单发送短信给指定号码
      */
     public static final String QING_ORDER_SEND_SMS_NAME = "qingshi.order.send.sms.queue";
+
+    /**
+     * 轻食外卖订单 配送平台创建订单失败 短信提醒 Delivery
+     */
+    public static final String DELIVERY_ORDER_FAIL_SMS = "delivery.order.fail.sms.queue";
 }

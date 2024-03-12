@@ -14,7 +14,9 @@ import java.util.List;
  * 折扣券策略
  */
 public class DiscountStrategy implements PromotionStrategy {
-    //折扣 eg: 0.85
+    /**
+     * 折扣 eg: 0.85
+     */
     private BigDecimal discount;
     private String couponName;
     private List<OrderDiscount> orderDiscounts;

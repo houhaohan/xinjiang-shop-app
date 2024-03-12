@@ -181,4 +181,24 @@ public class BigDecimalUtil {
         return val1.compareTo(val2) <= 0;
     }
 
+    /**
+     * val1 等于 val2
+     * @param val1
+     * @param val2
+     * @return
+     */
+    public static boolean eq(BigDecimal val1,BigDecimal val2) {
+        return val1.compareTo(val2) == 0;
+    }
+
+    /**
+     * val1 不等于 val2
+     * @param val1
+     * @param val2
+     * @return
+     */
+    public static boolean ne(BigDecimal val1,BigDecimal val2) {
+        return val1.compareTo(val2) != 0;
+    }
+
 }

@@ -10,9 +10,9 @@ public enum CapitalFlowWayEnum {
     /**
      * 到账方式
      */
-    _1(1,"支付宝"),
-    _2(2,"微信"),
-    _3(3,"银行卡");
+    ZFB(1,"支付宝"),
+    WE_CHAT(2,"微信"),
+    BANK(3,"银行卡");
 
     private Integer code;
     private String msg;
@@ -63,9 +63,9 @@ public enum CapitalFlowWayEnum {
 
     public static CapitalFlowWayEnum getEnumByChannelId(String channelId){
         if ("alipay_app".equals(channelId)){
-            return CapitalFlowWayEnum._1;
+            return CapitalFlowWayEnum.ZFB;
         }else {
-            return CapitalFlowWayEnum._2;
+            return CapitalFlowWayEnum.WE_CHAT;
         }
     }
 }

@@ -33,6 +33,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -278,6 +279,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public CustomerCoupon receive(Long customerId, Long couponId) {
         Coupon coupon = couponService.getById(couponId);
         //1、用户是否还能领取
@@ -297,6 +299,10 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         customerCoupon.setCouponType(coupon.getType());
         customerCoupon.setCouponStatus(CouponReceiveStatusEnum.RECEIVED.getCode());
         save(customerCoupon);
+
+        //3、更新优惠券领取数量
+        coupon.setClaimedNum(coupon.getClaimedNum()+1);
+        couponService.updateById(coupon);
         return customerCoupon;
     }
 

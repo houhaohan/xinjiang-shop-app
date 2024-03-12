@@ -94,7 +94,7 @@ public class DaDaTest {
      */
     private static void cancelOrder() throws RpcException {
         CancelOrderReq build = CancelOrderReq.builder()
-                .orderId("1734877944017592320")
+                .orderId("1760555074973929472")
                 .cancelReasonId(4)
                 .cancelReason("顾客取消订单")
                 .build();

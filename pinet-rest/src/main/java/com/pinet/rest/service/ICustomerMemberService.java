@@ -1,6 +1,5 @@
 package com.pinet.rest.service;
 
-import com.pinet.core.page.PageRequest;
 import com.pinet.rest.entity.CustomerMember;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.bo.RecommendTimeBo;

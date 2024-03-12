@@ -1,5 +1,6 @@
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.pinet.PinetApplication;
 import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
@@ -9,10 +10,16 @@ import com.pinet.keruyun.openapi.vo.OrderCreateVO;
 import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
 import com.pinet.keruyun.openapi.vo.TakeoutOrderCreateVo;
 import com.pinet.rest.entity.*;
+import com.pinet.rest.service.ICustomerBalanceService;
+import com.pinet.rest.service.ICustomerService;
 import com.pinet.rest.service.impl.OrderServicesImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest(classes = PinetApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductTest {
@@ -24,7 +31,7 @@ public class ProductTest {
     @Test
     public void test(){
 //        Orders orders = ordersService.getById(31785);//套餐
-        Orders orders = ordersService.getById(34412);
+        Orders orders = ordersService.getById(54344);
 //        OrderCreateVO orderCreateVO = ordersService.pushOrderToKry(orders);
 //        String s = ordersService.takeoutOrderCreate(orders);
 //        System.out.println(JsonUtil.toJson(orderCreateVO));
@@ -35,6 +42,10 @@ public class ProductTest {
 //        System.out.println(JSONObject.toJSONString(orderCreateVO));
         System.out.println(s);
         //{"domain":"ORDER","eventCode":"ORDER_WAIT_PAY","orderBody":{"bizSecondSource":"WECHAT_MINI_PROGRAM","bizSource":"OPEN_PLATFORM","logisticStatus":"INIT","orderProductConfig":"SCAN_CODE_ORDER_PRE","orderSecondType":"TEA_DRINK","outBizId":"16968314800248340480011","status":"WAIT_PAY"},"orderNo":"20230831061316000166920707540184"}
+    }
+
+    public static void main(String[] args) {
+        System.out.println(UUID.randomUUID().toString());
     }
 
 

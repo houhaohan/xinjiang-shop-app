@@ -24,4 +24,14 @@ public class CommonConstant {
     //小程序取餐叫号模板 ID
     public static final String PERFORMANCE_CALL_TEMPLATE_ID = "UQ9ksqAUuRgVLgii5aE3lsfsoO3ciByyED3R9WKZsCA";
 
+    /**
+     * 否
+     */
+    public static final Integer NO = 0;
+
+    /**
+     * 是
+     */
+    public static final Integer YES = 1;
+
 }

@@ -13,6 +13,7 @@ import java.util.List;
 
 /**
  * 满减券 策略
+ * @author chengshuanghui
  */
 public class FullReductionStrategy implements PromotionStrategy {
     private BigDecimal usePrice;
