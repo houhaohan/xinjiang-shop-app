@@ -93,7 +93,7 @@ public class RechargeNotifyServiceImpl implements IPayNotifyService {
         if (countRechargePrice.compareTo(new BigDecimal("500")) >= 0){
             memberLevel = 20;
             expireTime = DateUtil.offset(new Date(), DateField.YEAR,1);
-            jmsUtil.delaySend(QueueConstants.QING_MEMBER_PAY_NAME, orderPay.getCustomerId().toString(), (long) (15 * 60 * 1000));
+            jmsUtil.delaySend(QueueConstants.QING_MEMBER_PAY_NAME, orderPay.getCustomerId().toString(), 31536000000L);
         }
 
         if (memberLevel > 0){
