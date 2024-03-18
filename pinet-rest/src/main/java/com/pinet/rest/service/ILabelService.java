@@ -14,4 +14,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface ILabelService extends IService<Label> {
     String getByShopProdId(Long shopProdId);
 
+    /**
+     * 根据标签ID 查询
+     * @param labelIds 标签ID，逗号拼接
+     * @return
+     */
+    String getByLabelIds(String labelIds);
+
 }

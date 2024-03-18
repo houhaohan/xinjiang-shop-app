@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.ThreadLocalUtil;
+import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.OrderProductDto;
@@ -54,6 +55,9 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
     @Autowired
     private IKryComboGroupService kryComboGroupService;
 
+    @Autowired
+    private ICartComboDishSpecService cartComboDishSpecService;
+
     @Override
     public List<OrderProduct> getByOrderId(Long orderId) {
         List<OrderProduct> orderProducts = orderProductMapper.selectByOrderId(orderId);
@@ -74,14 +78,15 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
                 throw new PinetException("购物车内有失效的商品,请删除后在结算");
             }
             //查询购物车商品样式
-            List<CartProductSpec> cartProductSpecs;
-            if("COMBO".equalsIgnoreCase(k.getDishType())){
+            List<Long> shopProdSpecIds;
+            if(DishType.COMBO.equalsIgnoreCase(k.getDishType())){
                 //套餐
-                cartProductSpecs = cartProductSpecService.getComboByCartId(k.getId());
+                List<KryComboGroupDetail> kryComboGroupDetailList = kryComboGroupDetailService.getByShopProdId(k.getShopProdId());
+                shopProdSpecIds = kryComboGroupDetailList.stream().map(KryComboGroupDetail::getId).collect(Collectors.toList());
             }else {
-                cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
+                List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
+                shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
             }
-            List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
             QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds,orderType);
             OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
             orderProducts.add(orderProduct);

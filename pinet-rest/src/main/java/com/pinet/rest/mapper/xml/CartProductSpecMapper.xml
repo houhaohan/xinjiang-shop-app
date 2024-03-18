@@ -17,13 +17,13 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id,
-        create_by,
-        create_time,
-        update_by,
-        update_time,
-        del_flag,
-        cart_id, shop_prod_spec_id, shop_prod_spec_name
+        cps.id,
+        cps.create_by,
+        cps.create_time,
+        cps.update_by,
+        cps.update_time,
+        cps.del_flag,
+        cps.cart_id, cps.shop_prod_spec_id, cps.shop_prod_spec_name
     </sql>
     <select id="selectByCartId" resultType="com.pinet.rest.entity.CartProductSpec">
         select cps.*, sps.price
@@ -47,6 +47,12 @@
         from qingshi.cart c
                  left join cart_product_spec cps on c.id = cps.cart_id
         where c.del_flag = 0 and c.customer_id = #{userId} and cps.shop_prod_spec_id = #{shopProdSpecId} limit 1
+    </select>
+
+    <select id="getByUserIdAndShopProdId" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from cart c
+        left join cart_product_spec cps on c.id = cps.cart_id and cps.del_flag = 0
+        where c.customer_id = #{userId} and c.shop_prod_id = #{shopProdId} and c.del_flag = 0
     </select>
 
 </mapper>

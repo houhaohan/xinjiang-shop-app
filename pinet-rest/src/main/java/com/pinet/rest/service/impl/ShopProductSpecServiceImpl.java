@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -29,5 +30,10 @@ public class ShopProductSpecServiceImpl extends ServiceImpl<ShopProductSpecMappe
     @Override
     public int addStock(Long shopProductSpecId, Integer num) {
         return shopProductSpecMapper.addStock(shopProductSpecId,num);
+    }
+
+    @Override
+    public BigDecimal getPriceByShopProdId(Long shopProdId) {
+        return shopProductSpecMapper.getPriceByShopProdId(shopProdId);
     }
 }

@@ -50,10 +50,11 @@ public interface ShopProductMapper extends BaseMapper<ShopProduct> {
 
     /**
      * 套餐详情
-     * @param id
+     * @param shopId
+     * @param dishIds
      * @return
      */
-    ShopProductVo getComboDetailById(@Param("id") Long id);
+    List<ShopProductVo> getComboDetailByShopIdAndDishIds(@Param("shopId") Long shopId,@Param("dishIds") List<String> dishIds);
 
 
     /**

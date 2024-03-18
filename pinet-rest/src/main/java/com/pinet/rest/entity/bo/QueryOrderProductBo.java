@@ -25,11 +25,19 @@ public class QueryOrderProductBo {
     private Integer prodNum;
 
     /**
-     * 商品样式id
+     * 单品商品样式id
      */
     private List<Long> shopProdSpecIds;
 
+
+    /**
+     * 1外卖  2自提
+     */
     private Integer orderType;
+
+
+
+
 
 
 }

@@ -1,6 +1,7 @@
 import com.alibaba.fastjson.JSONObject;
 import com.pinet.PinetApplication;
 import com.pinet.common.file.util.OssUtil;
+import com.pinet.core.util.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * @program: xinjiang-shop-app
@@ -34,6 +36,11 @@ public class FileTest {
         String url =  ossUtil.upload(multi);
         System.out.println(url);
 
+    }
+
+    public static void main(String[] args) {
+        Date date = DateUtils.endOfDay(DateUtils.addDays(new Date(), 3));
+        System.out.println(date);
     }
 
 

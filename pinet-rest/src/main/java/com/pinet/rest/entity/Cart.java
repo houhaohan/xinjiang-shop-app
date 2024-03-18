@@ -2,6 +2,8 @@ package com.pinet.rest.entity;
 
 import com.pinet.core.entity.BaseEntity;
 import java.io.Serializable;
+import java.math.BigDecimal;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;

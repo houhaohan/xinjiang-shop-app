@@ -46,19 +46,33 @@
     </select>
 
     <select id="getCartByUserIdAndShopId" resultType="com.pinet.rest.entity.vo.CartVo">
-        select ifnull(SUM(prod_num),0) as prodNum,ifnull(sum(price),0) as price from (
-            select c.id,c.prod_num,
-            (sum((case sp.dish_type when 'COMBO' then kcgd.price/100 else sps.price end)) * c.prod_num) as price
+        select ifnull(sum(prod_num),0) as prodNum,ifnull(sum(price),0) as price from (
+            select  c.id,c.prod_num ,(c.prod_num * sps.price) as price
             from cart c
-            left join shop_product sp on sp.id = c.shop_prod_id and c.del_flag = 0
             left join cart_product_spec cps on c.id = cps.cart_id and cps.del_flag = 0
             left join shop_product_spec sps on  sps.id = cps.shop_prod_spec_id and sps.del_flag = 0
-            left join kry_combo_group_detail kcgd on kcgd.id = cps.shop_prod_spec_id and kcgd.del_flag = 0
             where c.shop_id = #{shopId} and c.customer_id = #{customerId}
             and c.cart_status = 1
+            and c.dish_type = 'SINGLE'
+            and c.del_flag= 0
+            group by c.id
+
+            UNION ALL
+
+            select c.id,c.prod_num,(kcgd.price * c.prod_num / 100) as price
+            from cart c
+            left join kry_combo_group kcg on kcg.shop_prod_id = c.shop_prod_id and kcg.del_flag = 0
+            left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+            where c.shop_id = #{shopId} and c.customer_id = #{customerId}
+            and c.cart_status = 1
+            and c.dish_type = 'COMBO'
             and c.del_flag= 0
             group by c.id
         ) t
+    </select>
+
+    <select id="getByUserIdAndShopProdId">
+        select <include refid="Base_Column_List"/> from cart where customer_id = #{customerId} and shop_prod_id = #{shopProdId} and del_flag = 0
     </select>
 
 </mapper>

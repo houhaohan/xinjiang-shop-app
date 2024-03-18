@@ -3,6 +3,8 @@ package com.pinet.rest.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.ShopProductSpec;
 
+import java.math.BigDecimal;
+
 /**
  * <p>
  * 服务类
@@ -27,5 +29,13 @@ public interface IShopProductSpecService extends IService<ShopProductSpec> {
      * @return 更新的记录条数
      */
     int addStock(Long shopProductSpecId, Integer num);
+
+
+    /**
+     * 查询商品价格
+     * @param shopProdId
+     * @return
+     */
+    BigDecimal getPriceByShopProdId(Long shopProdId);
 
 }

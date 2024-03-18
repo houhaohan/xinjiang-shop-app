@@ -1,16 +1,16 @@
 package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.LatAndLngUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.keruyun.openapi.constants.DishType;
-import com.pinet.rest.entity.CustomerAddress;
-import com.pinet.rest.entity.Shop;
-import com.pinet.rest.entity.ShopProduct;
+import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.HomeProductParam;
 import com.pinet.rest.entity.param.RecommendProductParam;
@@ -22,11 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -45,9 +45,9 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     @Autowired
     private IShopService shopService;
     @Autowired
-    private IProductGlanceOverService productGlanceOverService;
-    @Autowired
     private ICustomerAddressService customerAddressService;
+    @Autowired
+    private IKryComboGroupDetailService kryComboGroupDetailService;
 
 
     @Override
@@ -92,22 +92,44 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         return page;
     }
 
+    @Autowired
+    private ILabelService labelService;
     @Override
-    public ShopProductVo getDetailById(Long id) {
+    public <T extends ProductDetailVo> T getDetailById(Long id) {
         ShopProduct shopProduct = getById(id);
         if (shopProduct == null) {
             throw new PinetException("商品不存在");
         }
-        ShopProductVo shopProductVo = null;
         if(DishType.COMBO.equalsIgnoreCase(shopProduct.getDishType())){
-            shopProductVo = baseMapper.getComboDetailById(id);
-        }else {
-            shopProductVo = baseMapper.getDetailById(id);
+            ComboDishVo comboDishVo = new ComboDishVo();
+            comboDishVo.setId(id);
+            comboDishVo.setDishType(shopProduct.getDishType());
+            comboDishVo.setProdId(shopProduct.getProdId());
+            comboDishVo.setProductName(shopProduct.getProductName());
+            comboDishVo.setProductImg(shopProduct.getProductImg());
+            comboDishVo.setProductDesc(shopProduct.getProductDesc());
+            comboDishVo.setProductTypeId(shopProduct.getProductTypeId());
+            comboDishVo.setProductType(shopProduct.getProductType());
+            comboDishVo.setShopId(shopProduct.getShopId());
+            comboDishVo.setSaleCount(shopProduct.getSaleCount());
+//            String labels = labelService.getByLabelIds(shopProduct.getLableId());
+//            comboDishVo.setLabels(labels);
+            //套餐明细
+            List<KryComboGroupDetail> kryComboGroupDetailList = kryComboGroupDetailService.getByShopProdId(id);
+            Long sumPrice = kryComboGroupDetailList.stream().map(KryComboGroupDetail::getPrice).reduce(0L, Long::sum);
+            Long sumSellPrice = kryComboGroupDetailList.stream().map(KryComboGroupDetail::getSellPrice).reduce(0L, Long::sum);
+            comboDishVo.setPrice(BigDecimalUtil.fenToYuan(sumPrice));
+            comboDishVo.setMarketPrice(BigDecimalUtil.fenToYuan(sumSellPrice));
+            //子菜
+            List<String> singleDishIds = kryComboGroupDetailList.stream().filter(o -> !Objects.equals("",o.getSingleDishId())).map(KryComboGroupDetail::getSingleDishId).collect(Collectors.toList());
+            List<ShopProductVo> singleDishList = baseMapper.getComboDetailByShopIdAndDishIds(shopProduct.getShopId(), singleDishIds);
+            comboDishVo.setSingleDishList(singleDishList);
+            return (T)comboDishVo;
         }
-        //更新商品浏览次数
-        productGlanceOverService.updateGlanceOverTimes(id);
-        return shopProductVo;
+        ShopProductVo shopProductVo = baseMapper.getDetailById(id);
+        return (T)shopProductVo;
     }
+
 
     @Override
     public ShopProductListVo productListByShopId(Long shopId,BigDecimal lat,BigDecimal lng) {

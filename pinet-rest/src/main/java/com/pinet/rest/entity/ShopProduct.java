@@ -58,13 +58,13 @@ public class ShopProduct extends BaseEntity {
     @ApiModelProperty("所属分类")
     private String productType;
 
-//    @ApiModelProperty("售价")
-//    private BigDecimal price;
-//
-//    @ApiModelProperty("市场价")
-//    private BigDecimal marketPrice;
-
     @ApiModelProperty("店铺商品状态  1正常  2下架")
     private Integer shopProdStatus;
+
+    @ApiModelProperty("销量")
+    private Long saleCount;
+
+    @ApiModelProperty("标签ID，逗号拼接")
+    private String lableId;
 
 }

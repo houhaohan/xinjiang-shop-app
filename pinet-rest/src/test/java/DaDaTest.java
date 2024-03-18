@@ -13,6 +13,7 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.rest.entity.Orders;
 import com.pinet.rest.service.IDaDaService;
 import com.pinet.rest.service.IOrdersService;
+import com.pinet.rest.service.ISmsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -178,5 +179,14 @@ public class DaDaTest {
         AddOrderResp resp = QueryDeliverFeeAndAddOrderClient.queryDeliverFee(req);
         System.err.println(JSON.toJSONString(resp));
 
+    }
+
+    @Autowired
+    private ISmsService smsService;
+    @Test
+    public void test2(){
+        Long orderId = Long.valueOf("111");
+        String msg = "【食的作品】尊敬的用户，您的订单["+orderId+"]配送创建出现异常，请及时处理。";
+        smsService.sendSmsMsg("15868805739", msg);
     }
 }

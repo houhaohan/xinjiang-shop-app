@@ -39,5 +39,10 @@ public class CartProductSpecServiceImpl extends ServiceImpl<CartProductSpecMappe
         return cartProductSpec;
     }
 
+    @Override
+    public List<CartProductSpec> getByUserIdAndShopProdId(Long userId, Long shopProdId) {
+        return cartProductSpecMapper.getByUserIdAndShopProdId(userId,shopProdId);
+    }
+
 
 }

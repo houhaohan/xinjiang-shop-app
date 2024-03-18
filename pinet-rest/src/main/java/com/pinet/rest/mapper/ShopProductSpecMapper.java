@@ -4,6 +4,8 @@ import com.pinet.rest.entity.ShopProductSpec;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
+
 /**
  * <p>
  * Mapper 接口
@@ -30,4 +32,11 @@ public interface ShopProductSpecMapper extends BaseMapper<ShopProductSpec> {
      * @return 更新条数
      */
     int addStock(@Param("shopProductSpecId") Long shopProductSpecId,@Param("num") Integer num);
+
+    /**
+     * 查询商品单价
+     * @param shopProdId
+     * @return
+     */
+    BigDecimal getPriceByShopProdId(@Param("shopProdId") Long shopProdId);
 }

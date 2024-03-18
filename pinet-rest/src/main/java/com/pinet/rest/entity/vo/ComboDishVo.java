@@ -8,19 +8,25 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @description: 套餐菜
+ * @author: chengshuanghui
+ * @date: 2024-03-12 14:29
+ */
 @Data
-@ApiModel(value = "ShopProductVo",description = "商品详情")
-public class ShopProductVo extends ProductDetailVo{
+@ApiModel(value = "ComboDishVo",description = "套餐详情")
+public class ComboDishVo extends ProductDetailVo{
+
     @ApiModelProperty(value = "id")
     private Long id;
 
-    @ApiModelProperty(value = "商品ID")
-    private Long prodId;
+    @ApiModelProperty(value = "菜品ID")
+    private String prodId;
 
-    @ApiModelProperty(value = "商品名称")
+    @ApiModelProperty(value = "套餐名称")
     private String productName;
 
-    @ApiModelProperty(value = "商品图片")
+    @ApiModelProperty(value = "套餐图片")
     private String productImg;
 
     @ApiModelProperty(value = "商品描述，富文本")
@@ -44,14 +50,13 @@ public class ShopProductVo extends ProductDetailVo{
     @ApiModelProperty(value = "店铺ID")
     private Long shopId;
 
-    @ApiModelProperty(value = "sku")
-    private List<ShopProductSkuVo> skuList = new ArrayList<>();
+    @ApiModelProperty(value = "子菜列表")
+    private List<ShopProductVo> singleDishList = new ArrayList<>();
 
     @ApiModelProperty(value = "标签")
     private String labels;
 
     @ApiModelProperty(value = "销量")
     private Long saleCount;
-
 
 }

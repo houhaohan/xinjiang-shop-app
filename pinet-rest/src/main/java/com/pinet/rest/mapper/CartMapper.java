@@ -28,4 +28,12 @@ public interface CartMapper extends BaseMapper<Cart> {
      * @return
      */
     CartVo getCartByUserIdAndShopId(@Param("shopId") Long shopId, @Param("customerId") Long customerId);
+
+    /**
+     * 根据商品ID 查询用户购物车信息
+     * @param customerId
+     * @param shopProdId
+     * @return
+     */
+    Cart getByUserIdAndShopProdId(@Param("customerId") Long customerId, @Param("shopProdId") Long shopProdId);
 }

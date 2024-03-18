@@ -8,6 +8,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @program: xinjiang-shop-app
@@ -30,7 +31,13 @@ public class AddCartDto {
     @ApiModelProperty(value = "商品数量",name = "prodNum")
     private Integer prodNum;
 
-    @NotBlank(message = "店铺商品样式id不能为空")
+    @ApiModelProperty(value = "商品单价",name = "price")
+    private BigDecimal price;
+
+    @ApiModelProperty("套餐明细")
+    private List<AddCartDto> comboDetails;
+
+//    @NotBlank(message = "店铺商品样式id不能为空")
     @ApiModelProperty(value = "商品样式id(多个逗号分割)",name = "shopProdSpecId")
     private String shopProdSpecIds;
 
@@ -46,6 +53,5 @@ public class AddCartDto {
 
     @ApiModelProperty("是否是他人分享来的商品，0-否，1-是")
     private Integer shareFlag = 0;
-
 
 }

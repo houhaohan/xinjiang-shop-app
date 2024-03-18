@@ -39,7 +39,7 @@ public interface IShopProductService extends IService<ShopProduct> {
      * @param id
      * @return
      */
-    ShopProductVo getDetailById(Long id);
+    <T extends ProductDetailVo> T getDetailById(Long id);
 
     /**
      * 店铺商品列表

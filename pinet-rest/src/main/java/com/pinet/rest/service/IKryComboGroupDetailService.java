@@ -18,4 +18,18 @@ public interface IKryComboGroupDetailService extends IService<KryComboGroupDetai
 
     List<KryComboGroupDetailVo> getByOrderProdId(Long orderProdId,Long shopId);
 
+    /**
+     * 根据商品ID 查询套餐明细
+     * @param shopProdId
+     * @return
+     */
+    List<KryComboGroupDetail> getByShopProdId(Long shopProdId);
+
+    /**
+     * 根据商品ID查询套餐价格
+     * @param shopProdId
+     * @return
+     */
+    Long getPriceByShopProdId(Long shopProdId);
+
 }

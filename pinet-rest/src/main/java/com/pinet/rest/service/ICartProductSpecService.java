@@ -23,6 +23,15 @@ public interface ICartProductSpecService extends IService<CartProductSpec> {
      */
     List<CartProductSpec> getComboByCartId(Long cartId);
 
+
     CartProductSpec getByUserIdAndSpecId(Long userId,Long shopProdSpecId);
+
+    /**
+     * 根据用户ID和商品ID查询购物车样式
+     * @param userId
+     * @param shopProdId
+     * @return
+     */
+    List<CartProductSpec> getByUserIdAndShopProdId(Long userId,Long shopProdId);
 
 }

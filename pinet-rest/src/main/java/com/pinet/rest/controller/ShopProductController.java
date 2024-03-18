@@ -10,12 +10,10 @@ import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.keruyun.openapi.vo.KryResponse;
+import com.pinet.rest.annotation.GlanceOverLog;
 import com.pinet.rest.entity.dto.GetShopIdAndShopProdIdDto;
 import com.pinet.rest.entity.param.ShopProductParam;
-import com.pinet.rest.entity.vo.CartVo;
-import com.pinet.rest.entity.vo.GetShopProdIdByProdIdVo;
-import com.pinet.rest.entity.vo.ShopProductListVo;
-import com.pinet.rest.entity.vo.ShopProductVo;
+import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -122,7 +120,6 @@ public class ShopProductController extends BaseController {
 
     /**
      * 商品详情
-     *
      * @param id 商品ID
      * @return
      */
@@ -130,8 +127,9 @@ public class ShopProductController extends BaseController {
     @NotTokenSign
     @ApiOperation("商品详情")
     @ApiVersion(1)
-    public Result<ShopProductVo> getById(@RequestParam Long id) {
-        ShopProductVo shopProductVo = shopProductService.getDetailById(id);
+    @GlanceOverLog
+    public Result<ProductDetailVo> getById(@RequestParam Long id) {
+        ProductDetailVo shopProductVo = shopProductService.getDetailById(id);
         return Result.ok(shopProductVo);
     }
 

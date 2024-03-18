@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.rest.entity.Label;
 import com.pinet.rest.mapper.LabelMapper;
 import com.pinet.rest.service.ILabelService;
@@ -20,5 +21,13 @@ public class LabelServiceImpl extends ServiceImpl<LabelMapper, Label> implements
     @Override
     public String getByShopProdId(Long shopProdId) {
         return baseMapper.selectByShopProdId(shopProdId);
+    }
+
+    @Override
+    public String getByLabelIds(String labelIds) {
+        QueryWrapper<Label> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("GROUP_CONCAT(label_name,'/',color order by FIND_IN_SET(id,"+labelIds+"))");
+        queryWrapper.apply("FIND_IN_SET(id,{0}) > {1}",labelIds,0);
+        return this.getObj(queryWrapper, o -> o.toString());
     }
 }

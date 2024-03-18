@@ -29,13 +29,13 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id,
-        create_by,
-        create_time,
-        update_by,
-        update_time,
-        del_flag,
-        dish_id, combo_group_id, single_dish_id, max_choose, min_choose, fix_choose, dish_sku_id, dish_sku_price, opt_type, default_flag, dish_name, spec_name, sell_price, multi_spec_flag, sort
+        kcgd.id,
+        kcgd.create_by,
+        kcgd.create_time,
+        kcgd.update_by,
+        kcgd.update_time,
+        kcgd.del_flag,
+        kcgd.dish_id, kcgd.combo_group_id, kcgd.single_dish_id, kcgd.max_choose, kcgd.min_choose, kcgd.fix_choose, kcgd.dish_sku_id, kcgd.dish_sku_price, kcgd.opt_type, kcgd.default_flag, kcgd.dish_name, kcgd.spec_name, kcgd.sell_price, kcgd.price, kcgd.multi_spec_flag, kcgd.sort
     </sql>
 
     <select id="getByOrderProdId" resultType="com.pinet.rest.entity.vo.KryComboGroupDetailVo">
@@ -66,5 +66,18 @@
         (select shop_prod_spec_id from order_product_spec where order_prod_id = #{orderProdId} and prod_sku_name != '规格' and del_flag = 0)
         and kcgd.del_flag = 0
         order by kcgd.id
+    </select>
+
+
+    <select id="getByShopProdId" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from kry_combo_group kcg
+        inner join kry_combo_group_detail kcgd on kcgd.combo_group_id = kcg.id and kcgd.del_flag = 0
+        where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
+    </select>
+
+    <select id="getPriceByShopProdId" resultType="Long">
+        select sum(kcgd.price) from kry_combo_group kcg
+        inner join kry_combo_group_detail kcgd on kcgd.combo_group_id = kcg.id and kcgd.del_flag = 0
+        where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
     </select>
 </mapper>

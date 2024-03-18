@@ -23,6 +23,8 @@
         <result column="product_type_id" property="productTypeId"/>
         <result column="product_type" property="productType"/>
         <result column="shop_prod_status" property="shopProdStatus"/>
+        <result column="sale_count" property="saleCount"/>
+        <result column="lable_id" property="lableId"/>
     </resultMap>
 
 
@@ -232,7 +234,7 @@
         order by ps.id,sps.id
     </select>
 
-    <select id="getComboDetailById" resultMap="ShopProductMap">
+    <select id="getComboDetailByShopIdAndDishIds" resultMap="ShopProductMap">
         select sp.id,
         sp.prod_id,
         sp.product_name,
@@ -242,19 +244,29 @@
         sp.product_type_id,
         sp.product_type,
         sp.dish_type,
-        (kcgd.price/100) as spsPrice,
-        kcg.id as skuId,
-        kcg.group_name as skuName,
-        kcgd.id as shop_prod_spec_id,
-        kcgd.dish_name as spec_name,
-        kcgd.default_flag,
+        sps.price as spsPrice,
+        sps.sku_id as skuId,
+        sps.sku_name as skuName,
+        sps.id as shop_prod_spec_id,
+        sps.spec_name,
+        sps.default_flag,
+        sps.sku_id,
+        sps.stock,
         (select GROUP_CONCAT(label_name,'/',color order by FIND_IN_SET(id,sp.lable_id)) from label where FIND_IN_SET(id,sp.lable_id) > 0 and del_flag = 0) as labels
         from shop_product sp
-		left join kry_combo_group kcg on kcg.shop_prod_id = sp.id and kcg.del_flag = 0
-		left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
-        where sp.id = #{id}
-        order by kcg.id,kcgd.id
+        left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
+        inner join product_sku ps on ps.id = sps.sku_id and ps.del_flag = 0
+        where sp.shop_id = #{shopId}
+        <if test="dishIds != null and dishIds.size() > 0">
+            and sp.prod_id in
+            <foreach collection="dishIds" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        and sp.del_flag = 0
+        order by ps.id,sps.id
     </select>
+
 
     <select id="getProductListByShopId" resultMap="ProdTypeMap">
         select temp.id,
