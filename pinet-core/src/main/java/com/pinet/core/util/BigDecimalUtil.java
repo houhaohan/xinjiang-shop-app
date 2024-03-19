@@ -1,6 +1,7 @@
 package com.pinet.core.util;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 
 public class BigDecimalUtil {
@@ -100,6 +101,27 @@ public class BigDecimalUtil {
      */
     public static BigDecimal multiply(BigDecimal amount, BigDecimal val,Integer scale) {
         return amount.multiply(val).setScale(scale,BigDecimal.ROUND_HALF_UP);
+    }
+
+
+    /**
+     * 两数之积
+     * @param amount (单位元)
+     * @param num 数量
+     * @return 单位元
+     */
+    public static BigDecimal multiply(BigDecimal amount, Integer num, Integer scale, RoundingMode roundingMode) {
+        return amount.multiply(new BigDecimal(num)).setScale(scale,roundingMode);
+    }
+
+    /**
+     * 两数之积
+     * @param amount (单位元)
+     * @param num 数量
+     * @return 单位元
+     */
+    public static BigDecimal multiply(BigDecimal amount, Integer num,RoundingMode roundingMode) {
+        return multiply(amount,num,2,roundingMode);
     }
 
     /**

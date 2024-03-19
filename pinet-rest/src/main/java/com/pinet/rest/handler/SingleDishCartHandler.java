@@ -1,14 +1,25 @@
 package com.pinet.rest.handler;
 
-import com.pinet.keruyun.openapi.constants.DishType;
+import cn.hutool.core.convert.Convert;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.BigDecimalUtil;
+import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.CartProductSpec;
 import com.pinet.rest.entity.OrderProduct;
+import com.pinet.rest.entity.ShopProductSpec;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
+import com.pinet.rest.mapper.CartMapper;
 import com.pinet.rest.service.ICartProductSpecService;
 import com.pinet.rest.service.IOrderProductService;
+import com.pinet.rest.service.IShopProductSpecService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,17 +28,22 @@ import java.util.stream.Collectors;
  * @author: chengshuanghui
  * @date: 2024-03-18 14:21
  */
-@Component
 public class SingleDishCartHandler extends DishCartHandler {
 
-    private ICartProductSpecService cartProductSpecService;
-    private IOrderProductService orderProductService;
-
-    public SingleDishCartHandler(ICartProductSpecService cartProductSpecService,
-                                  IOrderProductService orderProductService){
-        this.cartProductSpecService = cartProductSpecService;
-        this.orderProductService = orderProductService;
+    public SingleDishCartHandler(CartContext context){
+        this.context = context;
     }
+
+
+    @Autowired
+    private ICartProductSpecService cartProductSpecService;
+    @Autowired
+    private IOrderProductService orderProductService;
+    @Autowired
+    private IShopProductSpecService shopProductSpecService;
+    @Resource
+    private CartMapper cartMapper;
+
 
     @Override
     public OrderProduct getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType) {
@@ -35,5 +51,73 @@ public class SingleDishCartHandler extends DishCartHandler {
         List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
         QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(shopProdId, prodNum, shopProdSpecIds, orderType);
         return orderProductService.getByQueryOrderProductBo(queryOrderProductBo);
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void handler() {
+        //单品
+        List<Long> singleProdSpecIds = Convert.toList(Long.class, context.request.getShopProdSpecIds());
+        //判断存不存在
+        List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByUserIdAndShopProdId(context.customerId, context.request.getShopProdId());
+        List<Long> shopProdSpecIdDBs = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
+        boolean allMatch = singleProdSpecIds.stream().allMatch(shopProdSpecIdDBs::contains);
+
+        if(allMatch){
+            //购物车已存在，新增数量
+            context.prodNum += 1;
+            Long cartId = cartProductSpecs.get(0).getCartId();
+            Cart cart = cartMapper.selectById(cartId);
+            cart.setProdNum(cart.getProdNum() + context.prodNum);
+            cartMapper.updateById(cart);
+
+            //查询单品价格
+            BigDecimal price = shopProductSpecService.getPriceByShopProdId(context.request.getShopProdId());
+            context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price);
+            return;
+        }
+
+        //购物车不存在，新增购物车
+        context.prodNum += context.request.getProdNum();
+        Cart cart = buildCartInfo();
+        cartMapper.insert(cart);
+
+        for(Long specId : singleProdSpecIds){
+            CartProductSpec cartProductSpec = new CartProductSpec();
+            cartProductSpec.setCartId(cart.getId());
+            cartProductSpec.setShopProdSpecId(specId);
+            ShopProductSpec shopProductSpec = shopProductSpecService.getById(specId);
+            if (shopProductSpec == null) {
+                throw new PinetException("样式不存在");
+            }
+            cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
+            cartProductSpecService.save(cartProductSpec);
+            BigDecimal price = BigDecimalUtil.multiply(shopProductSpec.getPrice(), new BigDecimal(cart.getProdNum()));
+            context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void refreshCart(Cart cart, Integer prodNum) {
+        if (prodNum > 0) {
+            cart.setProdNum(prodNum);
+            cartMapper.updateById(cart);
+            return;
+        }
+        cartProductSpecService.remove(new LambdaQueryWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,cart.getId()));
+        cartMapper.deleteById(cart.getId());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void clear(List<Long> ids) {
+        if(CollectionUtils.isEmpty(ids)){
+            return;
+        }
+        LambdaUpdateWrapper<CartProductSpec> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.in(CartProductSpec::getCartId,ids);
+        cartProductSpecService.remove(wrapper);
     }
 }

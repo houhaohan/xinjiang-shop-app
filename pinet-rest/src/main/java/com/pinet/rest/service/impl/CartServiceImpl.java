@@ -1,10 +1,8 @@
 package com.pinet.rest.service.impl;
 
-import cn.hutool.core.convert.Convert;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.pinet.core.ApiErrorEnum;
 import com.pinet.core.constants.DB;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
@@ -17,25 +15,21 @@ import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.vo.AddCartVo;
-import com.pinet.rest.entity.vo.CartComboDishSpecVo;
 import com.pinet.rest.entity.vo.CartListVo;
 import com.pinet.rest.entity.vo.CartVo;
+import com.pinet.rest.handler.CartContext;
 import com.pinet.rest.mapper.CartMapper;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>
@@ -61,14 +55,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Resource
     private ICartProductSpecService cartProductSpecService;
 
-    @Resource
-    private IShopProductSpecService shopProductSpecService;
-
     @Autowired
     private IKryComboGroupDetailService kryComboGroupDetailService;
-
-    @Autowired
-    private ICartComboDishService cartComboDishService;
 
     @Autowired
     private ICartComboDishSpecService cartComboDishSpecService;
@@ -115,117 +103,13 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         }
         dto.setShopId(shopProduct.getShopId());
         Long customerId = dto.getCustomerId();
-        int num = 0;
-        Long cartId = 0L;
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        if(DishType.COMBO.equalsIgnoreCase(shopProduct.getDishType())){
-            List<Long> shopProdSpecIds = new ArrayList<>();
-            for (AddCartDto singleDish : dto.getComboDetails()){
-                shopProdSpecIds.addAll(Convert.toList(Long.class, singleDish.getShopProdSpecIds()));
-            }
-            //查询套餐价格
-            Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(shopProduct.getId());
-            List<CartComboDishSpecVo> cartComboDishSpecVos = cartComboDishSpecService.getByUserIdAndShopProdSpecId(customerId, shopProdSpecIds);
-            List<Long> shopProdSpecIdList = cartComboDishSpecVos.stream().map(CartComboDishSpecVo::getShopProdSpecId).collect(Collectors.toList());
-            boolean allMatch = shopProdSpecIds.stream().allMatch(shopProdSpecIdList::contains);
-            if(allMatch){
-                //增加数量
-                num += 1;
-                cartId = cartComboDishSpecVos.get(0).getCartId();
-                Cart cart = getById(cartId);
-                cart.setProdNum(cart.getProdNum() + dto.getProdNum());
-                updateById(cart);
-                //套餐价格
-                BigDecimal price = BigDecimalUtil.multiply(BigDecimalUtil.fenToYuan(unitPrice), new BigDecimal(cart.getProdNum()));
-                totalPrice = BigDecimalUtil.sum(totalPrice,price);
-            }else {
-                //新增购物车
-                num = num + dto.getProdNum();
-                Cart cart = new Cart();
-                BeanUtils.copyProperties(dto, cart);
-                cart.setCartStatus(1);
-                cart.setCustomerId(customerId);
-                cart.setDishId(shopProduct.getProdId());
-                cart.setDishType(shopProduct.getDishType());
-                cart.setUnit(shopProduct.getUnit());
-                save(cart);
-                List<AddCartDto> comboDetails = dto.getComboDetails();
-                for(AddCartDto singleDish : comboDetails){
-                    CartComboDish cartComboDish = new CartComboDish();
-                    cartComboDish.setCartId(cart.getId());
-                    cartComboDish.setShopProdId(singleDish.getShopProdId());
-                    cartComboDishService.save(cartComboDish);
-                    List<Long> singleProdSpecIds = Convert.toList(Long.class, singleDish.getShopProdSpecIds());
-                    for(Long shopProdSpecId : singleProdSpecIds){
-                        CartComboDishSpec cartComboDishSpec = new CartComboDishSpec();
-                        cartComboDishSpec.setCartId(cart.getId());
-                        cartComboDishSpec.setShopProdId(singleDish.getShopProdId());
-                        cartComboDishSpec.setShopProdSpecId(shopProdSpecId);
-                        ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
-                        if (shopProductSpec == null) {
-                            throw new PinetException("样式不存在");
-                        }
-                        cartComboDishSpec.setShopProdSpecName(shopProductSpec.getSpecName());
-                        cartComboDishSpecService.save(cartComboDishSpec);
-                    }
-                }
 
-                BigDecimal price = BigDecimalUtil.multiply(BigDecimalUtil.fenToYuan(unitPrice), new BigDecimal(cart.getProdNum()));
-                totalPrice = BigDecimalUtil.sum(totalPrice,price);
-            }
-        }else if(DishType.SINGLE.equalsIgnoreCase(shopProduct.getDishType())){
-            //单品
-            List<Long> singleProdSpecIds = Convert.toList(Long.class, dto.getShopProdSpecIds());
-            //判断存不存在
-            List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByUserIdAndShopProdId(customerId, dto.getShopProdId());
-            List<Long> dBShopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-            boolean allMatch = singleProdSpecIds.stream().allMatch(dBShopProdSpecIds::contains);
-
-            if(allMatch){
-                //购物车已存在，新增数量
-                num += 1;
-                cartId = cartProductSpecs.get(0).getCartId();
-                Cart cart = getById(cartId);
-                cart.setProdNum(cart.getProdNum()+dto.getProdNum());
-                updateById(cart);
-
-                //查询单品价格
-                BigDecimal price = shopProductSpecService.getPriceByShopProdId(shopProduct.getId());
-                totalPrice = BigDecimalUtil.sum(totalPrice,price);
-
-            }else {
-                //购物车不存在，新增购物车
-                num += dto.getProdNum();
-                Cart cart = new Cart();
-                BeanUtils.copyProperties(dto, cart);
-                cart.setCartStatus(1);
-                cart.setCustomerId(customerId);
-                cart.setDishId(shopProduct.getProdId());
-                cart.setDishType(shopProduct.getDishType());
-                cart.setUnit(shopProduct.getUnit());
-                save(cart);
-
-                List<Long> shopProdSpecIds = Convert.toList(Long.class, dto.getShopProdSpecIds());
-                for(Long specId : shopProdSpecIds){
-                    CartProductSpec cartProductSpec = new CartProductSpec();
-                    cartProductSpec.setCartId(cart.getId());
-                    cartProductSpec.setShopProdSpecId(specId);
-                    ShopProductSpec shopProductSpec = shopProductSpecService.getById(specId);
-                    if (shopProductSpec == null) {
-                        throw new PinetException("样式不存在");
-                    }
-                    cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
-                    cartProductSpecService.save(cartProductSpec);
-                    BigDecimal price = BigDecimalUtil.multiply(shopProductSpec.getPrice(), new BigDecimal(cart.getProdNum()));
-                    totalPrice = BigDecimalUtil.sum(totalPrice,price);
-                }
-            }
-        }
-
-        AddCartVo addCartVo = new AddCartVo();
-        addCartVo.setProdNum(num);
-        addCartVo.setPrice(totalPrice);
-        return addCartVo;
+        CartContext context = new CartContext(shopProduct.getDishType());
+        context.setRequest(dto);
+        context.setCustomerId(customerId);
+        context.setShopProduct(shopProduct);
+        context.handler();
+        return context.response();
     }
 
     @Override
@@ -235,21 +119,9 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         if (cart == null || cart.getDelFlag() == 1) {
             throw new PinetException("购物车不存在");
         }
-        if(DishType.SINGLE.equalsIgnoreCase(cart.getDishType())){
-            //如果数量为0则删除
-            if (dto.getProdNum() == 0) {
-                cartProductSpecService.remove(new LambdaQueryWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,dto.getCartId()));
-                return removeById(dto.getCartId());
-            }
-        }else if(DishType.COMBO.equalsIgnoreCase(cart.getDishType())){
-            if (dto.getProdNum() == 0) {
-                cartComboDishService.deleteByCartId(dto.getCartId());
-                cartComboDishSpecService.deleteByCartId(dto.getCartId());
-                return true;
-            }
-        }
-        cart.setProdNum(dto.getProdNum());
-        return updateById(cart);
+        CartContext context = new CartContext(cart.getDishType());
+        context.refreshCart(cart,dto.getProdNum());
+        return true;
     }
 
     @Override
@@ -264,21 +136,24 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     public void delCartByShopId(Long shopId, Long customerId) {
         LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Cart::getShopId, shopId).eq(Cart::getCustomerId, customerId).eq(BaseEntity::getDelFlag, 0);
-
         List<Cart> cartList = list(lambdaQueryWrapper);
 
-        //删除购物车
-        remove(lambdaQueryWrapper);
+        List<Long> cartIds = cartList.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        removeByIds(cartIds);
+
 
         //删除cart_product_spec表数据
-        List<Long> cartIds = cartList.stream().map(BaseEntity::getId).collect(Collectors.toList());
-        LambdaQueryWrapper<CartProductSpec> removeWrapper = new LambdaQueryWrapper<>();
-        removeWrapper.in(CartProductSpec::getCartId,cartIds).eq(BaseEntity::getDelFlag,0);
-        cartProductSpecService.remove(removeWrapper);
+        List<Long> singleCartIds = cartList.stream().filter(c -> Objects.equals(c.getDishType(), DishType.SINGLE)).map(Cart::getId).collect(Collectors.toList());
+        List<Long> comboCartIds = cartList.stream().filter(c -> Objects.equals(c.getDishType(), DishType.COMBO)).map(Cart::getId).collect(Collectors.toList());
 
-        //删除套餐
-        cartComboDishService.deleteByCartIds(cartIds);
-        cartComboDishSpecService.deleteByCartIds(cartIds);
+        //删除购物车单品
+        CartContext singleContext = new CartContext(DishType.SINGLE);
+        singleContext.clear(singleCartIds);
+
+        //删除购物车套餐
+        CartContext comboContext = new CartContext(DishType.COMBO);
+        comboContext.clear(comboCartIds);
+
     }
 
     @Override

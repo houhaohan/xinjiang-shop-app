@@ -1,6 +1,8 @@
 package com.pinet.rest.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pinet.core.constants.CommonConstant;
+import com.pinet.core.constants.OrderPackageFeeConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.ThreadLocalUtil;
@@ -8,6 +10,9 @@ import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.OrderProductDto;
+import com.pinet.rest.entity.enums.OrderTypeEnum;
+import com.pinet.rest.entity.enums.ShopProdStatusEnum;
+import com.pinet.rest.handler.OrderContext;
 import com.pinet.rest.mapper.OrderProductMapper;
 import com.pinet.rest.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -100,7 +106,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         ShopProduct shopProduct = shopProductService.getById(queryOrderProductBo.getShopProdId());
 
         //判断店铺商品是否下架
-        if (shopProduct.getShopProdStatus() == 2) {
+        if (Objects.equals(shopProduct.getShopProdStatus(),ShopProdStatusEnum.OFF_SHELF.getCode())) {
             throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
         }
 
@@ -110,12 +116,9 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         }
 
         //设置打包费   //自提没有打包费
-        if (queryOrderProductBo.getOrderType() == 1){
-            if ("SINGLE".equals(shopProduct.getDishType())){
-                orderProduct.setPackageFee(new BigDecimal("1").multiply(new BigDecimal(queryOrderProductBo.getProdNum())));
-            }else if ("COMBO".equals(shopProduct.getDishType())){
-                orderProduct.setPackageFee(new BigDecimal("2").multiply(new BigDecimal(queryOrderProductBo.getProdNum())));
-            }
+        if (queryOrderProductBo.getOrderType().equals(OrderTypeEnum.TAKEAWAY.getCode())){
+            BigDecimal packageFee = OrderPackageFeeConstant.packageFee(shopProduct.getDishType());
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(packageFee, queryOrderProductBo.getProdNum(),RoundingMode.HALF_UP));
         }
         orderProduct.setDishId(shopProduct.getProdId());
         orderProduct.setShopProdId(shopProduct.getId());
@@ -125,13 +128,13 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
 
         List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
         //单价
-        BigDecimal prodUnitPrice = BigDecimal.ZERO;
+        BigDecimal unitPrice = BigDecimal.ZERO;
         for (Long shopProdSpecId : queryOrderProductBo.getShopProdSpecIds()) {
             //查询具体的样式并且校验
             OrderProductSpec orderProductSpec = new OrderProductSpec();
             if("COMBO".equalsIgnoreCase(shopProduct.getDishType())){
                 KryComboGroupDetail kryComboGroupDetail = kryComboGroupDetailService.getById(shopProdSpecId);
-                prodUnitPrice = prodUnitPrice.add(BigDecimalUtil.fenToYuan(kryComboGroupDetail.getPrice()));
+                unitPrice = unitPrice.add(BigDecimalUtil.fenToYuan(kryComboGroupDetail.getPrice()));
 
                 KryComboGroup kryComboGroup = kryComboGroupService.getById(kryComboGroupDetail.getComboGroupId());
                 orderProductSpec.setProdSkuId(kryComboGroup.getId());
@@ -144,7 +147,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
                 if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
                     throw new PinetException(shopProduct.getProductName() + ":" + shopProductSpec.getSpecName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
                 }
-                prodUnitPrice = prodUnitPrice.add(shopProductSpec.getPrice());
+                unitPrice = BigDecimalUtil.sum(unitPrice,shopProductSpec.getPrice());
                 ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
                 orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
                 orderProductSpec.setProdSkuName(productSku.getSkuName());
@@ -155,9 +158,9 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         }
         orderProduct.setOrderProductSpecs(orderProductSpecs);
         orderProduct.setOrderProductSpecStr(orderProductSpecs.stream().map(OrderProductSpec::getProdSpecName).collect(Collectors.joining(",")));
-        orderProduct.setProdUnitPrice(prodUnitPrice);
+        orderProduct.setProdUnitPrice(unitPrice);
         //计算总价
-        BigDecimal prodPrice = prodUnitPrice.multiply(new BigDecimal(queryOrderProductBo.getProdNum())).setScale(2, RoundingMode.DOWN);
+        BigDecimal prodPrice = BigDecimalUtil.multiply(unitPrice,queryOrderProductBo.getProdNum(),RoundingMode.DOWN);
         orderProduct.setProdPrice(prodPrice);
         orderProduct.setProdImg(shopProduct.getProductImg());
         return orderProduct;

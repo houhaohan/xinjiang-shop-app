@@ -1,32 +1,29 @@
 package com.pinet.rest.entity.enums;
 
-import com.pinet.core.util.BigDecimalUtil;
 import lombok.Getter;
 
-import java.math.BigDecimal;
-
-/**
- * @program:
- * @description: 订单类型枚举
- * @author: chengshaunghui
- * @create: 2024-03-08 14:04
- **/
 @Getter
-public enum OrderTypeEnum {
-    TAKEAWAY(1,"外卖"),
-    SELF_PICKUP(2,"自提");
+public enum ShopProdStatusEnum {
+
+
+    /**
+     * 商品状态
+     */
+    NORMAL(1,"正常"),
+    OFF_SHELF(2,"下架");
 
 
     private Integer code;
     private String msg;
 
-    OrderTypeEnum() {
+    ShopProdStatusEnum() {
     }
 
-    OrderTypeEnum(Integer code, String msg) {
+    ShopProdStatusEnum(Integer code, String msg) {
         this.code = code;
         this.msg = msg;
     }
+
 
 
     /**
@@ -39,7 +36,7 @@ public enum OrderTypeEnum {
         if (code == null) {
             return null;
         }
-        for (OrderTypeEnum enums : OrderTypeEnum.values()) {
+        for (ShopProdStatusEnum enums : ShopProdStatusEnum.values()) {
             if (enums.getCode().equals(code)) {
                 return enums.getMsg();
             }
