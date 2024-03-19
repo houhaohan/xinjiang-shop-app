@@ -4,6 +4,7 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.enums.DiscountTypeEnum;
+import com.pinet.rest.entity.vo.OrderProductVo;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -39,11 +40,11 @@ public class DiscountStrategy implements PromotionStrategy {
     }
 
     @Override
-    public List<OrderDiscount> apply(List<OrderProduct> orderProducts) {
+    public List<OrderDiscount> apply(List<OrderProductVo> orderProducts) {
         if(CollectionUtils.isEmpty(orderProducts)){
             return new ArrayList<>();
         }
-        for(OrderProduct orderProduct : orderProducts){
+        for(OrderProductVo orderProduct : orderProducts){
             BigDecimal discountAmount = BigDecimalUtil.multiply(orderProduct.getProdPrice(), discount);
             OrderDiscount orderDiscount = new OrderDiscount();
             orderDiscount.setDiscountMsg(orderProduct.getProdName());

@@ -1,5 +1,7 @@
 package com.pinet.core.constants;
 
+import java.math.BigDecimal;
+
 public class CommonConstant {
 
     public static final String SMS_CODE_LOGIN = "sms_code:login:";
@@ -33,5 +35,6 @@ public class CommonConstant {
      * 是
      */
     public static final Integer YES = 1;
+
 
 }

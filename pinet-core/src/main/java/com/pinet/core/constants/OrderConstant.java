@@ -1,5 +1,7 @@
 package com.pinet.core.constants;
 
+import java.math.BigDecimal;
+
 /**
  * @author chengshuanghui
  */
@@ -34,6 +36,16 @@ public class OrderConstant {
      * 退款状态 2-未到账
      */
     public static final Integer NOT_RECEIVED = 2;
+
+    /**
+     * 单品打包费
+     */
+    public static final BigDecimal SINGLE_PACKAGE_FEE = new BigDecimal("1");
+
+    /**
+     * 套餐打包费
+     */
+    public static final BigDecimal COMBO_PACKAGE_FEE = new BigDecimal("2");
 
     /**
      * 未支付订单自动取消时间，15分钟

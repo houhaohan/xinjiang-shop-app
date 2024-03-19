@@ -2,7 +2,6 @@ package com.pinet.rest.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pinet.rest.entity.OrderProduct;
-import com.pinet.rest.entity.bo.OrderProductBo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

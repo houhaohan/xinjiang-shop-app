@@ -15,6 +15,7 @@ import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.vo.AddCartVo;
+import com.pinet.rest.entity.vo.CartComboDishVo;
 import com.pinet.rest.entity.vo.CartListVo;
 import com.pinet.rest.entity.vo.CartVo;
 import com.pinet.rest.handler.CartContext;
@@ -58,8 +59,9 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Autowired
     private IKryComboGroupDetailService kryComboGroupDetailService;
 
+
     @Autowired
-    private ICartComboDishSpecService cartComboDishSpecService;
+    private ICartComboDishService cartComboDishService;
 
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
@@ -72,9 +74,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         cartListVos.forEach(k -> {
             List<CartProductSpec> cartProductSpecs = null;
             if(DishType.COMBO.equalsIgnoreCase(k.getDishType())){
-                List<CartComboDishSpec> cartComboDishSpecs = cartComboDishSpecService.getByCartId(k.getCartId());
-                String prodSpecName = cartComboDishSpecs.stream().map(CartComboDishSpec::getShopProdSpecName).collect(Collectors.joining(","));
-                k.setProdSpecName(prodSpecName);
+                List<CartComboDishVo> cartComboDishVos = cartComboDishService.getComboDishByCartId(k.getCartId(),k.getShopProdId());
+                k.setCartComboDishVos(cartComboDishVos);
                 Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(k.getShopProdId());
                 k.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice));
                 k.setAllPrice(BigDecimalUtil.multiply(k.getProdPrice(),new BigDecimal(k.getProdNum())));
@@ -168,18 +169,4 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         return true;
     }
 
-
-    /**
-     * 校验该门店是否有该商品
-     * @param shopId
-     * @param productId
-     * @param productName
-     * @return
-     */
-    private boolean verificationProductIsExist(Long shopId,String productId,String productName){
-        QueryWrapper<ShopProduct> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("shop_id",shopId);
-        queryWrapper.and(i->i.eq("prod_id",productId).or().eq("product_name",productName));
-        return shopProductService.count(queryWrapper) > 0;
-    }
 }

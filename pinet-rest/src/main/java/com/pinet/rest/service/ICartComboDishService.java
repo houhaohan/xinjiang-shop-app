@@ -2,6 +2,7 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.CartComboDish;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.CartComboDishVo;
 
 import java.util.List;
 
@@ -26,4 +27,19 @@ public interface ICartComboDishService extends IService<CartComboDish> {
      * @param cartIds
      */
     void deleteByCartIds(List<Long> cartIds);
+
+    /**
+     * 根据购物车ID查询
+     * @param cartId
+     * @return
+     */
+    List<CartComboDish> getByCartId(Long cartId);
+
+    /**
+     * 根据购物车ID查询
+     * @param cartId
+     * @param shopProdId 套餐ID
+     * @return
+     */
+    List<CartComboDishVo> getComboDishByCartId(Long cartId,Long shopProdId);
 }

@@ -3,6 +3,7 @@ package com.pinet.rest.handler;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.enums.CartStatusEnum;
+import com.pinet.rest.entity.vo.OrderProductVo;
 import org.springframework.beans.BeanUtils;
 
 
@@ -20,7 +21,7 @@ public abstract class DishCartHandler implements CartHandler {
      * @param cartId
      * @return
      */
-    public OrderProduct getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType){
+    public OrderProductVo getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType){
         return null;
     };
 

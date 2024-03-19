@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.vo.CustomerCouponVo;
+import com.pinet.rest.entity.vo.OrderProductVo;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -37,7 +37,7 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * @param orderProducts 订单商品
      * @return 是否可用
      */
-    Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProduct> orderProducts);
+    Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProductVo> orderProducts);
 
     /**
      * 判断优惠券是否可用
@@ -46,7 +46,7 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * @param orderProducts 订单商品
      * @return 是否可用
      */
-    Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts);
+    Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProductVo> orderProducts);
 
     /**
      * 优惠券过期提醒
@@ -82,4 +82,5 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
     CustomerCoupon receive(Long couponId);
 
     CustomerCoupon receive(Long customerId, Long couponId);
+
 }

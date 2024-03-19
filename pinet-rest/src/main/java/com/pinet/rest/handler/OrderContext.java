@@ -9,6 +9,7 @@ import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.vo.CreateOrderVo;
+import com.pinet.rest.entity.vo.OrderProductVo;
 import com.pinet.rest.service.*;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class OrderContext {
     protected Long userId;
     protected Shop shop;
     protected Orders order;
-    protected List<OrderProduct> orderProducts;
+    protected List<OrderProductVo> orderProducts;
     protected List<OrderDiscount> orderDiscounts;
     protected CreateOrderDto request;
     protected CreateOrderVo result;

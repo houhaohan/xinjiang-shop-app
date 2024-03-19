@@ -20,6 +20,7 @@ import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.dto.OrderListDto;
 import com.pinet.rest.entity.dto.OrderPayDto;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
+import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.service.IOrdersService;
 import io.swagger.annotations.Api;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -86,7 +88,7 @@ public class OrdersController extends BaseController {
     }
 
     private void checkParam(OrderSettlementDto dto){
-        if (dto.getOrderType() == 1 && dto.getCustomerAddressId() == null){
+        if (Objects.equals(dto.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode()) && dto.getCustomerAddressId() == null){
             throw new PinetException("外卖订单收货地址id必传");
         }
         //如果是直接购买  店铺商品id 和商品数量为必传

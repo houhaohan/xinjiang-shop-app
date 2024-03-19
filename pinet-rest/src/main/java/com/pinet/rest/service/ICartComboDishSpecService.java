@@ -42,4 +42,12 @@ public interface ICartComboDishSpecService extends IService<CartComboDishSpec> {
      * @return
      */
     List<CartComboDishSpec> getByCartId(Long cartId);
+
+    /**
+     * 根据购物车ID查询
+     * @param cartId
+     * @param shopProdId
+     * @return
+     */
+    List<CartComboDishSpec> getByCartIdAndProdId(Long cartId,Long shopProdId);
 }

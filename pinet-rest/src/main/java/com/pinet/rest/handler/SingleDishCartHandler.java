@@ -7,18 +7,12 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.CartProductSpec;
-import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.ShopProductSpec;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
-import com.pinet.rest.mapper.CartMapper;
-import com.pinet.rest.service.ICartProductSpecService;
-import com.pinet.rest.service.IOrderProductService;
-import com.pinet.rest.service.IShopProductSpecService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.pinet.rest.entity.vo.OrderProductVo;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,22 +29,13 @@ public class SingleDishCartHandler extends DishCartHandler {
     }
 
 
-    @Autowired
-    private ICartProductSpecService cartProductSpecService;
-    @Autowired
-    private IOrderProductService orderProductService;
-    @Autowired
-    private IShopProductSpecService shopProductSpecService;
-    @Resource
-    private CartMapper cartMapper;
-
 
     @Override
-    public OrderProduct getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType) {
-        List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(cartId);
+    public OrderProductVo getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType) {
+        List<CartProductSpec> cartProductSpecs = context.cartProductSpecService.getByCartId(cartId);
         List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
         QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(shopProdId, prodNum, shopProdSpecIds, orderType);
-        return orderProductService.getByQueryOrderProductBo(queryOrderProductBo);
+        return context.orderProductService.getByQueryOrderProductBo(queryOrderProductBo);
     }
 
 
@@ -60,7 +45,7 @@ public class SingleDishCartHandler extends DishCartHandler {
         //单品
         List<Long> singleProdSpecIds = Convert.toList(Long.class, context.request.getShopProdSpecIds());
         //判断存不存在
-        List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByUserIdAndShopProdId(context.customerId, context.request.getShopProdId());
+        List<CartProductSpec> cartProductSpecs = context.cartProductSpecService.getByUserIdAndShopProdId(context.customerId, context.request.getShopProdId());
         List<Long> shopProdSpecIdDBs = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
         boolean allMatch = singleProdSpecIds.stream().allMatch(shopProdSpecIdDBs::contains);
 
@@ -68,12 +53,12 @@ public class SingleDishCartHandler extends DishCartHandler {
             //购物车已存在，新增数量
             context.prodNum += 1;
             Long cartId = cartProductSpecs.get(0).getCartId();
-            Cart cart = cartMapper.selectById(cartId);
+            Cart cart = context.cartMapper.selectById(cartId);
             cart.setProdNum(cart.getProdNum() + context.prodNum);
-            cartMapper.updateById(cart);
+            context.cartMapper.updateById(cart);
 
             //查询单品价格
-            BigDecimal price = shopProductSpecService.getPriceByShopProdId(context.request.getShopProdId());
+            BigDecimal price = context.shopProductSpecService.getPriceByShopProdId(context.request.getShopProdId());
             context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price);
             return;
         }
@@ -81,18 +66,18 @@ public class SingleDishCartHandler extends DishCartHandler {
         //购物车不存在，新增购物车
         context.prodNum += context.request.getProdNum();
         Cart cart = buildCartInfo();
-        cartMapper.insert(cart);
+        context.cartMapper.insert(cart);
 
         for(Long specId : singleProdSpecIds){
             CartProductSpec cartProductSpec = new CartProductSpec();
             cartProductSpec.setCartId(cart.getId());
             cartProductSpec.setShopProdSpecId(specId);
-            ShopProductSpec shopProductSpec = shopProductSpecService.getById(specId);
+            ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(specId);
             if (shopProductSpec == null) {
                 throw new PinetException("样式不存在");
             }
             cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
-            cartProductSpecService.save(cartProductSpec);
+            context.cartProductSpecService.save(cartProductSpec);
             BigDecimal price = BigDecimalUtil.multiply(shopProductSpec.getPrice(), new BigDecimal(cart.getProdNum()));
             context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price);
         }
@@ -103,11 +88,11 @@ public class SingleDishCartHandler extends DishCartHandler {
     public void refreshCart(Cart cart, Integer prodNum) {
         if (prodNum > 0) {
             cart.setProdNum(prodNum);
-            cartMapper.updateById(cart);
+            context.cartMapper.updateById(cart);
             return;
         }
-        cartProductSpecService.remove(new LambdaQueryWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,cart.getId()));
-        cartMapper.deleteById(cart.getId());
+        context.cartProductSpecService.remove(new LambdaQueryWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,cart.getId()));
+        context.cartMapper.deleteById(cart.getId());
     }
 
     @Override
@@ -118,6 +103,6 @@ public class SingleDishCartHandler extends DishCartHandler {
         }
         LambdaUpdateWrapper<CartProductSpec> wrapper = new LambdaUpdateWrapper<>();
         wrapper.in(CartProductSpec::getCartId,ids);
-        cartProductSpecService.remove(wrapper);
+        context.cartProductSpecService.remove(wrapper);
     }
 }

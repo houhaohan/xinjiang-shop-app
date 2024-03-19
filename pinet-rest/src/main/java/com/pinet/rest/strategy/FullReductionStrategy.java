@@ -4,11 +4,11 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.enums.DiscountTypeEnum;
+import com.pinet.rest.entity.vo.OrderProductVo;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -41,13 +41,13 @@ public class FullReductionStrategy implements PromotionStrategy {
     }
 
     @Override
-    public List<OrderDiscount> apply(List<OrderProduct> orderProducts) {
+    public List<OrderDiscount> apply(List<OrderProductVo> orderProducts) {
         if(CollectionUtils.isEmpty(orderProducts)){
             return new ArrayList<>();
         }
         orderProducts.sort((o1, o2) -> o2.getProdPrice().compareTo(o1.getProdPrice()));
         BigDecimal couponPrice = this.couponPrice;
-        for(OrderProduct orderProduct : orderProducts){
+        for(OrderProductVo orderProduct : orderProducts){
             OrderDiscount orderDiscount = new OrderDiscount();
             orderDiscount.setType(DiscountTypeEnum.COUPON.getCode());
             if(BigDecimalUtil.ge(orderProduct.getProdPrice(),couponPrice)){

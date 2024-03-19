@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @program: xinjiang-shop-app
@@ -45,6 +46,9 @@ public class CartListVo {
 
     @ApiModelProperty(value = "购物车状态 1正常  2失效",name = "cartStatus")
     private Integer cartStatus;
+
+    @ApiModelProperty(value = "套餐明细",name = "cartComboDishVos")
+    private List<CartComboDishVo> cartComboDishVos;
 
 
 }

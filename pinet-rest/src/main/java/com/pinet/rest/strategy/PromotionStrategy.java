@@ -2,6 +2,7 @@ package com.pinet.rest.strategy;
 
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.OrderProduct;
+import com.pinet.rest.entity.vo.OrderProductVo;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,5 +21,5 @@ public interface PromotionStrategy {
      * @param orderProducts 优惠商品列表
      * @return
      */
-    List<OrderDiscount> apply(List<OrderProduct> orderProducts);
+    List<OrderDiscount> apply(List<OrderProductVo> orderProducts);
 }

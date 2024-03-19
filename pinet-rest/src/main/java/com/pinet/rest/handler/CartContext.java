@@ -1,15 +1,32 @@
 package com.pinet.rest.handler;
 
+import com.pinet.core.util.SpringContextUtils;
 import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.vo.AddCartVo;
+import com.pinet.rest.mapper.CartMapper;
+import com.pinet.rest.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public class CartContext {
+    protected ICartProductSpecService cartProductSpecService;
+
+    protected IOrderProductService orderProductService;
+
+    protected IKryComboGroupDetailService kryComboGroupDetailService;
+
+    protected ICartComboDishSpecService cartComboDishSpecService;
+
+    protected ICartComboDishService cartComboDishService;
+
+    protected IShopProductSpecService shopProductSpecService;
+
+    protected CartMapper cartMapper;
 
     /**
      * 用户 ID
@@ -24,7 +41,7 @@ public class CartContext {
     /**
      * 商品总价，单位元
      */
-    protected BigDecimal totalPrice;
+    protected BigDecimal totalPrice = BigDecimal.ZERO;
 
     /**
      * 菜品类型，SINGLE：单菜 ，COMBO：套餐， SIDE：配料
@@ -62,6 +79,7 @@ public class CartContext {
 
 
     public CartContext(String dishType){
+        init();
         this.dishType  = dishType;
         if(DishType.SINGLE.equalsIgnoreCase(dishType)){
             this.cartHandler = new SingleDishCartHandler(this);
@@ -69,6 +87,17 @@ public class CartContext {
             this.cartHandler = new ComboDishCartHandler(this);
         }
     }
+
+    private void init(){
+        cartProductSpecService = SpringContextUtils.getBean(ICartProductSpecService.class);
+        orderProductService = SpringContextUtils.getBean(IOrderProductService.class);
+        kryComboGroupDetailService = SpringContextUtils.getBean(IKryComboGroupDetailService.class);
+        cartComboDishSpecService = SpringContextUtils.getBean(ICartComboDishSpecService.class);
+        cartComboDishService = SpringContextUtils.getBean(ICartComboDishService.class);
+        shopProductSpecService = SpringContextUtils.getBean(IShopProductSpecService.class);
+        cartMapper = SpringContextUtils.getBean(CartMapper.class);
+        cartProductSpecService = SpringContextUtils.getBean(ICartProductSpecService.class);
+    };
 
 
     /**

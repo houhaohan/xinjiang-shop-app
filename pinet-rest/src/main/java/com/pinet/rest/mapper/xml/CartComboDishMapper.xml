@@ -25,4 +25,32 @@
         cart_id, shop_prod_id
     </sql>
 
+    <resultMap id="CartComboDishMap" type="com.pinet.rest.entity.vo.CartComboDishVo">
+        <result column="singleProdId" property="shopProdId" />
+        <result column="product_name" property="prodName" />
+        <result column="product_img" property="productImg" />
+        <collection property="comboDishSpecs" resultMap="CartComboDishSpecMap"/>
+    </resultMap>
+
+    <resultMap id="CartComboDishSpecMap" type="com.pinet.rest.entity.vo.CartComboDishSpecVo">
+        <result column="shop_prod_spec_id" property="shopProdSpecId" />
+        <result column="shop_prod_spec_name" property="shopProdSpecName" />
+        <result column="shopProdId" property="shopProdId" />
+        <result column="singleProdId" property="singleProdId" />
+    </resultMap>
+
+
+    <select id="getComboDishByCartId" resultMap="CartComboDishMap">
+        select
+            #{shopProdId} as shopProdId,
+            ccd.shop_prod_id as singleProdId,
+            sp.product_name,
+            sp.product_img,
+            ccds.shop_prod_spec_id,
+            ccds.shop_prod_spec_name
+        from cart_combo_dish ccd
+        left join cart_combo_dish_spec ccds on ccd.shop_prod_id = ccds.shop_prod_id and ccd.cart_id = ccds.cart_id and ccds.del_flag = 0
+        left join shop_product sp on sp.id = ccd.shop_prod_id
+        where ccd.cart_id = #{cartId}
+    </select>
 </mapper>

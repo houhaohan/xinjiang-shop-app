@@ -1,7 +1,9 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.pinet.rest.entity.CartComboDish;
+import com.pinet.rest.entity.vo.CartComboDishVo;
 import com.pinet.rest.mapper.CartComboDishMapper;
 import com.pinet.rest.service.ICartComboDishService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -35,5 +37,17 @@ public class CartComboDishServiceImpl extends ServiceImpl<CartComboDishMapper, C
         UpdateWrapper<CartComboDish> wrapper = new UpdateWrapper<>();
         wrapper.in("cart_id",cartIds);
         remove(wrapper);
+    }
+
+    @Override
+    public List<CartComboDish> getByCartId(Long cartId) {
+        QueryWrapper<CartComboDish> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("cart_id",cartId);
+        return list(queryWrapper);
+    }
+
+    @Override
+    public List<CartComboDishVo> getComboDishByCartId(Long cartId,Long shopProdId) {
+        return baseMapper.getComboDishByCartId(cartId,shopProdId);
     }
 }

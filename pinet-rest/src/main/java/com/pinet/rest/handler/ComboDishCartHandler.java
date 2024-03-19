@@ -6,11 +6,8 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.AddCartDto;
-import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.entity.vo.CartComboDishSpecVo;
-import com.pinet.rest.mapper.CartMapper;
-import com.pinet.rest.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.pinet.rest.entity.vo.OrderProductVo;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -30,35 +27,13 @@ public class ComboDishCartHandler extends DishCartHandler{
         this.context = context;
     }
 
-    @Autowired
-    private ICartProductSpecService cartProductSpecService;
-
-    @Autowired
-    private IOrderProductService orderProductService;
-
-    @Autowired
-    private IKryComboGroupDetailService kryComboGroupDetailService;
-
-    @Autowired
-    private ICartComboDishSpecService cartComboDishSpecService;
-
-    @Autowired
-    private ICartComboDishService cartComboDishService;
-
-    @Autowired
-    private IShopProductSpecService shopProductSpecService;
-
-    @Autowired
-    private CartMapper cartMapper;
-
-
     @Override
-    public OrderProduct getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType) {
+    public OrderProductVo getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType) {
         //套餐
-        List<CartProductSpec> cartProductSpecs = cartProductSpecService.getComboByCartId(cartId);
+        List<CartProductSpec> cartProductSpecs = context.cartProductSpecService.getComboByCartId(cartId);
         List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
         QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(shopProdId, prodNum, shopProdSpecIds,orderType);
-        return orderProductService.getByQueryOrderProductBo(queryOrderProductBo);
+        return context.orderProductService.getByQueryOrderProductBo(queryOrderProductBo);
      }
 
 
@@ -73,18 +48,18 @@ public class ComboDishCartHandler extends DishCartHandler{
             shopProdSpecIds.addAll(Convert.toList(Long.class, singleDish.getShopProdSpecIds()));
         }
         //查询套餐价格
-        Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(context.request.getShopProdId());
+        Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(context.request.getShopProdId());
 
-        List<CartComboDishSpecVo> cartComboDishSpecVos = cartComboDishSpecService.getByUserIdAndShopProdSpecId(context.customerId, shopProdSpecIds);
+        List<CartComboDishSpecVo> cartComboDishSpecVos = context.cartComboDishSpecService.getByUserIdAndShopProdSpecId(context.customerId, shopProdSpecIds);
         List<Long> shopProdSpecIdDBs = cartComboDishSpecVos.stream().map(CartComboDishSpecVo::getShopProdSpecId).collect(Collectors.toList());
         boolean allMatch = shopProdSpecIds.stream().allMatch(shopProdSpecIdDBs::contains);
         if(allMatch){
             //增加数量
             context.prodNum ++;
             Long cartId = cartComboDishSpecVos.get(0).getCartId();
-            Cart cart = cartMapper.selectById(cartId);
+            Cart cart = context.cartMapper.selectById(cartId);
             cart.setProdNum(cart.getProdNum() + context.request.getProdNum());
-            cartMapper.updateById(cart);
+            context.cartMapper.updateById(cart);
             //套餐价格
             BigDecimal price = BigDecimalUtil.multiply(BigDecimalUtil.fenToYuan(unitPrice), new BigDecimal(cart.getProdNum()));
             context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price);
@@ -95,13 +70,13 @@ public class ComboDishCartHandler extends DishCartHandler{
         //新增购物车
         context.prodNum += context.request.getProdNum();
         Cart cart = buildCartInfo();
-        cartMapper.insert(cart);
+        context.cartMapper.insert(cart);
         List<AddCartDto> comboDetails = context.request.getComboDetails();
         for(AddCartDto singleDish : comboDetails){
             CartComboDish cartComboDish = new CartComboDish();
             cartComboDish.setCartId(cart.getId());
             cartComboDish.setShopProdId(singleDish.getShopProdId());
-            cartComboDishService.save(cartComboDish);
+            context.cartComboDishService.save(cartComboDish);
             List<Long> singleProdSpecIds = Convert.toList(Long.class, singleDish.getShopProdSpecIds());
             for(Long shopProdSpecId : singleProdSpecIds){
 
@@ -109,12 +84,12 @@ public class ComboDishCartHandler extends DishCartHandler{
                 cartComboDishSpec.setCartId(cart.getId());
                 cartComboDishSpec.setShopProdId(singleDish.getShopProdId());
                 cartComboDishSpec.setShopProdSpecId(shopProdSpecId);
-                ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
+                ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(shopProdSpecId);
                 if (shopProductSpec == null) {
                     throw new PinetException("样式不存在");
                 }
                 cartComboDishSpec.setShopProdSpecName(shopProductSpec.getSpecName());
-                cartComboDishSpecService.save(cartComboDishSpec);
+                context.cartComboDishSpecService.save(cartComboDishSpec);
             }
         }
 
@@ -128,10 +103,12 @@ public class ComboDishCartHandler extends DishCartHandler{
     public void refreshCart(Cart cart,Integer prodNum) {
         if (prodNum > 0) {
             cart.setProdNum(prodNum);
-            cartMapper.updateById(cart);
+            context.cartMapper.updateById(cart);
+            return;
         }
-        cartComboDishService.deleteByCartId(cart.getId().intValue());
-        cartComboDishSpecService.deleteByCartId(cart.getId().intValue());
+        context.cartMapper.deleteById(cart.getId());
+        context.cartComboDishService.deleteByCartId(cart.getId().intValue());
+        context.cartComboDishSpecService.deleteByCartId(cart.getId().intValue());
     }
 
     @Override
@@ -140,8 +117,8 @@ public class ComboDishCartHandler extends DishCartHandler{
         if(CollectionUtils.isEmpty(ids)){
             return;
         }
-        cartComboDishService.deleteByCartIds(ids);
-        cartComboDishSpecService.deleteByCartIds(ids);
+        context.cartComboDishService.deleteByCartIds(ids);
+        context.cartComboDishSpecService.deleteByCartIds(ids);
     }
 
 }

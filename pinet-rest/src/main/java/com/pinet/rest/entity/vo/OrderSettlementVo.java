@@ -1,10 +1,8 @@
 package com.pinet.rest.entity.vo;
 
 import com.pinet.core.constants.CommonConstant;
-import com.pinet.rest.entity.CustomerCoupon;
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.OrderProduct;
-import com.pinet.rest.entity.bo.OrderProductBo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -43,7 +41,7 @@ public class OrderSettlementVo {
     private Integer orderMaxNum = CommonConstant.MAX_ORDER_NUM;
 
     @ApiModelProperty(value = "订单商品信息", name = "orderProductBoList")
-    private List<OrderProduct> orderProductBoList;
+    private List<OrderProductVo> orderProductBoList;
 
     @ApiModelProperty(value = "订单商品数量", name = "orderProductNum")
     private Integer orderProductNum;

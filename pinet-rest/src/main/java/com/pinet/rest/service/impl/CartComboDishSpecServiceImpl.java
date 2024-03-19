@@ -50,4 +50,12 @@ public class CartComboDishSpecServiceImpl extends ServiceImpl<CartComboDishSpecM
         queryWrapper.eq("cart_id",cartId);
         return list(queryWrapper);
     }
+
+    @Override
+    public List<CartComboDishSpec> getByCartIdAndProdId(Long cartId, Long shopProdId) {
+        QueryWrapper<CartComboDishSpec> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("cart_id",cartId);
+        queryWrapper.eq("shop_prod_id",shopProdId);
+        return list(queryWrapper);
+    }
 }

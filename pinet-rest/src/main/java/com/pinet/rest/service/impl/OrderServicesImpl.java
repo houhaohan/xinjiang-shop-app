@@ -37,6 +37,7 @@ import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
 import com.pinet.keruyun.openapi.vo.TakeoutOrderCreateVo;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.Customer;
+import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.enums.*;
@@ -53,6 +54,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -130,7 +132,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         orderDetailVo.setOrderProducts(orderProductService.getByOrderId(orderId));
         //判断是自提还是外卖
-        if (orderDetailVo.getOrderType() == 1) {
+        if (Objects.equals(orderDetailVo.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())) {
             OrderAddress orderAddress = orderAddressService.getOrderAddress(orderId);
             orderDetailVo.setAddress(orderAddress.getAddress());
             //脱敏
@@ -185,7 +187,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         OrderSettlementVo vo = new OrderSettlementVo();
         vo.setShopName(shop.getShopName());
 
-        List<OrderProduct> orderProducts = new ArrayList<>();
+        List<OrderProductVo> orderProducts = new ArrayList<>();
         if (dto.getSettlementType() == 1) {
             //购物车结算（通过店铺id 查找购物车进行结算）
             orderProducts = orderProductService.getByCartAndShop(dto.getShopId(), dto.getOrderType());
@@ -193,16 +195,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             //直接结算（通过具体的商品样式、商品数量进行结算）
             List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
             QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType());
-            OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
+            OrderProductVo orderProduct = orderProductService.getByQueryOrderProductBo(query);
             orderProducts.add(orderProduct);
         }
 
-        BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal packageFee = orderProducts.stream().map(OrderProductVo::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
         vo.setPackageFee(packageFee);
         vo.setOrderProductBoList(orderProducts);
         vo.setOrderMakeCount(countShopOrderMakeNum(dto.getShopId()));
         //计算商品总金额
-        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProductVo::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         //配送费
         BigDecimal shippingFee = getShippingFee(dto.getOrderType(), distance, shop.getDeliveryPlatform());
@@ -224,7 +226,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
 
 
-        Integer orderProductNum = orderProducts.stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
+        Integer orderProductNum = orderProducts.stream().map(OrderProductVo::getProdNum).reduce(Integer::sum).orElse(0);
         vo.setOrderProductNum(orderProductNum);
         vo.setOrderDiscounts(preferentialVo.getOrderDiscounts());
 
@@ -255,7 +257,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //自提订单默认距离是0  外卖订单 校验距离 4公里以内
         double distance = getDistance(dto.getCustomerAddressId(), dto.getOrderType(), shop);
 
-        List<OrderProduct> orderProducts = new ArrayList<>();
+        List<OrderProductVo> orderProducts = new ArrayList<>();
         if (dto.getSettlementType() == 1) {
             //购物车结算（通过店铺id 查找购物车进行结算）
             orderProducts = orderProductService.getByCartAndShop(dto.getShopId(), dto.getOrderType());
@@ -266,7 +268,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             //直接结算（通过具体的商品样式、商品数量进行结算）
             List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
             QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType());
-            OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
+            OrderProductVo orderProduct = orderProductService.getByQueryOrderProductBo(query);
             orderProducts.add(orderProduct);
         }
 
@@ -282,10 +284,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 //        }
 
         //计算打包费
-        BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal packageFee = orderProducts.stream().map(OrderProductVo::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         //订单商品原价
-        BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProductVo::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (Objects.equals(dto.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode()) && BigDecimalUtil.gt(shop.getMinDeliveryPrice(),orderProdOriginalPrice)) {
             throw new PinetException("餐品价格低于" + shop.getMinDeliveryPrice() + "元，无法配送");
@@ -318,16 +320,24 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //插入订单商品  并设置订单号
         orderProducts.forEach(k -> {
-            k.setOrderId(order.getId());
+            OrderProduct orderProduct = new OrderProduct();
+            BeanUtils.copyProperties(k,orderProduct);
+            orderProduct.setOrderId(order.getId());
             //保存订单商品表
-            orderProductService.save(k);
+            orderProductService.save(orderProduct);
 
             //保存订单商品样式表
             k.getOrderProductSpecs().forEach(k1 -> {
-                k1.setOrderProdId(k.getId());
-                k1.setOrderId(order.getId());
+                OrderProductSpec orderProductSpec = new OrderProductSpec();
+                orderProductSpec.setOrderId(order.getId());
+                orderProductSpec.setOrderProdId(orderProduct.getId());
+                orderProductSpec.setProdSkuId(k1.getProdSkuId());
+                orderProductSpec.setProdSkuName(k1.getProdSkuName());
+                orderProductSpec.setShopProdSpecId(k1.getShopProdSpecId());
+                orderProductSpec.setProdSpecName(k1.getProdSpecName());
+                orderProductSpecService.save(orderProductSpec);
             });
-            orderProductSpecService.saveBatch(k.getOrderProductSpecs());
+//            orderProductSpecService.saveBatch(k.getOrderProductSpecs());
         });
 
         //插入优惠明细表
@@ -392,7 +402,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      *
      * @param orders
      */
-    private void setOrdersCommission(Orders orders, List<OrderProduct> orderProducts) {
+    private void setOrdersCommission(Orders orders, List<OrderProductVo> orderProducts) {
         if (ObjectUtil.isNull(orders.getShareId()) || orders.getShareId() <= 0) {
             return;
         }

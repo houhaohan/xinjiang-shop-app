@@ -5,6 +5,7 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.DiscountTypeEnum;
 import com.pinet.rest.entity.enums.MemberLevelEnum;
+import com.pinet.rest.entity.vo.OrderProductVo;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.factory.PromotionStrategyFactory;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,7 @@ public class OrderPreferentialManager {
         this.couponProductService =  couponProductService;
     }
 
-    public PreferentialVo doPreferential(Long customerId, Long customerCouponId, BigDecimal orderProductPrice,List<OrderProduct> orderProducts){
+    public PreferentialVo doPreferential(Long customerId, Long customerCouponId, BigDecimal orderProductPrice,List<OrderProductVo> orderProducts){
         PreferentialVo preferentialVo = new PreferentialVo();
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
@@ -72,7 +73,7 @@ public class OrderPreferentialManager {
             orderDiscounts.addAll(promotionStrategyFactory.create().apply(orderProductPrice));
         }else if(coupon.getUseProduct() == 2){
             //部分商品
-            List<Long> shopProdIds = orderProducts.stream().map(OrderProduct::getShopProdId).collect(Collectors.toList());
+            List<Long> shopProdIds = orderProducts.stream().map(OrderProductVo::getShopProdId).collect(Collectors.toList());
             QueryWrapper<CouponProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.select("product_id");
             queryWrapper.eq("coupon_id",coupon.getId());
