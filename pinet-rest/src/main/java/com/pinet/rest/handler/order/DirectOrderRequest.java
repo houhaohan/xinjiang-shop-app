@@ -1,31 +1,20 @@
 package com.pinet.rest.handler.order;
 
 import com.pinet.rest.entity.dto.OrderComboDishDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class DirectOrderRequest {
+public class DirectOrderRequest extends OrderProductRequest {
 
-    private Long orderId;
-    private List<Long> shopProdSpecIds;
-    private Long shopProdId;
-    private String dishId;
-    private String productName;
-    private Integer prodNum;
-    private String unit;
-    private String productImg;
-    private boolean calculate;
     /**
-     * 订单状态  1外卖  2自提
+     * 商品样式 ID
      */
-    private Integer orderType;
+    private List<Long> shopProdSpecIds;
+
+    /**
+     * 订单套餐明细
+     */
     private List<OrderComboDishDto> comboDishDtoList;
 }

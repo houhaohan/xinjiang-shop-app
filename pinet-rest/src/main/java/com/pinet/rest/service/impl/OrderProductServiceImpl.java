@@ -128,7 +128,6 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         orderProductVo.setDishId(cart.getDishId());
         orderProductVo.setProdName(shopProduct.getProductName());
         orderProductVo.setUnit(shopProduct.getUnit());
-        //orderProductVo.setDishType(DishType.COMBO);
         Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(shopProduct.getId());
         orderProductVo.setProdUnitPrice(BigDecimalUtil.fenToYuan(unitPrice));
         orderProductVo.setProdNum(cart.getProdNum());

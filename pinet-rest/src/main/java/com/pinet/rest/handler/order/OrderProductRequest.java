@@ -12,14 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderProductRequest {
 
-    /**
-     * 订单 ID
-     */
     private Long orderId;
-    /**
-     * 购物车 ID
-     */
-    private Long cartId;
 
     /**
      * 商品 ID
@@ -51,15 +44,13 @@ public class OrderProductRequest {
      */
     private Integer prodNum;
 
-    /**
-     * 是否满足计算佣金的条件
-     */
     private boolean calculate;
 
     /**
      * 订单状态  1外卖  2自提
      */
     private Integer orderType;
+
 
 
 

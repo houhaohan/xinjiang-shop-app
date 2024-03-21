@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
-public class OrderComboDishHandler {
+public class OrderComboDishHandler extends OrderDishAbstractHandler{
     private final IOrderComboDishService orderComboDishService;
     private final IOrderComboDishSpecService orderComboDishSpecService;
     private final ICartComboDishService cartComboDishService;
@@ -33,27 +33,16 @@ public class OrderComboDishHandler {
 
 
     /**
+     * 购物车购买
      * 执行订单套餐商品入库
      */
     @Transactional(rollbackFor = Exception.class)
-    public OrderProduct exectue(OrderProductRequest request){
-        OrderProduct orderProduct = new OrderProduct();
-        orderProduct.setOrderId(request.getOrderId());
-        orderProduct.setShopProdId(request.getShopProdId());
-        orderProduct.setDishId(request.getDishId());
+    public OrderProduct exectue(CartOrderProductRequest request){
         Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(request.getShopProdId());
-        orderProduct.setProdUnitPrice(BigDecimalUtil.fenToYuan(unitPrice));
-        orderProduct.setProdNum(request.getProdNum());
-        orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),orderProduct.getProdNum(), RoundingMode.HALF_UP));
-        orderProduct.setProdName(request.getProdName());
-        orderProduct.setUnit(request.getUnit());
-        orderProduct.setProdImg(request.getProdImg());
-        if(request.isCalculate()){
-            orderProduct.setCommission(BigDecimalUtil.multiply(orderProduct.getProdPrice(),0.1));
-        }
+        OrderProduct orderProduct = buildOrderProduct(request, BigDecimalUtil.fenToYuan(unitPrice));
 
         if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
         }
         orderProductService.save(orderProduct);
 
@@ -91,6 +80,7 @@ public class OrderComboDishHandler {
 
 
     /**
+     * 直接购买
      * 执行订单套餐商品入库
      */
     @Transactional(rollbackFor = Exception.class)
@@ -105,14 +95,17 @@ public class OrderComboDishHandler {
         orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),orderProduct.getProdNum(), RoundingMode.HALF_UP));
         orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,request.getProdNum(),RoundingMode.HALF_UP));
 
-        orderProduct.setProdName(request.getProductName());
+        orderProduct.setProdName(request.getProdName());
         orderProduct.setUnit(request.getUnit());
-        orderProduct.setProdImg(request.getProductImg());
+        orderProduct.setProdImg(request.getProdImg());
         if(request.isCalculate()){
             orderProduct.setCommission(BigDecimalUtil.multiply(orderProduct.getProdPrice(),0.1));
         }
+        buildOrderProduct(request,BigDecimalUtil.fenToYuan(unitPrice));
 
-        orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
+        if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
+        }
         orderProductService.save(orderProduct);
 
         List<OrderComboDishDto> comboDishDtoList = request.getComboDishDtoList();

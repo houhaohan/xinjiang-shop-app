@@ -46,8 +46,6 @@ import com.pinet.rest.entity.param.OrderRefundNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.param.RefundParam;
 import com.pinet.rest.entity.vo.*;
-import com.pinet.rest.handler.order.CartOrderHandler;
-import com.pinet.rest.handler.order.DirectBuyOrderHandler;
 import com.pinet.rest.handler.order.OrderContext;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
@@ -57,7 +55,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -106,10 +103,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final OrderPreferentialManager orderPreferentialManager;
     private final WxMaService wxMaService;
     private final ICustomerService customerService;
-    private final IOrderComboDishService orderComboDishService;
-    private final IOrderComboDishSpecService orderComboDishSpecService;
-    private final IShopProductSpecService shopProductSpecService;
-    private final IProductSkuService productSkuService;
+    private final OrderContext context;
+
 
     @Override
     public List<OrderListVo> orderList(OrderListDto dto) {
@@ -257,76 +252,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return vo;
     }
 
-
-//    @Override
-//    public OrderSettlementVo orderSettlement0(OrderSettlementDto dto) {
-//
-//        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
-//
-//        Shop shop = shopService.getById(dto.getShopId());
-//        //判断店铺是否营业
-//        checkShop(shop);
-//        if (Objects.equals(dto.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode()) && Objects.equals(shop.getSupportDelivery(),CommonConstant.NO)) {
-//            throw new PinetException("该门店暂不支持外卖");
-//        }
-//
-//        double distance = getDistance(dto.getCustomerAddressId(), dto.getOrderType(), shop);
-//
-//        OrderSettlementVo vo = new OrderSettlementVo();
-//        vo.setShopName(shop.getShopName());
-//
-//        List<OrderProduct> orderProducts = new ArrayList<>();
-//        if (dto.getSettlementType() == 1) {
-//            //购物车结算（通过店铺id 查找购物车进行结算）
-//            orderProducts = orderProductService.getByCartAndShop(dto.getShopId(), dto.getOrderType());
-//        } else {
-//            //直接结算（通过具体的商品样式、商品数量进行结算）
-//            List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
-//            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType());
-//            OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
-//            orderProducts.add(orderProduct);
-//        }
-//
-//        BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
-//        vo.setPackageFee(packageFee);
-//        vo.setOrderProductBoList(orderProducts);
-//        vo.setOrderMakeCount(countShopOrderMakeNum(dto.getShopId()));
-//        //计算商品总金额
-//        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-//
-//        //配送费
-//        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), distance, shop.getDeliveryPlatform());
-//        vo.setShippingFee(shippingFee);
-//
-//        //设置订单原价 和 商品原价
-//        vo.setOriginalPrice(BigDecimalUtil.sum(orderProdPrice, shippingFee, packageFee));
-//        vo.setOriginalOrderProductPrice(orderProdPrice);
-//
-//        //订单优惠处理
-//        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderProdPrice, orderProducts);
-//        vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),packageFee,shippingFee));
-//
-//        //返回预计送达时间
-//        Date now = new Date();
-//        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetMinute(now, 15), "HH:mm");
-//        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 45), "HH:mm");
-//
-//        vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
-//
-//
-//        Integer orderProductNum = orderProducts.stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
-//        vo.setOrderProductNum(orderProductNum);
-//        vo.setOrderDiscounts(preferentialVo.getOrderDiscounts());
-//
-//        List<CustomerCouponVo> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));
-//        for (CustomerCouponVo customerCoupon : customerCoupons) {
-//            Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), orderProducts);
-//            customerCoupon.setIsUsable(isUsable);
-//        }
-//        vo.setCustomerCoupons(customerCoupons);
-//        return vo;
-//    }
-
     @Override
     public Integer countShopOrderMakeNum(Long shopId) {
         Date date = new Date();
@@ -335,10 +260,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
 
-    @Autowired
-    private CartOrderHandler cartOrderHandler;
-    @Autowired
-    private DirectBuyOrderHandler directBuyOrderHandler;
+//    @Autowired
+//    private CartOrderHandler cartOrderHandler;
+//    @Autowired
+//    private DirectBuyOrderHandler directBuyOrderHandler;
 
     @DSTransactional
     @Override
@@ -346,172 +271,17 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //店铺是否营业
         Shop shop = shopService.getById(request.getShopId());
         checkShop(shop);
-
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        OrderContext context = new OrderContext();
         context.setCustomerId(userId);
         context.setShop(shop);
         context.setRequest(request);
         context.setDistance(getDistance(request.getCustomerAddressId(),request.getOrderType(),shop));
         List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shop.getId());
         context.setCartList(cartList);
-        if(Objects.equals(request.getSettlementType(),SettlementTypeEnum.CART_BUY.getCode())){
-            cartOrderHandler.create(context);
-        }else {
-            directBuyOrderHandler.create(context);
-        }
+        context.handler();
         return context.getResponse();
     }
 
-//    @Override
-//    @DSTransactional
-//    public CreateOrderVo createOrder(CreateOrderDto dto) {
-//        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-//
-//        Shop shop = shopService.getById(dto.getShopId());
-//
-//        checkShop(shop);
-//        //自提订单默认距离是0  外卖订单 校验距离 4公里以内
-//        double distance = getDistance(dto.getCustomerAddressId(), dto.getOrderType(), shop);
-//
-//        List<OrderProduct> orderProducts = new ArrayList<>();
-//        if (dto.getSettlementType() == 1) {
-//            //购物车结算（通过店铺id 查找购物车进行结算）
-//            orderProducts = orderProductService.getByCartAndShop(dto.getShopId(), dto.getOrderType());
-//
-//            //删除购物车已购商品
-//            cartService.delCartByShopId(dto.getShopId(), userId);
-//        } else {
-//            //直接结算（通过具体的商品样式、商品数量进行结算）
-////            List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
-////            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType());
-////            OrderProductVo orderProduct = orderProductService.getByQueryOrderProductBo(query);
-////            orderProducts.add(orderProduct);
-//        }
-//
-//        //todo 暂时不考虑库存
-//        //减少已购商品的库存(第一版暂不加锁 后期考虑加乐观锁或redis锁)
-////        for (OrderProduct orderProduct : orderProducts) {
-////            for (OrderProductSpec orderProductSpec : orderProduct.getOrderProductSpecs()) {
-////                int res = shopProductSpecService.reduceStock(orderProductSpec.getShopProdSpecId(), orderProduct.getProdNum());
-////                if (res != 1) {
-////                    throw new PinetException("库存更新失败");
-////                }
-////            }
-////        }
-//
-//        //计算打包费
-//        BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
-//
-//        //订单商品原价
-//        BigDecimal orderProdOriginalPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-//
-//        if (Objects.equals(dto.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode()) && BigDecimalUtil.gt(shop.getMinDeliveryPrice(),orderProdOriginalPrice)) {
-//            throw new PinetException("餐品价格低于" + shop.getMinDeliveryPrice() + "元，无法配送");
-//        }
-//
-//        //用户支付的配送费
-//        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), distance, shop.getDeliveryPlatform());
-//
-//        //配送费
-//        BigDecimal shippingFeePlat = getShippingFeePlat(dto.getOrderType(), dto.getCustomerAddressId(), orderProdOriginalPrice, shop.getDeliveryShopNo(), shop.getDeliveryPlatform());
-//
-//        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(userId, dto.getCustomerCouponId(), orderProdOriginalPrice, orderProducts);
-//        BigDecimal orderPrice = BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(), shippingFee, packageFee);
-//
-//        //对比订单总金额和结算的总金额  如果不相同说明商品价格有调整
-//        if (!Objects.equals(dto.getOrderSource(),OrderSourceEnum.SYSTEM.getCode())
-//                && BigDecimalUtil.ne(orderPrice,dto.getOrderPrice())) {
-//            throw new PinetException("订单信息发生变化,请重新下单");
-//        }
-//
-//        //判断该订单是否有佣金
-//        //邀请人必须是店帮主  被邀人不能是店帮主
-//
-//        //创建订单基础信息0
-//        Orders order = createOrder(dto, shippingFee, distance, orderPrice, preferentialVo.getProductDiscountAmount(), preferentialVo.getDiscountAmount(), shop, packageFee, shippingFeePlat);
-//        setOrdersCommission(order, orderProducts);
-//
-//        //插入订单
-//        this.save(order);
-//
-//        //插入订单商品  并设置订单号
-//        orderProducts.forEach(k -> {
-//            OrderProduct orderProduct = new OrderProduct();
-//            BeanUtils.copyProperties(k,orderProduct);
-//            orderProduct.setOrderId(order.getId());
-//            //保存订单商品表
-//            orderProductService.save(orderProduct);
-//            if(Objects.equals(k.getDishType(),DishType.COMBO)){
-//                //套餐菜
-//                for(OrderComboDishDto orderComboDishDto : dto.getOrderComboDishList()){
-//                    OrderComboDish orderComboDish = new OrderComboDish();
-//                    orderComboDish.setOrderId(order.getId());
-//                    orderComboDish.setShopProdId(orderComboDishDto.getShopProdId());
-//                    orderComboDish.setSingleProdId(orderComboDishDto.getSingleProdId());
-//                    ShopProduct shopProduct = shopProductService.getById(orderComboDishDto.getSingleProdId());
-//                    orderComboDish.setDishId(shopProduct.getProdId());
-//                    orderComboDish.setImageUrl(shopProduct.getProductImg());
-//                    orderComboDish.setProdName(shopProduct.getProductName());
-//                    orderComboDish.setQuantity(orderComboDishDto.getQuantity());
-//                    orderComboDish.setUnit(shopProduct.getUnit());
-//                    orderComboDish.setUnitId(shopProduct.getUnitId());
-//                    orderComboDishService.save(orderComboDish);
-//
-//                    List<OrderComboDishSpec> orderComboDishSpecList = orderComboDishDto.getOrderComboDishSpecList().stream().map(spec -> {
-//                        OrderComboDishSpec orderComboDishSpec = new OrderComboDishSpec();
-//                        orderComboDishSpec.setOrderComboDishId(orderComboDish.getId());
-//                        orderComboDishSpec.setAddPrice(spec.getAddPrice());
-//                        orderComboDishSpec.setShopProdSpecId(spec.getShopProdSpecId());
-//                        orderComboDishSpec.setShopProdSpecName(spec.getShopProdSpecName());
-//                        return orderComboDishSpec;
-//                    }).collect(Collectors.toList());
-//                    orderComboDishSpecService.saveBatch(orderComboDishSpecList);
-//                }
-//            }else {
-//                //单品，保存订单商品样式表
-//                List<OrderProductSpec> orderProductSpecs = k.getOrderProductSpecs().stream().map(spec -> {
-//                    OrderProductSpec orderProductSpec = new OrderProductSpec();
-//                    orderProductSpec.setOrderId(order.getId());
-//                    orderProductSpec.setOrderProdId(orderProduct.getId());
-//                    orderProductSpec.setProdSkuId(spec.getProdSkuId());
-//                    orderProductSpec.setProdSkuName(spec.getProdSkuName());
-//                    orderProductSpec.setShopProdSpecId(spec.getShopProdSpecId());
-//                    orderProductSpec.setProdSpecName(spec.getProdSpecName());
-//                    return orderProductSpec;
-//                }).collect(Collectors.toList());
-//                orderProductSpecService.saveBatch(orderProductSpecs);
-//            }
-//        });
-//
-//        //插入优惠明细表
-//        List<OrderDiscount> orderDiscounts = preferentialVo.getOrderDiscounts();
-//        if (!CollectionUtils.isEmpty(orderDiscounts)) {
-//            orderDiscounts.forEach(item -> item.setOrderId(order.getId()));
-//            orderDiscountService.saveBatch(orderDiscounts);
-//        }
-//
-//        //外卖订单插入订单地址表
-//        if (Objects.equals(dto.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())) {
-//            OrderAddress orderAddress = orderAddressService.createByCustomerAddressId(dto.getCustomerAddressId());
-//            orderAddress.setOrderId(order.getId());
-//            Customer customer = customerService.getById(order.getCustomerId());
-//            orderAddress.setSex(customer.getSex());
-//            orderAddressService.save(orderAddress);
-//        }
-//
-//        //将订单放到mq中
-//        jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_PAY_NAME, order.getId().toString(), OrderConstant.ORDER_AUTO_CANCEL_TIME);
-//
-//        CreateOrderVo createOrderVo = new CreateOrderVo();
-//        createOrderVo.setOrderId(order.getId());
-//        createOrderVo.setOrderNo(order.getOrderNo());
-//        createOrderVo.setOrderPrice(orderPrice);
-//        //返回订单过期时间
-//        createOrderVo.setExpireTime(getExpireTime(order.getCreateTime()));
-//
-//        return createOrderVo;
-//    }
 
     /**
      * 获取距离
@@ -541,40 +311,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
 
-    /**
-     * 设置佣金
-     *
-     * @param orders
-     */
-    private void setOrdersCommission(Orders orders, List<OrderProduct> orderProducts) {
-        if (ObjectUtil.isNull(orders.getShareId()) || orders.getShareId() <= 0) {
-            return;
-        }
 
-        //判断下单人和分享人是否是同一个人
-        if (orders.getCustomerId().equals(orders.getShareId())) {
-            return;
-        }
-
-        //下单人会员等级
-        Integer customerMemberLevel = customerMemberService.getMemberLevel(orders.getCustomerId());
-        //分享人会员等级
-        Integer shareMemberLevel = customerMemberService.getMemberLevel(orders.getShareId());
-
-        //邀请人必须是店帮主  被邀人不能是店帮主
-        if (shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !customerMemberLevel.equals(MemberLevelEnum._20.getCode())) {
-            //佣金=商品总金额 * 0.1
-            BigDecimal commission = orders.getOrderProdPrice().multiply(new BigDecimal("0.1")).setScale(2, RoundingMode.HALF_UP);
-            orders.setCommission(commission);
-
-
-            //设置单个商品的佣金
-            orderProducts.forEach(k -> {
-                k.setCommission(k.getProdPrice().multiply(new BigDecimal("0.1")).setScale(2, RoundingMode.HALF_UP));
-            });
-
-        }
-    }
 
     private Long getExpireTime(Date createTime) {
         Date expireTime = DateUtil.offsetMinute(createTime, 15);

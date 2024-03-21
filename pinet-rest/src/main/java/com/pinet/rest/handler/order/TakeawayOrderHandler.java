@@ -53,7 +53,7 @@ package com.pinet.rest.handler.order;//package com.pinet.rest.handler.orders;
 //        Orders orders = buildOrder();
 //        orders.setShippingFeePlat(getShippingFeePlat(orders.getOrderProdPrice()));
 //        Integer level = customerMemberService.getMemberLevel(orders.getCustomerId());
-//        context.orderUserlevel = level;
+//        context.orderUserLevel = level;
 //        Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(level);
 //        orders.setScore(score);
 //        //初始化订单金额
@@ -207,7 +207,7 @@ package com.pinet.rest.handler.order;//package com.pinet.rest.handler.orders;
 //        Integer shareMemberLevel = customerMemberService.getMemberLevel(shareId);
 //
 //        //邀请人必须是店帮主  被邀人不能是店帮主
-//        return shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !context.orderUserlevel.equals(MemberLevelEnum._20.getCode());
+//        return shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !context.orderUserLevel.equals(MemberLevelEnum._20.getCode());
 //    }
 //
 //}
