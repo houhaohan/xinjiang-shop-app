@@ -49,14 +49,8 @@ public class DirectBuyOrderHandler extends OrderAbstractHandler {
         request.setShopProdSpecIds(shopProdSpecIds);
         request.setCalculate(condition);
 
-        OrderProduct orderProduct = null;
         List<OrderProduct> orderProducts = new ArrayList<>();
-        if(Objects.equals(shopProduct.getDishType(), DishType.SINGLE)){
-            orderProduct = context.orderSingleDishHandler.directOrder(request);
-        }else {
-            request.setComboDishDtoList(context.request.getOrderComboDishList());
-            orderProduct = context.orderComboDishHandler.directOrder(request);
-        }
+        OrderProduct orderProduct = context.orderDishContext.handler(shopProduct.getDishType()).execute(request);
         orderProducts.add(orderProduct);
         orders.setPackageFee(orderProduct.getPackageFee());
         orders.setOrderProdPrice(orderProduct.getProdPrice());

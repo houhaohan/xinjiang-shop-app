@@ -6,7 +6,8 @@ import com.pinet.rest.entity.OrderProduct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public abstract class OrderDishAbstractHandler {
+public abstract class OrderDishAbstractHandler implements OrderDishHandler {
+    protected OrderDishContext context;
 
     protected OrderProduct buildOrderProduct(OrderProductRequest request, BigDecimal unitPrice){
         OrderProduct orderProduct = new OrderProduct();

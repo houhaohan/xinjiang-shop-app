@@ -20,29 +20,28 @@ import java.util.stream.Collectors;
 /**
  * 订单 单品处理器
  */
-@Component
-@RequiredArgsConstructor
+
 public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
-    private final ICartProductSpecService cartProductSpecService;
-    private final IShopProductSpecService shopProductSpecService;
-    private final IOrderProductService orderProductService;
-    private final IOrderProductSpecService orderProductSpecService;
+
+    public OrderSingleDishHandler(OrderDishContext context){
+        this.context = context;
+    }
 
     /**
      * 单品购物车下单
      * 执行订单商品入库
      */
     @Transactional(rollbackFor = Exception.class)
-    public OrderProduct exectue(CartOrderProductRequest request){
-        List<CartProductSpec> cartProductSpecList = cartProductSpecService.getByCartId(request.getCartId());
+    public OrderProduct execute(CartOrderProductRequest request){
+        List<CartProductSpec> cartProductSpecList = context.cartProductSpecService.getByCartId(request.getCartId());
         List<Long> shopProdSpecIds = cartProductSpecList.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-        BigDecimal unitPrice = shopProductSpecService.getPriceByIds(shopProdSpecIds);
+        BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(shopProdSpecIds);
 
         OrderProduct orderProduct = buildOrderProduct(request, unitPrice);
         if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
             orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
         }
-        orderProductService.save(orderProduct);
+        context.orderProductService.save(orderProduct);
 
         //新增订单商品样式
         saveOrderProductSpecs(shopProdSpecIds,request.getOrderId(),orderProduct.getId());
@@ -55,13 +54,13 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
      * 执行订单商品入库
      */
     @Transactional(rollbackFor = Exception.class)
-    public OrderProduct directOrder(DirectOrderRequest request){
-        BigDecimal unitPrice = shopProductSpecService.getPriceByIds(request.getShopProdSpecIds());
+    public OrderProduct execute(DirectOrderRequest request){
+        BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(request.getShopProdSpecIds());
         OrderProduct orderProduct = buildOrderProduct(request, unitPrice);
         if(Objects.equals(request.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())){
             orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
         }
-        orderProductService.save(orderProduct);
+        context.orderProductService.save(orderProduct);
 
         saveOrderProductSpecs(request.getShopProdSpecIds(),request.getOrderId(),orderProduct.getId());
         return orderProduct;
@@ -78,14 +77,14 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
             OrderProductSpec orderProductSpec = new OrderProductSpec();
             orderProductSpec.setOrderId(orderId);
             orderProductSpec.setOrderProdId(orderProductId);
-            ShopProductSpec shopProductSpec = shopProductSpecService.getById(specId);
+            ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(specId);
             orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
             orderProductSpec.setProdSkuName(shopProductSpec.getSkuName());
             orderProductSpec.setShopProdSpecId(specId);
             orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
             return orderProductSpec;
         }).collect(Collectors.toList());
-        orderProductSpecService.saveBatch(orderProductSpecList);
+        context.orderProductSpecService.saveBatch(orderProductSpecList);
     }
 
 

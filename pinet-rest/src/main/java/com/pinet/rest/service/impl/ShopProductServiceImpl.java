@@ -18,8 +18,8 @@ import com.pinet.rest.entity.param.ShopProductParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.mapper.ShopProductMapper;
 import com.pinet.rest.service.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,15 +40,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopProduct> implements IShopProductService {
 
-    @Autowired
-    private IShopService shopService;
-    @Autowired
-    private ICustomerAddressService customerAddressService;
-    @Autowired
-    private IKryComboGroupDetailService kryComboGroupDetailService;
-
+    private final IShopService shopService;
+    private final ICustomerAddressService customerAddressService;
+    private final IKryComboGroupDetailService kryComboGroupDetailService;
+    private final ILabelService labelService;
 
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
@@ -92,8 +90,6 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
         return page;
     }
 
-    @Autowired
-    private ILabelService labelService;
     @Override
     public <T extends ProductDetailVo> T getDetailById(Long id) {
         ShopProduct shopProduct = getById(id);
@@ -112,8 +108,8 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
             comboDishVo.setProductType(shopProduct.getProductType());
             comboDishVo.setShopId(shopProduct.getShopId());
             comboDishVo.setSaleCount(shopProduct.getSaleCount());
-//            String labels = labelService.getByLabelIds(shopProduct.getLableId());
-//            comboDishVo.setLabels(labels);
+            String labels = labelService.getByLabelIds(shopProduct.getLableId());
+            comboDishVo.setLabels(labels);
             //套餐明细
             List<KryComboGroupDetail> kryComboGroupDetailList = kryComboGroupDetailService.getByShopProdId(id);
             Long sumPrice = kryComboGroupDetailList.stream().map(KryComboGroupDetail::getPrice).reduce(0L, Long::sum);

@@ -28,14 +28,13 @@ public class OrderContext {
     protected final ICustomerMemberService customerMemberService;
     protected final OrdersMapper ordersMapper;
     protected final IShopProductService shopProductService;
-    protected final OrderComboDishHandler orderComboDishHandler;
-    protected final OrderSingleDishHandler orderSingleDishHandler;
     protected final IOrderAddressService orderAddressService;
     protected final IOrderDiscountService orderDiscountService;
     protected final ICustomerService customerService;
     protected final IDaDaService daDaService;
     protected final ICustomerAddressService customerAddressService;
     protected final ICartService cartService;
+    protected final OrderDishContext orderDishContext;
     protected final JmsUtil jmsUtil;
     protected Long customerId;
     protected Double distance;

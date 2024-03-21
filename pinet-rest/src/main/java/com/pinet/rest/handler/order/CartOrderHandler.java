@@ -48,13 +48,9 @@ public class CartOrderHandler extends OrderAbstractHandler {
             request.setOrderType(context.request.getOrderType());
             request.setCalculate(condition);
 
-            OrderProduct orderProduct = null;
-            if(Objects.equals(cart.getDishType(), DishType.SINGLE)){
-                orderProduct = context.orderSingleDishHandler.exectue(request);
-            }else {
-                orderProduct = context.orderComboDishHandler.exectue(request);
-            }
-
+            OrderProduct orderProduct = context.orderDishContext
+                    .handler(shopProduct.getDishType())
+                    .execute(request);
             orders.setPackageFee(BigDecimalUtil.sum(orders.getPackageFee(),orderProduct.getPackageFee()));
             orders.setOrderProdPrice(BigDecimalUtil.sum(orders.getOrderProdPrice(),orderProduct.getProdPrice()));
             orderProducts.add(orderProduct);
@@ -62,9 +58,7 @@ public class CartOrderHandler extends OrderAbstractHandler {
 
         afterHandler(orders,orderProducts);
 
-
         // 清除购物车
         context.cartService.delCartByShopId(orders.getShopId(),orders.getCustomerId());
-
     }
 }
