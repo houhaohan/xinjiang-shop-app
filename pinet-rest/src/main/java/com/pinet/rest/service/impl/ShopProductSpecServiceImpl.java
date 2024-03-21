@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.rest.entity.ShopProductSpec;
 import com.pinet.rest.mapper.ShopProductSpecMapper;
 import com.pinet.rest.service.IShopProductSpecService;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -35,5 +37,13 @@ public class ShopProductSpecServiceImpl extends ServiceImpl<ShopProductSpecMappe
     @Override
     public BigDecimal getPriceByShopProdId(Long shopProdId) {
         return shopProductSpecMapper.getPriceByShopProdId(shopProdId);
+    }
+
+    @Override
+    public BigDecimal getPriceByIds(List<Long> ids) {
+        QueryWrapper<ShopProductSpec> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("sum(price)");
+        queryWrapper.in("id",ids);
+        return getObj(queryWrapper,o->((BigDecimal)o));
     }
 }

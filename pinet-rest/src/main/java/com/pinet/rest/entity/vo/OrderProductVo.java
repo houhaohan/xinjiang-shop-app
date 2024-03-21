@@ -24,6 +24,9 @@ public class OrderProductVo {
     @ApiModelProperty("客如云菜品ID")
     private String dishId;
 
+    @ApiModelProperty("菜品类型。SINGLE：单菜 ，COMBO：套餐， SIDE：配料")
+    private String dishType;
+
     @ApiModelProperty("商品名称")
     private String prodName;
 

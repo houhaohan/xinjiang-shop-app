@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @program: xinjiang-shop-app
@@ -47,6 +48,9 @@ public class OrderSettlementDto {
 
     @ApiModelProperty(value = "收货地址id(外卖订单必传)",name = "customerAddressId")
     private Long customerAddressId;
+
+    @ApiModelProperty(value = "套餐菜明细")
+    private List<OrderComboDishDto> orderComboDishList;
 
 
 }

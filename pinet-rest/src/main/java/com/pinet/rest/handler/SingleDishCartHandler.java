@@ -8,8 +8,7 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.CartProductSpec;
 import com.pinet.rest.entity.ShopProductSpec;
-import com.pinet.rest.entity.bo.QueryOrderProductBo;
-import com.pinet.rest.entity.vo.OrderProductVo;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -27,17 +26,6 @@ public class SingleDishCartHandler extends DishCartHandler {
     public SingleDishCartHandler(CartContext context){
         this.context = context;
     }
-
-
-
-    @Override
-    public OrderProductVo getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType) {
-        List<CartProductSpec> cartProductSpecs = context.cartProductSpecService.getByCartId(cartId);
-        List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-        QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(shopProdId, prodNum, shopProdSpecIds, orderType);
-        return context.orderProductService.getByQueryOrderProductBo(queryOrderProductBo);
-    }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)

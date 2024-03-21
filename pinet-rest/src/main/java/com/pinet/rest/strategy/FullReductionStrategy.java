@@ -41,13 +41,13 @@ public class FullReductionStrategy implements PromotionStrategy {
     }
 
     @Override
-    public List<OrderDiscount> apply(List<OrderProductVo> orderProducts) {
+    public List<OrderDiscount> apply(List<OrderProduct> orderProducts) {
         if(CollectionUtils.isEmpty(orderProducts)){
             return new ArrayList<>();
         }
         orderProducts.sort((o1, o2) -> o2.getProdPrice().compareTo(o1.getProdPrice()));
         BigDecimal couponPrice = this.couponPrice;
-        for(OrderProductVo orderProduct : orderProducts){
+        for(OrderProduct orderProduct : orderProducts){
             OrderDiscount orderDiscount = new OrderDiscount();
             orderDiscount.setType(DiscountTypeEnum.COUPON.getCode());
             if(BigDecimalUtil.ge(orderProduct.getProdPrice(),couponPrice)){

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * 订单优惠
+ * @author chengshuanghui
  */
 @Component
 public class OrderPreferentialManager {
@@ -32,7 +33,7 @@ public class OrderPreferentialManager {
         this.couponProductService =  couponProductService;
     }
 
-    public PreferentialVo doPreferential(Long customerId, Long customerCouponId, BigDecimal orderProductPrice,List<OrderProductVo> orderProducts){
+    public PreferentialVo doPreferential(Long customerId, Long customerCouponId, BigDecimal orderProductPrice,List<OrderProduct> orderProducts){
         PreferentialVo preferentialVo = new PreferentialVo();
         List<OrderDiscount> orderDiscounts = new ArrayList<>();
 
@@ -73,7 +74,7 @@ public class OrderPreferentialManager {
             orderDiscounts.addAll(promotionStrategyFactory.create().apply(orderProductPrice));
         }else if(coupon.getUseProduct() == 2){
             //部分商品
-            List<Long> shopProdIds = orderProducts.stream().map(OrderProductVo::getShopProdId).collect(Collectors.toList());
+            List<Long> shopProdIds = orderProducts.stream().map(OrderProduct::getShopProdId).collect(Collectors.toList());
             QueryWrapper<CouponProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.select("product_id");
             queryWrapper.eq("coupon_id",coupon.getId());
@@ -91,4 +92,5 @@ public class OrderPreferentialManager {
         preferentialVo.setOrderProductPrice(orderProductPrice);
         return preferentialVo;
     }
+
 }

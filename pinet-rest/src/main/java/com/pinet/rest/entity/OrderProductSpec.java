@@ -42,5 +42,4 @@ public class OrderProductSpec extends BaseEntity {
     @ApiModelProperty("店铺商品样式name")
     private String prodSpecName;
 
-
 }

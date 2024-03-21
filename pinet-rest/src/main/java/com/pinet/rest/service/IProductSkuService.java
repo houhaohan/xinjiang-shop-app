@@ -2,6 +2,7 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.ProductSku;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.OrderProductSpecVo;
 
 /**
  * <p>

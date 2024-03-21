@@ -21,5 +21,5 @@ public interface PromotionStrategy {
      * @param orderProducts 优惠商品列表
      * @return
      */
-    List<OrderDiscount> apply(List<OrderProductVo> orderProducts);
+    List<OrderDiscount> apply(List<OrderProduct> orderProducts);
 }

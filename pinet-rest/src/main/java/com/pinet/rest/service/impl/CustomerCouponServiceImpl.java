@@ -143,14 +143,14 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     @Override
-    public Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProductVo> orderProducts) {
+    public Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProduct> orderProducts) {
         CustomerCouponVo customerCouponVo = baseMapper.selectCustomerCouponVoById(customerCouponId);
         return checkCoupon(customerCouponVo, shopId, orderProducts);
     }
 
     @Override
-    public Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProductVo> orderProducts) {
-        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProductVo::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+    public Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts) {
+        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         //优惠券不存在
         if (ObjectUtil.isNull(customerCoupon)) {
@@ -185,13 +185,13 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
                 return false;
             }
         } else {
-            List<Long> shopProdIds = orderProducts.stream().map(OrderProductVo::getShopProdId).collect(Collectors.toList());
+            List<Long> shopProdIds = orderProducts.stream().map(OrderProduct::getShopProdId).collect(Collectors.toList());
             QueryWrapper<CouponProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.select("product_id");
             queryWrapper.eq("coupon_id", coupon.getId());
             queryWrapper.in("product_id", shopProdIds);
             List<Long> productIds = couponProductService.listObjs(queryWrapper, productId -> Long.valueOf(productId.toString()));
-            BigDecimal sumPrice = orderProducts.stream().filter(item -> productIds.contains(item.getShopProdId())).map(OrderProductVo::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal sumPrice = orderProducts.stream().filter(item -> productIds.contains(item.getShopProdId())).map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
             if (BigDecimalUtil.lt(sumPrice, coupon.getUsePrice())) {
                 return false;
             }

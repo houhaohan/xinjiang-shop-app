@@ -41,7 +41,7 @@ public class OrderSettlementVo {
     private Integer orderMaxNum = CommonConstant.MAX_ORDER_NUM;
 
     @ApiModelProperty(value = "订单商品信息", name = "orderProductBoList")
-    private List<OrderProductVo> orderProductBoList;
+    private List<OrderProduct> orderProductBoList;
 
     @ApiModelProperty(value = "订单商品数量", name = "orderProductNum")
     private Integer orderProductNum;

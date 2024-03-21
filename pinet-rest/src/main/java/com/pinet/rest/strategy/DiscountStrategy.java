@@ -40,11 +40,11 @@ public class DiscountStrategy implements PromotionStrategy {
     }
 
     @Override
-    public List<OrderDiscount> apply(List<OrderProductVo> orderProducts) {
+    public List<OrderDiscount> apply(List<OrderProduct> orderProducts) {
         if(CollectionUtils.isEmpty(orderProducts)){
             return new ArrayList<>();
         }
-        for(OrderProductVo orderProduct : orderProducts){
+        for(OrderProduct orderProduct : orderProducts){
             BigDecimal discountAmount = BigDecimalUtil.multiply(orderProduct.getProdPrice(), discount);
             OrderDiscount orderDiscount = new OrderDiscount();
             orderDiscount.setDiscountMsg(orderProduct.getProdName());

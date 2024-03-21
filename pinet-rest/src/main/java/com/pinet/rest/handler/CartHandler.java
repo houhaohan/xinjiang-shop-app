@@ -15,7 +15,7 @@ public interface CartHandler {
     /**
      * 刷新购物车数量
      */
-    public void refreshCart(Cart cart,Integer prodNum);
+    public void refreshCart(Cart cart, Integer prodNum);
 
     /**
      * 清除购物车

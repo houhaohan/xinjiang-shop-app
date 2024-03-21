@@ -27,16 +27,6 @@ public class ComboDishCartHandler extends DishCartHandler{
         this.context = context;
     }
 
-    @Override
-    public OrderProductVo getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType) {
-        //套餐
-        List<CartProductSpec> cartProductSpecs = context.cartProductSpecService.getComboByCartId(cartId);
-        List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-        QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(shopProdId, prodNum, shopProdSpecIds,orderType);
-        return context.orderProductService.getByQueryOrderProductBo(queryOrderProductBo);
-     }
-
-
     /**
      * 新增购物车
      */

@@ -28,4 +28,14 @@ public interface OrderProductMapper extends BaseMapper<OrderProduct> {
      * @return
      */
     List<OrderProductDto> getByOrderId(@Param("orderId") Long orderId);
+
+    /**
+     * 根据订单查询套餐信息
+     * @param orderId
+     * @return
+     */
+    List<OrderProduct> getComboByOrderId(@Param("orderId") Long orderId);
+
 }
+
+

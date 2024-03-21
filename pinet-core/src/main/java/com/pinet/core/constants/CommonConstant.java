@@ -36,5 +36,12 @@ public class CommonConstant {
      */
     public static final Integer YES = 1;
 
+    /**
+     * 是否删除，0-否，1-是
+     */
+    public static final int DEL_FLAG_N = 0;
+
+    public static final int DEL_FLAG_Y = 1;
+
 
 }

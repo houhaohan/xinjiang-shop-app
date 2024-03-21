@@ -26,6 +26,13 @@ public interface IOrderProductService extends IService<OrderProduct> {
      */
     List<OrderProduct> getByOrderId(Long orderId);
 
+    /**
+     * 获取订单套餐商品信息
+     * @param orderId
+     * @return
+     */
+    List<OrderProduct> getComboByOrderId(Long orderId);
+
 
     /**
      * 根据订单id查找订单商品详情，展示套餐明细
@@ -33,7 +40,7 @@ public interface IOrderProductService extends IService<OrderProduct> {
      * @param orderId 订单id
      * @return List
      */
-    List<OrderProductVo> getProductByOrderId(Long orderId);
+    List<OrderProduct> getProductByOrderId(Long orderId);
 
     /**
      * 根据店铺信息查询购物车商品 校验数据并构造List<OrderProduct>原始数据
@@ -42,7 +49,7 @@ public interface IOrderProductService extends IService<OrderProduct> {
      * @param shopId 店铺id
      * @return List
      */
-    List<OrderProductVo> getByCartAndShop(Long shopId, Integer orderType);
+    List<OrderProduct> getByCartAndShop(Long shopId, Integer orderType);
 
     /**
      * 通过QueryOrderProductBo参数构造OrderProduct数据
@@ -51,7 +58,7 @@ public interface IOrderProductService extends IService<OrderProduct> {
      * @param queryOrderProductBo 查询param
      * @return OrderProduct
      */
-    OrderProductVo getByQueryOrderProductBo(QueryOrderProductBo queryOrderProductBo);
+    OrderProduct getByQueryOrderProductBo(QueryOrderProductBo queryOrderProductBo);
 
     /**
      * 根据订单id 查询商品信息，对接客如云订单 使用

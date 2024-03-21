@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.ShopProductSpec;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -32,10 +33,17 @@ public interface IShopProductSpecService extends IService<ShopProductSpec> {
 
 
     /**
-     * 查询商品价格
+     * 查询商品价格(这个方法有问题)
      * @param shopProdId
      * @return
      */
     BigDecimal getPriceByShopProdId(Long shopProdId);
+
+    /**
+     * 根据样式ID查询商品价格
+     * @param ids
+     * @return
+     */
+    BigDecimal getPriceByIds(List<Long> ids);
 
 }

@@ -15,19 +15,6 @@ import org.springframework.beans.BeanUtils;
 public abstract class DishCartHandler implements CartHandler {
     protected CartContext context;
 
-
-    /**
-     * 根据购物车ID查询订单商品信息
-     * @param cartId
-     * @return
-     */
-    public OrderProductVo getOrderProductByCartId(Long cartId, Long shopProdId, Integer prodNum, Integer orderType){
-        return null;
-    };
-
-
-
-
     /**
      * 构建购物车信息
      * @return

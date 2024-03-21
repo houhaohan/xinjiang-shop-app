@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.pinet.rest.entity.vo.ComboDishSpecVo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -59,6 +60,10 @@ public class OrderProduct extends BaseEntity {
     @TableField(exist=false)
     @ApiModelProperty("订单商品样式信息")
     private List<OrderProductSpec> orderProductSpecs;
+
+    @ApiModelProperty("订单套餐商品明细")
+    @TableField(exist=false)
+    private List<ComboDishSpecVo> comboDishDetails;
 
     @TableField(exist=false)
     @ApiModelProperty("订单商品样式信息字符串")
