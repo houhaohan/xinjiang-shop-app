@@ -96,7 +96,7 @@ public class CartContext {
         shopProductSpecService = SpringContextUtils.getBean(IShopProductSpecService.class);
         cartMapper = SpringContextUtils.getBean(CartMapper.class);
         cartProductSpecService = SpringContextUtils.getBean(ICartProductSpecService.class);
-    };
+    }
 
 
     /**
@@ -104,14 +104,14 @@ public class CartContext {
      */
     public void handler(){
         cartHandler.handler();
-    };
+    }
 
     /**
      * 刷新购物车商品数量
      */
     public void refreshCart(Cart cart,Integer prodNum){
         cartHandler.refreshCart(cart,prodNum);
-    };
+    }
 
 
     /**
@@ -119,7 +119,7 @@ public class CartContext {
      */
     public void clear(List<Long> ids){
         cartHandler.clear(ids);
-    };
+    }
 
     /**
      * 新增购物车响应结果
@@ -130,7 +130,7 @@ public class CartContext {
         response.setProdNum(prodNum);
         response.setPrice(totalPrice);
         return response;
-    };
+    }
 
 
 }
