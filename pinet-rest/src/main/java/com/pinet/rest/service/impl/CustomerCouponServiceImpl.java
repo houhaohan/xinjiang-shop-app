@@ -172,7 +172,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
 
         //校验店铺
-        if (coupon.getUseShop() == CouponShopEnum.SOME_SHOP.getCode()) {
+        if (coupon.getUseShop().equals(CouponShopEnum.SOME_SHOP.getCode())) {
             boolean exists = couponShopService.isExistsInShop(customerCoupon.getCouponId(), shopId);
             if (!exists) {
                 return false;

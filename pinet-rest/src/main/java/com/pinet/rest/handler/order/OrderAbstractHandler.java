@@ -215,7 +215,7 @@ public abstract class OrderAbstractHandler implements OrderHandler{
         response.setOrderId(orders.getId());
         response.setOrderNo(orders.getOrderNo());
         response.setExpireTime(DateUtil.offsetMinute(orders.getCreateTime(), 15).getTime());
-        response.setOrderPrice(orders.getOrderPrice());
+        response.setOrderPrice(orderPrice);
         context.response = response;
     }
 
