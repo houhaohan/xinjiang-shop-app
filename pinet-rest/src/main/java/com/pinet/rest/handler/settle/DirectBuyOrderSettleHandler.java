@@ -1,6 +1,7 @@
 package com.pinet.rest.handler.settle;
 
 
+import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
@@ -27,7 +28,11 @@ public class DirectBuyOrderSettleHandler extends OrderSettleAbstractHandler {
         context.dishSettleContext
                 .execute(shopProduct.getDishType())
                 .handler();
-        orderProducts.add(context.dishSettleContext.response);
+        OrderProduct orderProduct = context.dishSettleContext.response;
+        orderProducts.add(orderProduct);
         context.response = orderProducts;
+        context.packageFee = BigDecimalUtil.sum(context.packageFee,orderProduct.getPackageFee());
+        context.orderProdPrice = BigDecimalUtil.sum(context.orderProdPrice,orderProduct.getProdPrice());
+        context.orderProductNum = context.orderProductNum + orderProduct.getProdNum();
     }
 }

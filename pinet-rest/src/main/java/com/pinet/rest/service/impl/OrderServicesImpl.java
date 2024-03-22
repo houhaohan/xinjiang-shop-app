@@ -210,17 +210,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         OrderSettlementVo vo = new OrderSettlementVo();
         vo.setShopName(shop.getShopName());
 
-//        List<OrderProduct> orderProducts = new ArrayList<>();
-//        if (dto.getSettlementType() == 1) {
-//            //购物车结算（通过店铺id 查找购物车进行结算）
-//            orderProducts = orderProductService.getByCartAndShop(dto.getShopId(), dto.getOrderType());
-//        } else {
-//            //直接结算（通过具体的商品样式、商品数量进行结算）
-//            List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
-//            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType(),dto.getOrderComboDishList());
-//            OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
-//            orderProducts.add(orderProduct);
-//        }
 
         OrderSetterContext orderSetterContext = new OrderSetterContext();
         orderSetterContext.setCartService(cartService);
@@ -230,8 +219,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderSetterContext.execute();
         List<OrderProduct> orderProducts = orderSetterContext.getResponse();
 
-        BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
-        vo.setPackageFee(packageFee);
+        vo.setPackageFee(orderSetterContext.getPackageFee());
         vo.setOrderProductBoList(orderProducts);
         vo.setOrderMakeCount(countShopOrderMakeNum(dto.getShopId()));
         //计算商品总金额
@@ -242,12 +230,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setShippingFee(shippingFee);
 
         //设置订单原价 和 商品原价
-        vo.setOriginalPrice(BigDecimalUtil.sum(orderProdPrice, shippingFee, packageFee));
-        vo.setOriginalOrderProductPrice(orderProdPrice);
+        vo.setOriginalOrderProductPrice(orderSetterContext.getOrderProdPrice());
+        vo.setOriginalPrice(BigDecimalUtil.sum(orderSetterContext.getOrderProdPrice(), shippingFee, orderSetterContext.getPackageFee()));
 
         //订单优惠处理
-        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderProdPrice, orderProducts);
-        vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),packageFee,shippingFee));
+        PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderSetterContext.getOrderProdPrice(), orderProducts);
+        vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),orderSetterContext.getPackageFee(),shippingFee));
 
         //返回预计送达时间
         Date now = new Date();
@@ -257,8 +245,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
 
 
-        Integer orderProductNum = orderProducts.stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
-        vo.setOrderProductNum(orderProductNum);
+//        Integer orderProductNum = orderProducts.stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
+        vo.setOrderProductNum(orderSetterContext.getOrderProductNum());
         vo.setOrderDiscounts(preferentialVo.getOrderDiscounts());
 
         List<CustomerCouponVo> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));

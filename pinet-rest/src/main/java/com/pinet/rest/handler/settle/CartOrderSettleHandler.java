@@ -1,6 +1,7 @@
 package com.pinet.rest.handler.settle;
 
 import com.pinet.core.exception.PinetException;
+import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.OrderSettlementDto;
@@ -37,9 +38,13 @@ public class CartOrderSettleHandler extends OrderSettleAbstractHandler{
             context.dishSettleContext
                     .execute(cart.getDishType())
                     .handler(cart);
-            orderProducts.add(context.dishSettleContext.response);
-        });
+            OrderProduct orderProduct = context.dishSettleContext.response;
+            orderProducts.add(orderProduct);
 
+            context.packageFee = BigDecimalUtil.sum(context.packageFee,orderProduct.getPackageFee());
+            context.orderProdPrice = BigDecimalUtil.sum(context.orderProdPrice,orderProduct.getProdPrice());
+            context.orderProductNum = context.orderProductNum + orderProduct.getProdNum();
+        });
         context.response = orderProducts;
     }
 

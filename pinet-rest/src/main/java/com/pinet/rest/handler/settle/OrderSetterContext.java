@@ -3,6 +3,8 @@ package com.pinet.rest.handler.settle;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.enums.SettlementTypeEnum;
 import com.pinet.rest.service.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,6 +19,12 @@ public class OrderSetterContext {
     protected DishSettleContext dishSettleContext;
     protected Long userId;
     protected List<OrderProduct> response;
+
+    protected BigDecimal packageFee = BigDecimal.ZERO;
+    protected BigDecimal orderProdPrice = BigDecimal.ZERO;
+    protected Integer orderProductNum = 0;
+
+
     protected OrderSettleHandler orderSettleHandler;
 
 
@@ -37,6 +45,18 @@ public class OrderSetterContext {
         return this.response;
     }
 
+
+    public BigDecimal getPackageFee(){
+        return this.packageFee;
+    }
+
+    public BigDecimal getOrderProdPrice(){
+        return this.orderProdPrice;
+    }
+
+    public Integer getOrderProductNum(){
+        return this.orderProductNum;
+    }
 
     public void execute(){
         if(Objects.equals(dishSettleContext.request.getSettlementType(), SettlementTypeEnum.CART_BUY.getCode())){
