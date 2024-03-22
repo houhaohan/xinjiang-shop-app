@@ -1,4 +1,4 @@
-package com.pinet.rest.handler;
+package com.pinet.rest.handler.cart;
 
 import com.pinet.core.util.SpringContextUtils;
 import com.pinet.keruyun.openapi.constants.DishType;
@@ -8,7 +8,6 @@ import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.mapper.CartMapper;
 import com.pinet.rest.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.List;

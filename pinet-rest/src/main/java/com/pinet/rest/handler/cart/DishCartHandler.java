@@ -1,9 +1,7 @@
-package com.pinet.rest.handler;
+package com.pinet.rest.handler.cart;
 
 import com.pinet.rest.entity.Cart;
-import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.enums.CartStatusEnum;
-import com.pinet.rest.entity.vo.OrderProductVo;
 import org.springframework.beans.BeanUtils;
 
 
@@ -28,6 +26,6 @@ public abstract class DishCartHandler implements CartHandler {
         cart.setDishType(context.shopProduct.getDishType());
         cart.setUnit(context.shopProduct.getUnit());
         return cart;
-    };
+    }
 
 }

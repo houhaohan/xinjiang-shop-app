@@ -5,5 +5,8 @@ package com.pinet.rest.handler.settle;
  * @author: chengshuanghui
  * @date: 2024-03-22 16:40
  */
-public abstract class OrderSettleAbstractHandler {
+public abstract class OrderSettleAbstractHandler implements OrderSettleHandler{
+
+    protected OrderSetterContext context;
+
 }

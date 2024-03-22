@@ -1,10 +1,12 @@
-package com.pinet.rest.handler;
+package com.pinet.rest.handler.cart;
 
 import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
+import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.CartProductSpec;
 import com.pinet.rest.entity.ShopProductSpec;
@@ -30,7 +32,9 @@ public class SingleDishCartHandler extends DishCartHandler {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void handler() {
-//        店铺商品样式id不能为空
+        if(StringUtil.isBlank(context.request.getShopProdSpecIds())){
+            throw new PinetException(ApiExceptionEnum.SPEC_ID_NOT_BLANK);
+        }
 
         //单品
         List<Long> singleProdSpecIds = Convert.toList(Long.class, context.request.getShopProdSpecIds());

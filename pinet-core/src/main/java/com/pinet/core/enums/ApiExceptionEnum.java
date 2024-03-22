@@ -10,6 +10,7 @@ public enum ApiExceptionEnum {
     COUPON_NO_QUANTITY(1003,"优惠券已领完，无法再领取"),
     COUPON_RECEIVE_UPPER_LIMIT(1004,"您领取的数量已达上限，请勿重复操作"),
     COUPON_DISABLE(1005,"优惠券已禁用"),
+    SPEC_ID_NOT_BLANK(1006,"店铺商品样式id不能为空"),
     ;
 
     private int code;

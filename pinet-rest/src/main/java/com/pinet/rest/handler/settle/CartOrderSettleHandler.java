@@ -19,17 +19,14 @@ import java.util.Objects;
  * @date: 2024-03-22 16:35
  */
 public class CartOrderSettleHandler extends OrderSettleAbstractHandler{
-    @Autowired
-    private IOrderProductService orderProductService;
-    @Autowired
-    private ICartService cartService;
 
+    public CartOrderSettleHandler(OrderSetterContext context){
+        this.context = context;
+    }
 
-
-    public void handler(OrderSettlementDto dto){
+    public void handler(){
         List<OrderProduct> orderProducts = new ArrayList<>();
-        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        List<Cart> cartList = cartService.getByUserIdAndShopId(userId, dto.getShopId());
+        List<Cart> cartList = context.cartService.getByUserIdAndShopId(context.userId, context.dishSettleContext.request.getShopId());
         if (CollectionUtils.isEmpty(cartList)) {
             throw new PinetException("购物车内没有需要结算的商品");
         }
@@ -37,9 +34,14 @@ public class CartOrderSettleHandler extends OrderSettleAbstractHandler{
             if (Objects.equals(cart.getCartStatus(), CartStatusEnum.EXPIRE.getCode())) {
                 throw new PinetException("购物车内有失效的商品,请删除后在结算");
             }
-            new DishHandlerFactory(cart.getDishType()).execute();
+            context.dishSettleContext
+                    .execute(cart.getDishType())
+                    .handler(cart);
+            orderProducts.add(context.dishSettleContext.response);
         });
 
+        context.response = orderProducts;
     }
+
 
 }

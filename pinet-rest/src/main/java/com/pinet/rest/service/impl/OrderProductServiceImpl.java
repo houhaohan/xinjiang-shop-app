@@ -99,26 +99,26 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
     @Override
     public List<OrderProduct> getByCartAndShop(Long shopId, Integer orderType) {
         List<OrderProduct> orderProducts = new ArrayList<>();
-        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shopId);
-        if (CollectionUtils.isEmpty(cartList)) {
-            throw new PinetException("购物车内没有需要结算的商品");
-        }
-        cartList.forEach(k -> {
-            if (Objects.equals(k.getCartStatus(), CartStatusEnum.EXPIRE.getCode())) {
-                throw new PinetException("购物车内有失效的商品,请删除后在结算");
-            }
-            if (DishType.COMBO.equalsIgnoreCase(k.getDishType())) {
-                OrderProduct comboOrderItemInfo = getComboOrderItemInfo(k, orderType);
-                orderProducts.add(comboOrderItemInfo);
-            } else {
-                List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
-                List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-                QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds, orderType,null);
-                OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
-                orderProducts.add(orderProduct);
-            }
-        });
+//        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+//        List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shopId);
+//        if (CollectionUtils.isEmpty(cartList)) {
+//            throw new PinetException("购物车内没有需要结算的商品");
+//        }
+//        cartList.forEach(k -> {
+//            if (Objects.equals(k.getCartStatus(), CartStatusEnum.EXPIRE.getCode())) {
+//                throw new PinetException("购物车内有失效的商品,请删除后在结算");
+//            }
+//            if (DishType.COMBO.equalsIgnoreCase(k.getDishType())) {
+//                OrderProduct comboOrderItemInfo = getComboOrderItemInfo(k, orderType);
+//                orderProducts.add(comboOrderItemInfo);
+//            } else {
+//                List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
+//                List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
+//                QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds, orderType,null);
+//                OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
+//                orderProducts.add(orderProduct);
+//            }
+//        });
         return orderProducts;
     }
 
@@ -178,96 +178,96 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
     @Override
     public OrderProduct getByQueryOrderProductBo(QueryOrderProductBo queryOrderProductBo) {
         OrderProduct orderProduct = new OrderProduct();
-        ShopProduct shopProduct = shopProductService.getById(queryOrderProductBo.getShopProdId());
-
-        //判断店铺商品是否下架
-        if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_SHELF.getCode())) {
-            throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
-        }
-
-        //判断店铺商品是否删除
-        if (shopProduct.getDelFlag() == 1) {
-            throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
-        }
-
-        //设置打包费   //自提没有打包费
-        if (queryOrderProductBo.getOrderType().equals(OrderTypeEnum.TAKEAWAY.getCode())) {
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, queryOrderProductBo.getProdNum(), RoundingMode.HALF_UP));
-        }
-        orderProduct.setDishId(shopProduct.getProdId());
-        orderProduct.setShopProdId(shopProduct.getId());
-        orderProduct.setProdName(shopProduct.getProductName());
-        orderProduct.setProdNum(queryOrderProductBo.getProdNum());
-        orderProduct.setUnit(shopProduct.getUnit());
-        //orderProduct.setDishType(shopProduct.getDishType());
-        //单价
-        BigDecimal unitPrice = BigDecimal.ZERO;
-        List<ComboDishSpecVo> orderComboDishList = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(queryOrderProductBo.getOrderComboDishList())){
-            for(OrderComboDishDto orderComboDishDto : queryOrderProductBo.getOrderComboDishList()){
-                ComboDishSpecVo comboDishSpecVo = new ComboDishSpecVo();
-                comboDishSpecVo.setShopProdId(orderComboDishDto.getShopProdId());
-                comboDishSpecVo.setSingleDishId(orderComboDishDto.getSingleProdId());
-                ShopProduct singleProduct = shopProductService.getById(orderComboDishDto.getSingleProdId());
-                comboDishSpecVo.setSingleDishName(singleProduct.getProductName());
-
-                List<OrderProductSpecVo> orderProductSpecs = new ArrayList<>();
-                for(OrderComboDishSpecDto orderComboDishSpecDto : orderComboDishDto.getOrderComboDishSpecList()) {
-                    OrderProductSpecVo orderProductSpecVo = new OrderProductSpecVo();
-                    ShopProductSpec singleSpec = shopProductSpecService.getById(orderComboDishSpecDto.getShopProdSpecId());
-                    orderProductSpecVo.setShopProdSpecId(orderComboDishSpecDto.getShopProdSpecId());
-                    orderProductSpecVo.setProdSpecName(orderComboDishSpecDto.getShopProdSpecName());
-                    orderProductSpecVo.setProdSkuId(singleSpec.getSkuId());
-                    orderProductSpecVo.setProdSkuName(singleSpec.getSkuName());
-                    orderProductSpecs.add(orderProductSpecVo);
-                }
-                comboDishSpecVo.setOrderProductSpecs(orderProductSpecs);
-                orderComboDishList.add(comboDishSpecVo);
-            }
-            Long price = kryComboGroupDetailService.getPriceByShopProdId(orderProduct.getShopProdId());
-            unitPrice = BigDecimalUtil.fenToYuan(price);
-        }
-        orderProduct.setComboDishDetails(orderComboDishList);
-
-        List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
-
-        if(!CollectionUtils.isEmpty(queryOrderProductBo.getShopProdSpecIds())){
-            for (Long shopProdSpecId : queryOrderProductBo.getShopProdSpecIds()) {
-                //查询具体的样式并且校验
-                OrderProductSpec orderProductSpec = new OrderProductSpec();
-                if (DishType.COMBO.equalsIgnoreCase(shopProduct.getDishType())) {
-                    KryComboGroupDetail kryComboGroupDetail = kryComboGroupDetailService.getById(shopProdSpecId);
-                    unitPrice = unitPrice.add(BigDecimalUtil.fenToYuan(kryComboGroupDetail.getPrice()));
-
-                    KryComboGroup kryComboGroup = kryComboGroupService.getById(kryComboGroupDetail.getComboGroupId());
-                    orderProductSpec.setProdSkuId(kryComboGroup.getId());
-                    orderProductSpec.setProdSkuName(kryComboGroup.getGroupName());
-                    orderProductSpec.setShopProdSpecId(shopProdSpecId);
-                    orderProductSpec.setProdSpecName(kryComboGroupDetail.getDishName());
-                    orderProductSpecs.add(orderProductSpec);
-                } else {
-                    ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
-                    if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
-                        throw new PinetException(shopProduct.getProductName() + ":" + shopProductSpec.getSpecName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
-                    }
-                    unitPrice = BigDecimalUtil.sum(unitPrice, shopProductSpec.getPrice());
-                    ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
-                    orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
-                    orderProductSpec.setProdSkuName(productSku.getSkuName());
-                    orderProductSpec.setShopProdSpecId(shopProdSpecId);
-                    orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
-                    orderProductSpecs.add(orderProductSpec);
-                }
-            }
-        }
-
-        orderProduct.setOrderProductSpecs(orderProductSpecs);
-        orderProduct.setOrderProductSpecStr(orderProductSpecs.stream().map(OrderProductSpec::getProdSpecName).collect(Collectors.joining(",")));
-        orderProduct.setProdUnitPrice(unitPrice);
-        //计算总价
-        BigDecimal prodPrice = BigDecimalUtil.multiply(unitPrice, queryOrderProductBo.getProdNum(), RoundingMode.DOWN);
-        orderProduct.setProdPrice(prodPrice);
-        orderProduct.setProdImg(shopProduct.getProductImg());
+//        ShopProduct shopProduct = shopProductService.getById(queryOrderProductBo.getShopProdId());
+//
+//        //判断店铺商品是否下架
+//        if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_SHELF.getCode())) {
+//            throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
+//        }
+//
+//        //判断店铺商品是否删除
+//        if (shopProduct.getDelFlag() == 1) {
+//            throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
+//        }
+//
+//        //设置打包费   //自提没有打包费
+//        if (queryOrderProductBo.getOrderType().equals(OrderTypeEnum.TAKEAWAY.getCode())) {
+//            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, queryOrderProductBo.getProdNum(), RoundingMode.HALF_UP));
+//        }
+//        orderProduct.setDishId(shopProduct.getProdId());
+//        orderProduct.setShopProdId(shopProduct.getId());
+//        orderProduct.setProdName(shopProduct.getProductName());
+//        orderProduct.setProdNum(queryOrderProductBo.getProdNum());
+//        orderProduct.setUnit(shopProduct.getUnit());
+//        //orderProduct.setDishType(shopProduct.getDishType());
+//        //单价
+//        BigDecimal unitPrice = BigDecimal.ZERO;
+//        List<ComboDishSpecVo> orderComboDishList = new ArrayList<>();
+//        if(!CollectionUtils.isEmpty(queryOrderProductBo.getOrderComboDishList())){
+//            for(OrderComboDishDto orderComboDishDto : queryOrderProductBo.getOrderComboDishList()){
+//                ComboDishSpecVo comboDishSpecVo = new ComboDishSpecVo();
+//                comboDishSpecVo.setShopProdId(orderComboDishDto.getShopProdId());
+//                comboDishSpecVo.setSingleDishId(orderComboDishDto.getSingleProdId());
+//                ShopProduct singleProduct = shopProductService.getById(orderComboDishDto.getSingleProdId());
+//                comboDishSpecVo.setSingleDishName(singleProduct.getProductName());
+//
+//                List<OrderProductSpecVo> orderProductSpecs = new ArrayList<>();
+//                for(OrderComboDishSpecDto orderComboDishSpecDto : orderComboDishDto.getOrderComboDishSpecList()) {
+//                    OrderProductSpecVo orderProductSpecVo = new OrderProductSpecVo();
+//                    ShopProductSpec singleSpec = shopProductSpecService.getById(orderComboDishSpecDto.getShopProdSpecId());
+//                    orderProductSpecVo.setShopProdSpecId(orderComboDishSpecDto.getShopProdSpecId());
+//                    orderProductSpecVo.setProdSpecName(orderComboDishSpecDto.getShopProdSpecName());
+//                    orderProductSpecVo.setProdSkuId(singleSpec.getSkuId());
+//                    orderProductSpecVo.setProdSkuName(singleSpec.getSkuName());
+//                    orderProductSpecs.add(orderProductSpecVo);
+//                }
+//                comboDishSpecVo.setOrderProductSpecs(orderProductSpecs);
+//                orderComboDishList.add(comboDishSpecVo);
+//            }
+//            Long price = kryComboGroupDetailService.getPriceByShopProdId(orderProduct.getShopProdId());
+//            unitPrice = BigDecimalUtil.fenToYuan(price);
+//        }
+//        orderProduct.setComboDishDetails(orderComboDishList);
+//
+//        List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
+//
+//        if(!CollectionUtils.isEmpty(queryOrderProductBo.getShopProdSpecIds())){
+//            for (Long shopProdSpecId : queryOrderProductBo.getShopProdSpecIds()) {
+//                //查询具体的样式并且校验
+//                OrderProductSpec orderProductSpec = new OrderProductSpec();
+//                if (DishType.COMBO.equalsIgnoreCase(shopProduct.getDishType())) {
+//                    KryComboGroupDetail kryComboGroupDetail = kryComboGroupDetailService.getById(shopProdSpecId);
+//                    unitPrice = unitPrice.add(BigDecimalUtil.fenToYuan(kryComboGroupDetail.getPrice()));
+//
+//                    KryComboGroup kryComboGroup = kryComboGroupService.getById(kryComboGroupDetail.getComboGroupId());
+//                    orderProductSpec.setProdSkuId(kryComboGroup.getId());
+//                    orderProductSpec.setProdSkuName(kryComboGroup.getGroupName());
+//                    orderProductSpec.setShopProdSpecId(shopProdSpecId);
+//                    orderProductSpec.setProdSpecName(kryComboGroupDetail.getDishName());
+//                    orderProductSpecs.add(orderProductSpec);
+//                } else {
+//                    ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
+//                    if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
+//                        throw new PinetException(shopProduct.getProductName() + ":" + shopProductSpec.getSpecName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
+//                    }
+//                    unitPrice = BigDecimalUtil.sum(unitPrice, shopProductSpec.getPrice());
+//                    ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
+//                    orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
+//                    orderProductSpec.setProdSkuName(productSku.getSkuName());
+//                    orderProductSpec.setShopProdSpecId(shopProdSpecId);
+//                    orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
+//                    orderProductSpecs.add(orderProductSpec);
+//                }
+//            }
+//        }
+//
+//        orderProduct.setOrderProductSpecs(orderProductSpecs);
+//        orderProduct.setOrderProductSpecStr(orderProductSpecs.stream().map(OrderProductSpec::getProdSpecName).collect(Collectors.joining(",")));
+//        orderProduct.setProdUnitPrice(unitPrice);
+//        //计算总价
+//        BigDecimal prodPrice = BigDecimalUtil.multiply(unitPrice, queryOrderProductBo.getProdNum(), RoundingMode.DOWN);
+//        orderProduct.setProdPrice(prodPrice);
+//        orderProduct.setProdImg(shopProduct.getProductImg());
         return orderProduct;
     }
 

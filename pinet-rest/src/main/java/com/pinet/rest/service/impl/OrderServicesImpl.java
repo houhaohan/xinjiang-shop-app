@@ -48,6 +48,8 @@ import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.param.RefundParam;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.handler.order.OrderContext;
+import com.pinet.rest.handler.settle.DishSettleContext;
+import com.pinet.rest.handler.settle.OrderSetterContext;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
@@ -105,6 +107,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final WxMaService wxMaService;
     private final ICustomerService customerService;
     private final OrderContext context;
+    private final DishSettleContext dishSettleContext;
 
 
     @Override
@@ -185,6 +188,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return orderDetailVo;
     }
 
+
     /**
      * 订单结算重构
      * @param dto
@@ -206,17 +210,25 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         OrderSettlementVo vo = new OrderSettlementVo();
         vo.setShopName(shop.getShopName());
 
-        List<OrderProduct> orderProducts = new ArrayList<>();
-        if (dto.getSettlementType() == 1) {
-            //购物车结算（通过店铺id 查找购物车进行结算）
-            orderProducts = orderProductService.getByCartAndShop(dto.getShopId(), dto.getOrderType());
-        } else {
-            //直接结算（通过具体的商品样式、商品数量进行结算）
-            List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
-            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType(),dto.getOrderComboDishList());
-            OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
-            orderProducts.add(orderProduct);
-        }
+//        List<OrderProduct> orderProducts = new ArrayList<>();
+//        if (dto.getSettlementType() == 1) {
+//            //购物车结算（通过店铺id 查找购物车进行结算）
+//            orderProducts = orderProductService.getByCartAndShop(dto.getShopId(), dto.getOrderType());
+//        } else {
+//            //直接结算（通过具体的商品样式、商品数量进行结算）
+//            List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
+//            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType(),dto.getOrderComboDishList());
+//            OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
+//            orderProducts.add(orderProduct);
+//        }
+
+        OrderSetterContext orderSetterContext = new OrderSetterContext();
+        orderSetterContext.setCartService(cartService);
+        dishSettleContext.setRequest(dto);
+        orderSetterContext.setDishSettleContext(dishSettleContext);
+        orderSetterContext.setUserId(customerId);
+        orderSetterContext.execute();
+        List<OrderProduct> orderProducts = orderSetterContext.getResponse();
 
         BigDecimal packageFee = orderProducts.stream().map(OrderProduct::getPackageFee).reduce(BigDecimal.ZERO, BigDecimal::add);
         vo.setPackageFee(packageFee);

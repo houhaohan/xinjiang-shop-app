@@ -1,16 +1,14 @@
 package com.pinet.rest.handler.settle;
 
-import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
-import com.pinet.rest.entity.enums.OrderTypeEnum;
+import com.pinet.rest.entity.dto.OrderComboDishDto;
+import com.pinet.rest.entity.dto.OrderComboDishSpecDto;
 import com.pinet.rest.entity.vo.ComboDishSpecVo;
 import com.pinet.rest.entity.vo.OrderProductSpecVo;
-import com.pinet.rest.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,50 +17,40 @@ import java.util.List;
  * @author: chengshuanghui
  * @date: 2024-03-22 16:48
  */
-public class ComboDishHandler implements DishSettleHandler{
-    @Autowired
-    private IShopProductService shopProductService;
-    @Autowired
-    private IShopProductSpecService shopProductSpecService;
-    @Autowired
-    private IKryComboGroupDetailService kryComboGroupDetailService;
-    @Autowired
-    private ICartComboDishService cartComboDishService;
-    @Autowired
-    private ICartComboDishSpecService cartComboDishSpecService;
+public class ComboDishHandler extends DishSettleAbstractHandler{
 
 
-    public OrderProduct handler(Cart cart,Integer orderType){
-        ShopProduct shopProduct = shopProductService.getById(cart.getShopProdId());
-        OrderProduct orderProduct = new OrderProduct();
-        orderProduct.setShopProdId(cart.getShopProdId());
-        orderProduct.setDishId(cart.getDishId());
-        orderProduct.setProdName(shopProduct.getProductName());
-        orderProduct.setUnit(shopProduct.getUnit());
-        Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(shopProduct.getId());
-        orderProduct.setProdUnitPrice(BigDecimalUtil.fenToYuan(unitPrice));
-        orderProduct.setProdNum(cart.getProdNum());
-        orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), new BigDecimal(orderProduct.getProdNum())));
-        orderProduct.setProdImg(shopProduct.getProductImg());
-        if (orderType.equals(OrderTypeEnum.TAKEAWAY.getCode())) {
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE, cart.getProdNum(), RoundingMode.HALF_UP));
-        }
+    public ComboDishHandler(DishSettleContext context){
+        this.context =  context;
+    }
 
-        StringBuffer sb = new StringBuffer();
+
+    /**
+     * 套餐购物车结算
+     * @param cart
+     * @return
+     */
+    @Override
+    public void handler(Cart cart){
+        OrderProduct orderProduct = build(cart.getShopProdId(), cart.getProdNum());
+
         List<ComboDishSpecVo> list = new ArrayList<>();
-        List<CartComboDish> cartComboDishList = cartComboDishService.getByCartId(cart.getId());
+        List<CartComboDish> cartComboDishList = context.cartComboDishService.getByCartId(cart.getId());
+        if(CollectionUtils.isEmpty(cartComboDishList)){
+            return;
+        }
         for (CartComboDish cartComboDish : cartComboDishList) {
             ComboDishSpecVo comboDishSpecVo = new ComboDishSpecVo();
-            comboDishSpecVo.setShopProdId(shopProduct.getId());
+            comboDishSpecVo.setShopProdId(cart.getShopProdId());
             comboDishSpecVo.setSingleDishId(cartComboDish.getShopProdId());
-            ShopProduct singleShopProduct = shopProductService.getById(cartComboDish.getShopProdId());
+            ShopProduct singleShopProduct = context.shopProductService.getById(cartComboDish.getShopProdId());
             comboDishSpecVo.setSingleDishName(singleShopProduct.getProductName());
-            List<CartComboDishSpec> cartComboDishSpecs = cartComboDishSpecService.getByCartIdAndProdId(cart.getId(), cartComboDish.getShopProdId());
+            List<CartComboDishSpec> cartComboDishSpecs = context.cartComboDishSpecService.getByCartIdAndProdId(cart.getId(), cartComboDish.getShopProdId());
 
             List<OrderProductSpecVo> orderProductSpecVoList = new ArrayList<>();
             for (CartComboDishSpec cartComboDishSpec : cartComboDishSpecs) {
                 OrderProductSpecVo orderProductSpecVo = new OrderProductSpecVo();
-                ShopProductSpec shopProductSpec = shopProductSpecService.getById(cartComboDishSpec.getShopProdSpecId());
+                ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(cartComboDishSpec.getShopProdSpecId());
                 orderProductSpecVo.setProdSkuId(shopProductSpec.getSkuId());
                 orderProductSpecVo.setProdSkuName(shopProductSpec.getSkuName());
                 orderProductSpecVo.setProdSpecName(cartComboDishSpec.getShopProdSpecName());
@@ -71,15 +59,64 @@ public class ComboDishHandler implements DishSettleHandler{
             }
             comboDishSpecVo.setOrderProductSpecs(orderProductSpecVoList);
             list.add(comboDishSpecVo);
-            sb.append(singleShopProduct.getProductName()).append(",");
         }
-        orderProduct.setOrderProductSpecStr(sb.substring(0,sb.length()-1));
         orderProduct.setComboDishDetails(list);
+        context.response = orderProduct;
+    }
+
+
+    /**
+     * 套餐直接结算
+     */
+    @Override
+    public void handler() {
+        OrderProduct orderProduct = build(context.request.getShopProdId(), context.request.getProdNum());
+
+        List<OrderComboDishDto> orderComboDishDtoList = context.request.getOrderComboDishList();
+        if(CollectionUtils.isEmpty(orderComboDishDtoList)){
+            return;
+        }
+        List<ComboDishSpecVo> orderComboDishList = new ArrayList<>(orderComboDishDtoList.size());
+        for(OrderComboDishDto orderComboDishDto : orderComboDishDtoList){
+            ComboDishSpecVo comboDishSpecVo = new ComboDishSpecVo();
+            comboDishSpecVo.setShopProdId(orderComboDishDto.getShopProdId());
+            comboDishSpecVo.setSingleDishId(orderComboDishDto.getSingleProdId());
+            ShopProduct singleProduct = context.shopProductService.getById(orderComboDishDto.getSingleProdId());
+            comboDishSpecVo.setSingleDishName(singleProduct.getProductName());
+
+            List<OrderProductSpecVo> orderProductSpecs = new ArrayList<>();
+            for(OrderComboDishSpecDto orderComboDishSpecDto : orderComboDishDto.getOrderComboDishSpecList()) {
+                OrderProductSpecVo orderProductSpecVo = new OrderProductSpecVo();
+                ShopProductSpec singleSpec = context.shopProductSpecService.getById(orderComboDishSpecDto.getShopProdSpecId());
+                orderProductSpecVo.setShopProdSpecId(orderComboDishSpecDto.getShopProdSpecId());
+                orderProductSpecVo.setProdSpecName(orderComboDishSpecDto.getShopProdSpecName());
+                orderProductSpecVo.setProdSkuId(singleSpec.getSkuId());
+                orderProductSpecVo.setProdSkuName(singleSpec.getSkuName());
+                orderProductSpecs.add(orderProductSpecVo);
+            }
+            comboDishSpecVo.setOrderProductSpecs(orderProductSpecs);
+            orderComboDishList.add(comboDishSpecVo);
+        }
+
+        orderProduct.setComboDishDetails(orderComboDishList);
+        context.response = orderProduct;
+    }
+
+
+    /**
+     * 构建订单商品
+     * @param shopProdId
+     * @param prodNum
+     * @return
+     */
+    @Override
+    protected OrderProduct build(Long shopProdId,Integer prodNum){
+        OrderProduct orderProduct = super.build(shopProdId, prodNum);
+        Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(shopProdId);
+        orderProduct.setProdUnitPrice(BigDecimalUtil.fenToYuan(unitPrice));
+        orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), new BigDecimal(orderProduct.getProdNum())));
         return orderProduct;
     }
 
-    @Override
-    public void handler() {
 
-    }
 }

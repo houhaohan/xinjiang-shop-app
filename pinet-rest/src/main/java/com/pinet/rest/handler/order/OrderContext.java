@@ -1,18 +1,13 @@
 package com.pinet.rest.handler.order;
 
 import com.pinet.common.mq.util.JmsUtil;
-import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.CreateOrderDto;
-import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.enums.SettlementTypeEnum;
 import com.pinet.rest.entity.vo.CreateOrderVo;
-import com.pinet.rest.handler.ComboDishCartHandler;
-import com.pinet.rest.handler.SingleDishCartHandler;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
