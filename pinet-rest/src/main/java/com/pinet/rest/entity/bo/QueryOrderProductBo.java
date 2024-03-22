@@ -1,5 +1,7 @@
 package com.pinet.rest.entity.bo;
 
+import com.pinet.rest.entity.dto.OrderComboDishDto;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -35,9 +37,8 @@ public class QueryOrderProductBo {
      */
     private Integer orderType;
 
-
-
-
+    @ApiModelProperty(value = "套餐菜明细")
+    private List<OrderComboDishDto> orderComboDishList;
 
 
 }

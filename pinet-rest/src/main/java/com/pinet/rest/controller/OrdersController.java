@@ -16,22 +16,22 @@ import com.pinet.keruyun.openapi.dto.OrderSyncDTO;
 import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
 import com.pinet.keruyun.openapi.vo.KryResponse;
 import com.pinet.rest.entity.Orders;
-import com.pinet.rest.entity.dto.CreateOrderDto;
-import com.pinet.rest.entity.dto.OrderListDto;
-import com.pinet.rest.entity.dto.OrderPayDto;
-import com.pinet.rest.entity.dto.OrderSettlementDto;
+import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
+import com.pinet.rest.entity.enums.SettlementTypeEnum;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.service.IOrdersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -92,10 +92,20 @@ public class OrdersController extends BaseController {
             throw new PinetException("外卖订单收货地址id必传");
         }
         //如果是直接购买  店铺商品id 和商品数量为必传
-        if (dto.getSettlementType() == 2 && (dto.getShopProdId() == null || dto.getProdNum() == null || StringUtil.isBlank(dto.getShopProdSpecIds()))) {
-            throw new PinetException("直接购买必传店铺商品id || 商品数量 || 商品样式id");
+        //判断是单品还是套餐
+        if(Objects.equals(dto.getSettlementType(), SettlementTypeEnum.DIRECT_BUY.getCode())){
+            //单品校验
+            if(dto.getShopProdId() == null){
+                throw new PinetException("商品ID不能为空");
+            }
+            if(dto.getProdNum() == null){
+                throw new PinetException("商品数量不能为空");
+            }
+            if(StringUtil.isBlank(dto.getShopProdSpecIds())
+                    && CollectionUtils.isEmpty(dto.getOrderComboDishList())){
+                throw new PinetException("商品样式明细不能为空");
+            }
         }
-
     }
 
 

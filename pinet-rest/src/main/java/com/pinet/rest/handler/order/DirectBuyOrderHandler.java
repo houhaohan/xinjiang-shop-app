@@ -5,6 +5,7 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.ShopProdStatusEnum;
+import com.pinet.rest.entity.request.DirectOrderRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ public class DirectBuyOrderHandler extends OrderAbstractHandler {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create() {
-        List<Long> shopProdSpecIds = Convert.toList(Long.class,context.request.getShopProdSpecIds());
         Orders orders = buildOrder();
         ShopProduct shopProduct = context.shopProductService.getById(context.request.getShopProdId());
         //判断店铺商品是否下架
@@ -48,7 +48,8 @@ public class DirectBuyOrderHandler extends OrderAbstractHandler {
         request.setProdImg(shopProduct.getProductImg());
         request.setDishId(shopProduct.getProdId());
         request.setProdNum(context.request.getProdNum());
-        request.setShopProdSpecIds(shopProdSpecIds);
+        request.setShopProdSpecIds(Convert.toList(Long.class,context.request.getShopProdSpecIds()));
+        request.setComboDishDtoList(context.request.getOrderComboDishList());
         request.setCalculate(condition);
 
         List<OrderProduct> orderProducts = new ArrayList<>();

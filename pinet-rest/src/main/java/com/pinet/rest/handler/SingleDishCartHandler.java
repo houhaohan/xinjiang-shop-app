@@ -30,6 +30,8 @@ public class SingleDishCartHandler extends DishCartHandler {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void handler() {
+//        店铺商品样式id不能为空
+
         //单品
         List<Long> singleProdSpecIds = Convert.toList(Long.class, context.request.getShopProdSpecIds());
         //判断存不存在

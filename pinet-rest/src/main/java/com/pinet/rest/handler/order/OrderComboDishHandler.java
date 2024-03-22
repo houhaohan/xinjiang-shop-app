@@ -6,6 +6,8 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.OrderComboDishDto;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
+import com.pinet.rest.entity.request.CartOrderProductRequest;
+import com.pinet.rest.entity.request.DirectOrderRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.RoundingMode;
@@ -88,8 +90,6 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
         orderProduct.setProdUnitPrice(BigDecimalUtil.fenToYuan(unitPrice));
         orderProduct.setProdNum(request.getProdNum());
         orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),orderProduct.getProdNum(), RoundingMode.HALF_UP));
-        orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,request.getProdNum(),RoundingMode.HALF_UP));
-
         orderProduct.setProdName(request.getProdName());
         orderProduct.setUnit(request.getUnit());
         orderProduct.setProdImg(request.getProdImg());
@@ -108,7 +108,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
             OrderComboDish orderComboDish = new OrderComboDish();
             orderComboDish.setOrderId(request.getOrderId());
             orderComboDish.setShopProdId(comboDishDto.getShopProdId());
-            ShopProduct singleProduct = context.shopProductService.getById(comboDishDto.getShopProdId());
+            ShopProduct singleProduct = context.shopProductService.getById(comboDishDto.getSingleProdId());
             orderComboDish.setDishId(singleProduct.getProdId());
             orderComboDish.setProdName(singleProduct.getProductName());
             orderComboDish.setUnit(singleProduct.getUnit());

@@ -9,6 +9,8 @@ import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.bo.QueryOrderProductBo;
+import com.pinet.rest.entity.dto.OrderComboDishDto;
+import com.pinet.rest.entity.dto.OrderComboDishSpecDto;
 import com.pinet.rest.entity.dto.OrderProductDto;
 import com.pinet.rest.entity.enums.CartStatusEnum;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
@@ -80,7 +82,12 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
 
     @Override
     public List<OrderProduct> getComboByOrderId(Long orderId) {
-        return orderProductMapper.getComboByOrderId(orderId);
+        List<OrderProduct> orderProducts = orderProductMapper.getComboByOrderId(orderId);
+        for(OrderProduct orderProduct : orderProducts){
+            String orderProductSpecStr = orderProduct.getComboDishDetails().stream().map(ComboDishSpecVo::getSingleDishName).collect(Collectors.joining(","));
+            orderProduct.setOrderProductSpecStr(orderProductSpecStr);
+        }
+        return orderProducts;
     }
 
     @Override
@@ -107,7 +114,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
             } else {
                 List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getId());
                 List<Long> shopProdSpecIds = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-                QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds, orderType);
+                QueryOrderProductBo queryOrderProductBo = new QueryOrderProductBo(k.getShopProdId(), k.getProdNum(), shopProdSpecIds, orderType,null);
                 OrderProduct orderProduct = this.getByQueryOrderProductBo(queryOrderProductBo);
                 orderProducts.add(orderProduct);
             }
@@ -193,37 +200,67 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
         orderProduct.setProdNum(queryOrderProductBo.getProdNum());
         orderProduct.setUnit(shopProduct.getUnit());
         //orderProduct.setDishType(shopProduct.getDishType());
-
-        List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
         //单价
         BigDecimal unitPrice = BigDecimal.ZERO;
-        for (Long shopProdSpecId : queryOrderProductBo.getShopProdSpecIds()) {
-            //查询具体的样式并且校验
-            OrderProductSpec orderProductSpec = new OrderProductSpec();
-            if (DishType.COMBO.equalsIgnoreCase(shopProduct.getDishType())) {
-                KryComboGroupDetail kryComboGroupDetail = kryComboGroupDetailService.getById(shopProdSpecId);
-                unitPrice = unitPrice.add(BigDecimalUtil.fenToYuan(kryComboGroupDetail.getPrice()));
+        List<ComboDishSpecVo> orderComboDishList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(queryOrderProductBo.getOrderComboDishList())){
+            for(OrderComboDishDto orderComboDishDto : queryOrderProductBo.getOrderComboDishList()){
+                ComboDishSpecVo comboDishSpecVo = new ComboDishSpecVo();
+                comboDishSpecVo.setShopProdId(orderComboDishDto.getShopProdId());
+                comboDishSpecVo.setSingleDishId(orderComboDishDto.getSingleProdId());
+                ShopProduct singleProduct = shopProductService.getById(orderComboDishDto.getSingleProdId());
+                comboDishSpecVo.setSingleDishName(singleProduct.getProductName());
 
-                KryComboGroup kryComboGroup = kryComboGroupService.getById(kryComboGroupDetail.getComboGroupId());
-                orderProductSpec.setProdSkuId(kryComboGroup.getId());
-                orderProductSpec.setProdSkuName(kryComboGroup.getGroupName());
-                orderProductSpec.setShopProdSpecId(shopProdSpecId);
-                orderProductSpec.setProdSpecName(kryComboGroupDetail.getDishName());
-                orderProductSpecs.add(orderProductSpec);
-            } else {
-                ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
-                if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
-                    throw new PinetException(shopProduct.getProductName() + ":" + shopProductSpec.getSpecName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
+                List<OrderProductSpecVo> orderProductSpecs = new ArrayList<>();
+                for(OrderComboDishSpecDto orderComboDishSpecDto : orderComboDishDto.getOrderComboDishSpecList()) {
+                    OrderProductSpecVo orderProductSpecVo = new OrderProductSpecVo();
+                    ShopProductSpec singleSpec = shopProductSpecService.getById(orderComboDishSpecDto.getShopProdSpecId());
+                    orderProductSpecVo.setShopProdSpecId(orderComboDishSpecDto.getShopProdSpecId());
+                    orderProductSpecVo.setProdSpecName(orderComboDishSpecDto.getShopProdSpecName());
+                    orderProductSpecVo.setProdSkuId(singleSpec.getSkuId());
+                    orderProductSpecVo.setProdSkuName(singleSpec.getSkuName());
+                    orderProductSpecs.add(orderProductSpecVo);
                 }
-                unitPrice = BigDecimalUtil.sum(unitPrice, shopProductSpec.getPrice());
-                ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
-                orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
-                orderProductSpec.setProdSkuName(productSku.getSkuName());
-                orderProductSpec.setShopProdSpecId(shopProdSpecId);
-                orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
-                orderProductSpecs.add(orderProductSpec);
+                comboDishSpecVo.setOrderProductSpecs(orderProductSpecs);
+                orderComboDishList.add(comboDishSpecVo);
+            }
+            Long price = kryComboGroupDetailService.getPriceByShopProdId(orderProduct.getShopProdId());
+            unitPrice = BigDecimalUtil.fenToYuan(price);
+        }
+        orderProduct.setComboDishDetails(orderComboDishList);
+
+        List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
+
+        if(!CollectionUtils.isEmpty(queryOrderProductBo.getShopProdSpecIds())){
+            for (Long shopProdSpecId : queryOrderProductBo.getShopProdSpecIds()) {
+                //查询具体的样式并且校验
+                OrderProductSpec orderProductSpec = new OrderProductSpec();
+                if (DishType.COMBO.equalsIgnoreCase(shopProduct.getDishType())) {
+                    KryComboGroupDetail kryComboGroupDetail = kryComboGroupDetailService.getById(shopProdSpecId);
+                    unitPrice = unitPrice.add(BigDecimalUtil.fenToYuan(kryComboGroupDetail.getPrice()));
+
+                    KryComboGroup kryComboGroup = kryComboGroupService.getById(kryComboGroupDetail.getComboGroupId());
+                    orderProductSpec.setProdSkuId(kryComboGroup.getId());
+                    orderProductSpec.setProdSkuName(kryComboGroup.getGroupName());
+                    orderProductSpec.setShopProdSpecId(shopProdSpecId);
+                    orderProductSpec.setProdSpecName(kryComboGroupDetail.getDishName());
+                    orderProductSpecs.add(orderProductSpec);
+                } else {
+                    ShopProductSpec shopProductSpec = shopProductSpecService.getById(shopProdSpecId);
+                    if (shopProductSpec.getStock() < queryOrderProductBo.getProdNum()) {
+                        throw new PinetException(shopProduct.getProductName() + ":" + shopProductSpec.getSpecName() + "库存不足,剩余库存:" + shopProductSpec.getStock());
+                    }
+                    unitPrice = BigDecimalUtil.sum(unitPrice, shopProductSpec.getPrice());
+                    ProductSku productSku = productSkuService.getById(shopProductSpec.getSkuId());
+                    orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
+                    orderProductSpec.setProdSkuName(productSku.getSkuName());
+                    orderProductSpec.setShopProdSpecId(shopProdSpecId);
+                    orderProductSpec.setProdSpecName(shopProductSpec.getSpecName());
+                    orderProductSpecs.add(orderProductSpec);
+                }
             }
         }
+
         orderProduct.setOrderProductSpecs(orderProductSpecs);
         orderProduct.setOrderProductSpecStr(orderProductSpecs.stream().map(OrderProductSpec::getProdSpecName).collect(Collectors.joining(",")));
         orderProduct.setProdUnitPrice(unitPrice);

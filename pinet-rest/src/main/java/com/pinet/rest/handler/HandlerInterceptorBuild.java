@@ -21,7 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * APP token的拦截器
+ * @description APP token的拦截器
+ * @author chengshuanghui
+ * @data 2022-12-12 15:00
  */
 @Component
 public class HandlerInterceptorBuild implements HandlerInterceptor {

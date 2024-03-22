@@ -1,4 +1,4 @@
-package com.pinet.rest.handler.order;
+package com.pinet.rest.entity.request;
 
 import com.pinet.rest.entity.dto.OrderComboDishDto;
 import lombok.Data;

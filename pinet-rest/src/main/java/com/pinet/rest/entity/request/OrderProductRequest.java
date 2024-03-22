@@ -1,4 +1,4 @@
-package com.pinet.rest.handler.order;
+package com.pinet.rest.entity.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

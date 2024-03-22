@@ -2,6 +2,7 @@ package com.pinet.rest.service.impl;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.lang.UUID;
@@ -116,15 +117,21 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderListVos.getRecords().forEach(k -> {
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
             //如果是自提订单并且是配送中 修改状态状态str为可领取
-            if (k.getOrderStatus().equals(OrderStatusEnum.SEND_OUT.getCode()) && k.getOrderType() == 2) {
+            if (k.getOrderStatus().equals(OrderStatusEnum.SEND_OUT.getCode())
+                    && Objects.equals(k.getOrderType(),OrderTypeEnum.SELF_PICKUP.getCode())) {
                 k.setOrderStatusStr("可领取");
             }
-            List<OrderProduct> orderProducts = orderProductService.getByOrderId(k.getOrderId());
+            List<OrderProduct> orderProducts = new ArrayList<>();
+            List<OrderProduct> singleOrderProducts = orderProductService.getByOrderId(k.getOrderId());
+            List<OrderProduct> comboOrderProducts = orderProductService.getComboByOrderId(k.getOrderId());
+            orderProducts.addAll(singleOrderProducts);
+            orderProducts.addAll(comboOrderProducts);
             k.setOrderProducts(orderProducts);
             k.setProdNum(orderProducts.size());
         });
         return orderListVos.getRecords();
     }
+
 
     @Override
     public OrderDetailVo orderDetail(Long orderId) {
@@ -207,7 +214,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         } else {
             //直接结算（通过具体的商品样式、商品数量进行结算）
             List<Long> shopProdSpecIds = splitShopProdSpecIds(dto.getShopProdSpecIds());
-            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType());
+            QueryOrderProductBo query = new QueryOrderProductBo(dto.getShopProdId(), dto.getProdNum(), shopProdSpecIds, dto.getOrderType(),dto.getOrderComboDishList());
             OrderProduct orderProduct = orderProductService.getByQueryOrderProductBo(query);
             orderProducts.add(orderProduct);
         }
@@ -765,10 +772,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * 分割商品样式id
      */
     private List<Long> splitShopProdSpecIds(String shopProdSpecIds) {
-        String[] idArray = shopProdSpecIds.split(",");
-
-        return Arrays.stream(idArray)
-                .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+        return Convert.toList(Long.class,shopProdSpecIds);
     }
 
     @SneakyThrows
