@@ -18,6 +18,7 @@ import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.strategy.MemberLevelStrategyContext;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -25,6 +26,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @description 订单抽象处理器
+ * @author chengshuanghui
+ * @data 2024-03-21 15:00
+ */
 public abstract class OrderAbstractHandler implements OrderHandler{
     protected OrderContext context;
 
@@ -162,6 +168,7 @@ public abstract class OrderAbstractHandler implements OrderHandler{
      * @param orders
      * @param orderProducts
      */
+    @Transactional(rollbackFor = Exception.class)
     protected void afterHandler(Orders orders,List<OrderProduct> orderProducts) {
         PreferentialVo preferentialVo = context.orderPreferentialManager.doPreferential(orders.getCustomerId(), context.request.getCustomerCouponId(), orders.getOrderProdPrice(), orderProducts);
         orders.setDiscountAmount(preferentialVo.getDiscountAmount());

@@ -1,9 +1,6 @@
 package com.pinet.core.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -40,6 +37,7 @@ public class BaseEntity implements Serializable {
     @TableField(value = "update_time",fill = FieldFill.UPDATE)
     private Date updateTime;
     @ApiModelProperty(value = "是否删除  0正常  1删除")
+    @TableLogic
     private Integer delFlag = 0;
 
 

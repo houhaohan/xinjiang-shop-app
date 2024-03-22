@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 直接购买订单处理器
+ * @description 直接购买订单处理器
+ * @author chengshaunghui
+ * @data 2024-03-21 15:00
  */
 public class DirectBuyOrderHandler extends OrderAbstractHandler {
 

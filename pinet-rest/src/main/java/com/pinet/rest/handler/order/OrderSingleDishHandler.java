@@ -18,9 +18,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * 订单 单品处理器
+ * @description 订单 单品处理器
+ * @author chengshuanghui
+ * @data 2024-03-21 15:00
  */
-
 public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
 
     public OrderSingleDishHandler(OrderDishContext context){
@@ -31,6 +32,7 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
      * 单品购物车下单
      * 执行订单商品入库
      */
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public OrderProduct execute(CartOrderProductRequest request){
         List<CartProductSpec> cartProductSpecList = context.cartProductSpecService.getByCartId(request.getCartId());
@@ -54,6 +56,7 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
      * 执行订单商品入库
      */
     @Transactional(rollbackFor = Exception.class)
+    @Override
     public OrderProduct execute(DirectOrderRequest request){
         BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(request.getShopProdSpecIds());
         OrderProduct orderProduct = buildOrderProduct(request, unitPrice);

@@ -19,6 +19,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @description 订单上下文
+ * @author chengshuanghui
+ * @data 2024-03-21 15:00
+ */
 @Component
 @RequiredArgsConstructor
 public class OrderContext {

@@ -6,9 +6,6 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.OrderComboDishDto;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
-import com.pinet.rest.service.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.RoundingMode;
@@ -17,7 +14,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * 订单套餐菜处理器
+ * @description 订单套餐菜处理器
+ * @author chengshuanghui
+ * @data 2024-03-21 15:00
  */
 public class OrderComboDishHandler extends OrderDishAbstractHandler{
 
@@ -31,6 +30,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
      * 执行订单套餐商品入库
      */
     @Transactional(rollbackFor = Exception.class)
+    @Override
     public OrderProduct execute(CartOrderProductRequest request){
         Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(request.getShopProdId());
         OrderProduct orderProduct = buildOrderProduct(request, BigDecimalUtil.fenToYuan(unitPrice));
@@ -78,6 +78,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
      * 执行订单套餐商品入库
      */
     @Transactional(rollbackFor = Exception.class)
+    @Override
     public OrderProduct execute(DirectOrderRequest request){
         OrderProduct orderProduct = new OrderProduct();
         orderProduct.setOrderId(request.getOrderId());

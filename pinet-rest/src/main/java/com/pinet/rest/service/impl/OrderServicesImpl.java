@@ -260,11 +260,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
 
-//    @Autowired
-//    private CartOrderHandler cartOrderHandler;
-//    @Autowired
-//    private DirectBuyOrderHandler directBuyOrderHandler;
-
     @DSTransactional
     @Override
     public CreateOrderVo createOrder(CreateOrderDto request) {

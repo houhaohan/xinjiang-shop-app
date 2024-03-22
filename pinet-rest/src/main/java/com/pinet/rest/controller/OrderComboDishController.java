@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2024-03-20
  */
 @RestController
-@RequestMapping("/order-combo-dish")
+@RequestMapping("/orderComboDish")
 public class OrderComboDishController extends BaseController {
 
 }
