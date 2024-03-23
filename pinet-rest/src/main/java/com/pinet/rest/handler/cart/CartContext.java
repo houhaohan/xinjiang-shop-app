@@ -28,11 +28,6 @@ public class CartContext {
     protected CartMapper cartMapper;
 
     /**
-     * 用户 ID
-     */
-    protected Long customerId;
-
-    /**
      * 商品数量
      */
     protected int prodNum;
@@ -65,10 +60,6 @@ public class CartContext {
 
     public void setRequest(AddCartDto request){
         this.request = request;
-    }
-
-    public void setCustomerId(Long customerId){
-        this.customerId = customerId;
     }
 
     public void setShopProduct(ShopProduct shopProduct) {

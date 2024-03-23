@@ -4,6 +4,7 @@ import cn.hutool.core.convert.Convert;
 import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
+import com.pinet.core.util.FilterUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.vo.CartComboDishSpecVo;
@@ -41,7 +42,7 @@ public class ComboDishCartHandler extends DishCartHandler{
         //查询套餐价格
         Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(context.request.getShopProdId());
 
-        List<CartComboDishSpecVo> cartComboDishSpecVos = context.cartComboDishSpecService.getByUserIdAndShopProdSpecId(context.customerId, shopProdSpecIds);
+        List<CartComboDishSpecVo> cartComboDishSpecVos = context.cartComboDishSpecService.getByUserIdAndShopProdSpecId(context.request.getCustomerId(), shopProdSpecIds);
         List<Long> shopProdSpecIdDBs = cartComboDishSpecVos.stream().map(CartComboDishSpecVo::getShopProdSpecId).collect(Collectors.toList());
         boolean allMatch = shopProdSpecIds.stream().allMatch(shopProdSpecIdDBs::contains);
         if(allMatch){
@@ -71,16 +72,12 @@ public class ComboDishCartHandler extends DishCartHandler{
             List<Long> singleProdSpecIds = Convert.toList(Long.class, singleDish.getShopProdSpecIds());
 
             List<ShopProductSpec> shopProductSpecs = context.shopProductSpecService.listByIds(singleProdSpecIds);
-
             List<CartComboDishSpec> cartComboDishSpecList = singleProdSpecIds.stream().map(id -> {
                 CartComboDishSpec cartComboDishSpec = new CartComboDishSpec();
                 cartComboDishSpec.setCartId(cart.getId());
                 cartComboDishSpec.setShopProdId(singleDish.getShopProdId());
                 cartComboDishSpec.setShopProdSpecId(id);
-                ShopProductSpec shopProductSpec = shopProductSpecs.stream()
-                        .filter(o -> Objects.equals(id, o.getId()))
-                        .findFirst()
-                        .orElseThrow(() -> new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
+                ShopProductSpec shopProductSpec = FilterUtil.filter(shopProductSpecs, id, ApiExceptionEnum.SPEC_NOT_EXISTS);
                 cartComboDishSpec.setShopProdSpecName(shopProductSpec.getSpecName());
                 return cartComboDishSpec;
             }).collect(Collectors.toList());

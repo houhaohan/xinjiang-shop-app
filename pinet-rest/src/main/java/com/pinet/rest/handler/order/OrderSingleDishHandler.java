@@ -2,8 +2,8 @@ package com.pinet.rest.handler.order;
 
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.enums.ApiExceptionEnum;
-import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
+import com.pinet.core.util.FilterUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.request.CartOrderProductRequest;
@@ -85,10 +85,7 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
             OrderProductSpec orderProductSpec = new OrderProductSpec();
             orderProductSpec.setOrderId(orderId);
             orderProductSpec.setOrderProdId(orderProductId);
-            ShopProductSpec shopProductSpec = shopProductSpecs.stream()
-                    .filter(o -> Objects.equals(o.getId(), specId))
-                    .findFirst()
-                    .orElseThrow(() -> new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
+            ShopProductSpec shopProductSpec = FilterUtil.filter(shopProductSpecs, specId, ApiExceptionEnum.SPEC_NOT_EXISTS);
             orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
             orderProductSpec.setProdSkuName(shopProductSpec.getSkuName());
             orderProductSpec.setShopProdSpecId(specId);

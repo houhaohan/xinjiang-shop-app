@@ -4,7 +4,6 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.enums.DiscountTypeEnum;
-import com.pinet.rest.entity.vo.OrderProductVo;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;

@@ -4,14 +4,12 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.core.constants.DB;
-import com.pinet.core.entity.BaseEntity;
 import com.pinet.rest.entity.OrderPay;
 import com.pinet.rest.mapper.OrderPayMapper;
 import com.pinet.rest.service.IOrderPayService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * <p>

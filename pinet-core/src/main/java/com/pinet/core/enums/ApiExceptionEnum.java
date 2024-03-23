@@ -12,6 +12,7 @@ public enum ApiExceptionEnum {
     COUPON_DISABLE(1005,"优惠券已禁用"),
     SPEC_ID_NOT_BLANK(1006,"店铺商品样式id不能为空"),
     SPEC_NOT_EXISTS(1007,"样式不存在"),
+    PROD_NOT_EXISTS(1008,"商品不存在"),
     ;
 
     private int code;

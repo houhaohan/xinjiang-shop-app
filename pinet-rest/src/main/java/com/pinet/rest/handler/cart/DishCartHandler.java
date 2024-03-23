@@ -21,7 +21,7 @@ public abstract class DishCartHandler implements CartHandler {
         Cart cart = new Cart();
         BeanUtils.copyProperties(context.request, cart);
         cart.setCartStatus(CartStatusEnum.NORMAL.getCode());
-        cart.setCustomerId(context.customerId);
+        cart.setCustomerId(context.request.getCustomerId());
         cart.setDishId(context.shopProduct.getProdId());
         cart.setDishType(context.shopProduct.getDishType());
         cart.setUnit(context.shopProduct.getUnit());

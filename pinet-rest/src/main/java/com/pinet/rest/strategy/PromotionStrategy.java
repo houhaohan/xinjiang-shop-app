@@ -2,7 +2,6 @@ package com.pinet.rest.strategy;
 
 import com.pinet.rest.entity.OrderDiscount;
 import com.pinet.rest.entity.OrderProduct;
-import com.pinet.rest.entity.vo.OrderProductVo;
 
 import java.math.BigDecimal;
 import java.util.List;

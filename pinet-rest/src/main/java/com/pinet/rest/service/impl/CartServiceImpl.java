@@ -3,7 +3,6 @@ package com.pinet.rest.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pinet.core.constants.DB;
-import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.ThreadLocalUtil;
@@ -21,11 +20,10 @@ import com.pinet.rest.handler.cart.CartContext;
 import com.pinet.rest.mapper.CartMapper;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
@@ -41,26 +39,15 @@ import java.util.stream.Collectors;
  */
 @Service
 @DS(DB.MASTER)
+@RequiredArgsConstructor
 public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements ICartService {
 
-    @Resource
-    private CartMapper cartMapper;
-
-    @Resource
-    private IShopService shopService;
-
-    @Resource
-    private IShopProductService shopProductService;
-
-    @Resource
-    private ICartProductSpecService cartProductSpecService;
-
-    @Autowired
-    private IKryComboGroupDetailService kryComboGroupDetailService;
-
-
-    @Autowired
-    private ICartComboDishService cartComboDishService;
+    private final CartMapper cartMapper;
+    private final IShopService shopService;
+    private final IShopProductService shopProductService;
+    private final ICartProductSpecService cartProductSpecService;
+    private final IKryComboGroupDetailService kryComboGroupDetailService;
+    private final ICartComboDishService cartComboDishService;
 
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
@@ -71,7 +58,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         }
         List<CartListVo> cartListVos = cartMapper.selectCartList(dto);
         cartListVos.forEach(k -> {
-            List<CartProductSpec> cartProductSpecs = null;
             if(DishType.COMBO.equalsIgnoreCase(k.getDishType())){
                 List<CartComboDishVo> cartComboDishVos = cartComboDishService.getComboDishByCartId(k.getCartId(),k.getShopProdId());
                 k.setCartComboDishVos(cartComboDishVos);
@@ -79,7 +65,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                 k.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice));
                 k.setAllPrice(BigDecimalUtil.multiply(k.getProdPrice(),new BigDecimal(k.getProdNum())));
             }else {
-                cartProductSpecs = cartProductSpecService.getByCartId(k.getCartId());
+                List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getCartId());
                 String prodSpecName = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecName).collect(Collectors.joining(","));
                 k.setProdSpecName(prodSpecName);
                 BigDecimal price = cartProductSpecs.stream().map(CartProductSpec::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -102,11 +88,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             throw new PinetException("店铺商品不存在");
         }
         dto.setShopId(shopProduct.getShopId());
-        Long customerId = dto.getCustomerId();
-
         CartContext context = new CartContext(shopProduct.getDishType());
         context.setRequest(dto);
-        context.setCustomerId(customerId);
         context.setShopProduct(shopProduct);
         context.handler();
         return context.response();
@@ -116,7 +99,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Transactional(rollbackFor = Exception.class)
     public Boolean editCartProdNum(EditCartProdNumDto dto) {
         Cart cart = getById(dto.getCartId());
-        if (cart == null || cart.getDelFlag() == 1) {
+        if (cart == null) {
             throw new PinetException("购物车不存在");
         }
         CartContext context = new CartContext(cart.getDishType());
@@ -134,13 +117,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delCartByShopId(Long shopId, Long customerId) {
-        LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Cart::getShopId, shopId).eq(Cart::getCustomerId, customerId).eq(BaseEntity::getDelFlag, 0);
-        List<Cart> cartList = list(lambdaQueryWrapper);
-
-        List<Long> cartIds = cartList.stream().map(BaseEntity::getId).collect(Collectors.toList());
-        removeByIds(cartIds);
-
+        List<Cart> cartList = getByUserIdAndShopId(customerId, shopId);
+        removeBatchByIds(cartList);
 
         //删除cart_product_spec表数据
         List<Long> singleCartIds = cartList.stream().filter(c -> Objects.equals(c.getDishType(), DishType.SINGLE)).map(Cart::getId).collect(Collectors.toList());
@@ -162,6 +140,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean clearCart(ClearCartDto dto) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         delCartByShopId(dto.getShopId(),userId);

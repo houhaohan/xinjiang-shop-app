@@ -37,7 +37,6 @@ public class AddCartDto {
     @ApiModelProperty("套餐明细")
     private List<AddCartDto> comboDetails;
 
-//    @NotBlank(message = "店铺商品样式id不能为空")
     @ApiModelProperty(value = "商品样式id(多个逗号分割)",name = "shopProdSpecId")
     private String shopProdSpecIds;
 

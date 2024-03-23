@@ -1,11 +1,11 @@
 package com.pinet.rest.handler.cart;
 
 import cn.hutool.core.convert.Convert;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
+import com.pinet.core.util.FilterUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.CartProductSpec;
@@ -39,7 +39,7 @@ public class SingleDishCartHandler extends DishCartHandler {
         //单品
         List<Long> singleProdSpecIds = Convert.toList(Long.class, context.request.getShopProdSpecIds());
         //判断存不存在
-        List<CartProductSpec> cartProductSpecs = context.cartProductSpecService.getByUserIdAndShopProdId(context.customerId, context.request.getShopProdId());
+        List<CartProductSpec> cartProductSpecs = context.cartProductSpecService.getByUserIdAndShopProdId(context.request.getCustomerId(), context.request.getShopProdId());
         List<Long> shopProdSpecIdDBs = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
         boolean allMatch = singleProdSpecIds.stream().allMatch(shopProdSpecIdDBs::contains);
 
@@ -62,14 +62,12 @@ public class SingleDishCartHandler extends DishCartHandler {
         Cart cart = buildCartInfo();
         context.cartMapper.insert(cart);
 
+        List<ShopProductSpec> shopProductSpecs = context.shopProductSpecService.listByIds(singleProdSpecIds);
         for(Long specId : singleProdSpecIds){
             CartProductSpec cartProductSpec = new CartProductSpec();
             cartProductSpec.setCartId(cart.getId());
             cartProductSpec.setShopProdSpecId(specId);
-            ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(specId);
-            if (shopProductSpec == null) {
-                throw new PinetException("样式不存在");
-            }
+            ShopProductSpec shopProductSpec = FilterUtil.filter(shopProductSpecs, specId, ApiExceptionEnum.SPEC_NOT_EXISTS);
             cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
             context.cartProductSpecService.save(cartProductSpec);
             BigDecimal price = BigDecimalUtil.multiply(shopProductSpec.getPrice(), new BigDecimal(cart.getProdNum()));
@@ -87,7 +85,7 @@ public class SingleDishCartHandler extends DishCartHandler {
             context.cartMapper.updateById(cart);
             return;
         }
-        context.cartProductSpecService.remove(new LambdaQueryWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,cartId));
+        context.cartProductSpecService.remove(new LambdaUpdateWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,cartId));
         context.cartMapper.deleteById(cartId);
     }
 
