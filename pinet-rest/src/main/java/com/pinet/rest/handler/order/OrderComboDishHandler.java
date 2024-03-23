@@ -8,8 +8,10 @@ import com.pinet.rest.entity.dto.OrderComboDishDto;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.request.CartOrderProductRequest;
 import com.pinet.rest.entity.request.DirectOrderRequest;
+import com.pinet.rest.entity.request.OrderProductRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +29,16 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
     }
 
 
+    @Override
+    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice) {
+        OrderProduct orderProduct = super.build(request, unitPrice);
+        if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
+        }
+        context.orderProductService.save(orderProduct);
+        return orderProduct;
+    }
+
     /**
      * 购物车购买
      * 执行订单套餐商品入库
@@ -35,12 +47,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
     @Override
     public OrderProduct execute(CartOrderProductRequest request){
         Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(request.getShopProdId());
-        OrderProduct orderProduct = buildOrderProduct(request, BigDecimalUtil.fenToYuan(unitPrice));
-
-        if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
-        }
-        context.orderProductService.save(orderProduct);
+        OrderProduct orderProduct = build(request, BigDecimalUtil.fenToYuan(unitPrice));
 
         List<CartComboDish> cartComboDishList = context.cartComboDishService.getByCartId(request.getCartId());
         for(CartComboDish cartComboDish : cartComboDishList){
@@ -82,26 +89,8 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
     @Transactional(rollbackFor = Exception.class)
     @Override
     public OrderProduct execute(DirectOrderRequest request){
-        OrderProduct orderProduct = new OrderProduct();
-        orderProduct.setOrderId(request.getOrderId());
-        orderProduct.setShopProdId(request.getShopProdId());
-        orderProduct.setDishId(request.getDishId());
         Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(request.getShopProdId());
-        orderProduct.setProdUnitPrice(BigDecimalUtil.fenToYuan(unitPrice));
-        orderProduct.setProdNum(request.getProdNum());
-        orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),orderProduct.getProdNum(), RoundingMode.HALF_UP));
-        orderProduct.setProdName(request.getProdName());
-        orderProduct.setUnit(request.getUnit());
-        orderProduct.setProdImg(request.getProdImg());
-        if(request.isCalculate()){
-            orderProduct.setCommission(BigDecimalUtil.multiply(orderProduct.getProdPrice(),0.1));
-        }
-        buildOrderProduct(request,BigDecimalUtil.fenToYuan(unitPrice));
-
-        if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
-        }
-        context.orderProductService.save(orderProduct);
+        OrderProduct orderProduct = build(request, BigDecimalUtil.fenToYuan(unitPrice));
 
         List<OrderComboDishDto> comboDishDtoList = request.getComboDishDtoList();
         for(OrderComboDishDto comboDishDto : comboDishDtoList){

@@ -18,7 +18,6 @@ import java.util.List;
  */
 public interface OrderProductMapper extends BaseMapper<OrderProduct> {
 
-    List<OrderProductBo> selectOrderProduct(@Param("orderId") Long orderId);
 
     List<OrderProduct> selectByOrderId(@Param("orderId") Long orderId);
 

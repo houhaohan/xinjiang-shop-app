@@ -4,9 +4,9 @@ package com.pinet.rest.handler.settle;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.ShopProduct;
-import com.pinet.rest.entity.dto.OrderSettlementDto;
 
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,14 +25,14 @@ public class DirectBuyOrderSettleHandler extends OrderSettleAbstractHandler {
         List<OrderProduct> orderProducts = new ArrayList<>();
         DishSettleContext dishSettleContext = context.dishSettleContext;
         ShopProduct shopProduct = dishSettleContext.shopProductService.getById(dishSettleContext.request.getShopProdId());
-        context.dishSettleContext
-                .execute(shopProduct.getDishType())
-                .handler();
-        OrderProduct orderProduct = context.dishSettleContext.response;
+        dishSettleContext.execute(shopProduct.getDishType()).handler();
+        OrderProduct orderProduct = dishSettleContext.response;
         orderProducts.add(orderProduct);
         context.response = orderProducts;
-        context.packageFee = BigDecimalUtil.sum(context.packageFee,orderProduct.getPackageFee());
-        context.orderProdPrice = BigDecimalUtil.sum(context.orderProdPrice,orderProduct.getProdPrice());
-        context.orderProductNum = context.orderProductNum + orderProduct.getProdNum();
+        context.packageFee = orderProduct.getPackageFee();
+        context.orderProdPrice = orderProduct.getProdPrice();
+        context.orderProductNum = orderProduct.getProdNum();
+        context.shippingFee = calculate(context.dishSettleContext.request.getOrderType(), context.distance.intValue(), context.deliveryPlatform);
+
     }
 }

@@ -40,7 +40,7 @@ public class OrderConstant {
     /**
      * 单品打包费
      */
-    public static final BigDecimal SINGLE_PACKAGE_FEE = new BigDecimal("1");
+    public static final BigDecimal SINGLE_PACKAGE_FEE = BigDecimal.ONE;
 
     /**
      * 套餐打包费

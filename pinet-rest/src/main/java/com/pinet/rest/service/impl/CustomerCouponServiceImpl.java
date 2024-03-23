@@ -26,20 +26,19 @@ import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
 import com.pinet.rest.entity.vo.CustomerCouponVo;
-import com.pinet.rest.entity.vo.OrderProductVo;
 import com.pinet.rest.mapper.CustomerCouponMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -53,25 +52,14 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @DS(DB.MASTER)
+@RequiredArgsConstructor
 public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper, CustomerCoupon> implements ICustomerCouponService {
-    @Resource
-    private RedisUtil redisUtil;
-
-    @Resource
-    private JmsUtil jmsUtil;
-
-    @Resource
-    private WxMaService wxMaService;
-
-    @Resource
-    private ICouponService couponService;
-
-    @Resource
-    private ICouponShopService couponShopService;
-
-    @Autowired
-    private ICouponProductService couponProductService;
-
+    private final RedisUtil redisUtil;
+    private final JmsUtil jmsUtil;
+    private final WxMaService wxMaService;
+    private final ICouponService couponService;
+    private final ICouponShopService couponShopService;
+    private final ICouponProductService couponProductService;
 
     @Override
     public List<CustomerCouponVo> customerCouponList(PageRequest pageRequest) {
@@ -143,13 +131,13 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     @Override
-    public Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProduct> orderProducts) {
+    public <T extends OrderProduct> Boolean checkCoupon(Long customerCouponId, Long shopId, List<T> orderProducts) {
         CustomerCouponVo customerCouponVo = baseMapper.selectCustomerCouponVoById(customerCouponId);
         return checkCoupon(customerCouponVo, shopId, orderProducts);
     }
 
     @Override
-    public Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts) {
+    public  <T extends OrderProduct> Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<T> orderProducts) {
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         //优惠券不存在
@@ -202,12 +190,15 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     @Override
     public void couponWarn(Long customerCouponId) {
         CustomerCoupon customerCoupon = getById(customerCouponId);
-        if (ObjectUtil.isNotNull(customerCoupon)) {
-            Date remindTime = DateUtil.offsetDay(customerCoupon.getExpireTime(), -1);
-            if (remindTime.getTime() - System.currentTimeMillis() > 0) {
-                jmsUtil.delaySend(QueueConstants.QING_COUPON_EXPIRE_WARN_NAME, customerCouponId.toString(), remindTime.getTime() - System.currentTimeMillis());
-            }
+        if(Objects.isNull(customerCoupon)){
+            return;
         }
+        Date remindTime = DateUtil.offsetDay(customerCoupon.getExpireTime(), -1);
+        if (remindTime.getTime() - System.currentTimeMillis() <= 0) {
+            return;
+        }
+        jmsUtil.delaySend(QueueConstants.QING_COUPON_EXPIRE_WARN_NAME, customerCouponId.toString(), remindTime.getTime() - System.currentTimeMillis());
+
     }
 
     @Override

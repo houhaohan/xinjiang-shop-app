@@ -2,14 +2,10 @@ package com.pinet.rest.handler.settle;
 
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
-import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.*;
-import com.pinet.rest.entity.dto.OrderSettlementDto;
 import com.pinet.rest.entity.enums.CartStatusEnum;
-import com.pinet.rest.service.ICartService;
-import com.pinet.rest.service.IOrderProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +41,7 @@ public class CartOrderSettleHandler extends OrderSettleAbstractHandler{
             context.orderProdPrice = BigDecimalUtil.sum(context.orderProdPrice,orderProduct.getProdPrice());
             context.orderProductNum = context.orderProductNum + orderProduct.getProdNum();
         });
+        context.shippingFee = calculate(context.dishSettleContext.request.getOrderType(), context.distance.intValue(), context.deliveryPlatform);
         context.response = orderProducts;
     }
 

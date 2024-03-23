@@ -8,6 +8,7 @@ import com.pinet.rest.entity.enums.SettlementTypeEnum;
 import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,6 @@ import java.util.Objects;
 public class OrderContext {
 
     protected final OrderPreferentialManager orderPreferentialManager;
-    protected final IShippingFeeRuleService shippingFeeRuleService;
     protected final ICustomerMemberService customerMemberService;
     protected final OrdersMapper ordersMapper;
     protected final IShopProductService shopProductService;

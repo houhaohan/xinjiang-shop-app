@@ -18,11 +18,14 @@ public class OrderSetterContext {
     protected ICartService cartService;
     protected DishSettleContext dishSettleContext;
     protected Long userId;
+    protected Double distance;
+    protected String deliveryPlatform;
     protected List<OrderProduct> response;
 
     protected BigDecimal packageFee = BigDecimal.ZERO;
     protected BigDecimal orderProdPrice = BigDecimal.ZERO;
     protected Integer orderProductNum = 0;
+    protected BigDecimal shippingFee = BigDecimal.ZERO;
 
 
     protected OrderSettleHandler orderSettleHandler;
@@ -36,6 +39,15 @@ public class OrderSetterContext {
         this.cartService = cartService;
     }
 
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
+    }
+
+    public void setDeliveryPlatform(String deliveryPlatform) {
+        this.deliveryPlatform = deliveryPlatform;
+    }
+
     public void setDishSettleContext(DishSettleContext dishSettleContext){
         this.dishSettleContext = dishSettleContext;
     }
@@ -44,7 +56,6 @@ public class OrderSetterContext {
     public List<OrderProduct> getResponse(){
         return this.response;
     }
-
 
     public BigDecimal getPackageFee(){
         return this.packageFee;
@@ -56,6 +67,10 @@ public class OrderSetterContext {
 
     public Integer getOrderProductNum(){
         return this.orderProductNum;
+    }
+
+    public BigDecimal getShippingFee() {
+        return shippingFee;
     }
 
     public void execute(){

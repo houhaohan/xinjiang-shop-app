@@ -31,7 +31,7 @@ import java.util.Objects;
  * @author chengshuanghui
  * @data 2024-03-21 15:00
  */
-public abstract class OrderAbstractHandler implements OrderHandler{
+public abstract class OrderAbstractHandler extends ShippingFeeHandler implements OrderHandler{
     protected OrderContext context;
 
 
@@ -51,7 +51,9 @@ public abstract class OrderAbstractHandler implements OrderHandler{
         order.setEstimateArrivalStartTime(DateUtil.offsetHour(now, 1));
         order.setEstimateArrivalEndTime(DateUtil.offsetMinute(now, 90));
         order.setOrderDistance(context.distance.intValue());
-        order.setShippingFee(shippingFeeRule(order.getOrderDistance()));
+
+        BigDecimal shippingFee = calculate(context.request.getOrderType(), order.getOrderDistance(), context.shop.getDeliveryPlatform());
+        order.setShippingFee(shippingFee);
         order.setRemark(context.request.getRemark());
         order.setShareId(context.request.getShareId());
         order.setCustomerCouponId(context.request.getCustomerCouponId());
@@ -65,10 +67,8 @@ public abstract class OrderAbstractHandler implements OrderHandler{
         return order;
     }
 
-
-
     /**
-     * 平台配送费
+     * 达达平台配送费
      * @param orderType
      * @param shop
      * @param customerAddressId
@@ -119,26 +119,6 @@ public abstract class OrderAbstractHandler implements OrderHandler{
     }
 
 
-
-    private BigDecimal shippingFeeRule(Integer distance) {
-        if(Objects.equals(context.request.getOrderType(), OrderTypeEnum.SELF_PICKUP.getCode())){
-            return BigDecimal.ZERO;
-        }
-        if (!Environment.isProd()) {
-            return new BigDecimal("4");
-        }
-        if (context.shop.getDeliveryPlatform().equals(DeliveryPlatformEnum.ZPS.getCode())) {
-            //todo 商家没有对接外卖平台，自配送
-            return BigDecimal.ZERO;
-        }
-
-        BigDecimal shippingFee = context.shippingFeeRuleService.getByDistance(distance);
-        if (shippingFee == null) {
-            throw new PinetException("配送费查询失败");
-        }
-        return shippingFee;
-    }
-
     /**
      * 是否满足计算佣金的条件
      *
@@ -169,7 +149,7 @@ public abstract class OrderAbstractHandler implements OrderHandler{
      * @param orderProducts
      */
     @Transactional(rollbackFor = Exception.class)
-    protected void afterHandler(Orders orders,List<OrderProduct> orderProducts) {
+    public void afterHandler(Orders orders,List<OrderProduct> orderProducts) {
         PreferentialVo preferentialVo = context.orderPreferentialManager.doPreferential(orders.getCustomerId(), context.request.getCustomerCouponId(), orders.getOrderProdPrice(), orderProducts);
         orders.setDiscountAmount(preferentialVo.getDiscountAmount());
         BigDecimal orderPrice = BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(), orders.getShippingFee(), orders.getPackageFee());

@@ -2,13 +2,11 @@ package com.pinet.rest.service.impl;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -18,8 +16,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.imdada.open.platform.client.internal.req.order.AddOrderReq;
-import com.imdada.open.platform.client.internal.resp.order.AddOrderResp;
 import com.imdada.open.platform.exception.RpcException;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.CommonConstant;
@@ -39,7 +35,6 @@ import com.pinet.keruyun.openapi.vo.TakeoutOrderCreateVo;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.OrderProduct;
-import com.pinet.rest.entity.bo.QueryOrderProductBo;
 import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.enums.*;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
@@ -99,8 +94,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final IKryOrderPushLogService kryOrderPushLogService;
     private final IDaDaService daDaService;
     private final ICustomerAddressService customerAddressService;
-    private final IShippingFeeRuleService shippingFeeRuleService;
-    private final IShopProductService shopProductService;
     private final IScoreRecordService scoreRecordService;
     private final ICustomerBalanceService customerBalanceService;
     private final OrderPreferentialManager orderPreferentialManager;
@@ -204,52 +197,46 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 && Objects.equals(shop.getSupportDelivery(),CommonConstant.NO)) {
             throw new PinetException("该门店暂不支持外卖");
         }
-
-        double distance = getDistance(dto.getCustomerAddressId(), dto.getOrderType(), shop);
+        Double distance = getDistance(dto.getCustomerAddressId(), dto.getOrderType(), shop);
 
         OrderSettlementVo vo = new OrderSettlementVo();
         vo.setShopName(shop.getShopName());
-
-
         OrderSetterContext orderSetterContext = new OrderSetterContext();
         orderSetterContext.setCartService(cartService);
         dishSettleContext.setRequest(dto);
         orderSetterContext.setDishSettleContext(dishSettleContext);
         orderSetterContext.setUserId(customerId);
+        orderSetterContext.setDistance(distance);
+        orderSetterContext.setDeliveryPlatform(shop.getDeliveryPlatform());
         orderSetterContext.execute();
         List<OrderProduct> orderProducts = orderSetterContext.getResponse();
 
         vo.setPackageFee(orderSetterContext.getPackageFee());
         vo.setOrderProductBoList(orderProducts);
         vo.setOrderMakeCount(countShopOrderMakeNum(dto.getShopId()));
-        //计算商品总金额
-        BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         //配送费
-        BigDecimal shippingFee = getShippingFee(dto.getOrderType(), distance, shop.getDeliveryPlatform());
-        vo.setShippingFee(shippingFee);
+        vo.setShippingFee(orderSetterContext.getShippingFee());
 
         //设置订单原价 和 商品原价
         vo.setOriginalOrderProductPrice(orderSetterContext.getOrderProdPrice());
-        vo.setOriginalPrice(BigDecimalUtil.sum(orderSetterContext.getOrderProdPrice(), shippingFee, orderSetterContext.getPackageFee()));
+        vo.setOriginalPrice(BigDecimalUtil.sum(orderSetterContext.getOrderProdPrice(), orderSetterContext.getShippingFee(), orderSetterContext.getPackageFee()));
 
         //订单优惠处理
         PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderSetterContext.getOrderProdPrice(), orderProducts);
-        vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),orderSetterContext.getPackageFee(),shippingFee));
+        vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),orderSetterContext.getPackageFee(),orderSetterContext.getShippingFee()));
 
         //返回预计送达时间
         Date now = new Date();
         String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetMinute(now, 15), "HH:mm");
         String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 45), "HH:mm");
-
         vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
 
-
-//        Integer orderProductNum = orderProducts.stream().map(OrderProduct::getProdNum).reduce(Integer::sum).orElse(0);
         vo.setOrderProductNum(orderSetterContext.getOrderProductNum());
         vo.setOrderDiscounts(preferentialVo.getOrderDiscounts());
 
         List<CustomerCouponVo> customerCoupons = customerCouponService.customerCouponList(new PageRequest(1, 100));
+
         for (CustomerCouponVo customerCoupon : customerCoupons) {
             Boolean isUsable = customerCouponService.checkCoupon(customerCoupon, shop.getId(), orderProducts);
             customerCoupon.setIsUsable(isUsable);
@@ -272,6 +259,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //店铺是否营业
         Shop shop = shopService.getById(request.getShopId());
         checkShop(shop);
+
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         context.setCustomerId(userId);
         context.setShop(shop);
@@ -288,17 +276,17 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * 获取距离
      */
     private double getDistance(Long customerAddressId, Integer orderType, Shop shop) {
-        double distance = 0;
         CustomerAddress customerAddress = customerAddressService.getById(customerAddressId);
-        if (Objects.equals(orderType,OrderTypeEnum.TAKEAWAY.getCode())) {
-            if (Objects.equals(shop.getSupportDelivery(),CommonConstant.NO)) {
-                throw new PinetException("该店铺暂不支持外卖订单");
-            }
-            distance = LatAndLngUtils.getDistance(customerAddress.getLng().doubleValue(), customerAddress.getLat().doubleValue(),
-                    Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
-            if (distance > shop.getDeliveryDistance()) {
-                throw new PinetException("店铺距离过远,无法配送");
-            }
+        if(!Objects.equals(orderType,OrderTypeEnum.TAKEAWAY.getCode())){
+            return 0D;
+        }
+        if (Objects.equals(shop.getSupportDelivery(),CommonConstant.NO)) {
+            throw new PinetException("该店铺暂不支持外卖订单");
+        }
+        double distance = LatAndLngUtils.getDistance(customerAddress.getLng().doubleValue(), customerAddress.getLat().doubleValue(),
+                Double.parseDouble(shop.getLng()), Double.parseDouble(shop.getLat()));
+        if (distance > shop.getDeliveryDistance()) {
+            throw new PinetException("店铺距离过远,无法配送");
         }
         return distance;
     }
@@ -310,9 +298,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new PinetException("店铺已经打烊了~");
         }
     }
-
-
-
 
     private Long getExpireTime(Date createTime) {
         Date expireTime = DateUtil.offsetMinute(createTime, 15);
@@ -568,81 +553,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return discountedPrice;
     }
 
-    /**
-     * 店帮主优惠计算 每个商品分开计算优惠 套餐不参与
-     *
-     * @param orderProducts  订单商品信息
-     * @param orderDiscounts 订单优惠明细
-     * @param customerId     用户id
-     * @param originalPrice  原价
-     * @return 折后价
-     */
-    private BigDecimal getDiscountedPrice(List<OrderProduct> orderProducts, List<OrderDiscount> orderDiscounts, Long customerId, BigDecimal originalPrice) {
-        Integer memberLevel = customerMemberService.getMemberLevel(customerId);
-        MemberLevelEnum memberLevelEnum = MemberLevelEnum.getEnumByCode(memberLevel);
-        //门客不优惠  直接return
-        if (memberLevel.equals(MemberLevelEnum._0.getCode())) {
-            return originalPrice;
-        }
-
-        boolean isCombo = false;
-
-        for (OrderProduct orderProduct : orderProducts) {
-            ShopProduct shopProduct = shopProductService.getById(orderProduct.getShopProdId());
-            if ("COMBO".equals(shopProduct.getDishType())) {
-                isCombo = true;
-            } else {
-                orderProduct.setProdPrice(orderProduct.getProdPrice().multiply(memberLevelEnum.getDiscount()).setScale(2, RoundingMode.HALF_UP));
-            }
-        }
-        //计算折后总价
-        BigDecimal discountedPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        //添加优惠明细
-        OrderDiscount orderDiscount = new OrderDiscount();
-        String discountMsg = memberLevelEnum.getMsg() + memberLevelEnum.getDiscount().multiply(new BigDecimal(10)) + "优惠";
-        orderDiscount.setDiscountMsg(discountMsg)
-                .setDiscountAmount(originalPrice.subtract(discountedPrice)).setType(1);
-        orderDiscounts.add(orderDiscount);
-
-
-        if (isCombo) {
-            OrderDiscount orderDiscount1 = new OrderDiscount();
-            orderDiscount1.setDiscountMsg("特价团餐商品无法参与会员优惠").setDiscountAmount(BigDecimal.ZERO).setType(1);
-            orderDiscounts.add(orderDiscount1);
-        }
-
-        return discountedPrice;
-    }
-
-//    /**
-//     * 获取积分
-//     *
-//     * @param customerId 用户id
-//     * @param orderPrice 订单价格
-//     * @return 积分
-//     */
-    /*
-    private Integer getScore(Long customerId, BigDecimal orderPrice) {
-        int score = 0;
-        Integer memberLevel = customerMemberService.getMemberLevel(customerId);
-        //店帮主 2倍积分
-        if (memberLevel.equals(MemberLevelEnum._20.getCode())) {
-            score = orderPrice.multiply(new BigDecimal("2")).setScale(0, RoundingMode.DOWN).intValue();
-        }
-
-        //会员 1倍积分
-        if (memberLevel.equals(MemberLevelEnum._10.getCode())) {
-            score = orderPrice.multiply(new BigDecimal("1")).setScale(0, RoundingMode.DOWN).intValue();
-        }
-
-        //门客 0.5倍积分
-        if (memberLevel.equals(MemberLevelEnum._0.getCode())) {
-            score = orderPrice.multiply(new BigDecimal("0.5")).setScale(0, RoundingMode.DOWN).intValue();
-        }
-        return score;
-    }*/
-
 
     @Override
     public List<PickUpListVo> pickUpList() {
@@ -656,122 +566,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             }
         });
         return pickUpListVos;
-    }
-
-
-    private Orders createOrder(CreateOrderDto dto, BigDecimal shippingFee, Double m, BigDecimal orderPrice, BigDecimal orderProdPrice, BigDecimal discountAmount, Shop shop, BigDecimal packageFee, BigDecimal shippingFeePlat) {
-        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        Date now = new Date();
-        Date estimateArrivalStartTime = DateUtil.offsetHour(now, 1);
-        Date estimateArrivalEndTime = DateUtil.offsetMinute(now, 90);
-
-        Orders order = new Orders();
-        Snowflake snowflake = IdUtil.getSnowflake();
-        order.setOrderNo(snowflake.nextId());
-        order.setOrderType(dto.getOrderType());
-        order.setOrderStatus(OrderStatusEnum.NOT_PAY.getCode());
-        order.setCustomerId(userId);
-        order.setShopId(shop.getId());
-        order.setShopName(shop.getShopName());
-        order.setOrderPrice(orderPrice);
-        order.setOrderProdPrice(orderProdPrice);
-        order.setDiscountAmount(discountAmount);
-        order.setShippingFee(shippingFee);
-        order.setPackageFee(packageFee);
-        order.setEstimateArrivalStartTime(estimateArrivalStartTime);
-        order.setEstimateArrivalEndTime(estimateArrivalEndTime);
-        order.setOrderDistance(m.intValue());
-        order.setRemark(dto.getRemark());
-        order.setShareId(dto.getShareId());
-        order.setKryShopId(shop.getKryShopId());
-        order.setOrderSource(dto.getOrderSource());
-        order.setShippingFeePlat(shippingFeePlat);
-        order.setCustomerCouponId(dto.getCustomerCouponId());
-        return order;
-    }
-
-
-    /**
-     * 获取用户支付配送费
-     *
-     * @param orderType 订单类型( 1外卖  2自提)
-     * @return
-     */
-    private BigDecimal getShippingFee(Integer orderType, double distance, String deliveryPlatform) {
-        if (orderType == 2) {
-            return new BigDecimal("0");
-        }
-        if (!Environment.isProd()) {
-            return new BigDecimal("4");
-        }
-        if (deliveryPlatform.equals(DeliveryPlatformEnum.ZPS.getCode())) {
-            //todo 商家没有对接外卖平台，自配送
-            return BigDecimal.ZERO;
-        }
-
-
-        BigDecimal shippingFee = shippingFeeRuleService.getByDistance(distance);
-        if (shippingFee == null) {
-            throw new PinetException("配送费查询失败");
-        }
-        return shippingFee;
-
-    }
-
-
-    /**
-     * 获取平台配送费
-     *
-     * @param orderType        订单类型( 1外卖  2自提)
-     * @param deliveryPlatform 配送平台( ZPS-自配送，DADA-达达)
-     * @return BigDecimal
-     */
-    private BigDecimal getShippingFeePlat(Integer orderType, Long customerAddressId, BigDecimal orderProdPrice, String deliveryShopNo, String deliveryPlatform) {
-        if (Objects.equals(orderType,OrderTypeEnum.SELF_PICKUP.getCode())) {
-            return BigDecimal.ZERO;
-        }
-        //测试环境默认4元吧
-        if (!Environment.isProd()) {
-            return new BigDecimal("4");
-        }
-        if (StringUtil.isBlank(deliveryShopNo) || deliveryPlatform.equals(DeliveryPlatformEnum.ZPS.getCode())) {
-            //todo 商家没有对接外卖平台，自配送
-            return BigDecimal.ZERO;
-        }
-        //查询收货地址
-        CustomerAddress customerAddress = customerAddressService.getById(customerAddressId);
-        if (ObjectUtil.isNull(customerAddress)) {
-            throw new PinetException("收货地址异常");
-        }
-
-        Snowflake snowflake = IdUtil.getSnowflake();
-
-        AddOrderReq addOrderReq = AddOrderReq.builder()
-                .shopNo(deliveryShopNo)
-                .originId(snowflake.nextIdStr())
-                .cargoPrice(orderProdPrice.doubleValue())
-                .prepay(0)
-                .receiverName(customerAddress.getName())
-                .receiverAddress(customerAddress.getAddress())
-                .receiverPhone(customerAddress.getPhone())
-                .callback("http://xinjiangapi.ypxlbz.com/house/qingshi/api/dada/deliverFee/callback")
-                .cargoWeight(0.5)
-                .receiverLat(customerAddress.getLat().doubleValue())
-                .receiverLng(customerAddress.getLng().doubleValue())
-                .build();
-        try {
-            AddOrderResp addOrderResp = daDaService.queryDeliverFee(addOrderReq);
-            return BigDecimal.valueOf(addOrderResp.getDeliverFee());
-        } catch (RpcException e) {
-            throw new PinetException("查询配送费服务失败");
-        }
-    }
-
-    /**
-     * 分割商品样式id
-     */
-    private List<Long> splitShopProdSpecIds(String shopProdSpecIds) {
-        return Convert.toList(Long.class,shopProdSpecIds);
     }
 
     @SneakyThrows

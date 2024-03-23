@@ -26,6 +26,21 @@ public class ComboDishHandler extends DishSettleAbstractHandler{
 
 
     /**
+     * 构建订单商品
+     * @param shopProdId
+     * @param prodNum
+     * @return
+     */
+    @Override
+    protected OrderProduct build(Long shopProdId,Integer prodNum){
+        OrderProduct orderProduct = super.build(shopProdId, prodNum);
+        Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(shopProdId);
+        orderProduct.setProdUnitPrice(BigDecimalUtil.fenToYuan(unitPrice));
+        orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), new BigDecimal(orderProduct.getProdNum())));
+        return orderProduct;
+    }
+
+    /**
      * 套餐购物车结算
      * @param cart
      * @return
@@ -33,12 +48,11 @@ public class ComboDishHandler extends DishSettleAbstractHandler{
     @Override
     public void handler(Cart cart){
         OrderProduct orderProduct = build(cart.getShopProdId(), cart.getProdNum());
-
-        List<ComboDishSpecVo> list = new ArrayList<>();
         List<CartComboDish> cartComboDishList = context.cartComboDishService.getByCartId(cart.getId());
         if(CollectionUtils.isEmpty(cartComboDishList)){
             return;
         }
+        List<ComboDishSpecVo> list = new ArrayList<>();
         for (CartComboDish cartComboDish : cartComboDishList) {
             ComboDishSpecVo comboDishSpecVo = new ComboDishSpecVo();
             comboDishSpecVo.setShopProdId(cart.getShopProdId());
@@ -103,20 +117,7 @@ public class ComboDishHandler extends DishSettleAbstractHandler{
     }
 
 
-    /**
-     * 构建订单商品
-     * @param shopProdId
-     * @param prodNum
-     * @return
-     */
-    @Override
-    protected OrderProduct build(Long shopProdId,Integer prodNum){
-        OrderProduct orderProduct = super.build(shopProdId, prodNum);
-        Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(shopProdId);
-        orderProduct.setProdUnitPrice(BigDecimalUtil.fenToYuan(unitPrice));
-        orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), new BigDecimal(orderProduct.getProdNum())));
-        return orderProduct;
-    }
+
 
 
 }

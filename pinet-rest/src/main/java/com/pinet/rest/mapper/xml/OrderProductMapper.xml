@@ -33,19 +33,7 @@
         op.del_flag,
         op.order_id, op.dish_id, op.unit, op.shop_prod_id, op.prod_name, op.prod_unit_price, op.prod_num, op.prod_price, op.commission, op.package_fee, op.prod_img
     </sql>
-    <select id="selectOrderProduct" resultType="com.pinet.rest.entity.bo.OrderProductBo" parameterType="java.lang.Long">
-        select op.id             orderProductId,
-               op.prod_name      prodName,
-               op.prod_sku_name  prodSkuName,
-               op.prod_spec_name prodSpecName,
-               op.prod_num       prodNum,
-               sp.product_img    productImg,
-               op.prod_price     prodPrice
-        from qingshi.order_product op
-                 left join qingshi.shop_product sp on sp.id = op.shop_prod_id
-        where op.del_flag = 0
-          and op.order_id = #{orderId}
-    </select>
+
 
 
     <resultMap id="selectByOrderIdResultMap" type="com.pinet.rest.entity.OrderProduct">

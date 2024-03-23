@@ -15,7 +15,7 @@ import java.math.RoundingMode;
 public abstract class OrderDishAbstractHandler implements OrderDishHandler {
     protected OrderDishContext context;
 
-    protected OrderProduct buildOrderProduct(OrderProductRequest request, BigDecimal unitPrice){
+    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice){
         OrderProduct orderProduct = new OrderProduct();
         orderProduct.setOrderId(request.getOrderId());
         orderProduct.setShopProdId(request.getShopProdId());
@@ -29,7 +29,6 @@ public abstract class OrderDishAbstractHandler implements OrderDishHandler {
         if(request.isCalculate()){
             orderProduct.setCommission(BigDecimalUtil.multiply(orderProduct.getProdPrice(),0.1));
         }
-
         return orderProduct;
     }
 

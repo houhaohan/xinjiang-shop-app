@@ -6,6 +6,7 @@ import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.request.CartOrderProductRequest;
 import com.pinet.rest.entity.request.DirectOrderRequest;
+import com.pinet.rest.entity.request.OrderProductRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -25,6 +26,15 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
         this.context = context;
     }
 
+    @Override
+    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice) {
+        OrderProduct orderProduct = super.build(request, unitPrice);
+        if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
+        }
+        return orderProduct;
+    }
+
     /**
      * 单品购物车下单
      * 执行订单商品入库
@@ -36,10 +46,7 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
         List<Long> shopProdSpecIds = cartProductSpecList.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
         BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(shopProdSpecIds);
 
-        OrderProduct orderProduct = buildOrderProduct(request, unitPrice);
-        if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
-        }
+        OrderProduct orderProduct = build(request, unitPrice);
         context.orderProductService.save(orderProduct);
 
         //新增订单商品样式
@@ -56,10 +63,7 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
     @Override
     public OrderProduct execute(DirectOrderRequest request){
         BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(request.getShopProdSpecIds());
-        OrderProduct orderProduct = buildOrderProduct(request, unitPrice);
-        if(Objects.equals(request.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
-        }
+        OrderProduct orderProduct = build(request, unitPrice);
         context.orderProductService.save(orderProduct);
 
         saveOrderProductSpecs(request.getShopProdSpecIds(),request.getOrderId(),orderProduct.getId());
