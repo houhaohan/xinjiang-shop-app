@@ -131,13 +131,13 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     @Override
-    public <T extends OrderProduct> Boolean checkCoupon(Long customerCouponId, Long shopId, List<T> orderProducts) {
+    public Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProduct> orderProducts) {
         CustomerCouponVo customerCouponVo = baseMapper.selectCustomerCouponVoById(customerCouponId);
         return checkCoupon(customerCouponVo, shopId, orderProducts);
     }
 
     @Override
-    public  <T extends OrderProduct> Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<T> orderProducts) {
+    public  Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts) {
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         //优惠券不存在
@@ -174,11 +174,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
             }
         } else {
             List<Long> shopProdIds = orderProducts.stream().map(OrderProduct::getShopProdId).collect(Collectors.toList());
-            QueryWrapper<CouponProduct> queryWrapper = new QueryWrapper<>();
-            queryWrapper.select("product_id");
-            queryWrapper.eq("coupon_id", coupon.getId());
-            queryWrapper.in("product_id", shopProdIds);
-            List<Long> productIds = couponProductService.listObjs(queryWrapper, productId -> Long.valueOf(productId.toString()));
+            List<Long> productIds = couponProductService.getProdIdsByShopProdIdsAndCouponId(shopProdIds, coupon.getId());
             BigDecimal sumPrice = orderProducts.stream().filter(item -> productIds.contains(item.getShopProdId())).map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
             if (BigDecimalUtil.lt(sumPrice, coupon.getUsePrice())) {
                 return false;
@@ -186,6 +182,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         }
         return true;
     }
+
 
     @Override
     public void couponWarn(Long customerCouponId) {
@@ -258,9 +255,10 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     @Override
     public Long countByCustomerId(Long customerId) {
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("customer_id", customerId);
-        queryWrapper.in("coupon_status", 1, 2);
-        queryWrapper.gt("expire_time", new Date());
+        queryWrapper.lambda()
+                .eq(CustomerCoupon::getCustomerId,customerId)
+                .in(CustomerCoupon::getCouponStatus,1,2)
+                .gt(CustomerCoupon::getExpireTime,new Date());
         return count(queryWrapper);
     }
 

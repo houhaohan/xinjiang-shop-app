@@ -2,6 +2,8 @@ package com.pinet.rest.handler.order;
 
 
 import com.pinet.core.constants.OrderConstant;
+import com.pinet.core.enums.ApiExceptionEnum;
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.OrderComboDishDto;
@@ -66,17 +68,22 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
             context.orderComboDishService.save(orderComboDish);
 
             List<CartComboDishSpec> cartComboDishSpecList = context.cartComboDishSpecService.getByCartIdAndProdId(request.getCartId(), singleProduct.getId());
-            List<OrderComboDishSpec> orderComboDishSpecList = cartComboDishSpecList.stream().map(spec -> {
+            List<Long> shopProdSpecIds = cartComboDishSpecList.stream().map(CartComboDishSpec::getShopProdSpecId).collect(Collectors.toList());
+            List<ShopProductSpec> shopProductSpecs = context.shopProductSpecService.listByIds(shopProdSpecIds);
+
+            List<OrderComboDishSpec> orderComboDishSpecList = shopProdSpecIds.stream().map(specId -> {
                 OrderComboDishSpec orderComboDishSpec = new OrderComboDishSpec();
-                ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(spec.getShopProdSpecId());
+                ShopProductSpec shopProductSpec = shopProductSpecs.stream()
+                        .filter(s -> Objects.equals(s.getId(), specId))
+                        .findFirst()
+                        .orElseThrow(() -> new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
                 orderComboDishSpec.setAddPrice(shopProductSpec.getPrice());
                 orderComboDishSpec.setOrderComboDishId(orderComboDish.getId());
-                orderComboDishSpec.setShopProdSpecId(spec.getShopProdSpecId());
-                orderComboDishSpec.setShopProdSpecName(spec.getShopProdSpecName());
+                orderComboDishSpec.setShopProdSpecId(specId);
+                orderComboDishSpec.setShopProdSpecName(shopProductSpec.getSpecName());
                 return orderComboDishSpec;
             }).collect(Collectors.toList());
             context.orderComboDishSpecService.saveBatch(orderComboDishSpecList);
-
         }
         return orderProduct;
     }

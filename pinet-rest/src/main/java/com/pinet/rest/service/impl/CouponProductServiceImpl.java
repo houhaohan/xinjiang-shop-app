@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.rest.entity.CouponProduct;
 import com.pinet.rest.mapper.CouponProductMapper;
 import com.pinet.rest.service.ICouponProductService;
@@ -20,7 +21,12 @@ import java.util.List;
 public class CouponProductServiceImpl extends ServiceImpl<CouponProductMapper, CouponProduct> implements ICouponProductService {
 
     @Override
-    public void getByProductIds(List<Long> prodIds) {
-
+    public List<Long> getProdIdsByShopProdIdsAndCouponId(List<Long> shopProdIds,Long couponId){
+        QueryWrapper<CouponProduct> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .select(CouponProduct::getProductId)
+                .eq(CouponProduct::getCouponId,couponId)
+                .in(CouponProduct::getProductId,shopProdIds);
+        return listObjs(queryWrapper, productId -> Long.valueOf(productId.toString()));
     }
 }

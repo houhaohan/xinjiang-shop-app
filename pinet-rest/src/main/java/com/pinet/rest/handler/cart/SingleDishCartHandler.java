@@ -79,14 +79,16 @@ public class SingleDishCartHandler extends DishCartHandler {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void refreshCart(Cart cart, Integer prodNum) {
+    public void refreshCart(Long cartId, Integer prodNum) {
         if (prodNum > 0) {
+            Cart cart = new Cart();
+            cart.setId(cartId);
             cart.setProdNum(prodNum);
             context.cartMapper.updateById(cart);
             return;
         }
-        context.cartProductSpecService.remove(new LambdaQueryWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,cart.getId()));
-        context.cartMapper.deleteById(cart.getId());
+        context.cartProductSpecService.remove(new LambdaQueryWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,cartId));
+        context.cartMapper.deleteById(cartId);
     }
 
     @Override

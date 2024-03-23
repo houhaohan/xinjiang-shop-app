@@ -1,8 +1,6 @@
 package com.pinet.rest.handler.cart;
 
 
-import com.pinet.rest.entity.Cart;
-
 import java.util.List;
 
 public interface CartHandler {
@@ -15,7 +13,7 @@ public interface CartHandler {
     /**
      * 刷新购物车数量
      */
-    void refreshCart(Cart cart, Integer prodNum);
+    void refreshCart(Long cartId, Integer prodNum);
 
     /**
      * 清除购物车

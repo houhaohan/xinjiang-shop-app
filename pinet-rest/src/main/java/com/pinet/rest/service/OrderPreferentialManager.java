@@ -75,11 +75,7 @@ public class OrderPreferentialManager {
         }else if(coupon.getUseProduct() == 2){
             //部分商品
             List<Long> shopProdIds = orderProducts.stream().map(OrderProduct::getShopProdId).collect(Collectors.toList());
-            QueryWrapper<CouponProduct> queryWrapper = new QueryWrapper<>();
-            queryWrapper.select("product_id");
-            queryWrapper.eq("coupon_id",coupon.getId());
-            queryWrapper.in("product_id",shopProdIds);
-            List<Long> productIds = couponProductService.listObjs(queryWrapper,productId-> Long.valueOf(productId.toString()));
+            List<Long> productIds = couponProductService.getProdIdsByShopProdIdsAndCouponId(shopProdIds, coupon.getId());
             orderProducts = orderProducts.stream().filter(item -> productIds.contains(item.getShopProdId())).collect(Collectors.toList());
             orderDiscounts.addAll(promotionStrategyFactory.create().apply(orderProducts));
         }

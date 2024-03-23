@@ -120,7 +120,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             throw new PinetException("购物车不存在");
         }
         CartContext context = new CartContext(cart.getDishType());
-        context.refreshCart(cart,dto.getProdNum());
+        context.refreshCart(cart.getId(),dto.getProdNum());
         return true;
     }
 

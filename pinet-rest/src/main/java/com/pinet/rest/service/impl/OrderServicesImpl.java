@@ -701,7 +701,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderStrategyRequest.setValidateDishStock(true);
         takeoutOrderCreateDTO.setOrderStrategyRequest(orderStrategyRequest);
 
-        OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(order.getId(),"weixin_mini");
+        OrderPay orderPay = orderPayService.getByOrderId(order.getId());
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
         paymentDetailRequest.setOutBizId(String.valueOf(orderPay.getId()));
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orderPay.getPayPrice()));

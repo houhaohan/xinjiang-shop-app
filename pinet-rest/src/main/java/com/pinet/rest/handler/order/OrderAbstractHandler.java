@@ -36,13 +36,12 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
 
 
     protected Orders buildOrder(){
-        Long userId = context.customerId;
         Orders order = new Orders();
         order.setOrderNo(IdUtil.getSnowflake().nextId());
         order.setOrderType(context.request.getOrderType());
         order.setOrderStatus(OrderStatusEnum.NOT_PAY.getCode());
         order.setOrderSource(context.request.getOrderSource());
-        order.setCustomerId(userId);
+        order.setCustomerId(context.customerId);
         order.setShopId(context.request.getShopId());
         order.setKryShopId(context.shop.getKryShopId());
         order.setShopName(context.shop.getShopName());
@@ -75,7 +74,7 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
      * @param orderProdPrice
      * @return
      */
-    protected BigDecimal getShippingFeePlat(Integer orderType, Shop shop, Long customerAddressId, BigDecimal orderProdPrice ) {
+    private BigDecimal getShippingFeePlat(Integer orderType, Shop shop, Long customerAddressId, BigDecimal orderProdPrice ) {
         if (Objects.equals(orderType, OrderTypeEnum.SELF_PICKUP.getCode())) {
             return BigDecimal.ZERO;
         }
@@ -126,12 +125,12 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
      * @param shareId 分享人 ID
      */
     protected boolean commissionCondition(Long customerId,Long shareId) {
-        if (ObjectUtil.isNull(shareId) || shareId <= 0) {
+        if (Objects.isNull(shareId) || shareId <= 0) {
             return false;
         }
 
         //判断下单人和分享人是否是同一个人
-        if (shareId.equals(customerId)) {
+        if (Objects.equals(customerId,shareId)) {
             return false;
         }
         //分享人会员等级

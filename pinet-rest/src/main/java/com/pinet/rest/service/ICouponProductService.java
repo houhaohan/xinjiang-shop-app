@@ -15,5 +15,6 @@ import java.util.List;
  */
 public interface ICouponProductService extends IService<CouponProduct> {
 
-    void getByProductIds(List<Long> prodIds);
+
+    List<Long> getProdIdsByShopProdIdsAndCouponId(List<Long> shopProdIds,Long couponId);
 }

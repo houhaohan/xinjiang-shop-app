@@ -46,4 +46,5 @@ public interface IShopProductSpecService extends IService<ShopProductSpec> {
      */
     BigDecimal getPriceByIds(List<Long> ids);
 
+
 }

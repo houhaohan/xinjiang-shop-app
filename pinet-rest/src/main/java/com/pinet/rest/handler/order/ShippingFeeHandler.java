@@ -9,6 +9,7 @@ import com.pinet.rest.service.IShippingFeeRuleService;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @description 费送费处理器
@@ -36,9 +37,7 @@ public class ShippingFeeHandler {
         }
         IShippingFeeRuleService shippingFeeRuleService = SpringContextUtils.getBean(IShippingFeeRuleService.class);
         BigDecimal shippingFee = shippingFeeRuleService.getByDistance(distance);
-        if (shippingFee == null) {
-            throw new PinetException("配送费查询失败");
-        }
-        return shippingFee;
+        return Optional.ofNullable(shippingFee).orElseThrow(() -> new PinetException("配送费查询失败"));
     }
+
 }

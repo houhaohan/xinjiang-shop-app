@@ -1,6 +1,8 @@
 package com.pinet.rest.handler.order;
 
 import com.pinet.core.constants.OrderConstant;
+import com.pinet.core.enums.ApiExceptionEnum;
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
@@ -16,21 +18,21 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @description 订单 单品处理器
  * @author chengshuanghui
+ * @description 订单 单品处理器
  * @data 2024-03-21 15:00
  */
-public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
+public class OrderSingleDishHandler extends OrderDishAbstractHandler {
 
-    public OrderSingleDishHandler(OrderDishContext context){
+    public OrderSingleDishHandler(OrderDishContext context) {
         this.context = context;
     }
 
     @Override
     protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice) {
         OrderProduct orderProduct = super.build(request, unitPrice);
-        if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
+        if (Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())) {
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE, orderProduct.getProdNum(), RoundingMode.HALF_UP));
         }
         return orderProduct;
     }
@@ -41,7 +43,7 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public OrderProduct execute(CartOrderProductRequest request){
+    public OrderProduct execute(CartOrderProductRequest request) {
         List<CartProductSpec> cartProductSpecList = context.cartProductSpecService.getByCartId(request.getCartId());
         List<Long> shopProdSpecIds = cartProductSpecList.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
         BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(shopProdSpecIds);
@@ -50,7 +52,7 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
         context.orderProductService.save(orderProduct);
 
         //新增订单商品样式
-        saveOrderProductSpecs(shopProdSpecIds,request.getOrderId(),orderProduct.getId());
+        saveOrderProductSpecs(shopProdSpecIds, request.getOrderId(), orderProduct.getId());
         return orderProduct;
     }
 
@@ -61,27 +63,32 @@ public class OrderSingleDishHandler extends  OrderDishAbstractHandler{
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public OrderProduct execute(DirectOrderRequest request){
+    public OrderProduct execute(DirectOrderRequest request) {
         BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(request.getShopProdSpecIds());
         OrderProduct orderProduct = build(request, unitPrice);
         context.orderProductService.save(orderProduct);
 
-        saveOrderProductSpecs(request.getShopProdSpecIds(),request.getOrderId(),orderProduct.getId());
+        saveOrderProductSpecs(request.getShopProdSpecIds(), request.getOrderId(), orderProduct.getId());
         return orderProduct;
     }
 
     /**
      * 新增订单商品样式
+     *
      * @param shopProdSpecIds
      * @param orderId
      * @param orderProductId
      */
-    private void saveOrderProductSpecs(List<Long> shopProdSpecIds,Long orderId,Long orderProductId){
+    private void saveOrderProductSpecs(List<Long> shopProdSpecIds, Long orderId, Long orderProductId) {
+        List<ShopProductSpec> shopProductSpecs = context.shopProductSpecService.listByIds(shopProdSpecIds);
         List<OrderProductSpec> orderProductSpecList = shopProdSpecIds.stream().map(specId -> {
             OrderProductSpec orderProductSpec = new OrderProductSpec();
             orderProductSpec.setOrderId(orderId);
             orderProductSpec.setOrderProdId(orderProductId);
-            ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(specId);
+            ShopProductSpec shopProductSpec = shopProductSpecs.stream()
+                    .filter(o -> Objects.equals(o.getId(), specId))
+                    .findFirst()
+                    .orElseThrow(() -> new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
             orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());
             orderProductSpec.setProdSkuName(shopProductSpec.getSkuName());
             orderProductSpec.setShopProdSpecId(specId);

@@ -36,7 +36,16 @@ public class OrderPayServiceImpl extends ServiceImpl<OrderPayMapper, OrderPay> i
     @Override
     public OrderPay getByOrderNo(Long orderNo) {
         LambdaQueryWrapper<OrderPay> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(OrderPay::getOrderNo,orderNo).eq(BaseEntity::getDelFlag,0);
+        lambdaQueryWrapper.eq(OrderPay::getOrderNo,orderNo);
         return getOne(lambdaQueryWrapper);
+    }
+
+    @Override
+    public OrderPay getByOrderId(Long orderId) {
+        LambdaQueryWrapper<OrderPay> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderPay::getOrderId,orderId);
+        queryWrapper.orderByDesc(OrderPay::getId);
+        queryWrapper.last(" limit 1 ");
+        return getOne(queryWrapper);
     }
 }

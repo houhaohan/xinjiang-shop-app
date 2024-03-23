@@ -1,6 +1,7 @@
 package com.pinet.rest.handler.cart;
 
 import cn.hutool.core.convert.Convert;
+import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
@@ -12,6 +13,8 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -66,19 +69,22 @@ public class ComboDishCartHandler extends DishCartHandler{
             cartComboDish.setShopProdId(singleDish.getShopProdId());
             context.cartComboDishService.save(cartComboDish);
             List<Long> singleProdSpecIds = Convert.toList(Long.class, singleDish.getShopProdSpecIds());
-            for(Long shopProdSpecId : singleProdSpecIds){
 
+            List<ShopProductSpec> shopProductSpecs = context.shopProductSpecService.listByIds(singleProdSpecIds);
+
+            List<CartComboDishSpec> cartComboDishSpecList = singleProdSpecIds.stream().map(id -> {
                 CartComboDishSpec cartComboDishSpec = new CartComboDishSpec();
                 cartComboDishSpec.setCartId(cart.getId());
                 cartComboDishSpec.setShopProdId(singleDish.getShopProdId());
-                cartComboDishSpec.setShopProdSpecId(shopProdSpecId);
-                ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(shopProdSpecId);
-                if (shopProductSpec == null) {
-                    throw new PinetException("样式不存在");
-                }
+                cartComboDishSpec.setShopProdSpecId(id);
+                ShopProductSpec shopProductSpec = shopProductSpecs.stream()
+                        .filter(o -> Objects.equals(id, o.getId()))
+                        .findFirst()
+                        .orElseThrow(() -> new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
                 cartComboDishSpec.setShopProdSpecName(shopProductSpec.getSpecName());
-                context.cartComboDishSpecService.save(cartComboDishSpec);
-            }
+                return cartComboDishSpec;
+            }).collect(Collectors.toList());
+            context.cartComboDishSpecService.saveBatch(cartComboDishSpecList);
         }
 
         BigDecimal price = BigDecimalUtil.multiply(BigDecimalUtil.fenToYuan(unitPrice), new BigDecimal(cart.getProdNum()));
@@ -88,15 +94,17 @@ public class ComboDishCartHandler extends DishCartHandler{
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void refreshCart(Cart cart,Integer prodNum) {
+    public void refreshCart(Long cartId,Integer prodNum) {
         if (prodNum > 0) {
+            Cart cart = new Cart();
+            cart.setId(cartId);
             cart.setProdNum(prodNum);
             context.cartMapper.updateById(cart);
             return;
         }
-        context.cartMapper.deleteById(cart.getId());
-        context.cartComboDishService.deleteByCartId(cart.getId().intValue());
-        context.cartComboDishSpecService.deleteByCartId(cart.getId().intValue());
+        context.cartMapper.deleteById(cartId);
+        context.cartComboDishService.deleteByCartId(cartId);
+        context.cartComboDishSpecService.deleteByCartId(cartId);
     }
 
     @Override

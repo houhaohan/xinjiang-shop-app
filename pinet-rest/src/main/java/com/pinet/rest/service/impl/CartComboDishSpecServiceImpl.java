@@ -30,7 +30,7 @@ public class CartComboDishSpecServiceImpl extends ServiceImpl<CartComboDishSpecM
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByCartId(Integer cartId) {
+    public void deleteByCartId(Long cartId) {
         UpdateWrapper<CartComboDishSpec> wrapper = new UpdateWrapper<>();
         wrapper.eq("cart_id",cartId);
         remove(wrapper);

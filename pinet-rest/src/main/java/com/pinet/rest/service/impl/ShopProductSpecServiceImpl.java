@@ -46,4 +46,5 @@ public class ShopProductSpecServiceImpl extends ServiceImpl<ShopProductSpecMappe
         queryWrapper.in("id",ids);
         return getObj(queryWrapper,o->((BigDecimal)o));
     }
+
 }

@@ -61,9 +61,10 @@ public class CartOrderHandler extends OrderAbstractHandler {
             orderProducts.add(orderProduct);
         }
 
-        afterHandler(orders,orderProducts);
-
         // 清除购物车
         context.cartService.delCartByShopId(orders.getShopId(),orders.getCustomerId());
+
+        afterHandler(orders,orderProducts);
+
     }
 }

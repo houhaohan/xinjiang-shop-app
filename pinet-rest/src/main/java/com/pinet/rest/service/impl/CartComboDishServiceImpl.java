@@ -25,7 +25,7 @@ public class CartComboDishServiceImpl extends ServiceImpl<CartComboDishMapper, C
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByCartId(Integer cartId) {
+    public void deleteByCartId(Long cartId) {
         UpdateWrapper<CartComboDish> wrapper = new UpdateWrapper<>();
         wrapper.eq("cart_id",cartId);
         remove(wrapper);

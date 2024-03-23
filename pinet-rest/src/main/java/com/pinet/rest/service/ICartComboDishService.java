@@ -20,7 +20,7 @@ public interface ICartComboDishService extends IService<CartComboDish> {
      * 删除购物车套餐明细
      * @param cartId
      */
-    void deleteByCartId(Integer cartId);
+    void deleteByCartId(Long cartId);
 
     /**
      * 批量删除购物车套餐明细

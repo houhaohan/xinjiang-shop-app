@@ -19,4 +19,10 @@ public interface IOrderPayService extends IService<OrderPay> {
      * @param orderNo 订单编号
      */
     OrderPay getByOrderNo(Long orderNo);
+
+    /**
+     * 根据orderId查询 最新一条支付信息
+     * @param orderId 订单ID
+     */
+    OrderPay getByOrderId(Long orderId);
 }

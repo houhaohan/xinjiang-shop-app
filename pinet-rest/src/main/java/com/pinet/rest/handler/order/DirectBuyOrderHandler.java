@@ -2,7 +2,6 @@ package com.pinet.rest.handler.order;
 
 import cn.hutool.core.convert.Convert;
 import com.pinet.core.exception.PinetException;
-import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.ShopProdStatusEnum;
 import com.pinet.rest.entity.request.DirectOrderRequest;
@@ -53,7 +52,9 @@ public class DirectBuyOrderHandler extends OrderAbstractHandler {
         request.setCalculate(condition);
 
         List<OrderProduct> orderProducts = new ArrayList<>();
-        OrderProduct orderProduct = context.orderDishContext.handler(shopProduct.getDishType()).execute(request);
+        OrderProduct orderProduct = context.orderDishContext
+                .handler(shopProduct.getDishType())
+                .execute(request);
         orderProducts.add(orderProduct);
         orders.setPackageFee(orderProduct.getPackageFee());
         orders.setOrderProdPrice(orderProduct.getProdPrice());

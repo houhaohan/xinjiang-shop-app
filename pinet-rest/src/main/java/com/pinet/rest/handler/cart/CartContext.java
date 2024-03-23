@@ -109,8 +109,8 @@ public class CartContext {
     /**
      * 刷新购物车商品数量
      */
-    public void refreshCart(Cart cart,Integer prodNum){
-        cartHandler.refreshCart(cart,prodNum);
+    public void refreshCart(Long cartId,Integer prodNum){
+        cartHandler.refreshCart(cartId,prodNum);
     }
 
 

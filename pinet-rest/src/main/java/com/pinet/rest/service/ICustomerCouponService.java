@@ -35,7 +35,7 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * @param orderProducts 订单商品
      * @return 是否可用
      */
-    <T extends OrderProduct>  Boolean checkCoupon(Long customerCouponId, Long shopId, List<T> orderProducts);
+    Boolean checkCoupon(Long customerCouponId, Long shopId, List<OrderProduct> orderProducts);
 
     /**
      * 判断优惠券是否可用
@@ -44,7 +44,7 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
      * @param orderProducts 订单商品
      * @return 是否可用
      */
-    <T extends OrderProduct> Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<T> orderProducts);
+    Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts);
 
     /**
      * 优惠券过期提醒
