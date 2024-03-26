@@ -7,6 +7,7 @@ import com.pinet.rest.entity.vo.CartListVo;
 import com.pinet.rest.entity.vo.CartVo;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -36,4 +37,18 @@ public interface CartMapper extends BaseMapper<Cart> {
      * @return
      */
     Cart getByUserIdAndShopProdId(@Param("customerId") Long customerId, @Param("shopProdId") Long shopProdId);
+
+    /**
+     * 查询购物车单品价格 数量
+     * @param cartId
+     * @return
+     */
+    BigDecimal getSingleByCartId(@Param("cartId") Long cartId);
+
+    /**
+     * 查询购物车单品价格 数量
+     * @param cartId
+     * @return
+     */
+    Long getComboByCartId(@Param("cartId") Long cartId);
 }

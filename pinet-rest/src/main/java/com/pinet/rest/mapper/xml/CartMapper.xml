@@ -59,20 +59,86 @@
 
             UNION ALL
 
-            select c.id,c.prod_num,(kcgd.price * c.prod_num / 100) as price
-            from cart c
-            left join kry_combo_group kcg on kcg.shop_prod_id = c.shop_prod_id and kcg.del_flag = 0
-            left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
-            where c.shop_id = #{shopId} and c.customer_id = #{customerId}
-            and c.cart_status = 1
-            and c.dish_type = 'COMBO'
-            and c.del_flag= 0
-            group by c.id
+           select (sum(price) * sum(prodNum))as price,sum(prodNum) as prodNum
+           from (
+	            <!-- 最小单价-->
+                select
+                c.id,sum(kcgd.price/100) as price, c.prod_num as prodNum
+                from cart c
+                left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
+                left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.single_dish_id = '' and kcgd.del_flag = 0
+                where c.id = #{cartId}
+
+                union all
+
+               <!-- 规格加价-->
+                select
+                sum(kcgd.dish_sku_price/100) as price, 0 as prodNum
+                from cart c
+                left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
+                left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+                left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = 24
+                left join shop_product_spec sps on sps.shop_prod_id = single.id and kcgd.spec_name = sps.spec_name and sps.del_flag = 0
+                where sps.id in
+                (
+                        select ccds.shop_prod_spec_id
+                        from cart_combo_dish ccd
+                        left join cart_combo_dish_spec ccds on ccd.cart_id = ccds.cart_id and ccd.shop_prod_id = ccds.shop_prod_id and ccds.del_flag = 0
+                        where ccd.cart_id = #{cartId}
+                )
+                and c.id = #{cartId}
+                and kcg.del_flag = 0
+            ) combo
+
         ) t
     </select>
 
-    <select id="getByUserIdAndShopProdId">
+    <select id="getByUserIdAndShopProdId" resultMap="BaseResultMap">
         select <include refid="Base_Column_List"/> from cart where customer_id = #{customerId} and shop_prod_id = #{shopProdId} and del_flag = 0
+    </select>
+
+    <select id="getSingleByCartId" resultType="java.math.BigDecimal">
+        select  sps.price as price
+        from cart c
+        left join cart_product_spec cps on c.id = cps.cart_id and cps.del_flag = 0
+        left join shop_product_spec sps on  sps.id = cps.shop_prod_spec_id and sps.del_flag = 0
+        where c.cart_status = 1
+        and c.id = #{cartId}
+        and c.del_flag= 0
+    </select>
+
+    <select id="getComboByCartId" resultType="java.lang.Long">
+        select sum(price) as price
+        from (
+            <!-- 最小单价-->
+            select
+            sum(kcgd.price) as price
+            from cart c
+            left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
+            left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.single_dish_id = '' and kcgd.del_flag = 0
+            where c.id = #{cartId} and c.cart_status = 1 and c.del_flag= 0
+
+            union all
+
+            <!-- 规格加价-->
+            select
+            sum(kcgd.dish_sku_price) as price
+            from cart c
+            left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
+            left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+            left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = c.shop_id
+            left join shop_product_spec sps on sps.shop_prod_id = single.id and kcgd.spec_name = sps.spec_name and sps.del_flag = 0
+            where sps.id in
+            (
+            select ccds.shop_prod_spec_id
+            from cart_combo_dish ccd
+            left join cart_combo_dish_spec ccds on ccd.cart_id = ccds.cart_id and ccd.shop_prod_id = ccds.shop_prod_id and ccds.del_flag = 0
+            where ccd.cart_id = #{cartId}
+            )
+            and c.id = #{cartId}
+            and c.cart_status = 1
+            and kcg.del_flag = 0
+        ) combo
     </select>
 
 </mapper>

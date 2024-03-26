@@ -157,8 +157,6 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
                 && BigDecimalUtil.ne(orderPrice,context.request.getOrderPrice())) {
             throw new PinetException("订单信息发生变化,请重新下单");
         }
-        orders.setCommission(BigDecimalUtil.multiply(orders.getOrderPrice(),0.1));
-
         //修改订单金额
         Orders entity = new Orders();
         entity.setId(orders.getId());
@@ -166,10 +164,11 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         entity.setOrderPrice(orderPrice);
         entity.setPackageFee(orders.getPackageFee());
         entity.setOrderProdPrice(orders.getOrderProdPrice());
+        entity.setCommission(BigDecimalUtil.multiply(orderPrice ,0.1));
         Integer level = context.customerMemberService.getMemberLevel(orders.getCustomerId());
         Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(level);
-        orders.setScore(score);
-        orders.setShippingFeePlat(getShippingFeePlat(orders.getOrderType(),context.shop,context.request.getCustomerAddressId(),orders.getOrderProdPrice()));
+        entity.setScore(score);
+        entity.setShippingFeePlat(getShippingFeePlat(orders.getOrderType(),context.shop,context.request.getCustomerAddressId(),orders.getOrderProdPrice()));
         context.ordersMapper.updateById(entity);
 
         List<OrderDiscount> orderDiscounts = preferentialVo.getOrderDiscounts();

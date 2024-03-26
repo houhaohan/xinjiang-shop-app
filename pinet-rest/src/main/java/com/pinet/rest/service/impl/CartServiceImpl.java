@@ -2,6 +2,7 @@ package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
@@ -12,10 +13,7 @@ import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
-import com.pinet.rest.entity.vo.AddCartVo;
-import com.pinet.rest.entity.vo.CartComboDishVo;
-import com.pinet.rest.entity.vo.CartListVo;
-import com.pinet.rest.entity.vo.CartVo;
+import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.handler.cart.CartContext;
 import com.pinet.rest.mapper.CartMapper;
 import com.pinet.rest.service.*;
@@ -62,7 +60,15 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                 List<CartComboDishVo> cartComboDishVos = cartComboDishService.getComboDishByCartId(k.getCartId(),k.getShopProdId());
                 k.setCartComboDishVos(cartComboDishVos);
                 Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(k.getShopProdId());
-                k.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice));
+
+                //规格加价
+                List<Long> shopProdSpecIds = cartComboDishVos.stream().map(CartComboDishVo::getComboDishSpecs)
+                        .flatMap(list ->
+                                list.stream().map(CartComboDishSpecVo::getShopProdSpecId)
+                        ).collect(Collectors.toList());
+                List<ComboSingleProductSpecVo> comboSingleProductSpecVos = kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, shop.getId());
+                Long addPrice = comboSingleProductSpecVos.stream().map(ComboSingleProductSpecVo::getAddPrice).reduce(0L, Long::sum);
+                k.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice + addPrice));
                 k.setAllPrice(BigDecimalUtil.multiply(k.getProdPrice(),new BigDecimal(k.getProdNum())));
             }else {
                 List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getCartId());
@@ -136,7 +142,30 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     @Override
     public CartVo getCartByUserIdAndShopId(Long shopId, Long customerId) {
-        return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
+        QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("shop_id",shopId);
+        queryWrapper.eq("customer_id",customerId);
+        List<Cart> cartList = list(queryWrapper);
+        CartVo cartVo = new CartVo();
+        Integer prodNum = 0;
+        BigDecimal price = BigDecimal.ZERO;
+
+        for(Cart cart : cartList){
+            if(DishType.SINGLE.equals(cart.getDishType())){
+                //单品单价
+                BigDecimal unitPrice = cartMapper.getSingleByCartId(cart.getId());
+                price = BigDecimalUtil.sum(price,BigDecimalUtil.multiply(unitPrice,new BigDecimal(cart.getProdNum())));
+            }else {
+                //套餐单价
+                Long unitPrice = cartMapper.getComboByCartId(cart.getId());
+                price = BigDecimalUtil.sum(price,BigDecimalUtil.multiply(BigDecimalUtil.fenToYuan(unitPrice),new BigDecimal(cart.getProdNum())));
+            }
+            prodNum = prodNum + cart.getProdNum();
+        }
+        cartVo.setPrice(price);
+        cartVo.setProdNum(prodNum);
+        return cartVo;
+//        return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
     }
 
     @Override

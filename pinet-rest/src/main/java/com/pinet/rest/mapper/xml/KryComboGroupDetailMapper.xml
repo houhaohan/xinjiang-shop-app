@@ -76,8 +76,28 @@
     </select>
 
     <select id="getPriceByShopProdId" resultType="Long">
-        select sum(kcgd.price) from kry_combo_group kcg
+        select kcgd.price from kry_combo_group kcg
         inner join kry_combo_group_detail kcgd on kcgd.combo_group_id = kcg.id and kcgd.del_flag = 0
-        where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
+        where kcg.shop_prod_id = #{shopProdId}
+        and kcgd.single_dish_id = ''
+        and kcg.del_flag = 0
+    </select>
+
+
+
+    <select id="getSpecByShopProdSpecIds" resultType="com.pinet.rest.entity.vo.ComboSingleProductSpecVo">
+        select
+            sps.id as shopProdSpecId,
+            sps.spec_name as shopProdSpecName,
+            ifnull(kcgd.dish_sku_price,0) as addPrice
+        from kry_combo_group kcg
+        left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+        left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = #{shopId}
+        left join shop_product_spec sps on sps.shop_prod_id = single.id and kcgd.spec_name = sps.spec_name and sps.del_flag = 0
+        where sps.id in
+        <foreach collection="ids" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+        and kcg.del_flag = 0
     </select>
 </mapper>

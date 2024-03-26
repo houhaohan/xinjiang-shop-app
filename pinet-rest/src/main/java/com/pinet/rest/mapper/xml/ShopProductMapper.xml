@@ -58,6 +58,7 @@
         <result column="sku_id" property="skuId"/>
         <result column="spsPrice" property="price"/>
         <result column="spsMarketPrice" property="marketPrice"/>
+        <result column="add_price" property="addPrice"/>
         <result column="stock" property="stock"/>
     </resultMap>
 
@@ -268,6 +269,34 @@
     </select>
 
 
+    <select id="getComboDetailByShopIdAndShopProdId" resultMap="ShopProductMap">
+        select  single.id,
+            single.prod_id,
+            single.product_name,
+            single.product_img,
+            single.product_desc,
+            single.shop_id,
+            single.product_type_id,
+            single.product_type,
+            single.dish_type,
+            kcgd.price/100 as price,
+            kcgd.sell_price/100 as market_price,
+            (ifnull(kcgd.dish_sku_price,0)/100) AS add_price,
+            kcgd.default_flag,
+            kcgd.spec_name,
+            sps.sku_id as skuId,
+            sps.sku_name as skuName,
+            sps.id as shop_prod_spec_id,
+            sps.sku_id,
+            sps.stock
+        from kry_combo_group kcg
+        left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+        left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = #{shopId}
+        left join shop_product_spec sps on sps.shop_prod_id = single.id and kcgd.spec_name = sps.spec_name and sps.del_flag = 0
+        where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
+    </select>
+
+
     <select id="getProductListByShopId" resultMap="ProdTypeMap">
         select temp.id,
 			 temp.shop_id,
@@ -328,7 +357,7 @@
                        max(kcgd.sell_price/100) as market_price
                 from shop_product sp
                 inner join product_type pt on pt.id = sp.product_type_id and pt.del_flag = 0
-                inner join kry_combo_group_detail kcgd on kcgd.dish_id = sp.prod_id and kcgd.del_flag = 0
+                inner join kry_combo_group_detail kcgd on kcgd.dish_id = sp.prod_id and kcgd.single_dish_id = '' and kcgd.del_flag = 0
                 where sp.shop_id = #{shopId}
                 and sp.shop_prod_status = 1
                 and sp.dish_type = 'COMBO'

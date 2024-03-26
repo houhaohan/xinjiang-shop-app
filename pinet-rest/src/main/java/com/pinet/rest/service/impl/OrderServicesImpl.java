@@ -533,6 +533,27 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             addCartDto.setShopProdSpecIds(shopProdSpecIds);
             cartService.addCart(addCartDto);
         });
+
+        List<OrderProduct> comboProducts = orderProductService.getComboByOrderId(orderId);
+        comboProducts.forEach(p->{
+            AddCartDto addCartDto = new AddCartDto();
+            addCartDto.setShopId(order.getShopId());
+            addCartDto.setShopProdId(p.getShopProdId());
+            addCartDto.setProdNum(p.getProdNum());
+            addCartDto.setCustomerId(customerId);
+            List<AddCartDto> comboDetails = p.getComboDishDetails().stream().map(item -> {
+                AddCartDto dto = new AddCartDto();
+                dto.setShopId(order.getShopId());
+                dto.setShopProdId(item.getShopProdId());
+                dto.setProdNum(item.getQuantity());
+                dto.setCustomerId(customerId);
+                String shopProdSpecIds = item.getOrderProductSpecs().stream().map(OrderProductSpecVo::getShopProdSpecId).map(String::valueOf).collect(Collectors.joining(","));
+                dto.setShopProdSpecIds(shopProdSpecIds);
+                return dto;
+            }).collect(Collectors.toList());
+            addCartDto.setComboDetails(comboDetails);
+            cartService.addCart(addCartDto);
+        });
     }
 
 
@@ -963,7 +984,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         for (KryComboGroupDetailVo groupDetail : kryComboGroupDetailList) {
             ScanCodeDish dish = new ScanCodeDish();
             dish.setOutDishNo(String.valueOf(groupDetail.getId()));
-            dish.setOutDishNo(UUID.randomUUID().toString());
             dish.setDishId(groupDetail.getSingleDishId());
             dish.setDishType("COMBO_DETAIL");
             dish.setDishCode(groupDetail.getDishCode());

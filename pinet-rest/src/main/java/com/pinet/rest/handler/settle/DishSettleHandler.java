@@ -10,6 +10,7 @@ import com.pinet.rest.entity.Cart;
 public interface DishSettleHandler {
     /**
      * 购物车结算菜品处理方法
+     * @param cart
      */
     void handler(Cart cart);
 

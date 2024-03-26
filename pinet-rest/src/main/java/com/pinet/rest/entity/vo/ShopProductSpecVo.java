@@ -28,10 +28,13 @@ public class ShopProductSpecVo{
     private Long skuId;
 
     @ApiModelProperty("售价")
-    private BigDecimal price;
+    private BigDecimal price = BigDecimal.ZERO;
 
     @ApiModelProperty("市场价")
     private BigDecimal marketPrice;
+
+    @ApiModelProperty("加价")
+    private BigDecimal addPrice;
 
     @ApiModelProperty("库存")
     private Integer stock = 9999;
