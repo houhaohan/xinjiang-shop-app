@@ -28,7 +28,7 @@ public class OrderComboDishVo {
     private String singleDishId;
 
     @ApiModelProperty("单品名称")
-    private Long singleProdName;
+    private String singleProdName;
 
     @ApiModelProperty("单品编码")
     private String dishCode;

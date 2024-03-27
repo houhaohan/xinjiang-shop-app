@@ -2,6 +2,7 @@ package com.pinet.rest.mapper;
 
 import com.pinet.rest.entity.KryComboGroupDetail;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.vo.ComboGroupDetailVo;
 import com.pinet.rest.entity.vo.ComboSingleProductSpecVo;
 import com.pinet.rest.entity.vo.KryComboGroupDetailVo;
 import org.apache.ibatis.annotations.Param;
@@ -45,5 +46,13 @@ public interface KryComboGroupDetailMapper extends BaseMapper<KryComboGroupDetai
      * @return
      */
     List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(@Param("ids") List<Long> shopProdSpecIds,@Param("shopId") Long shopId);
+
+    /**
+     * 根据商品样式ID查询套餐明细
+     * @param shopProdSpecIds
+     * @param shopProdId
+     * @return
+     */
+    List<ComboGroupDetailVo> getByShopSpecIdsAndShopProdId(@Param("shopProdSpecIds") List<Long> shopProdSpecIds, @Param("shopProdId") Long shopProdId);
 
 }

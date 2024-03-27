@@ -852,7 +852,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 //        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
+        dto.setOutBizNo(UUID.randomUUID().toString());
         dto.setRemark(orders.getRemark());
+        dto.setRemark("测试单，请勿出餐");
         dto.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         dto.setPromoFee(BigDecimalUtil.yuanToFen(orders.getDiscountAmount()));
         dto.setActualFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
@@ -860,6 +862,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
         paymentDetailRequest.setOutBizId(String.valueOf(orders.getId()));
+        paymentDetailRequest.setOutBizId(java.util.UUID.randomUUID().toString());
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
         paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
         paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
@@ -883,6 +886,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
+            request.setOutDishNo(java.util.UUID.randomUUID().toString());
             request.setDishId(orderProduct.getProdId());
             request.setDishName(orderProduct.getProductName());
             request.setDishCode(orderProduct.getDishCode());
@@ -925,9 +929,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         System.err.println("----------");
         System.err.println(JSON.toJSONString(dto));
-        return null;
-//        String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
-//        ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
+        String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
+        ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
+        System.err.println(JSON.toJSONString(scanCodePrePlaceOrderVo));
 //        //记录日志
 //        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
 //
@@ -942,7 +946,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 //        if (scanCodePrePlaceOrderVo.getData() == null) {
 //            return null;
 //        }
-//        return scanCodePrePlaceOrderVo.getData().getOrderNo();
+        return scanCodePrePlaceOrderVo.getData().getOrderNo();
     }
 
 
@@ -986,7 +990,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param shopId
      */
     private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct, Long shopId) {
-        Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(orderProduct.getId());
         List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndShopProdId(orderProduct.getOrderId(), orderProduct.getId());
 
         List<ScanCodeDish> dishList = new ArrayList<>(orderComboDishList.size());
@@ -996,9 +999,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             dish.setDishId(orderComboDish.getSingleDishId());
             dish.setDishType("COMBO_DETAIL");
             dish.setDishCode(orderComboDish.getDishCode());
-            dish.setDishName(orderComboDish.getShopProdSpecName());
+            dish.setDishName(orderComboDish.getSingleProdName()+"-"+orderComboDish.getShopProdSpecName());
             dish.setDishQuantity(BigDecimal.ONE);
-            dish.setDishFee(BigDecimalUtil.yuan2Fen(orderComboDish.getAddPrice()) + unitPrice);
+            dish.setDishFee(BigDecimalUtil.yuan2Fen(orderComboDish.getAddPrice()));
             dish.setUnitId(orderComboDish.getUnitId());
             dish.setUnitCode(orderComboDish.getUnitId());
             dish.setUnitName(orderComboDish.getUnit());

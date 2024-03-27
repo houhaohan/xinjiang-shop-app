@@ -14,6 +14,7 @@
         <result column="shop_prod_spec_id" property="shopProdSpecId" />
         <result column="shop_prod_spec_name" property="shopProdSpecName" />
         <result column="add_price" property="addPrice" />
+        <result column="combo_group_detail_id" property="comboGroupDetailId" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -24,7 +25,7 @@
         update_by,
         update_time,
         del_flag,
-        order_combo_dish_id,  shop_prod_spec_id, shop_prod_spec_name, add_price
+        order_combo_dish_id,  shop_prod_spec_id, shop_prod_spec_name, add_price, combo_group_detail_id
     </sql>
 
 </mapper>

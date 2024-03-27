@@ -1,6 +1,7 @@
 package com.pinet.rest.service.impl;
 
 import com.pinet.rest.entity.KryComboGroupDetail;
+import com.pinet.rest.entity.vo.ComboGroupDetailVo;
 import com.pinet.rest.entity.vo.ComboSingleProductSpecVo;
 import com.pinet.rest.entity.vo.KryComboGroupDetailVo;
 import com.pinet.rest.mapper.KryComboGroupDetailMapper;
@@ -42,5 +43,10 @@ public class KryComboGroupDetailServiceImpl extends ServiceImpl<KryComboGroupDet
     @Override
     public List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(List<Long> shopProdSpecIds,Long shopId) {
         return kryComboGroupDetailMapper.getSpecByShopProdSpecIds(shopProdSpecIds,shopId);
+    }
+
+    @Override
+    public List<ComboGroupDetailVo> getByShopSpecIdsAndShopProdId(List<Long> shopProdSpecIds, Long shopProdId) {
+        return kryComboGroupDetailMapper.getByShopSpecIdsAndShopProdId(shopProdSpecIds,shopProdId);
     }
 }

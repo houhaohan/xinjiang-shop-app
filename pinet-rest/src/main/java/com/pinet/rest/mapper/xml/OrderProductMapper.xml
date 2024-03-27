@@ -102,7 +102,7 @@
     </select>
 
     <select id="getByOrderId" resultType="com.pinet.rest.entity.dto.OrderProductDto">
-         select op.id,
+         select sp.id,
                 sp.kry_shop_id,
                 sp.prod_id ,
                 sp.dish_code ,
@@ -130,7 +130,7 @@
 
          union all
 
-         select op.id,
+         select sp.id,
                 sp.kry_shop_id,
                 sp.prod_id ,
                 sp.dish_code ,

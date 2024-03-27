@@ -34,6 +34,9 @@ public class OrderComboDishSpec extends BaseEntity {
     @ApiModelProperty("样式名称")
     private String shopProdSpecName;
 
+    @ApiModelProperty("套餐样式明细ID")
+    private Long comboGroupDetailId;
+
     @ApiModelProperty("加价")
     private BigDecimal addPrice;
 

@@ -70,7 +70,7 @@ public class OrderProduct extends BaseEntity {
     private String orderProductSpecStr;
 
     @ApiModelProperty("佣金")
-    private BigDecimal commission;
+    private BigDecimal commission = BigDecimal.ZERO;
 
     @ApiModelProperty("打包费")
     private BigDecimal packageFee = BigDecimal.ZERO;

@@ -2,8 +2,10 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.KryComboGroupDetail;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.ComboGroupDetailVo;
 import com.pinet.rest.entity.vo.ComboSingleProductSpecVo;
 import com.pinet.rest.entity.vo.KryComboGroupDetailVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -36,8 +38,16 @@ public interface IKryComboGroupDetailService extends IService<KryComboGroupDetai
     /**
      * 根据商品规格ID 查询规格信息
      * @param shopProdSpecIds
+     * @param shopId
      * @return
      */
     List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(List<Long> shopProdSpecIds,Long shopId);
+
+    /**
+     * 根据商品样式ID查询套餐明细
+     * @param shopProdSpecIds
+     * @return
+     */
+    List<ComboGroupDetailVo> getByShopSpecIdsAndShopProdId(List<Long> shopProdSpecIds, Long shopProdId);
 
 }

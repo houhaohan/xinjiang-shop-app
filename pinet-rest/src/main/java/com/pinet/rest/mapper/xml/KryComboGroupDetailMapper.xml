@@ -89,6 +89,9 @@
         select
             sps.id as shopProdSpecId,
             sps.spec_name as shopProdSpecName,
+            sps.sku_id as skuId,
+            sps.sku_name as skuName,
+            kcgd.id as comboGroupDetailId,
             ifnull(kcgd.dish_sku_price,0) as addPrice
         from kry_combo_group kcg
         left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
@@ -99,5 +102,29 @@
             #{item}
         </foreach>
         and kcg.del_flag = 0
+    </select>
+
+    <select id="getByShopSpecIdsAndShopProdId" resultType="com.pinet.rest.entity.vo.ComboGroupDetailVo">
+        select <include refid="Base_Column_List"/>,t.shop_prod_spec_id,t.sku_id,t.sku_name
+        from kry_combo_group kcg
+        left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+        inner join (
+            select sp.id,
+                sp.product_name,
+                sps.spec_name,
+                sps.sku_id,
+                sps.sku_name,
+                sps.dish_id,
+                sps.sku_code,
+                sps.id  as shop_prod_spec_id
+            from shop_product sp
+            inner join  shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
+            where sps.id in
+            <foreach collection="shopProdSpecIds" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        ) t on kcgd.dish_name = t.product_name and kcgd.spec_name = t.spec_name
+        where kcg.del_flag = 0
+        and kcg.shop_prod_id = #{shopProdId}
     </select>
 </mapper>

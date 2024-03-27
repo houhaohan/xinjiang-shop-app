@@ -30,11 +30,13 @@ public class CartComboDishSpec extends BaseEntity {
     @ApiModelProperty("套餐内单品id")
     private Long shopProdId;
 
+    @ApiModelProperty("套餐明细id")
+    private Long comboGroupDetailId;
+
     @ApiModelProperty("样式id")
     private Long shopProdSpecId;
 
     @ApiModelProperty("样式名称")
     private String shopProdSpecName;
-
 
 }

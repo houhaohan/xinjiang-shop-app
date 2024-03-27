@@ -8,6 +8,7 @@ import com.pinet.core.util.FilterUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.vo.CartComboDishSpecVo;
+import com.pinet.rest.entity.vo.ComboGroupDetailVo;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -71,14 +72,18 @@ public class ComboDishCartHandler extends DishCartHandler{
             context.cartComboDishService.save(cartComboDish);
             List<Long> singleProdSpecIds = Convert.toList(Long.class, singleDish.getShopProdSpecIds());
 
-            List<ShopProductSpec> shopProductSpecs = context.shopProductSpecService.listByIds(singleProdSpecIds);
+            List<ComboGroupDetailVo> kryComboGroupDetailList = context.kryComboGroupDetailService.getByShopSpecIdsAndShopProdId(singleProdSpecIds, context.request.getShopProdId());
             List<CartComboDishSpec> cartComboDishSpecList = singleProdSpecIds.stream().map(id -> {
                 CartComboDishSpec cartComboDishSpec = new CartComboDishSpec();
                 cartComboDishSpec.setCartId(cart.getId());
                 cartComboDishSpec.setShopProdId(singleDish.getShopProdId());
                 cartComboDishSpec.setShopProdSpecId(id);
-                ShopProductSpec shopProductSpec = FilterUtil.filter(shopProductSpecs, id, ApiExceptionEnum.SPEC_NOT_EXISTS);
-                cartComboDishSpec.setShopProdSpecName(shopProductSpec.getSpecName());
+                ComboGroupDetailVo comboGroupDetailVo = kryComboGroupDetailList.stream()
+                        .filter(item -> Objects.equals(id, item.getShopProdSpecId()))
+                        .findFirst()
+                        .orElseThrow(() -> new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
+                cartComboDishSpec.setShopProdSpecName(comboGroupDetailVo.getSpecName());
+                cartComboDishSpec.setComboGroupDetailId(comboGroupDetailVo.getId());
                 return cartComboDishSpec;
             }).collect(Collectors.toList());
             context.cartComboDishSpecService.saveBatch(cartComboDishSpecList);

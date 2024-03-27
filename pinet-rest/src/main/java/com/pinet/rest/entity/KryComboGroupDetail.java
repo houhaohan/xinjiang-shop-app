@@ -46,7 +46,7 @@ public class KryComboGroupDetail extends BaseEntity {
     private String dishSkuId;
 
     @ApiModelProperty("套餐分组为可选分组时的子菜加价金额,单位：分")
-    private Long dishSkuPrice;
+    private Long dishSkuPrice = 0L;
 
     @ApiModelProperty("可选类型(OPTIONAL-可选/REQUIRED-必选)")
     private String optType;
