@@ -102,34 +102,60 @@
     </select>
 
     <select id="getByOrderId" resultType="com.pinet.rest.entity.dto.OrderProductDto">
-         SELECT sp.id,
-            sp.kry_shop_id,
-            sp.prod_id ,
-            sp.dish_code ,
-            sp.unit_id ,
-            sp.unit ,
-            sp.dish_type ,
-            sp.product_name ,
-            sp.product_img ,
-            sp.product_desc ,
-            op.id as orderProductId,
-            op.order_id ,
-            op.prod_unit_price ,
-            op.prod_num ,
-            op.prod_price ,
-            op.package_fee,
-			(CASE sp.dish_type WHEN 'COMBO' THEN  kcgd.dish_sku_id ELSE sps.kry_sku_id END ) kry_sku_id,
-            (CASE sp.dish_type WHEN 'COMBO' THEN  NULL ELSE sps.sku_code END ) sku_code,
-			(CASE sp.dish_type WHEN 'COMBO' THEN  kcgd.dish_name ELSE sps.sku_name END ) sku_name
-        FROM order_product op
-        LEFT JOIN shop_product sp ON op.shop_prod_id = sp.id AND sp.del_flag = 0
-        LEFT JOIN order_product_spec ops ON ops.order_id = op.order_id AND ops.order_prod_id = op.id AND ops.del_flag = 0
-        LEFT JOIN shop_product_spec sps ON sps.id = ops.shop_prod_spec_id AND (sps.cooking_way_id = '' OR sps.cooking_way_id IS NULL) AND sps.del_flag = 0
-        LEFT JOIN kry_combo_group_detail kcgd ON  kcgd.id = ops.shop_prod_spec_id AND kcgd.del_flag = 0
-        LEFT JOIN kry_combo_group kcg ON kcg.id = kcgd.combo_group_id
-        WHERE op.order_id = #{orderId}
-        AND (CASE sp.dish_type  WHEN 'COMBO' THEN kcg.kry_sku_id != '' ELSE sps.kry_sku_id IS NOT NULL END)
-        AND op.del_flag = 0
+         select op.id,
+                sp.kry_shop_id,
+                sp.prod_id ,
+                sp.dish_code ,
+                sp.unit_id ,
+                sp.unit ,
+                sp.dish_type ,
+                sp.product_name ,
+                sp.product_img ,
+                sp.product_desc ,
+                op.id as orderProductId,
+                op.order_id ,
+                op.prod_unit_price ,
+                op.prod_num ,
+                op.prod_price ,
+                op.package_fee,
+                kcg.kry_sku_id,
+                null as sku_code,
+                null as sku_name
+         from order_product op
+         left join shop_product sp on op.shop_prod_id = sp.id
+         left join kry_combo_group kcg on op.shop_prod_id = kcg.shop_prod_id and kcg.kry_sku_id != '' and kcg.del_flag = 0
+         where op.order_id = #{orderId}
+         and sp.dish_type = 'COMBO'
+         and op.del_flag = 0
+
+         union all
+
+         select op.id,
+                sp.kry_shop_id,
+                sp.prod_id ,
+                sp.dish_code ,
+                sp.unit_id ,
+                sp.unit ,
+                sp.dish_type ,
+                sp.product_name ,
+                sp.product_img ,
+                sp.product_desc ,
+                op.id as orderProductId,
+                op.order_id ,
+                op.prod_unit_price ,
+                op.prod_num ,
+                op.prod_price ,
+                op.package_fee,
+                sps.kry_sku_id,
+                sps.sku_code,
+                sps.sku_name
+         from order_product op
+         left join shop_product sp on op.shop_prod_id = sp.id
+         left join order_product_spec ops on ops.order_prod_id = op.id and ops.del_flag = 0
+         left join shop_product_spec sps on sps.id = ops.shop_prod_spec_id and sps.del_flag = 0
+         where op.order_id = #{orderId}
+         and sp.dish_type = 'SINGLE'
+         and op.del_flag = 0
     </select>
 
     <select id="getComboByOrderId" resultMap="OrderComboProductMap">

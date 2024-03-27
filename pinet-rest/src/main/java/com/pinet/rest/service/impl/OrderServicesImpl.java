@@ -7,6 +7,7 @@ import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -846,9 +847,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders) {
         //生产环境才推单，其他环境就不推了吧
-        if (!Environment.isProd()) {
-            return null;
-        }
+//        if (!Environment.isProd()) {
+//            return null;
+//        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
         dto.setRemark(orders.getRemark());
@@ -921,23 +922,27 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
-        String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
-        ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
-        //记录日志
-        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
 
-        if (scanCodePrePlaceOrderVo == null) {
-            return null;
-        }
-        if ("fail".equals(scanCodePrePlaceOrderVo.getSuccess())) {
-            //推送失败，重试
-            pushKryOrderMessage(orders, scanCodePrePlaceOrderVo.getFormatMsgInfo());
-            return null;
-        }
-        if (scanCodePrePlaceOrderVo.getData() == null) {
-            return null;
-        }
-        return scanCodePrePlaceOrderVo.getData().getOrderNo();
+        System.err.println("----------");
+        System.err.println(JSON.toJSONString(dto));
+        return null;
+//        String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
+//        ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
+//        //记录日志
+//        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
+//
+//        if (scanCodePrePlaceOrderVo == null) {
+//            return null;
+//        }
+//        if ("fail".equals(scanCodePrePlaceOrderVo.getSuccess())) {
+//            //推送失败，重试
+//            pushKryOrderMessage(orders, scanCodePrePlaceOrderVo.getFormatMsgInfo());
+//            return null;
+//        }
+//        if (scanCodePrePlaceOrderVo.getData() == null) {
+//            return null;
+//        }
+//        return scanCodePrePlaceOrderVo.getData().getOrderNo();
     }
 
 
@@ -972,6 +977,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     }
 
+    private final IOrderComboDishService orderComboDishService;
+
     /**
      * 套餐明细
      *
@@ -979,31 +986,33 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param shopId
      */
     private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct, Long shopId) {
-        List<KryComboGroupDetailVo> kryComboGroupDetailList = kryComboGroupDetailService.getByOrderProdId(orderProduct.getOrderProductId(), shopId);
-        List<ScanCodeDish> dishList = new ArrayList<>(kryComboGroupDetailList.size());
-        for (KryComboGroupDetailVo groupDetail : kryComboGroupDetailList) {
+        Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(orderProduct.getId());
+        List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndShopProdId(orderProduct.getOrderId(), orderProduct.getId());
+
+        List<ScanCodeDish> dishList = new ArrayList<>(orderComboDishList.size());
+        for(OrderComboDishVo orderComboDish : orderComboDishList){
             ScanCodeDish dish = new ScanCodeDish();
-            dish.setOutDishNo(String.valueOf(groupDetail.getId()));
-            dish.setDishId(groupDetail.getSingleDishId());
+            dish.setOutDishNo(UUID.randomUUID().toString());
+            dish.setDishId(orderComboDish.getSingleDishId());
             dish.setDishType("COMBO_DETAIL");
-            dish.setDishCode(groupDetail.getDishCode());
-            dish.setDishName(groupDetail.getDishName());
+            dish.setDishCode(orderComboDish.getDishCode());
+            dish.setDishName(orderComboDish.getShopProdSpecName());
             dish.setDishQuantity(BigDecimal.ONE);
-            dish.setDishFee(groupDetail.getSellPrice());
-            dish.setUnitId(groupDetail.getUnitId());
-            dish.setUnitCode(groupDetail.getUnitId());
-            dish.setUnitName(groupDetail.getUnit());
-            dish.setDishOriginalFee(groupDetail.getSellPrice());
-            dish.setTotalFee(groupDetail.getSellPrice() * dish.getDishQuantity().longValue());
-            dish.setActualFee(groupDetail.getPrice() * dish.getDishQuantity().longValue());
-            dish.setPromoFee(dish.getTotalFee() - dish.getActualFee());
+            dish.setDishFee(BigDecimalUtil.yuan2Fen(orderComboDish.getAddPrice()) + unitPrice);
+            dish.setUnitId(orderComboDish.getUnitId());
+            dish.setUnitCode(orderComboDish.getUnitId());
+            dish.setUnitName(orderComboDish.getUnit());
+            dish.setDishOriginalFee(dish.getDishFee());
+            dish.setTotalFee(dish.getDishFee() * dish.getDishQuantity().longValue());//菜品总金额
+            dish.setActualFee(dish.getDishFee() * dish.getDishQuantity().longValue());//应付金额
+            dish.setPromoFee(dish.getTotalFee() -  dish.getActualFee());//优惠
             dish.setPackageFee("0");
             dish.setWeightDishFlag("0");
-            dish.setDishImgUrl(groupDetail.getImageUrl());
+            dish.setDishImgUrl(orderComboDish.getImageUrl());
             dish.setIsPack("false");
             dish.setDishGiftFlag("false");
             dish.setItemOriginType("SINGLE");
-            dish.setDishSkuId(groupDetail.getDishSkuId());
+            dish.setDishSkuId(orderComboDish.getDishSkuId());
             dishList.add(dish);
         }
         return dishList;

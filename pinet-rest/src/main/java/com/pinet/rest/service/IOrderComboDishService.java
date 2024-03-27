@@ -2,6 +2,9 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.OrderComboDish;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.OrderComboDishVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -16,8 +19,9 @@ public interface IOrderComboDishService extends IService<OrderComboDish> {
     /**
      * 根据订单ID 和 套餐单品ID 查询
      * @param orderId
-     * @param singleProdId
+     * @param shopProdId
      * @return
      */
-    OrderComboDish getByOrderIdAndSingleProdId(Long orderId,Long singleProdId);
+
+    List<OrderComboDishVo> getByOrderIdAndShopProdId(Long orderId, Long shopProdId);
 }
