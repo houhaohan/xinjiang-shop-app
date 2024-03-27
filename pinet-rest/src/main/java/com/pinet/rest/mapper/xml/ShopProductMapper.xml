@@ -270,30 +270,46 @@
 
 
     <select id="getComboDetailByShopIdAndShopProdId" resultMap="ShopProductMap">
-        select  single.id,
-            single.prod_id,
-            single.product_name,
-            single.product_img,
-            single.product_desc,
-            single.shop_id,
-            single.product_type_id,
-            single.product_type,
-            single.dish_type,
-            kcgd.price/100 as price,
-            kcgd.sell_price/100 as market_price,
-            (ifnull(kcgd.dish_sku_price,0)/100) AS add_price,
-            kcgd.default_flag,
-            kcgd.spec_name,
-            sps.sku_id as skuId,
-            sps.sku_name as skuName,
-            sps.id as shop_prod_spec_id,
-            sps.sku_id,
-            sps.stock
-        from kry_combo_group kcg
-        left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
-        left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = #{shopId}
-        left join shop_product_spec sps on sps.shop_prod_id = single.id and kcgd.spec_name = sps.spec_name and sps.del_flag = 0
-        where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
+        select sp.id,
+		sp.prod_id,
+		sp.product_name,
+		sp.product_img,
+		sp.product_desc,
+		sp.shop_id,
+		sp.product_type_id,
+		sp.product_type,
+		sp.dish_type,
+		sps.sku_id as skuId,
+        sps.sku_name as skuName,
+        sps.id as shop_prod_spec_id,
+        sps.sku_id,
+        sps.stock,
+		t.price/100 as price,
+        t.sell_price/100 as market_price,
+        t.dish_sku_price/100 as add_price,
+        sps.spec_name,
+        t.default_flag
+        from shop_product sp
+        left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
+        left join (
+            select  kcgd.id,
+                kcgd.single_dish_id,
+                kcgd.dish_name,
+                kcgd.spec_name,
+                kcgd.price,
+                kcgd.sell_price,
+                ifnull(kcgd.dish_sku_price,0) as dish_sku_price,
+                kcgd.default_flag
+            from kry_combo_group kcg
+            inner join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+            where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
+        ) t on t.single_dish_id = sp.prod_id and sps.spec_name = t.spec_name and t.dish_name = sp.product_name
+        where sp.shop_id = #{shopId} and sp.del_flag = 0
+        and sp.prod_id in
+        <foreach collection="dishIds" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+
     </select>
 
 

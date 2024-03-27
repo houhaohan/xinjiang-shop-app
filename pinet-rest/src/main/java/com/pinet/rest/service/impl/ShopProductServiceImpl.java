@@ -111,11 +111,13 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
             String labels = labelService.getByLabelIds(shopProduct.getLableId());
             comboDishVo.setLabels(labels);
             //套餐明细
-            List<ShopProductVo> singleDishList = baseMapper.getComboDetailByShopIdAndShopProdId(shopProduct.getShopId(), id);
-            ShopProductVo shopProductVo = singleDishList.stream().filter(s -> s.getId() == null).findFirst().get();
-            comboDishVo.setPrice(shopProductVo.getPrice());
-            comboDishVo.setMarketPrice(shopProductVo.getMarketPrice());
-            singleDishList = singleDishList.stream().filter(s->s.getId() != null).collect(Collectors.toList());
+            List<KryComboGroupDetail> kryComboGroupDetails = kryComboGroupDetailService.getByShopProdId(id);
+            List<String> singleDishIds = kryComboGroupDetails.stream().map(KryComboGroupDetail::getSingleDishId).distinct().collect(Collectors.toList());
+            KryComboGroupDetail comboGroupDetail = kryComboGroupDetails.stream().filter(item -> StringUtil.isBlank(item.getSingleDishId())).findFirst().get();
+
+            List<ShopProductVo> singleDishList = baseMapper.getComboDetailByShopIdAndShopProdId(shopProduct.getShopId(), id,singleDishIds);
+            comboDishVo.setPrice(BigDecimalUtil.fenToYuan(comboGroupDetail.getPrice()));
+            comboDishVo.setMarketPrice(BigDecimalUtil.fenToYuan(comboGroupDetail.getSellPrice()));
             comboDishVo.setSingleDishList(singleDishList);
             return (T)comboDishVo;
         }
