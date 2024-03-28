@@ -76,7 +76,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
 
             List<CartComboDishSpec> cartComboDishSpecList = context.cartComboDishSpecService.getByCartIdAndProdId(request.getCartId(), singleProduct.getId());
             List<Long> shopProdSpecIds = cartComboDishSpecList.stream().map(CartComboDishSpec::getShopProdSpecId).collect(Collectors.toList());
-            List<ComboSingleProductSpecVo> shopProductSpecs = context.kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, singleProduct.getShopId());
+            List<ComboSingleProductSpecVo> shopProductSpecs = context.kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, request.getShopProdId());
             List<OrderComboDishSpec> orderComboDishSpecList = shopProdSpecIds.stream().map(specId -> {
                 OrderComboDishSpec orderComboDishSpec = new OrderComboDishSpec();
                 ComboSingleProductSpecVo spec =  shopProductSpecs.stream()
@@ -127,7 +127,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
             context.orderComboDishService.save(orderComboDish);
 
             List<Long> shopProdSpecIds = comboDishDto.getOrderComboDishSpecList().stream().map(OrderComboDishSpecDto::getShopProdSpecId).collect(Collectors.toList());
-            List<ComboSingleProductSpecVo> shopProductSpecs = context.kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, singleProduct.getShopId());
+            List<ComboSingleProductSpecVo> shopProductSpecs = context.kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, comboDishDto.getShopProdId());
             List<OrderComboDishSpec> orderComboDishSpecList = shopProdSpecIds.stream().map(specId -> {
                 OrderComboDishSpec orderComboDishSpec = new OrderComboDishSpec();
                 ComboSingleProductSpecVo spec = shopProductSpecs.stream()
@@ -138,6 +138,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
                 orderComboDishSpec.setAddPrice(BigDecimalUtil.fenToYuan(spec.getAddPrice()));
                 orderComboDishSpec.setShopProdSpecId(spec.getShopProdSpecId());
                 orderComboDishSpec.setShopProdSpecName(spec.getShopProdSpecName());
+                orderComboDishSpec.setComboGroupDetailId(spec.getComboGroupDetailId());
                 orderProduct.setProdUnitPrice(BigDecimalUtil.sum(orderProduct.getProdUnitPrice(),BigDecimalUtil.fenToYuan(spec.getAddPrice())));
                 return orderComboDishSpec;
             }).collect(Collectors.toList());

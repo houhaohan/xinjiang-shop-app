@@ -41,8 +41,8 @@ public class KryComboGroupDetailServiceImpl extends ServiceImpl<KryComboGroupDet
     }
 
     @Override
-    public List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(List<Long> shopProdSpecIds,Long shopId) {
-        return kryComboGroupDetailMapper.getSpecByShopProdSpecIds(shopProdSpecIds,shopId);
+    public List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(List<Long> shopProdSpecIds,Long shopProdId) {
+        return kryComboGroupDetailMapper.getSpecByShopProdSpecIds(shopProdSpecIds,shopProdId);
     }
 
     @Override

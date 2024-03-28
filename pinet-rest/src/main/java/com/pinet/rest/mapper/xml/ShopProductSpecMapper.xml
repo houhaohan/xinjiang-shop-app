@@ -23,13 +23,13 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id,
-        create_by,
-        create_time,
-        update_by,
-        update_time,
-        del_flag,
-        shop_prod_id, prod_spec_id, spec_name, sku_id, kry_sku_id,sku_code,  price, sku_name, stock
+        sps.id,
+        sps.create_by,
+        sps.create_time,
+        sps.update_by,
+        sps.update_time,
+        sps.del_flag,
+        sps.shop_prod_id, sps.prod_spec_id, sps.spec_name, sps.sku_id, sps.kry_sku_id, sps.sku_code, sps.price, sps.sku_name, sps.stock
     </sql>
 
     <update id="updateStock">
@@ -47,6 +47,14 @@
 
     <select id="getPriceByShopProdId" resultType="java.math.BigDecimal">
         select sum(price) from shop_product_spec where shop_prod_id = #{shopProdId} and del_flag = 0
+    </select>
+
+    <select id="getByShopProdId" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from shop_product sp
+        left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
+        where sp.id = #{shopProdId}
+        and sp.del_flag = 0
     </select>
 
 </mapper>

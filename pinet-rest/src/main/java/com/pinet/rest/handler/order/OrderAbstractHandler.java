@@ -18,6 +18,7 @@ import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.strategy.MemberLevelStrategyContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -31,6 +32,7 @@ import java.util.Objects;
  * @author chengshuanghui
  * @data 2024-03-21 15:00
  */
+@Slf4j
 public abstract class OrderAbstractHandler extends ShippingFeeHandler implements OrderHandler{
     protected OrderContext context;
 
@@ -113,6 +115,7 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
             AddOrderResp addOrderResp = context.daDaService.queryDeliverFee(addOrderReq);
             return BigDecimal.valueOf(addOrderResp.getDeliverFee());
         } catch (RpcException e) {
+            log.error("查询配送费服务失败====>{}",e.getMessage());
             throw new PinetException("查询配送费服务失败");
         }
     }

@@ -47,4 +47,9 @@ public class ShopProductSpecServiceImpl extends ServiceImpl<ShopProductSpecMappe
         return getObj(queryWrapper,o->((BigDecimal)o));
     }
 
+    @Override
+    public List<ShopProductSpec> getByShopProdId(Long shopProdId) {
+        return shopProductSpecMapper.getByShopProdId(shopProdId);
+    }
+
 }

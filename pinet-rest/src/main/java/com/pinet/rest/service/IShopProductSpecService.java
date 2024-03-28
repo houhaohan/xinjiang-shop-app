@@ -47,4 +47,11 @@ public interface IShopProductSpecService extends IService<ShopProductSpec> {
     BigDecimal getPriceByIds(List<Long> ids);
 
 
+    /**
+     * 根据单品ID查询样式明细
+     * @param shopProdId
+     * @return
+     */
+    List<ShopProductSpec> getByShopProdId(Long shopProdId);
+
 }

@@ -90,7 +90,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final ICustomerCouponService customerCouponService;
     private final IOrderDiscountService orderDiscountService;
     private final IKryApiService kryApiService;
-    private final IKryComboGroupDetailService kryComboGroupDetailService;
     private final IKryOrderCompensateService kryOrderCompensateService;
     private final IKryOrderPushLogService kryOrderPushLogService;
     private final IDaDaService daDaService;
@@ -102,6 +101,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final ICustomerService customerService;
     private final OrderContext context;
     private final DishSettleContext dishSettleContext;
+    private final IShopProductSpecService shopProductSpecService;
 
 
     @Override
@@ -931,7 +931,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         System.err.println(JSON.toJSONString(dto));
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
-        System.err.println(JSON.toJSONString(scanCodePrePlaceOrderVo));
+//        System.err.println(JSON.toJSONString(scanCodePrePlaceOrderVo));
 //        //记录日志
 //        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
 //
@@ -985,37 +985,73 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 套餐明细
-     *
      * @param orderProduct
      * @param shopId
      */
     private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct, Long shopId) {
         List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndShopProdId(orderProduct.getOrderId(), orderProduct.getId());
+        Map<String, List<OrderComboDishVo>> singleOrderMap = orderComboDishList.stream().collect(Collectors.groupingBy(OrderComboDishVo::getSingleDishId,LinkedHashMap::new,Collectors.toList()));
 
-        List<ScanCodeDish> dishList = new ArrayList<>(orderComboDishList.size());
-        for(OrderComboDishVo orderComboDish : orderComboDishList){
+        List<ScanCodeDish> dishList = new ArrayList<>(singleOrderMap.size());
+        for (Map.Entry<String, List<OrderComboDishVo>> entry : singleOrderMap.entrySet()) {
+            List<OrderComboDishVo> orderComboDishVoList = entry.getValue();
+            OrderComboDishVo orderComboDishVo = orderComboDishVoList.get(0);
+
+
             ScanCodeDish dish = new ScanCodeDish();
             dish.setOutDishNo(UUID.randomUUID().toString());
-            dish.setDishId(orderComboDish.getSingleDishId());
+            dish.setDishId(entry.getKey());
             dish.setDishType("COMBO_DETAIL");
-            dish.setDishCode(orderComboDish.getDishCode());
-            dish.setDishName(orderComboDish.getSingleProdName()+"-"+orderComboDish.getShopProdSpecName());
+            dish.setDishCode(orderComboDishVo.getDishCode());
+            dish.setDishName(orderComboDishVo.getSingleProdName());
+            //做法
+            List<DishAttachProp> dishAttachPropList = orderComboDishVoList.stream()
+                    .filter(o -> !Objects.equals("标准",o.getShopProdSpecName()))
+                    .map(o -> {
+                        DishAttachProp dishAttachProp = new DishAttachProp();
+                        dishAttachProp.setOutAttachPropNo(IdUtil.getSnowflake().nextIdStr());
+                        dishAttachProp.setAttachPropType("PRACTICE");
+                        dishAttachProp.setAttachPropCode(dishAttachProp.getOutAttachPropNo());
+                        dishAttachProp.setAttachPropName(o.getShopProdSpecName());
+                        dishAttachProp.setPrice(BigDecimalUtil.yuan2Fen(o.getAddPrice()));
+                        dishAttachProp.setQuantity(1);
+                        dishAttachProp.setTotalFee(dishAttachProp.getPrice() * dishAttachProp.getQuantity());
+                        dishAttachProp.setPromoFee(0L);
+                        dishAttachProp.setActualFee(dishAttachProp.getPrice() * dishAttachProp.getQuantity());
+                        dishAttachProp.setAttachPropId(dishAttachProp.getOutAttachPropNo());
+                        return dishAttachProp;
+                    }).collect(Collectors.toList());
+            dish.setDishAttachPropList(dishAttachPropList);
+
             dish.setDishQuantity(BigDecimal.ONE);
-            dish.setDishFee(BigDecimalUtil.yuan2Fen(orderComboDish.getAddPrice()));
-            dish.setUnitId(orderComboDish.getUnitId());
-            dish.setUnitCode(orderComboDish.getUnitId());
-            dish.setUnitName(orderComboDish.getUnit());
+            dish.setDishFee(0L);
+            dish.setUnitId(orderComboDishVo.getUnitId());
+            dish.setUnitCode(orderComboDishVo.getUnitId());
+            dish.setUnitName(orderComboDishVo.getUnit());
             dish.setDishOriginalFee(dish.getDishFee());
             dish.setTotalFee(dish.getDishFee() * dish.getDishQuantity().longValue());//菜品总金额
             dish.setActualFee(dish.getDishFee() * dish.getDishQuantity().longValue());//应付金额
             dish.setPromoFee(dish.getTotalFee() -  dish.getActualFee());//优惠
             dish.setPackageFee("0");
             dish.setWeightDishFlag("0");
-            dish.setDishImgUrl(orderComboDish.getImageUrl());
+            dish.setDishImgUrl(orderComboDishVoList.get(0).getImageUrl());
             dish.setIsPack("false");
             dish.setDishGiftFlag("false");
             dish.setItemOriginType("SINGLE");
-            dish.setDishSkuId(orderComboDish.getDishSkuId());
+            String dishSkuId = orderComboDishVoList.stream()
+                    .filter(o -> StringUtil.isNotBlank(o.getDishSkuId()))
+                    .map(OrderComboDishVo::getDishSkuId)
+                    .findFirst()
+                    .orElse(null);
+            if(StringUtil.isBlank(dishSkuId)){
+                List<ShopProductSpec> shopProductSpecList = shopProductSpecService.getByShopProdId(orderComboDishVo.getSingleProdId());
+                dishSkuId = shopProductSpecList.stream()
+                        .filter(sps-> Objects.equals(orderComboDishVo.getShopProdSpecName(),sps.getSpecName()))
+                        .map(ShopProductSpec::getKrySkuId)
+                        .findFirst().get();
+            }
+
+            dish.setDishSkuId(dishSkuId);
             dishList.add(dish);
         }
         return dishList;

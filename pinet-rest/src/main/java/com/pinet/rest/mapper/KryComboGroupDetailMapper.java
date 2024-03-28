@@ -43,9 +43,10 @@ public interface KryComboGroupDetailMapper extends BaseMapper<KryComboGroupDetai
     /**
      * 根据规格ID 查询规格信息
      * @param shopProdSpecIds
+     * @param shopProdId 套餐ID
      * @return
      */
-    List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(@Param("ids") List<Long> shopProdSpecIds,@Param("shopId") Long shopId);
+    List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(@Param("ids") List<Long> shopProdSpecIds,@Param("shopProdId") Long shopProdId);
 
     /**
      * 根据商品样式ID查询套餐明细

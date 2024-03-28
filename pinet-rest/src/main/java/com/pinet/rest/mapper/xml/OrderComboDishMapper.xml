@@ -35,7 +35,7 @@
 
 
     <select id="getByOrderIdAndShopProdId" resultType="com.pinet.rest.entity.vo.OrderComboDishVo">
-        select
+         select
             ocd.shop_prod_id,
             ocd.single_prod_id,
             ocd.dish_id as singleDishId,
@@ -44,10 +44,11 @@
             ocd.unit_id,
             ocd.unit,
             ocd.image_url,
-            ocds.add_price,
+            ocds.add_price as add_price,
             ocds.shop_prod_spec_id,
-            ocds.shop_prod_spec_name,
-            kcgd.dish_sku_id
+            ocds.shop_prod_spec_name as shop_prod_spec_name,
+			kcgd.dish_sku_id as dish_sku_id,
+			kcgd.price
         from order_combo_dish ocd
         left join order_combo_dish_spec ocds on ocd.id = ocds.order_combo_dish_id and ocds.del_flag = 0
         left join shop_product sp on sp.id = ocd.single_prod_id

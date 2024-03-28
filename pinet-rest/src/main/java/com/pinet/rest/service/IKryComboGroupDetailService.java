@@ -38,10 +38,10 @@ public interface IKryComboGroupDetailService extends IService<KryComboGroupDetai
     /**
      * 根据商品规格ID 查询规格信息
      * @param shopProdSpecIds
-     * @param shopId
+     * @param shopProdId 套餐ID
      * @return
      */
-    List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(List<Long> shopProdSpecIds,Long shopId);
+    List<ComboSingleProductSpecVo> getSpecByShopProdSpecIds(List<Long> shopProdSpecIds,Long shopProdId);
 
     /**
      * 根据商品样式ID查询套餐明细

@@ -66,7 +66,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                         .flatMap(list ->
                                 list.stream().map(CartComboDishSpecVo::getShopProdSpecId)
                         ).collect(Collectors.toList());
-                List<ComboSingleProductSpecVo> comboSingleProductSpecVos = kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, shop.getId());
+                List<ComboSingleProductSpecVo> comboSingleProductSpecVos = kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, k.getShopProdId());
                 Long addPrice = comboSingleProductSpecVos.stream().map(ComboSingleProductSpecVo::getAddPrice).reduce(0L, Long::sum);
                 k.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice + addPrice));
                 k.setAllPrice(BigDecimalUtil.multiply(k.getProdPrice(),new BigDecimal(k.getProdNum())));

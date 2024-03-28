@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -39,4 +40,11 @@ public interface ShopProductSpecMapper extends BaseMapper<ShopProductSpec> {
      * @return
      */
     BigDecimal getPriceByShopProdId(@Param("shopProdId") Long shopProdId);
+
+    /**
+     * 根据商品ID查询样式
+     * @param shopProdId
+     * @return
+     */
+    List<ShopProductSpec> getByShopProdId(@Param("shopProdId") Long shopProdId);
 }
