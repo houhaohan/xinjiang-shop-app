@@ -420,8 +420,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return updateById(orders);
         } else {*/
 
-        //推送客如云,订单状态  1外卖  2自提
-        if (Objects.equals(orders.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())) {
+
+        //推送客如云,异步处理
+        jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH,String.valueOf(orders.getId()));
+
+    /**if (Objects.equals(orders.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())) {
             orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
             String kryOrderNo = takeoutOrderCreate(orders);
             orders.setKryOrderNo(kryOrderNo);
@@ -447,7 +450,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             //先用mq异步发送  (后期可能会删除)
             //jmsUtil.delaySend(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders), 10 * 1000L);
 
-        }
+        }*/
         log.info("支付回调更新订单信息为{}", JSONObject.toJSONString(orders));
         return updateById(orders);
     }
@@ -698,6 +701,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param order
      * @return
      */
+    @Override
     public String takeoutOrderCreate(Orders order) {
         if (!Environment.isProd()) {
             return "";

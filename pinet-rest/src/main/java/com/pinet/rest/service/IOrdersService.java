@@ -85,6 +85,13 @@ public interface IOrdersService extends IService<Orders> {
     String scanCodePrePlaceOrder(Orders orders);
 
     /**
+     * 推送外卖单到客如云
+     * @param orders
+     * @return
+     */
+    String takeoutOrderCreate(Orders orders);
+
+    /**
      * 客如云订单交易推送接口
      * @param dto
      */
