@@ -4,6 +4,7 @@ package com.pinet.rest.handler.settle;
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
+import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
@@ -39,7 +40,11 @@ public abstract class DishSettleAbstractHandler implements DishSettleHandler {
         OrderProduct orderProduct = new OrderProduct();
         //设置打包费   //自提没有打包费
         if (Objects.equals(context.request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())) {
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, prodNum, RoundingMode.HALF_UP));
+            if(Objects.equals(shopProduct.getDishType(), DishType.COMBO)){
+                orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE, prodNum, RoundingMode.HALF_UP));
+            }else {
+                orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, prodNum, RoundingMode.HALF_UP));
+            }
         }
         orderProduct.setDishId(shopProduct.getProdId());
         orderProduct.setShopProdId(shopProduct.getId());
