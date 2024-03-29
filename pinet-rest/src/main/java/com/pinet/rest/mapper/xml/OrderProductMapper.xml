@@ -152,9 +152,10 @@
          from order_product op
          left join shop_product sp on op.shop_prod_id = sp.id
          left join order_product_spec ops on ops.order_prod_id = op.id and ops.del_flag = 0
-         left join shop_product_spec sps on sps.id = ops.shop_prod_spec_id and sps.del_flag = 0
+         left join shop_product_spec sps on sps.id = ops.shop_prod_spec_id and (sps.cooking_way_id = '' or sps.cooking_way_id IS NULL)  and sps.del_flag = 0
          where op.order_id = #{orderId}
          and sp.dish_type = 'SINGLE'
+        and sps.kry_sku_id IS NOT NULL
          and op.del_flag = 0
     </select>
 
