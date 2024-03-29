@@ -3,11 +3,9 @@ package com.pinet.rest.service.impl;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -17,7 +15,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.imdada.open.platform.exception.RpcException;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.DB;
@@ -102,6 +99,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final OrderContext context;
     private final DishSettleContext dishSettleContext;
     private final IShopProductSpecService shopProductSpecService;
+    private final IOrderComboDishService orderComboDishService;
 
 
     @Override
@@ -949,7 +947,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     }
 
-    private final IOrderComboDishService orderComboDishService;
+
 
     /**
      * 套餐明细
