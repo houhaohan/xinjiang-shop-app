@@ -676,13 +676,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      */
     @Override
     public String takeoutOrderCreate(Orders order) {
-//        if (!Environment.isProd()) {
-//            return "";
-//        }
+        if (!Environment.isProd()) {
+            return "";
+        }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
         takeoutOrderCreateDTO.setRemark(order.getRemark());
-        takeoutOrderCreateDTO.setRemark("测试单，请勿出餐");
         takeoutOrderCreateDTO.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         takeoutOrderCreateDTO.setPromoFee(BigDecimalUtil.yuanToFen(order.getDiscountAmount()));//优惠
         takeoutOrderCreateDTO.setActualFee(BigDecimalUtil.yuan2Fen(order.getOrderPrice()));//应付
@@ -824,14 +823,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders) {
         //生产环境才推单，其他环境就不推了吧
-//        if (!Environment.isProd()) {
-//            return null;
-//        }
+        if (!Environment.isProd()) {
+            return null;
+        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
-        dto.setOutBizNo(UUID.randomUUID().toString());
         dto.setRemark(orders.getRemark());
-        dto.setRemark("测试单，请勿出餐");
         dto.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         dto.setPromoFee(BigDecimalUtil.yuanToFen(orders.getDiscountAmount()));
         dto.setActualFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
@@ -839,7 +836,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
         paymentDetailRequest.setOutBizId(String.valueOf(orders.getId()));
-        paymentDetailRequest.setOutBizId(java.util.UUID.randomUUID().toString());
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
         paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
         paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
@@ -863,7 +859,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
-            request.setOutDishNo(java.util.UUID.randomUUID().toString());
             request.setDishId(orderProduct.getProdId());
             request.setDishName(orderProduct.getProductName());
             request.setDishCode(orderProduct.getDishCode());
