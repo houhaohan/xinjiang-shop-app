@@ -46,6 +46,7 @@ public class KryOrderPushListener {
     @JmsListener(destination = QueueConstants.KRY_ORDER_PUSH, containerFactory = "queueListener")
     @Transactional(rollbackFor = Exception.class)
     public void orderPush(String message) {
+        log.info("================================客如云订单 消费===============================");
         Orders order = ordersService.getById(Long.parseLong(message));
         //已推送的订单不用再推了
         if(StringUtil.isNotBlank(order.getMealCode()) || StringUtil.isNotBlank(order.getKryOrderNo())){
@@ -55,27 +56,30 @@ public class KryOrderPushListener {
         entity.setId(order.getId());
         if(Objects.equals(order.getOrderType(), OrderTypeEnum.SELF_PICKUP.getCode())){
             //自提单
+            log.info("================================客如云自提订单 消费===============================");
             String kryOrderNo = ordersService.scanCodePrePlaceOrder(order);
             entity.setKryOrderNo(kryOrderNo);
-            entity.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
+            order.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
             //判断订单是否有佣金 如果有佣金 && 订单状态是已完成 设置佣金三天后到账
             if (BigDecimalUtil.gt(order.getCommission(), BigDecimal.ZERO)) {
                 jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, order.getId().toString(), 3 * 24 * 60 * 60 * 1000L);
             }
         }else {
             //外卖单
+            log.info("================================客如云外卖订单 消费===============================");
             String kryOrderNo = ordersService.takeoutOrderCreate(order);
-            entity.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
             entity.setKryOrderNo(kryOrderNo);
-            entity.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
+            order.setOrderStatus(OrderStatusEnum.MAKE.getCode());
             //创建配送订单
             try {
                 daDaService.createOrder(order);
             } catch (RpcException e) {
+                e.printStackTrace();
                 //todo 短信提醒 15868805739
                 jmsUtil.sendMsgQueue(QueueConstants.DELIVERY_ORDER_FAIL_SMS, order.getId().toString());
             }
         }
+        entity.setOrderStatus(order.getOrderStatus());
         ordersService.updateById(entity);
     }
 

@@ -373,12 +373,13 @@
                        max(kcgd.sell_price/100) as market_price
                 from shop_product sp
                 inner join product_type pt on pt.id = sp.product_type_id and pt.del_flag = 0
-                inner join kry_combo_group_detail kcgd on kcgd.dish_id = sp.prod_id and kcgd.single_dish_id = '' and kcgd.del_flag = 0
+                inner join kry_combo_group kcg on kcg.shop_prod_id = sp.id and kcg.del_flag = 0
+                inner join kry_combo_group_detail kcgd on kcgd.combo_group_id = kcg.id and kcgd.single_dish_id = '' and kcgd.del_flag = 0
                 where sp.shop_id = #{shopId}
                 and sp.shop_prod_status = 1
                 and sp.dish_type = 'COMBO'
                 and sp.del_flag = 0
-                group by kcgd.combo_group_id
+                group by kcg.id
         ) temp
         group by temp.id
         order by temp.sort,temp.price
@@ -433,7 +434,8 @@
                        min(kcgd.price/100) as price
                 from shop s
 				inner join shop_product sp on s.id = sp.shop_id
-                inner join kry_combo_group_detail kcgd on kcgd.dish_id = sp.prod_id and kcgd.del_flag = 0
+				inner join kry_combo_group kcg on kcg.shop_prod_id = sp.id and kcg.del_flag = 0
+				inner join kry_combo_group_detail kcgd on kcgd.combo_group_id = kcg.id and kcgd.single_dish_id = '' and kcgd.del_flag = 0
                 where sp.shop_id = #{shopId}
                 and sp.shop_prod_status = 1
                 and sp.dish_type = 'COMBO'

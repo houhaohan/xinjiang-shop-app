@@ -23,11 +23,11 @@ public class CartOrderSettleHandler extends OrderSettleAbstractHandler{
 
     @Override
     public void handler(){
-        List<OrderProduct> orderProducts = new ArrayList<>();
         List<Cart> cartList = context.cartService.getByUserIdAndShopId(context.userId, context.dishSettleContext.request.getShopId());
         if (CollectionUtils.isEmpty(cartList)) {
             throw new PinetException("购物车内没有需要结算的商品");
         }
+        List<OrderProduct> orderProducts = new ArrayList<>(cartList.size());
         cartList.forEach(cart -> {
             if (Objects.equals(cart.getCartStatus(), CartStatusEnum.EXPIRE.getCode())) {
                 throw new PinetException("购物车内有失效的商品,请删除后在结算");

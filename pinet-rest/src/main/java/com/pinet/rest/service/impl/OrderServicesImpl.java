@@ -358,6 +358,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             log.error("微信支付回调出现异常,订单号不存在:" + param.getOrderNo());
             return false;
         }
+        orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
         log.info("支付回调查询出订单信息为{}", JSONObject.toJSONString(orders));
 
         OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(), param.getChannelId());
@@ -420,39 +421,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             return updateById(orders);
         } else {*/
 
-
+        updateById(orders);
         //推送客如云,异步处理
         jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH,String.valueOf(orders.getId()));
-
-    /**if (Objects.equals(orders.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())) {
-            orders.setOrderStatus(OrderStatusEnum.SEND_OUT.getCode());
-            String kryOrderNo = takeoutOrderCreate(orders);
-            orders.setKryOrderNo(kryOrderNo);
-            orders.setOrderStatus(OrderStatusEnum.PAY_COMPLETE.getCode());
-            //创建配送订单
-            try {
-                daDaService.createOrder(orders);
-            } catch (RpcException e) {
-                //todo 短信提醒 15868805739
-                jmsUtil.sendMsgQueue(QueueConstants.DELIVERY_ORDER_FAIL_SMS, orders.getId().toString());
-            }
-        } else {
-            //自提单
-            String kryOrderNo = scanCodePrePlaceOrder(orders);
-            orders.setKryOrderNo(kryOrderNo);
-            orders.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
-            //判断订单是否有佣金 如果有佣金 && 订单状态是已完成 设置佣金三天后到账
-            if (BigDecimalUtil.gt(orders.getCommission(),BigDecimal.ZERO)) {
-                jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), 3 * 24 * 60 * 60 * 1000L);
-            }
-
-            //自提订单发送短信
-            //先用mq异步发送  (后期可能会删除)
-            //jmsUtil.delaySend(QueueConstants.QING_ORDER_SEND_SMS_NAME, JSONObject.toJSONString(orders), 10 * 1000L);
-
-        }*/
         log.info("支付回调更新订单信息为{}", JSONObject.toJSONString(orders));
-        return updateById(orders);
+        return true;
     }
 
     @Override
@@ -703,12 +676,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      */
     @Override
     public String takeoutOrderCreate(Orders order) {
-        if (!Environment.isProd()) {
-            return "";
-        }
+//        if (!Environment.isProd()) {
+//            return "";
+//        }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
         takeoutOrderCreateDTO.setRemark(order.getRemark());
+        takeoutOrderCreateDTO.setRemark("测试单，请勿出餐");
         takeoutOrderCreateDTO.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         takeoutOrderCreateDTO.setPromoFee(BigDecimalUtil.yuanToFen(order.getDiscountAmount()));//优惠
         takeoutOrderCreateDTO.setActualFee(BigDecimalUtil.yuan2Fen(order.getOrderPrice()));//应付
@@ -727,10 +701,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderStrategyRequest.setValidateDishStock(true);
         takeoutOrderCreateDTO.setOrderStrategyRequest(orderStrategyRequest);
 
-        OrderPay orderPay = orderPayService.getByOrderId(order.getId());
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
-        paymentDetailRequest.setOutBizId(String.valueOf(orderPay.getId()));
-        paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orderPay.getPayPrice()));
+        paymentDetailRequest.setOutBizId(IdUtil.getSnowflake().nextIdStr());
+        paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(order.getOrderPrice()));
         paymentDetailRequest.setChangeAmount(0);
         paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
         paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
@@ -930,26 +903,22 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
-
-        System.err.println("----------");
-        System.err.println(JSON.toJSONString(dto));
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
-//        System.err.println(JSON.toJSONString(scanCodePrePlaceOrderVo));
 //        //记录日志
-//        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
-//
-//        if (scanCodePrePlaceOrderVo == null) {
-//            return null;
-//        }
-//        if ("fail".equals(scanCodePrePlaceOrderVo.getSuccess())) {
-//            //推送失败，重试
-//            pushKryOrderMessage(orders, scanCodePrePlaceOrderVo.getFormatMsgInfo());
-//            return null;
-//        }
-//        if (scanCodePrePlaceOrderVo.getData() == null) {
-//            return null;
-//        }
+        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
+
+        if (scanCodePrePlaceOrderVo == null) {
+            return null;
+        }
+        if ("fail".equals(scanCodePrePlaceOrderVo.getSuccess())) {
+            //推送失败，重试
+            pushKryOrderMessage(orders, scanCodePrePlaceOrderVo.getFormatMsgInfo());
+            return null;
+        }
+        if (scanCodePrePlaceOrderVo.getData() == null) {
+            return null;
+        }
         return scanCodePrePlaceOrderVo.getData().getOrderNo();
     }
 

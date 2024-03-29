@@ -19,7 +19,7 @@ public class QueueConstants {
     public static final String QING_MEMBER_PAY_NAME = "qingshi.member.pay.queue";
 
     /**
-     * 轻食佣金三天自动到账
+     * 轻食佣金三天自动到账,消费者在商家后台
      */
     public static final String QING_SHI_ORDER_COMMISSION = "qingshi.order.commission";
 
