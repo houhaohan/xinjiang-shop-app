@@ -14,7 +14,10 @@ public class OrderProductDto {
     @ApiModelProperty("客如云店铺ID")
     private String kryShopId;
 
-    @ApiModelProperty("商品ID")
+    @ApiModelProperty("店铺商品 ID")
+    private Long shopProdId;
+
+    @ApiModelProperty("客如云商品ID")
     private String prodId;
 
     @ApiModelProperty("订单商品ID")

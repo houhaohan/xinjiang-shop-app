@@ -773,7 +773,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
                 request.setItemOriginType(DishType.COMBO);
                 request.setDishType(DishType.COMBO_DISH);
-                dishList.addAll(getComboGroupDetail(orderProduct, order.getShopId()));
+                dishList.addAll(getComboGroupDetail(orderProduct));
             }
             if (!CollectionUtils.isEmpty(dishList)) {
                 request.setDishList(dishList);
@@ -889,7 +889,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 request.setDishType(DishType.COMBO_DISH);
                 request.setItemOriginType(DishType.COMBO);
                 //套餐明细
-                dishList.addAll(getComboGroupDetail(orderProduct, orders.getShopId()));
+                dishList.addAll(getComboGroupDetail(orderProduct));
             }
             if (!CollectionUtils.isEmpty(dishList)) {
                 request.setDishList(dishList);
@@ -954,10 +954,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     /**
      * 套餐明细
      * @param orderProduct
-     * @param shopId
+     * @param
      */
-    private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct, Long shopId) {
-        List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndShopProdId(orderProduct.getOrderId(), orderProduct.getId());
+    private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct) {
+        List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndShopProdId(orderProduct.getOrderId(), orderProduct.getShopProdId());
         Map<String, List<OrderComboDishVo>> singleOrderMap = orderComboDishList.stream().collect(Collectors.groupingBy(OrderComboDishVo::getSingleDishId,LinkedHashMap::new,Collectors.toList()));
 
         List<ScanCodeDish> dishList = new ArrayList<>(singleOrderMap.size());
