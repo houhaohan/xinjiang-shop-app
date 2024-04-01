@@ -41,6 +41,11 @@
         <result column="market_price" property="marketPrice"/>
         <result column="shop_id" property="shopId"/>
         <result column="labels" property="labels"/>
+        <result column="groupId" property="groupId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="group_type" property="groupType"/>
+        <result column="max_choose" property="maxChoose"/>
+        <result column="min_choose" property="minChoose"/>
         <collection property="skuList" resultMap="SkuMap"/>
     </resultMap>
 
@@ -284,6 +289,11 @@
         sps.id as shop_prod_spec_id,
         sps.sku_id,
         sps.stock,
+        t.groupId,
+        t.group_name,
+        t.group_type,
+        t.max_choose,
+        t.min_choose,
 		t.price/100 as price,
         t.sell_price/100 as market_price,
         t.dish_sku_price/100 as add_price,
@@ -291,8 +301,14 @@
         t.default_flag
         from shop_product sp
         left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
-        left join (
-            select  kcgd.id,
+        inner join (
+            select
+                kcg.id as groupId,
+                kcg.group_name,
+                kcg.group_type,
+                kcg.max_choose,
+                kcg.min_choose,
+                kcgd.id,
                 kcgd.single_dish_id,
                 kcgd.dish_name,
                 kcgd.spec_name,
@@ -303,12 +319,15 @@
             from kry_combo_group kcg
             inner join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
             where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
-        ) t on t.single_dish_id = sp.prod_id and sps.spec_name = t.spec_name and t.dish_name = sp.product_name
+        ) t on t.single_dish_id = sp.prod_id
+       <!-- and sps.spec_name = t.spec_name
+        and t.dish_name = sp.product_name -->
         where sp.shop_id = #{shopId} and sp.del_flag = 0
         and sp.prod_id in
         <foreach collection="dishIds" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+        group by sp.id
 
     </select>
 

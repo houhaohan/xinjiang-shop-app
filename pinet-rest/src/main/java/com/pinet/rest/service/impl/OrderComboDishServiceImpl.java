@@ -25,7 +25,7 @@ public class OrderComboDishServiceImpl extends ServiceImpl<OrderComboDishMapper,
     private final OrderComboDishMapper orderComboDishMapper;
 
     @Override
-    public List<OrderComboDishVo> getByOrderIdAndShopProdId(Long orderId, Long shopProdId) {
-        return orderComboDishMapper.getByOrderIdAndShopProdId(orderId,shopProdId);
+    public List<OrderComboDishVo> getByOrderIdAndOrderProdId(Long orderId, Long shopProdId) {
+        return orderComboDishMapper.getByOrderIdAndOrderProdId(orderId,shopProdId);
     }
 }

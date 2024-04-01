@@ -19,10 +19,10 @@ public interface OrderComboDishMapper extends BaseMapper<OrderComboDish> {
 
 
     /**
-     * 根据订单 ID 和套餐 ID查询
+     * 根据订单 ID 和订单商品 ID查询
      * @param orderId
-     * @param shopProdId
+     * @param orderProdId
      * @return
      */
-    List<OrderComboDishVo> getByOrderIdAndShopProdId(@Param("orderId") Long orderId, @Param("shopProdId") Long shopProdId);
+    List<OrderComboDishVo> getByOrderIdAndOrderProdId(@Param("orderId") Long orderId, @Param("orderProdId") Long orderProdId);
 }

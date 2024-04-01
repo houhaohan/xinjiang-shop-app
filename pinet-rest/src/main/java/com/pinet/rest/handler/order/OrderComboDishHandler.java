@@ -62,6 +62,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
         for(CartComboDish cartComboDish : cartComboDishList){
             OrderComboDish orderComboDish = new OrderComboDish();
             orderComboDish.setOrderId(request.getOrderId());
+            orderComboDish.setOrderProdId(orderProduct.getId());
             orderComboDish.setShopProdId(cartComboDish.getShopProdId());
             ShopProduct singleProduct = FilterUtil.filter(shopProducts, cartComboDish.getShopProdId(),ApiExceptionEnum.PROD_NOT_EXISTS);
             orderComboDish.setDishId(singleProduct.getProdId());
@@ -115,6 +116,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
         for(OrderComboDishDto comboDishDto : comboDishDtoList){
             OrderComboDish orderComboDish = new OrderComboDish();
             orderComboDish.setOrderId(request.getOrderId());
+            orderComboDish.setOrderProdId(orderProduct.getId());
             orderComboDish.setShopProdId(comboDishDto.getShopProdId());
             ShopProduct singleProduct = FilterUtil.filter(shopProducts, comboDishDto.getSingleProdId(),ApiExceptionEnum.PROD_NOT_EXISTS);
             orderComboDish.setDishId(singleProduct.getProdId());

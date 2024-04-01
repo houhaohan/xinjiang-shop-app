@@ -27,6 +27,9 @@ public class OrderComboDish extends BaseEntity {
     @ApiModelProperty("订单id")
     private Long orderId;
 
+    @ApiModelProperty("订单商品id")
+    private Long orderProdId;
+
     @ApiModelProperty("套餐id")
     private Long shopProdId;
 

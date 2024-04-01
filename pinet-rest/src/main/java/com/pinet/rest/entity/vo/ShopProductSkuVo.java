@@ -17,6 +17,10 @@ public class ShopProductSkuVo {
     @ApiModelProperty("sku名称")
     private String skuName;
 
+
+    @ApiModelProperty(value = "是否为默认子菜，Y-是，N-否'")
+    private String defaultFlag;
+
     @ApiModelProperty("sku样式")
     private List<ShopProductSpecVo> skuSpecs = new ArrayList<>();
 }

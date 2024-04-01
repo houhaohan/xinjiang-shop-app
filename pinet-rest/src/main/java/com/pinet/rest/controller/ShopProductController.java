@@ -3,7 +3,6 @@ package com.pinet.rest.controller;
 
 import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson.JSONObject;
-import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;

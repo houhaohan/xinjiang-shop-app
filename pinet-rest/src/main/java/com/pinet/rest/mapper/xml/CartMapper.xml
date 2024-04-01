@@ -46,50 +46,53 @@
     </select>
 
     <select id="getCartByUserIdAndShopId" resultType="com.pinet.rest.entity.vo.CartVo">
-        select ifnull(sum(prod_num),0) as prodNum,ifnull(sum(price),0) as price from (
-            select  c.id,c.prod_num ,(c.prod_num * sps.price) as price
-            from cart c
-            left join cart_product_spec cps on c.id = cps.cart_id and cps.del_flag = 0
-            left join shop_product_spec sps on  sps.id = cps.shop_prod_spec_id and sps.del_flag = 0
-            where c.shop_id = #{shopId} and c.customer_id = #{customerId}
-            and c.cart_status = 1
-            and c.dish_type = 'SINGLE'
-            and c.del_flag= 0
-            group by c.id
+        select sum(price)  as price,sum(prod_num) as prodNum
+        from (
+            <!-- 单品价格，数量-->
+           select
+           sum((sps.price * prod_num)) as price, sum(c.prod_num)  as prod_num
+           from cart c
+           inner join cart_product_spec cps on c.id = cps.cart_id and cps.del_flag = 0
+           inner join shop_product_spec sps on  sps.id = cps.shop_prod_spec_id and sps.del_flag = 0
+           where c.dish_type = 'SINGLE' and c.shop_id = #{shopId} and c.customer_id = #{customerId} and cooking_way_id is null
 
-            UNION ALL
+           union all
 
-           select (sum(price) * sum(prodNum))as price,sum(prodNum) as prodNum
-           from (
-	            <!-- 最小单价-->
-                select
-                c.id,sum(kcgd.price/100) as price, c.prod_num as prodNum
-                from cart c
-                left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
-                left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.single_dish_id = '' and kcgd.del_flag = 0
-                where c.id = #{cartId}
+            <!-- 套餐价格，数量-->
+           select
+           sum((kcgd.price / 100 * c.prod_num)) as price,sum(c.prod_num)  as prod_num
+           from cart c
+           left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
+           left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+           where c.cart_status = 1
+           and c.dish_type = 'COMBO'
+           and c.customer_id = #{customerId}
+           and c.shop_id = #{shopId}
+           and kcgd.single_dish_id = ''
+           and c.del_flag= 0
 
-                union all
+           union all
 
-               <!-- 规格加价-->
-                select
-                sum(kcgd.dish_sku_price/100) as price, 0 as prodNum
-                from cart c
-                left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
-                left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
-                left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = 24
-                left join shop_product_spec sps on sps.shop_prod_id = single.id and kcgd.spec_name = sps.spec_name and sps.del_flag = 0
-                where sps.id in
-                (
-                        select ccds.shop_prod_spec_id
-                        from cart_combo_dish ccd
-                        left join cart_combo_dish_spec ccds on ccd.cart_id = ccds.cart_id and ccd.shop_prod_id = ccds.shop_prod_id and ccds.del_flag = 0
-                        where ccd.cart_id = #{cartId}
-                )
-                and c.id = #{cartId}
-                and kcg.del_flag = 0
-            ) combo
-
+            <!-- 套餐加价-->
+           select
+           ifnull(sum(kcgd.dish_sku_price/100),0)  as price,0 as prod_num
+           from cart c
+           left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
+           left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
+           left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = c.shop_id
+           left join shop_product_spec sps on sps.shop_prod_id = single.id and kcgd.spec_name = sps.spec_name and sps.del_flag = 0
+           where sps.id in
+           (
+               select ccds.shop_prod_spec_id
+               from cart_combo_dish ccd
+               left join cart_combo_dish_spec ccds on ccd.cart_id = ccds.cart_id and ccd.shop_prod_id = ccds.shop_prod_id and ccds.del_flag = 0
+               where ccd.cart_id = c.id
+           )
+           and c.cart_status = 1
+           and c.shop_id = #{shopId}
+           and c.customer_id = #{customerId}
+           and c.dish_type = 'COMBO'
+           and kcg.del_flag = 0
         ) t
     </select>
 
@@ -126,7 +129,7 @@
             from cart c
             left join kry_combo_group kcg on c.shop_prod_id = kcg.shop_prod_id and kcg.del_flag = 0
             left join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
-            left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = c.shop_id
+            left join shop_product single on single.prod_id = kcgd.single_dish_id and single.shop_id = c.shop_id and single.del_flag = 0
             left join shop_product_spec sps on sps.shop_prod_id = single.id and kcgd.spec_name = sps.spec_name and sps.del_flag = 0
             where sps.id in
             (

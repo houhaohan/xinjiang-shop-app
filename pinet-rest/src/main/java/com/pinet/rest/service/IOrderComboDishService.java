@@ -17,11 +17,11 @@ import java.util.List;
 public interface IOrderComboDishService extends IService<OrderComboDish> {
 
     /**
-     * 根据订单ID 和 套餐单品ID 查询
+     * 根据订单ID 和 订单商品ID 查询
      * @param orderId
-     * @param shopProdId
+     * @param orderProdId
      * @return
      */
 
-    List<OrderComboDishVo> getByOrderIdAndShopProdId(Long orderId, Long shopProdId);
+    List<OrderComboDishVo> getByOrderIdAndOrderProdId(Long orderId, Long orderProdId);
 }

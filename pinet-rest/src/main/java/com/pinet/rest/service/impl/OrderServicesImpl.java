@@ -955,7 +955,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param
      */
     private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct) {
-        List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndShopProdId(orderProduct.getOrderId(), orderProduct.getShopProdId());
+        List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndOrderProdId(orderProduct.getOrderId(), orderProduct.getId());
         Map<String, List<OrderComboDishVo>> singleOrderMap = orderComboDishList.stream().collect(Collectors.groupingBy(OrderComboDishVo::getSingleDishId,LinkedHashMap::new,Collectors.toList()));
 
         List<ScanCodeDish> dishList = new ArrayList<>(singleOrderMap.size());

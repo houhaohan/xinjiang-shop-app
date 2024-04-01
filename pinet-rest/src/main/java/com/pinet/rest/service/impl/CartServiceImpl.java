@@ -142,30 +142,31 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     @Override
     public CartVo getCartByUserIdAndShopId(Long shopId, Long customerId) {
-        QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("shop_id",shopId);
-        queryWrapper.eq("customer_id",customerId);
-        List<Cart> cartList = list(queryWrapper);
-        CartVo cartVo = new CartVo();
-        Integer prodNum = 0;
-        BigDecimal price = BigDecimal.ZERO;
+//        QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("shop_id",shopId);
+//        queryWrapper.eq("customer_id",customerId);
+//        List<Cart> cartList = list(queryWrapper);
+//        CartVo cartVo = new CartVo();
+//        Integer prodNum = 0;
+//        BigDecimal price = BigDecimal.ZERO;
+//
+//        for(Cart cart : cartList){
+//            if(DishType.SINGLE.equals(cart.getDishType())){
+//                //单品单价
+//                BigDecimal unitPrice = cartMapper.getSingleByCartId(cart.getId());
+//                price = BigDecimalUtil.sum(price,BigDecimalUtil.multiply(unitPrice,new BigDecimal(cart.getProdNum())));
+//            }else {
+//                //套餐单价
+//                Long unitPrice = cartMapper.getComboByCartId(cart.getId());
+//                price = BigDecimalUtil.sum(price,BigDecimalUtil.multiply(BigDecimalUtil.fenToYuan(unitPrice),new BigDecimal(cart.getProdNum())));
+//            }
+//            prodNum = prodNum + cart.getProdNum();
+//        }
+//        cartVo.setPrice(price);
+//        cartVo.setProdNum(prodNum);
 
-        for(Cart cart : cartList){
-            if(DishType.SINGLE.equals(cart.getDishType())){
-                //单品单价
-                BigDecimal unitPrice = cartMapper.getSingleByCartId(cart.getId());
-                price = BigDecimalUtil.sum(price,BigDecimalUtil.multiply(unitPrice,new BigDecimal(cart.getProdNum())));
-            }else {
-                //套餐单价
-                Long unitPrice = cartMapper.getComboByCartId(cart.getId());
-                price = BigDecimalUtil.sum(price,BigDecimalUtil.multiply(BigDecimalUtil.fenToYuan(unitPrice),new BigDecimal(cart.getProdNum())));
-            }
-            prodNum = prodNum + cart.getProdNum();
-        }
-        cartVo.setPrice(price);
-        cartVo.setProdNum(prodNum);
-        return cartVo;
-//        return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
+//        return cartVo;
+        return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
     }
 
     @Override
