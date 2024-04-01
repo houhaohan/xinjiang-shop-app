@@ -50,13 +50,15 @@ public class ComboDishVo extends ProductDetailVo{
     @ApiModelProperty(value = "店铺ID")
     private Long shopId;
 
-    @ApiModelProperty(value = "子菜列表")
-    private List<ShopProductVo> singleDishList = new ArrayList<>();
-
     @ApiModelProperty(value = "标签")
     private String labels;
 
     @ApiModelProperty(value = "销量")
     private Long saleCount;
+
+    @ApiModelProperty(value = "套餐组")
+    private List<ComboGroup> groups;
+
+
 
 }

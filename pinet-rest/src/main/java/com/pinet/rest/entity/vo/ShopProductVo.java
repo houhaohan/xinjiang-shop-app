@@ -53,19 +53,5 @@ public class ShopProductVo extends ProductDetailVo{
     @ApiModelProperty(value = "销量")
     private Long saleCount;
 
-    @ApiModelProperty(value = "套餐组 ID")
-    private Long groupId;
-
-    @ApiModelProperty(value = "套餐组名称")
-    private String groupName;
-
-    @ApiModelProperty(value = "套餐组类型（FIXED:固定，OPTIONAL:可选）")
-    private String groupType;
-
-    @ApiModelProperty(value = "套餐分组子菜的最大选择数")
-    private Integer maxChoose;
-
-    @ApiModelProperty(value = "套餐分组子菜的最小选择数")
-    private Integer minChoose;
 
 }

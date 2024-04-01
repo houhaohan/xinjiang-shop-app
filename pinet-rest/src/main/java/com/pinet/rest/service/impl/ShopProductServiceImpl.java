@@ -115,10 +115,10 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
             List<String> singleDishIds = kryComboGroupDetails.stream().map(KryComboGroupDetail::getSingleDishId).distinct().collect(Collectors.toList());
             KryComboGroupDetail comboGroupDetail = kryComboGroupDetails.stream().filter(item -> StringUtil.isBlank(item.getSingleDishId())).findFirst().get();
 
-            List<ShopProductVo> singleDishList = baseMapper.getComboDetailByShopIdAndShopProdId(shopProduct.getShopId(), id,singleDishIds);
+            List<ComboGroup> singleDishList = baseMapper.getComboDetailByShopIdAndShopProdId(shopProduct.getShopId(), id,singleDishIds);
             comboDishVo.setPrice(BigDecimalUtil.fenToYuan(comboGroupDetail.getPrice()));
             comboDishVo.setMarketPrice(BigDecimalUtil.fenToYuan(comboGroupDetail.getSellPrice()));
-            comboDishVo.setSingleDishList(singleDishList);
+            comboDishVo.setGroups(singleDishList);
             return (T)comboDishVo;
         }
         ShopProductVo shopProductVo = baseMapper.getDetailById(id);
