@@ -47,6 +47,7 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
     private final ICustomerAddressService customerAddressService;
     private final IKryComboGroupDetailService kryComboGroupDetailService;
     private final ILabelService labelService;
+    private final IKrySideDishGroupDetailService krySideDishGroupDetailService;
 
     @Override
     public List<HotProductVo> hotSellList(HomeProductParam param) {
@@ -122,6 +123,8 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
             return (T)comboDishVo;
         }
         ShopProductVo shopProductVo = baseMapper.getDetailById(id);
+        List<KrySideDishGroupDetail> krySideDishGroupDetails = krySideDishGroupDetailService.getByShopProdId(id);
+        shopProductVo.setSideDishGroupDetailList(krySideDishGroupDetails);
         return (T)shopProductVo;
     }
 

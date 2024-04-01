@@ -1,5 +1,6 @@
 package com.pinet.rest.entity.vo;
 
+import com.pinet.rest.entity.KrySideDishGroupDetail;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -52,6 +53,9 @@ public class ShopProductVo extends ProductDetailVo{
 
     @ApiModelProperty(value = "销量")
     private Long saleCount;
+
+    @ApiModelProperty("加料明细")
+    private List<KrySideDishGroupDetail> sideDishGroupDetailList = new ArrayList<>();
 
 
 }

@@ -51,12 +51,22 @@
         <result column="shop_id" property="shopId"/>
         <result column="labels" property="labels"/>
         <collection property="skuList" resultMap="SkuMap"/>
+        <collection property="sideDishGroupDetailList" resultMap="KrySideDishGroupDetailMap"/>
     </resultMap>
 
     <resultMap id="SkuMap" type="com.pinet.rest.entity.vo.ShopProductSkuVo">
         <result column="skuId" property="skuId"/>
         <result column="skuName" property="skuName"/>
         <collection property="skuSpecs" resultMap="SkuSpecsMap"/>
+    </resultMap>
+
+    <resultMap id="KrySideDishGroupDetailMap" type="com.pinet.rest.entity.vo.SideDishGroupDetailVo">
+        <result column="comboGroupDetailId" property="id"/>
+        <result column="id" property="shopProdId"/>
+        <result column="side_dish_id" property="sideDishId"/>
+        <result column="side_dish_name" property="sideDishName"/>
+        <result column="side_dish_group_id" property="sideDishGroupId"/>
+        <result column="sideAddPrice" property="addPrice"/>
     </resultMap>
 
     <resultMap id="SkuSpecsMap" type="com.pinet.rest.entity.vo.ShopProductSpecVo">
@@ -291,6 +301,7 @@
 		sps.sku_id as skuId,
         sps.sku_name as skuName,
         sps.id as shop_prod_spec_id,
+        sps.spec_name,
         sps.sku_id,
         sps.stock,
         t.groupId,
@@ -301,8 +312,12 @@
 		t.price/100 as price,
         t.sell_price/100 as market_price,
         t.dish_sku_price/100 as add_price,
-        sps.spec_name,
-        t.default_flag
+        t.default_flag,
+        ksdgd.id as comboGroupDetailId,
+        ksdgd.side_dish_id,
+        ksdgd.side_dish_name,
+        ksdgd.side_dish_group_id,
+        ksdgd.add_price / 100 as sideAddPrice
         from shop_product sp
         left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
         inner join (
@@ -322,16 +337,17 @@
                 kcgd.default_flag
             from kry_combo_group kcg
             inner join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
-            where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
+        where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
         ) t on t.single_dish_id = sp.prod_id
        <!-- and sps.spec_name = t.spec_name
         and t.dish_name = sp.product_name -->
+        left join kry_side_dish_group_detail ksdgd on ksdgd.shop_prod_id = sp.id and ksdgd.del_flag = 0
         where sp.shop_id = #{shopId} and sp.del_flag = 0
         and sp.prod_id in
         <foreach collection="dishIds" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
-        group by sp.id
+        <!--group by sp.id-->
 
     </select>
 
