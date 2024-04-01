@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -44,5 +45,8 @@ public class CartProductSpecServiceImpl extends ServiceImpl<CartProductSpecMappe
         return cartProductSpecMapper.getByUserIdAndShopProdId(userId,shopProdId);
     }
 
-
+    @Override
+    public boolean saveBatch(Collection<CartProductSpec> entityList) {
+        return cartProductSpecMapper.insertBatchSomeColumn(entityList) > 0;
+    }
 }

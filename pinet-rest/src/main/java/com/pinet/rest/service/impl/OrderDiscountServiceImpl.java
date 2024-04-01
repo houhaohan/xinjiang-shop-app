@@ -7,7 +7,9 @@ import com.pinet.rest.mapper.OrderDiscountMapper;
 import com.pinet.rest.service.IOrderDiscountService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -26,5 +28,11 @@ public class OrderDiscountServiceImpl extends ServiceImpl<OrderDiscountMapper, O
         QueryWrapper<OrderDiscount> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("order_id",orderId);
         return list(queryWrapper);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean saveBatch(Collection<OrderDiscount> entityList) {
+        return baseMapper.insertBatchSomeColumn(entityList) > 0;
     }
 }

@@ -21,8 +21,10 @@ public class OrderDishContext {
     protected final IShopProductSpecService shopProductSpecService;
     protected final IOrderProductSpecService orderProductSpecService;
     protected final ICartProductSpecService cartProductSpecService;
+    protected String dishType;
 
     public OrderDishHandler handler(String dishType){
+        this.dishType = dishType;
         if(Objects.equals(dishType, DishType.SINGLE)){
             return  new OrderSingleDishHandler(this);
         }else {

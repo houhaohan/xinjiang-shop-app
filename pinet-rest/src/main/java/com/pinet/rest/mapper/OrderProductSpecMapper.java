@@ -3,6 +3,8 @@ package com.pinet.rest.mapper;
 import com.pinet.rest.entity.OrderProductSpec;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
+import java.util.Collection;
+
 /**
  * <p>
  *  Mapper 接口
@@ -13,4 +15,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface OrderProductSpecMapper extends BaseMapper<OrderProductSpec> {
 
+    /**
+     * 批量插入
+     * @param list
+     * @return
+     */
+    int insertBatchSomeColumn(Collection<OrderProductSpec> list);
 }

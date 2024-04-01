@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -42,7 +43,7 @@ public class OrderPreferentialManager {
 
         CustomerMember customerMember = customerMemberService.getByCustomerId(customerId);
         //店帮主、会员 折扣
-        if(customerMember != null){
+        if(Objects.nonNull(customerMember)){
             //优惠后金额
             MemberLevelEnum e = MemberLevelEnum.getEnumByCode(customerMember.getMemberLevel());
             BigDecimal discountedPrice = BigDecimalUtil.multiply(orderProductPrice, e.getDiscount());

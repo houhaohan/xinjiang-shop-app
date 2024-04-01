@@ -4,6 +4,7 @@ import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.FilterUtil;
+import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.request.CartOrderProductRequest;
@@ -31,8 +32,13 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
     @Override
     protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice) {
         OrderProduct orderProduct = super.build(request, unitPrice);
-        if (Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())) {
+        if (Objects.equals(request.getOrderType(), OrderTypeEnum.SELF_PICKUP.getCode())) {
+            return orderProduct;
+        }
+        if(Objects.equals(context.dishType, DishType.COMBO)){
             orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE, orderProduct.getProdNum(), RoundingMode.HALF_UP));
+        }else {
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, orderProduct.getProdNum(), RoundingMode.HALF_UP));
         }
         return orderProduct;
     }
@@ -83,6 +89,7 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
         List<ShopProductSpec> shopProductSpecs = context.shopProductSpecService.listByIds(shopProdSpecIds);
         List<OrderProductSpec> orderProductSpecList = shopProdSpecIds.stream().map(specId -> {
             OrderProductSpec orderProductSpec = new OrderProductSpec();
+            orderProductSpec.setCreateBy(shopProductSpecs.get(0).getCreateBy());
             orderProductSpec.setOrderId(orderId);
             orderProductSpec.setOrderProdId(orderProductId);
             ShopProductSpec shopProductSpec = FilterUtil.filter(shopProductSpecs, specId, ApiExceptionEnum.SPEC_NOT_EXISTS);

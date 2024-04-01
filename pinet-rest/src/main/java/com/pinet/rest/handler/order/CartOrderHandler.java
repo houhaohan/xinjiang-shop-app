@@ -28,8 +28,9 @@ public class CartOrderHandler extends OrderAbstractHandler {
     public void create() {
         Orders orders = buildOrder();
         boolean condition = commissionCondition(orders.getCustomerId(),orders.getShareId());
-        List<OrderProduct> orderProducts = new ArrayList<>();
-        for(Cart cart : context.cartList){
+        List<Cart> cartList = context.cartService.getByUserIdAndShopId(context.customerId, context.request.getShopId());
+        List<OrderProduct> orderProducts = new ArrayList<>(cartList.size());
+        for(Cart cart : cartList){
             ShopProduct shopProduct = context.shopProductService.getById(cart.getShopProdId());
             //判断店铺商品是否下架
             if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_SHELF.getCode())) {
@@ -52,6 +53,7 @@ public class CartOrderHandler extends OrderAbstractHandler {
             request.setUnit(shopProduct.getUnit());
             request.setOrderType(context.request.getOrderType());
             request.setCalculate(condition);
+            request.setCustomerId(context.customerId);
 
             OrderProduct orderProduct = context.orderDishContext
                     .handler(shopProduct.getDishType())

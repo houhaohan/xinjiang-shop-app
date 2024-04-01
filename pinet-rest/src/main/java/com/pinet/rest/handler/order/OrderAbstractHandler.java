@@ -178,7 +178,10 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
 
         List<OrderDiscount> orderDiscounts = preferentialVo.getOrderDiscounts();
         if (!CollectionUtils.isEmpty(orderDiscounts)) {
-            orderDiscounts.forEach(item -> item.setOrderId(orders.getId()));
+            orderDiscounts.forEach(item->{
+                item.setOrderId(orders.getId());
+                item.setCreateBy(orders.getCreateBy());
+            });
             context.orderDiscountService.saveBatch(orderDiscounts);
         }
 

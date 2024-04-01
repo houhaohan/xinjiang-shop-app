@@ -51,6 +51,11 @@ public class OrderProductRequest {
      */
     private Integer orderType;
 
+    /**
+     * 用户ID
+     */
+    private Long customerId;
+
 
 
 

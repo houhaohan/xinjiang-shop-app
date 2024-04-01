@@ -29,4 +29,21 @@
         order_id, order_prod_id, prod_sku_id, prod_sku_name, shop_prod_spec_id, prod_spec_name
     </sql>
 
+    <insert id="insertBatchSomeColumn" useGeneratedKeys="true" keyProperty="id">
+        insert into order_product_spec
+        (create_by,create_time,order_id,order_prod_id,prod_sku_id,prod_sku_name,shop_prod_spec_id,prod_spec_name)
+        values
+        <foreach collection="list" item="item" separator="," index="index">
+            (#{item.createBy},
+            now(),
+            #{item.orderId},
+            #{item.orderProdId},
+            #{item.prodSkuId},
+            #{item.prodSkuName},
+            #{item.shopProdSpecId},
+            #{item.prodSpecName}
+            )
+        </foreach>
+    </insert>
+
 </mapper>

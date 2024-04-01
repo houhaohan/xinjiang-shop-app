@@ -25,6 +25,22 @@
         cps.del_flag,
         cps.cart_id, cps.shop_prod_spec_id, cps.shop_prod_spec_name
     </sql>
+
+    <insert id="insertBatchSomeColumn" useGeneratedKeys="true" keyProperty="id">
+        insert into cart_product_spec
+        (create_by,create_time,cart_id,shop_prod_spec_id,shop_prod_spec_name)
+        values
+        <foreach collection="list" item="item" separator="," index="index">
+            (#{item.createBy},
+            now(),
+            #{item.cartId},
+            #{item.shopProdSpecId},
+            #{item.shopProdSpecName}
+            )
+        </foreach>
+    </insert>
+
+
     <select id="selectByCartId" resultType="com.pinet.rest.entity.CartProductSpec">
         select cps.*, sps.price
         from cart_product_spec cps

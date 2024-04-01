@@ -264,8 +264,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         context.setShop(shop);
         context.setRequest(request);
         context.setDistance(getDistance(request.getCustomerAddressId(),request.getOrderType(),shop));
-        List<Cart> cartList = cartService.getByUserIdAndShopId(userId, shop.getId());
-        context.setCartList(cartList);
         context.handler();
         return context.getResponse();
     }

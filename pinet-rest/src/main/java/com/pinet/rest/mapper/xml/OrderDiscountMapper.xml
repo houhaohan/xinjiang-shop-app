@@ -27,4 +27,19 @@
         order_id, discount_amount, discount_msg, `type`
     </sql>
 
+    <insert id="insertBatchSomeColumn" useGeneratedKeys="true" keyProperty="id">
+        insert into order_discount
+        (create_by, create_time, order_id, discount_amount, discount_msg, `type`)
+        values
+        <foreach collection="list" item="item" separator="," index="index">
+            (#{item.createBy},
+            now(),
+            #{item.orderId},
+            #{item.discountAmount},
+            #{item.discountMsg},
+            #{item.type}
+            )
+        </foreach>
+    </insert>
+
 </mapper>

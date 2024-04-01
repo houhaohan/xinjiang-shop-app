@@ -28,4 +28,22 @@
         order_combo_dish_id,  shop_prod_spec_id, shop_prod_spec_name, add_price, combo_group_detail_id
     </sql>
 
+    <insert id="insertBatchSomeColumn" useGeneratedKeys="true" keyProperty="id">
+        insert into order_combo_dish_spec
+        (create_by,create_time,update_by,update_time,del_flag,order_combo_dish_id,shop_prod_spec_id,shop_prod_spec_name,add_price,combo_group_detail_id)
+        values
+        <foreach collection="list" item="item" separator="," index="index">
+            (#{item.createBy},
+            now(),
+            #{item.updateBy},
+            #{item.updateTime},
+            #{item.delFlag},
+            #{item.orderComboDishId},
+            #{item.shopProdSpecId},
+            #{item.shopProdSpecName},
+            #{item.addPrice},
+            #{item.comboGroupDetailId}
+            )
+        </foreach>
+    </insert>
 </mapper>

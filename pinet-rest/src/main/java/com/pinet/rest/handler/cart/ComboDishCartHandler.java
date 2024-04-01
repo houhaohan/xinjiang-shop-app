@@ -75,6 +75,8 @@ public class ComboDishCartHandler extends DishCartHandler{
             List<ComboGroupDetailVo> kryComboGroupDetailList = context.kryComboGroupDetailService.getByShopSpecIdsAndShopProdId(singleProdSpecIds, context.request.getShopProdId());
             List<CartComboDishSpec> cartComboDishSpecList = singleProdSpecIds.stream().map(id -> {
                 CartComboDishSpec cartComboDishSpec = new CartComboDishSpec();
+                cartComboDishSpec.setCreateBy(cart.getCreateBy());
+                cartComboDishSpec.setCreateTime(cart.getCreateTime());
                 cartComboDishSpec.setCartId(cart.getId());
                 cartComboDishSpec.setShopProdId(singleDish.getShopProdId());
                 cartComboDishSpec.setShopProdSpecId(id);

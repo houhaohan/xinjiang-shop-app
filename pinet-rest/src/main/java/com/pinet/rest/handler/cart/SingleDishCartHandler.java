@@ -63,16 +63,19 @@ public class SingleDishCartHandler extends DishCartHandler {
         context.cartMapper.insert(cart);
 
         List<ShopProductSpec> shopProductSpecs = context.shopProductSpecService.listByIds(singleProdSpecIds);
-        for(Long specId : singleProdSpecIds){
+        List<CartProductSpec> cartProductSpecList = singleProdSpecIds.stream().map(specId -> {
             CartProductSpec cartProductSpec = new CartProductSpec();
+            cartProductSpec.setCreateBy(cart.getCreateBy());
+            cartProductSpec.setCreateTime(cart.getCreateTime());
             cartProductSpec.setCartId(cart.getId());
             cartProductSpec.setShopProdSpecId(specId);
             ShopProductSpec shopProductSpec = FilterUtil.filter(shopProductSpecs, specId, ApiExceptionEnum.SPEC_NOT_EXISTS);
             cartProductSpec.setShopProdSpecName(shopProductSpec.getSpecName());
-            context.cartProductSpecService.save(cartProductSpec);
             BigDecimal price = BigDecimalUtil.multiply(shopProductSpec.getPrice(), new BigDecimal(cart.getProdNum()));
-            context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price);
-        }
+            context.totalPrice = BigDecimalUtil.sum(context.totalPrice, price);
+            return cartProductSpec;
+        }).collect(Collectors.toList());
+        context.cartProductSpecService.saveBatch(cartProductSpecList);
     }
 
     @Override

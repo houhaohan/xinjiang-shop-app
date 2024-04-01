@@ -4,6 +4,7 @@ import com.pinet.rest.entity.CartProductSpec;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -15,6 +16,12 @@ import java.util.List;
  * @since 2022-12-28
  */
 public interface CartProductSpecMapper extends BaseMapper<CartProductSpec> {
+    /**
+     * 批量插入
+     * @param list
+     * @return
+     */
+    int insertBatchSomeColumn(Collection<CartProductSpec> list);
 
     List<CartProductSpec> selectByCartId(@Param("cartId") Long cartId);
 
@@ -34,4 +41,6 @@ public interface CartProductSpecMapper extends BaseMapper<CartProductSpec> {
      * @return
      */
     List<CartProductSpec> getByUserIdAndShopProdId(@Param("userId") Long userId,@Param("shopProdId") Long shopProdId);
+
+
 }

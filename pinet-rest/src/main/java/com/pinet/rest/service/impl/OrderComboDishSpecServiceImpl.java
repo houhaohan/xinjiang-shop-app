@@ -5,6 +5,9 @@ import com.pinet.rest.mapper.OrderComboDishSpecMapper;
 import com.pinet.rest.service.IOrderComboDishSpecService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
 
 /**
  * <p>
@@ -17,4 +20,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderComboDishSpecServiceImpl extends ServiceImpl<OrderComboDishSpecMapper, OrderComboDishSpec> implements IOrderComboDishSpecService {
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean saveBatch(Collection<OrderComboDishSpec> entityList) {
+        return  baseMapper.insertBatchSomeColumn(entityList) > 0;
+    }
 }

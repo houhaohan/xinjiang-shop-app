@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -59,6 +61,8 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
         List<Long> shopProdIds = cartComboDishList.stream().map(CartComboDish::getShopProdId).collect(Collectors.toList());
         List<ShopProduct> shopProducts = context.shopProductService.listByIds(shopProdIds);
 
+        Date now = new Date();
+        List<OrderComboDishSpec> orderComboDishSpecList = new ArrayList<>();
         for(CartComboDish cartComboDish : cartComboDishList){
             OrderComboDish orderComboDish = new OrderComboDish();
             orderComboDish.setOrderId(request.getOrderId());
@@ -77,10 +81,13 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
 
             List<CartComboDishSpec> cartComboDishSpecList = context.cartComboDishSpecService.getByCartIdAndProdId(request.getCartId(), singleProduct.getId());
             List<Long> shopProdSpecIds = cartComboDishSpecList.stream().map(CartComboDishSpec::getShopProdSpecId).collect(Collectors.toList());
-            List<ComboSingleProductSpecVo> shopProductSpecs = context.kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, request.getShopProdId());
-            List<OrderComboDishSpec> orderComboDishSpecList = shopProdSpecIds.stream().map(specId -> {
+            List<ComboSingleProductSpecVo> singleProductSpecs = context.kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, request.getShopProdId());
+
+            shopProdSpecIds.forEach(specId -> {
                 OrderComboDishSpec orderComboDishSpec = new OrderComboDishSpec();
-                ComboSingleProductSpecVo spec =  shopProductSpecs.stream()
+                orderComboDishSpec.setCreateTime(now);
+                orderComboDishSpec.setCreateBy(request.getCustomerId());
+                ComboSingleProductSpecVo spec =  singleProductSpecs.stream()
                         .filter(o->Objects.equals(o.getShopProdSpecId(),specId))
                         .findFirst()
                         .orElseThrow(()->new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
@@ -89,11 +96,11 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
                 orderComboDishSpec.setShopProdSpecId(specId);
                 orderComboDishSpec.setShopProdSpecName(spec.getShopProdSpecName());
                 orderComboDishSpec.setComboGroupDetailId(spec.getComboGroupDetailId());
+                orderComboDishSpecList.add(orderComboDishSpec);
                 orderProduct.setProdUnitPrice(BigDecimalUtil.sum(orderProduct.getProdUnitPrice(),BigDecimalUtil.fenToYuan(spec.getAddPrice())));
-                return orderComboDishSpec;
-            }).collect(Collectors.toList());
-            context.orderComboDishSpecService.saveBatch(orderComboDishSpecList);
+            });
         }
+        context.orderComboDishSpecService.saveBatch(orderComboDishSpecList);
         orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),new BigDecimal(orderProduct.getProdNum())));
         context.orderProductService.updateById(orderProduct);
         return orderProduct;
@@ -112,8 +119,9 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
         List<Long> singleProdIds = request.getComboDishDtoList().stream().map(OrderComboDishDto::getSingleProdId).collect(Collectors.toList());
         List<ShopProduct> shopProducts = context.shopProductService.listByIds(singleProdIds);
 
-        List<OrderComboDishDto> comboDishDtoList = request.getComboDishDtoList();
-        for(OrderComboDishDto comboDishDto : comboDishDtoList){
+        Date now = new Date();
+        List<OrderComboDishSpec> orderComboDishSpecList = new ArrayList<>();
+        for(OrderComboDishDto comboDishDto : request.getComboDishDtoList()){
             OrderComboDish orderComboDish = new OrderComboDish();
             orderComboDish.setOrderId(request.getOrderId());
             orderComboDish.setOrderProdId(orderProduct.getId());
@@ -129,10 +137,12 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
             context.orderComboDishService.save(orderComboDish);
 
             List<Long> shopProdSpecIds = comboDishDto.getOrderComboDishSpecList().stream().map(OrderComboDishSpecDto::getShopProdSpecId).collect(Collectors.toList());
-            List<ComboSingleProductSpecVo> shopProductSpecs = context.kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, comboDishDto.getShopProdId());
-            List<OrderComboDishSpec> orderComboDishSpecList = shopProdSpecIds.stream().map(specId -> {
+            List<ComboSingleProductSpecVo> singleProductSpecs = context.kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, comboDishDto.getShopProdId());
+            shopProdSpecIds.forEach(specId -> {
                 OrderComboDishSpec orderComboDishSpec = new OrderComboDishSpec();
-                ComboSingleProductSpecVo spec = shopProductSpecs.stream()
+                orderComboDishSpec.setCreateTime(now);
+                orderComboDishSpec.setCreateBy(request.getCustomerId());
+                ComboSingleProductSpecVo spec = singleProductSpecs.stream()
                         .filter(o -> Objects.equals(o.getShopProdSpecId(), specId))
                         .findFirst()
                         .orElseThrow(() -> new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
@@ -141,11 +151,11 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
                 orderComboDishSpec.setShopProdSpecId(spec.getShopProdSpecId());
                 orderComboDishSpec.setShopProdSpecName(spec.getShopProdSpecName());
                 orderComboDishSpec.setComboGroupDetailId(spec.getComboGroupDetailId());
+                orderComboDishSpecList.add(orderComboDishSpec);
                 orderProduct.setProdUnitPrice(BigDecimalUtil.sum(orderProduct.getProdUnitPrice(),BigDecimalUtil.fenToYuan(spec.getAddPrice())));
-                return orderComboDishSpec;
-            }).collect(Collectors.toList());
-            context.orderComboDishSpecService.saveBatch(orderComboDishSpecList);
+            });
         }
+        context.orderComboDishSpecService.saveBatch(orderComboDishSpecList);
         orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),new BigDecimal(orderProduct.getProdNum())));
         context.orderProductService.updateById(orderProduct);
         return orderProduct;

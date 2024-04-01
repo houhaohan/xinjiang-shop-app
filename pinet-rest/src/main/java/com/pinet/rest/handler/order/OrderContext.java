@@ -39,7 +39,6 @@ public class OrderContext {
     protected Long customerId;
     protected Double distance;
     protected Shop shop;
-    protected List<Cart> cartList;
     protected CreateOrderDto request;
     protected CreateOrderVo response;
     protected OrderHandler orderHandler;
@@ -54,10 +53,6 @@ public class OrderContext {
 
     public void setShop(Shop shop){
         this.shop = shop;
-    }
-
-    public void setCartList(List<Cart> cartList){
-        this.cartList = cartList;
     }
 
     public void setRequest(CreateOrderDto request){
