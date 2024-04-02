@@ -2,7 +2,6 @@ package com.pinet.rest.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
@@ -66,12 +65,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                         .flatMap(list ->
                                 list.stream().map(CartComboDishSpecVo::getShopProdSpecId)
                         ).collect(Collectors.toList());
-
-//                List<Long> shopProdSpecIds = cartComboDishVos.stream()
-//                        .flatMap(dish -> dish.getComboDishSpecs()
-//                                .stream()
-//                                .map(CartComboDishSpecVo::getShopProdSpecId)
-//                ).collect(Collectors.toList());
 
                 List<ComboSingleProductSpecVo> comboSingleProductSpecVos = kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, cart.getShopProdId());
                 Long addPrice = comboSingleProductSpecVos.stream().map(ComboSingleProductSpecVo::getAddPrice).reduce(0L, Long::sum);
