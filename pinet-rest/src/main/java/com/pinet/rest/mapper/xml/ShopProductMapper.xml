@@ -51,7 +51,7 @@
         <result column="shop_id" property="shopId"/>
         <result column="labels" property="labels"/>
         <collection property="skuList" resultMap="SkuMap"/>
-        <collection property="sideDishGroupDetailList" resultMap="KrySideDishGroupDetailMap"/>
+        <!--<collection property="sideDishGroupDetailList" resultMap="KrySideDishGroupDetailMap"/>-->
     </resultMap>
 
     <resultMap id="SkuMap" type="com.pinet.rest.entity.vo.ShopProductSkuVo">
@@ -70,8 +70,8 @@
     </resultMap>
 
     <resultMap id="SkuSpecsMap" type="com.pinet.rest.entity.vo.ShopProductSpecVo">
+        <id column="shop_prod_spec_id" property="shopProdSpecId"/>
         <result column="prod_spec_id" property="prodSpecId"/>
-        <result column="shop_prod_spec_id" property="shopProdSpecId"/>
         <result column="spec_name" property="specName"/>
         <result column="default_flag" property="defaultFlag"/>
         <result column="sku_id" property="skuId"/>
@@ -312,12 +312,12 @@
 		t.price/100 as price,
         t.sell_price/100 as market_price,
         t.dish_sku_price/100 as add_price,
-        t.default_flag,
-        ksdgd.id as comboGroupDetailId,
+        t.default_flag,1
+       <!-- ksdgd.id as comboGroupDetailId,
         ksdgd.side_dish_id,
         ksdgd.side_dish_name,
         ksdgd.side_dish_group_id,
-        ksdgd.add_price / 100 as sideAddPrice
+        ksdgd.add_price / 100 as sideAddPrice-->
         from shop_product sp
         left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
         inner join (
@@ -341,13 +341,12 @@
         ) t on t.single_dish_id = sp.prod_id
        <!-- and sps.spec_name = t.spec_name
         and t.dish_name = sp.product_name -->
-        left join kry_side_dish_group_detail ksdgd on ksdgd.shop_prod_id = sp.id and ksdgd.del_flag = 0
+        <!--left join kry_side_dish_group_detail ksdgd on ksdgd.shop_prod_id = sp.id and ksdgd.del_flag = 0-->
         where sp.shop_id = #{shopId} and sp.del_flag = 0
         and sp.prod_id in
         <foreach collection="dishIds" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
-        <!--group by sp.id-->
 
     </select>
 

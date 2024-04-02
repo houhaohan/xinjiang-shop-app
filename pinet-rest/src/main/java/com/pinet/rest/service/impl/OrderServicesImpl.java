@@ -517,7 +517,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             List<AddCartDto> comboDetails = p.getComboDishDetails().stream().map(item -> {
                 AddCartDto dto = new AddCartDto();
                 dto.setShopId(order.getShopId());
-                dto.setShopProdId(item.getShopProdId());
+                dto.setShopProdId(item.getSingleDishId());
                 dto.setProdNum(item.getQuantity());
                 dto.setCustomerId(customerId);
                 String shopProdSpecIds = item.getOrderProductSpecs().stream().map(OrderProductSpecVo::getShopProdSpecId).map(String::valueOf).collect(Collectors.joining(","));
@@ -819,12 +819,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders) {
         //生产环境才推单，其他环境就不推了吧
-        if (!Environment.isProd()) {
-            return null;
-        }
+//        if (!Environment.isProd()) {
+//            return null;
+//        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
         dto.setRemark(orders.getRemark());
+        //dto.setRemark("测试单，请勿出餐");
         dto.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         dto.setPromoFee(BigDecimalUtil.yuanToFen(orders.getDiscountAmount()));
         dto.setActualFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
@@ -832,6 +833,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
         paymentDetailRequest.setOutBizId(String.valueOf(orders.getId()));
+        //paymentDetailRequest.setOutBizId(UUID.randomUUID().toString());
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
         paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
         paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
@@ -855,6 +857,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
+            //request.setOutDishNo(UUID.randomUUID().toString());
             request.setDishId(orderProduct.getProdId());
             request.setDishName(orderProduct.getProductName());
             request.setDishCode(orderProduct.getDishCode());
@@ -894,6 +897,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
+        System.err.println(JSONObject.toJSONString(dto));
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
 //        //记录日志
@@ -953,7 +957,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param
      */
     private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct) {
-        List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndOrderProdId(orderProduct.getOrderId(), orderProduct.getId());
+        List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndOrderProdId(orderProduct.getOrderId(), orderProduct.getOrderProductId());
         Map<String, List<OrderComboDishVo>> singleOrderMap = orderComboDishList.stream().collect(Collectors.groupingBy(OrderComboDishVo::getSingleDishId,LinkedHashMap::new,Collectors.toList()));
 
         List<ScanCodeDish> dishList = new ArrayList<>(singleOrderMap.size());

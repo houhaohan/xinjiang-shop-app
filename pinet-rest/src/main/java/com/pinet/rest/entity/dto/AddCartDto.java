@@ -37,10 +37,10 @@ public class AddCartDto {
     @ApiModelProperty("套餐明细")
     private List<AddCartDto> comboDetails;
 
-    @ApiModelProperty(value = "商品样式id(多个逗号分割)",name = "shopProdSpecId")
+    @ApiModelProperty(value = "商品样式id(多个逗号分割),单品传这个参数，套餐在套餐明细里也要传这个参数",name = "shopProdSpecId")
     private String shopProdSpecIds;
 
-    @ApiModelProperty(value = "内部参数不需要传",name = "customerId")
+    @ApiModelProperty(value = "内部参数不需要传",name = "customerId",hidden = true)
     private Long customerId;
 
     // 分享的商品加购物车需要传经纬度，用来茶最近店铺
