@@ -44,6 +44,9 @@ public class OrderProductRequest {
      */
     private Integer prodNum;
 
+    /**
+     * 是否满足计算佣金的条件
+     */
     private boolean calculate;
 
     /**

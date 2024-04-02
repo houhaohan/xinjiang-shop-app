@@ -4,7 +4,6 @@ import cn.hutool.core.convert.Convert;
 import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
-import com.pinet.core.util.FilterUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.AddCartDto;
 import com.pinet.rest.entity.vo.CartComboDishSpecVo;
@@ -13,10 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,16 +32,17 @@ public class ComboDishCartHandler extends DishCartHandler{
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void handler() {
-        List<Long> shopProdSpecIds = new ArrayList<>();
-        for (AddCartDto singleDish : context.request.getComboDetails()){
-            shopProdSpecIds.addAll(Convert.toList(Long.class, singleDish.getShopProdSpecIds()));
-        }
+        List<Long> shopProdSpecIds = context.request.getComboDetails().stream()
+                .map(singleDish -> Convert.toList(Long.class, singleDish.getShopProdSpecIds()))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
         //查询套餐价格
         Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(context.request.getShopProdId());
 
         List<CartComboDishSpecVo> cartComboDishSpecVos = context.cartComboDishSpecService.getByUserIdAndShopProdSpecId(context.request.getCustomerId(), shopProdSpecIds);
         List<Long> shopProdSpecIdDBs = cartComboDishSpecVos.stream().map(CartComboDishSpecVo::getShopProdSpecId).collect(Collectors.toList());
         boolean allMatch = shopProdSpecIds.stream().allMatch(shopProdSpecIdDBs::contains);
+        //所有样式ID 都相同，就新增数量，否则新增购物车
         if(allMatch){
             //增加数量
             context.prodNum ++;

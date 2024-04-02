@@ -55,28 +55,35 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             throw new PinetException("店铺不存在");
         }
         List<CartListVo> cartListVos = cartMapper.selectCartList(dto);
-        cartListVos.forEach(k -> {
-            if(DishType.COMBO.equalsIgnoreCase(k.getDishType())){
-                List<CartComboDishVo> cartComboDishVos = cartComboDishService.getComboDishByCartId(k.getCartId(),k.getShopProdId());
-                k.setCartComboDishVos(cartComboDishVos);
-                Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(k.getShopProdId());
+        cartListVos.forEach(cart -> {
+            if(DishType.COMBO.equalsIgnoreCase(cart.getDishType())){
+                List<CartComboDishVo> cartComboDishVos = cartComboDishService.getComboDishByCartId(cart.getCartId(),cart.getShopProdId());
+                cart.setCartComboDishVos(cartComboDishVos);
+                Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(cart.getShopProdId());
 
                 //规格加价
                 List<Long> shopProdSpecIds = cartComboDishVos.stream().map(CartComboDishVo::getComboDishSpecs)
                         .flatMap(list ->
                                 list.stream().map(CartComboDishSpecVo::getShopProdSpecId)
                         ).collect(Collectors.toList());
-                List<ComboSingleProductSpecVo> comboSingleProductSpecVos = kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, k.getShopProdId());
+
+//                List<Long> shopProdSpecIds = cartComboDishVos.stream()
+//                        .flatMap(dish -> dish.getComboDishSpecs()
+//                                .stream()
+//                                .map(CartComboDishSpecVo::getShopProdSpecId)
+//                ).collect(Collectors.toList());
+
+                List<ComboSingleProductSpecVo> comboSingleProductSpecVos = kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, cart.getShopProdId());
                 Long addPrice = comboSingleProductSpecVos.stream().map(ComboSingleProductSpecVo::getAddPrice).reduce(0L, Long::sum);
-                k.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice + addPrice));
-                k.setAllPrice(BigDecimalUtil.multiply(k.getProdPrice(),new BigDecimal(k.getProdNum())));
+                cart.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice + addPrice));
+                cart.setAllPrice(BigDecimalUtil.multiply(cart.getProdPrice(),new BigDecimal(cart.getProdNum())));
             }else {
-                List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(k.getCartId());
+                List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(cart.getCartId());
                 String prodSpecName = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecName).collect(Collectors.joining(","));
-                k.setProdSpecName(prodSpecName);
+                cart.setProdSpecName(prodSpecName);
                 BigDecimal price = cartProductSpecs.stream().map(CartProductSpec::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-                k.setProdPrice(price);
-                k.setAllPrice(BigDecimalUtil.multiply(price,new BigDecimal(k.getProdNum())));
+                cart.setProdPrice(price);
+                cart.setAllPrice(BigDecimalUtil.multiply(price,new BigDecimal(cart.getProdNum())));
             }
 
         });
