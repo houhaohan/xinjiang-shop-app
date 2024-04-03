@@ -125,7 +125,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
             OrderComboDish orderComboDish = new OrderComboDish();
             orderComboDish.setOrderId(request.getOrderId());
             orderComboDish.setOrderProdId(orderProduct.getId());
-            orderComboDish.setShopProdId(comboDishDto.getShopProdId());
+            orderComboDish.setShopProdId(request.getShopProdId());
             ShopProduct singleProduct = FilterUtil.filter(shopProducts, comboDishDto.getSingleProdId(),ApiExceptionEnum.PROD_NOT_EXISTS);
             orderComboDish.setDishId(singleProduct.getProdId());
             orderComboDish.setProdName(singleProduct.getProductName());
