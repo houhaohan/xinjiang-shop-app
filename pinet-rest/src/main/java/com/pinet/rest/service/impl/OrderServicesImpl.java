@@ -308,18 +308,21 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
 
         Orders orders = getById(dto.getOrderId());
-        if (orders == null) {
+        if (Objects.isNull(orders)) {
             throw new PinetException("订单不存在");
         }
-
-        if (orders.getOrderPrice().compareTo(dto.getOrderPrice()) != 0) {
+        if(BigDecimalUtil.ne(orders.getOrderPrice(),dto.getOrderPrice())){
             throw new PinetException("支付金额异常,请重新支付");
         }
         //根据不同支付渠道获取调用不同支付方法
         IPayService payService = SpringContextUtils.getBean(dto.getChannelId() + "_" + "service", IPayService.class);
+        OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(), dto.getChannelId());
+        if(Objects.nonNull(orderPay) && Objects.equals(orderPay.getPayStatus(),OrderConstant.PAID)){
+            throw new PinetException("订单已支付");
+        }
 
         //构造orderPay
-        OrderPay orderPay = new OrderPay();
+        orderPay = new OrderPay();
         orderPay.setOrderId(orders.getId());
         orderPay.setOrderNo(orders.getOrderNo());
         orderPay.setCustomerId(customerId);
