@@ -7,7 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jms.annotation.EnableJms;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * 启动类
@@ -18,7 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @MapperScan("com.pinet.rest.mapper")
 @Slf4j
 @EnableJms
-@EnableScheduling
+@EnableAsync
 public class PinetApplication {
 
     public static void main(String[] args) {

@@ -31,6 +31,9 @@ public class ShopProductSpec extends BaseEntity {
     @ApiModelProperty("商品样式表id")
     private Long prodSpecId;
 
+    @ApiModelProperty("客如云做法 ID")
+    private String cookingWayId;
+
     @ApiModelProperty("样式名称")
     private String specName;
 
@@ -45,6 +48,9 @@ public class ShopProductSpec extends BaseEntity {
 
     @ApiModelProperty("客如云sku 名称")
     private String skuName;
+
+    @ApiModelProperty("菜品ID")
+    private String dishId;
 
     @ApiModelProperty("价格")
     private BigDecimal price;

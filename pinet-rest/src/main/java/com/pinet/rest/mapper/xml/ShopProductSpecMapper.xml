@@ -12,11 +12,13 @@
         <result column="del_flag" property="delFlag"/>
         <result column="shop_prod_id" property="shopProdId"/>
         <result column="prod_spec_id" property="prodSpecId"/>
+        <result column="cooking_way_id" property="cookingWayId"/>
         <result column="spec_name" property="specName"/>
         <result column="sku_id" property="skuId"/>
         <result column="kry_sku_id" property="krySkuId"/>
         <result column="sku_code" property="skuCode"/>
         <result column="sku_name" property="skuName"/>
+        <result column="dish_id" property="dishId"/>
         <result column="price" property="price"/>
         <result column="stock" property="stock"/>
     </resultMap>
@@ -29,7 +31,7 @@
         sps.update_by,
         sps.update_time,
         sps.del_flag,
-        sps.shop_prod_id, sps.prod_spec_id, sps.spec_name, sps.sku_id, sps.kry_sku_id, sps.sku_code, sps.price, sps.sku_name, sps.stock
+        sps.shop_prod_id, sps.prod_spec_id, sps.cooking_way_id, sps.spec_name, sps.sku_id, sps.kry_sku_id, sps.sku_code, sps.sku_name, sps.dish_id, sps.price, sps.stock
     </sql>
 
     <update id="updateStock">

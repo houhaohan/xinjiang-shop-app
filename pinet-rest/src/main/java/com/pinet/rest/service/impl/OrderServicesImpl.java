@@ -51,6 +51,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -894,10 +895,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
-        System.err.println(JSONObject.toJSONString(dto));
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
-//        //记录日志
+        //记录日志
         pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
 
         if (scanCodePrePlaceOrderVo == null) {
@@ -1005,15 +1005,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     .filter(o -> StringUtil.isNotBlank(o.getDishSkuId()))
                     .map(OrderComboDishVo::getDishSkuId)
                     .findFirst()
-                    .orElse(null);
-            if(StringUtil.isBlank(dishSkuId)){
-                List<ShopProductSpec> shopProductSpecList = shopProductSpecService.getByShopProdId(orderComboDishVo.getSingleProdId());
-                dishSkuId = shopProductSpecList.stream()
-                        .filter(sps-> Objects.equals(orderComboDishVo.getShopProdSpecName(),sps.getSpecName()))
-                        .map(ShopProductSpec::getKrySkuId)
-                        .findFirst().get();
-            }
-
+                    .orElseGet(()->{
+                        List<ShopProductSpec> shopProductSpecList = shopProductSpecService.getByShopProdId(orderComboDishVo.getSingleProdId());
+                        return shopProductSpecList.stream()
+                                .filter(spec->StringUtil.isBlank(spec.getCookingWayId()))
+                                .map(ShopProductSpec::getKrySkuId)
+                                .findFirst()
+                                .get();
+                    });
             dish.setDishSkuId(dishSkuId);
             dishList.add(dish);
         }
@@ -1077,7 +1076,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @param param
      * @param res
      */
-    private void pushKryOrderLog(Long orderId, String param, String res, String success) {
+    @Async
+    public void pushKryOrderLog(Long orderId, String param, String res, String success) {
         KryOrderPushLog log = new KryOrderPushLog();
         log.setOrderId(orderId);
         log.setParams(param);

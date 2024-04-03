@@ -8,6 +8,7 @@ package com.pinet.rest.mq.consumer;
 
 import com.imdada.open.platform.exception.RpcException;
 import com.pinet.common.mq.util.JmsUtil;
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Orders;
@@ -70,10 +71,15 @@ public class KryOrderPushListener {
             String kryOrderNo = ordersService.takeoutOrderCreate(order);
             entity.setKryOrderNo(kryOrderNo);
             order.setOrderStatus(OrderStatusEnum.MAKE.getCode());
+            order.setKryOrderNo(kryOrderNo);
             //创建配送订单
             try {
                 daDaService.createOrder(order);
             } catch (RpcException e) {
+                e.printStackTrace();
+                //todo 短信提醒 15868805739
+                jmsUtil.sendMsgQueue(QueueConstants.DELIVERY_ORDER_FAIL_SMS, order.getId().toString());
+            } catch (PinetException e){
                 e.printStackTrace();
                 //todo 短信提醒 15868805739
                 jmsUtil.sendMsgQueue(QueueConstants.DELIVERY_ORDER_FAIL_SMS, order.getId().toString());
