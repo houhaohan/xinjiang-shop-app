@@ -3,7 +3,7 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
-import com.pinet.rest.entity.dto.AddCartDto;
+import com.pinet.rest.entity.dto.AddCartDTO;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
@@ -53,7 +53,7 @@ public class CartController extends BaseController {
     @ApiOperation("添加购物车")
     @PostMapping("/addCart")
     @ApiVersion(1)
-    public Result<AddCartVo> addCart(@Validated @RequestBody AddCartDto dto) {
+    public Result<AddCartVo> addCart(@Validated @RequestBody AddCartDTO dto) {
         dto.setCustomerId(currentUserId());
         AddCartVo addCartVo = cartService.addCart(dto);
         return Result.ok(addCartVo);

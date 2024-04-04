@@ -249,9 +249,8 @@
         (select GROUP_CONCAT(label_name,'/',color order by FIND_IN_SET(id,sp.lable_id)) from label where FIND_IN_SET(id,sp.lable_id) > 0 and del_flag = 0) as labels
         from shop_product sp
         left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
-        inner join product_sku ps on ps.id = sps.sku_id and ps.del_flag = 0
         where sp.id = #{id}
-        order by ps.id,sps.id
+        order by sps.sku_id,sps.id
     </select>
 
     <select id="getComboDetailByShopIdAndDishIds" resultMap="ShopProductMap">
@@ -275,7 +274,6 @@
         (select GROUP_CONCAT(label_name,'/',color order by FIND_IN_SET(id,sp.lable_id)) from label where FIND_IN_SET(id,sp.lable_id) > 0 and del_flag = 0) as labels
         from shop_product sp
         left join shop_product_spec sps on sps.shop_prod_id = sp.id and sps.del_flag = 0
-        inner join product_sku ps on ps.id = sps.sku_id and ps.del_flag = 0
         where sp.shop_id = #{shopId}
         <if test="dishIds != null and dishIds.size() > 0">
             and sp.prod_id in
@@ -284,7 +282,7 @@
             </foreach>
         </if>
         and sp.del_flag = 0
-        order by ps.id,sps.id
+        order by sps.sku_id,sps.id
     </select>
 
 
@@ -347,6 +345,7 @@
         <foreach collection="dishIds" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+        order by sps.sku_id,sps.id
 
     </select>
 

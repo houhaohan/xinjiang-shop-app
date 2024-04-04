@@ -2,9 +2,8 @@ package com.pinet.rest.handler.cart;
 
 import com.pinet.core.util.SpringContextUtils;
 import com.pinet.keruyun.openapi.constants.DishType;
-import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.ShopProduct;
-import com.pinet.rest.entity.dto.AddCartDto;
+import com.pinet.rest.entity.dto.AddCartDTO;
 import com.pinet.rest.entity.vo.AddCartVo;
 import com.pinet.rest.mapper.CartMapper;
 import com.pinet.rest.service.*;
@@ -50,7 +49,7 @@ public class CartContext {
     /**
      * 购物车请求参数
      */
-    protected AddCartDto request;
+    protected AddCartDTO request;
 
     /**
      * 购物车处理器
@@ -58,7 +57,7 @@ public class CartContext {
     protected CartHandler cartHandler;
 
 
-    public void setRequest(AddCartDto request){
+    public void setRequest(AddCartDTO request){
         this.request = request;
     }
 

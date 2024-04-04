@@ -499,9 +499,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (order == null) {
             throw new PinetException("订单不存在");
         }
+        //单品
         List<OrderProduct> orderProducts = orderProductService.getByOrderId(orderId);
         orderProducts.forEach(k -> {
-            AddCartDto addCartDto = new AddCartDto();
+            AddCartDTO addCartDto = new AddCartDTO();
             addCartDto.setShopId(order.getShopId());
             addCartDto.setShopProdId(k.getShopProdId());
             addCartDto.setProdNum(k.getProdNum());
@@ -511,20 +512,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             cartService.addCart(addCartDto);
         });
 
+        //套餐
         List<OrderProduct> comboProducts = orderProductService.getComboByOrderId(orderId);
         comboProducts.forEach(p->{
-            AddCartDto addCartDto = new AddCartDto();
+            AddCartDTO addCartDto = new AddCartDTO();
             addCartDto.setShopId(order.getShopId());
             addCartDto.setShopProdId(p.getShopProdId());
             addCartDto.setProdNum(p.getProdNum());
             addCartDto.setCustomerId(customerId);
-            List<AddCartDto> comboDetails = p.getComboDishDetails().stream().map(item -> {
-                AddCartDto dto = new AddCartDto();
-                dto.setShopId(order.getShopId());
-                dto.setShopProdId(item.getSingleDishId());
-                dto.setProdNum(item.getQuantity());
-                dto.setCustomerId(customerId);
-                String shopProdSpecIds = item.getOrderProductSpecs().stream().map(OrderProductSpecVo::getShopProdSpecId).map(String::valueOf).collect(Collectors.joining(","));
+            List<AddCartDTO.CartComboDishDTO> comboDetails = p.getComboDishDetails().stream().map(item -> {
+                AddCartDTO.CartComboDishDTO dto = new AddCartDTO.CartComboDishDTO();
+                dto.setShopProdId(p.getShopProdId());
+                dto.setSingleProdId(item.getSingleDishId());
+                String shopProdSpecIds = item.getOrderProductSpecs().stream().map(spec->String.valueOf(spec.getShopProdSpecId())).collect(Collectors.joining(","));
                 dto.setShopProdSpecIds(shopProdSpecIds);
                 return dto;
             }).collect(Collectors.toList());

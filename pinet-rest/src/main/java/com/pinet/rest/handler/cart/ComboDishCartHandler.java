@@ -5,7 +5,7 @@ import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
-import com.pinet.rest.entity.dto.AddCartDto;
+import com.pinet.rest.entity.dto.AddCartDTO;
 import com.pinet.rest.entity.vo.CartComboDishSpecVo;
 import com.pinet.rest.entity.vo.ComboGroupDetailVo;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,11 +61,11 @@ public class ComboDishCartHandler extends DishCartHandler{
         context.prodNum += context.request.getProdNum();
         Cart cart = buildCartInfo();
         context.cartMapper.insert(cart);
-        List<AddCartDto> comboDetails = context.request.getComboDetails();
-        for(AddCartDto singleDish : comboDetails){
+        List<AddCartDTO.CartComboDishDTO> comboDetails = context.request.getComboDetails();
+        for(AddCartDTO.CartComboDishDTO singleDish : comboDetails){
             CartComboDish cartComboDish = new CartComboDish();
             cartComboDish.setCartId(cart.getId());
-            cartComboDish.setShopProdId(singleDish.getShopProdId());
+            cartComboDish.setShopProdId(singleDish.getSingleProdId());
             context.cartComboDishService.save(cartComboDish);
             List<Long> singleProdSpecIds = Convert.toList(Long.class, singleDish.getShopProdSpecIds());
 
@@ -75,7 +75,7 @@ public class ComboDishCartHandler extends DishCartHandler{
                 cartComboDishSpec.setCreateBy(cart.getCreateBy());
                 cartComboDishSpec.setCreateTime(cart.getCreateTime());
                 cartComboDishSpec.setCartId(cart.getId());
-                cartComboDishSpec.setShopProdId(singleDish.getShopProdId());
+                cartComboDishSpec.setShopProdId(singleDish.getSingleProdId());
                 cartComboDishSpec.setShopProdSpecId(id);
                 ComboGroupDetailVo comboGroupDetailVo = kryComboGroupDetailList.stream()
                         .filter(item -> Objects.equals(id, item.getShopProdSpecId()))

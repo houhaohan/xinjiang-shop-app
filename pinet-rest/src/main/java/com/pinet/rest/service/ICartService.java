@@ -4,7 +4,7 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.Cart;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pinet.rest.entity.dto.AddCartDto;
+import com.pinet.rest.entity.dto.AddCartDTO;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
@@ -27,7 +27,7 @@ public interface ICartService extends IService<Cart> {
 
     List<CartListVo> cartList(CartListDto dto);
 
-    AddCartVo addCart(AddCartDto dto);
+    AddCartVo addCart(AddCartDTO dto);
 
     Boolean editCartProdNum(EditCartProdNumDto dto);
 

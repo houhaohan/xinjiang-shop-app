@@ -8,7 +8,7 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
-import com.pinet.rest.entity.dto.AddCartDto;
+import com.pinet.rest.entity.dto.AddCartDTO;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
@@ -87,7 +87,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AddCartVo addCart(AddCartDto dto) {
+    public AddCartVo addCart(AddCartDTO dto) {
         ShopProduct shopProduct = shopProductService.getById(dto.getShopProdId());
         //校验店铺商品id是否存在
         if (shopProduct == null){

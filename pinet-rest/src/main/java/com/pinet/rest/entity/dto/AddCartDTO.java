@@ -17,8 +17,8 @@ import java.util.List;
  * @create: 2022-12-08 11:42
  **/
 @Data
-@ApiModel(value = "AddCartDto",description = "添加购物车dto")
-public class AddCartDto {
+@ApiModel(value = "AddCartDTO",description = "添加购物车dto")
+public class AddCartDTO {
     @ApiModelProperty(value = "店铺id",name = "shopId")
     private Long shopId;
 
@@ -35,9 +35,9 @@ public class AddCartDto {
     private BigDecimal price;
 
     @ApiModelProperty("套餐明细")
-    private List<AddCartDto> comboDetails;
+    private List<CartComboDishDTO> comboDetails;
 
-    @ApiModelProperty(value = "商品样式id(多个逗号分割),单品传这个参数，套餐在套餐明细里也要传这个参数",name = "shopProdSpecId")
+    @ApiModelProperty(value = "商品样式id(多个逗号分割)",name = "shopProdSpecId")
     private String shopProdSpecIds;
 
     @ApiModelProperty(value = "内部参数不需要传",name = "customerId",hidden = true)
@@ -52,5 +52,36 @@ public class AddCartDto {
 
     @ApiModelProperty("是否是他人分享来的商品，0-否，1-是")
     private Integer shareFlag = 0;
+
+    @Data
+    @ApiModel(description = "套餐明细")
+    public static class CartComboDishDTO{
+        @ApiModelProperty("套餐ID")
+        private Long shopProdId;
+
+        @ApiModelProperty("单品ID")
+        private Long singleProdId;
+
+        @ApiModelProperty("单品样式ID")
+        private String shopProdSpecIds;
+
+        @ApiModelProperty("单品样式明细")
+        private List<CartComboDishSpecDTO> comboDetails;
+
+    }
+
+    @Data
+    @ApiModel(description = "单品样式")
+    public static class CartComboDishSpecDTO{
+        @ApiModelProperty("加价")
+        private BigDecimal addPrice;
+
+        @ApiModelProperty("样式ID")
+        private Long shopProdSpecId;
+
+        @ApiModelProperty("样式名称")
+        private String shopProdSpecName;
+
+    }
 
 }
