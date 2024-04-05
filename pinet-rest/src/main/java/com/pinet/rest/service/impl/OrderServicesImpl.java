@@ -987,8 +987,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                         dishAttachProp.setAttachPropId(dishAttachProp.getOutAttachPropNo());
                         return dishAttachProp;
                     }).collect(Collectors.toList());
-            dish.setDishAttachPropList(dishAttachPropList);
-
+            if(!CollectionUtils.isEmpty(dishAttachPropList)){
+                dish.setDishAttachPropList(dishAttachPropList);
+            }
             dish.setDishQuantity(BigDecimal.ONE);
             dish.setDishFee(0L);
             dish.setUnitId(orderComboDishVo.getUnitId());
@@ -1000,7 +1001,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             dish.setPromoFee(dish.getTotalFee() -  dish.getActualFee());//优惠
             dish.setPackageFee("0");
             dish.setWeightDishFlag("0");
-            dish.setDishImgUrl(orderComboDishVoList.get(0).getImageUrl());
+            dish.setDishImgUrl(orderComboDishVo.getImageUrl());
             dish.setIsPack("false");
             dish.setDishGiftFlag("false");
             dish.setItemOriginType("SINGLE");

@@ -50,7 +50,7 @@ public class WebLogAspect {
                 + "==> 请求时间：" + DateUtil.now() + "\n"
                 + "==> 请求接口：" + request.getMethod() + " " + request.getRequestURL() + "\n"
                 + "==> 请求方法：" + joinPoint.getTarget().getClass().getName() + "." + method.getName() + "\n"
-                + "==> 参数内容：" + Arrays.toString(joinPoint.getArgs()) + "\n");
+                + "==> 参数内容：" + JSON.toJSONString(joinPoint.getArgs()) + "\n");
     }
 
     @AfterReturning(pointcut = "exec()", returning = "object")

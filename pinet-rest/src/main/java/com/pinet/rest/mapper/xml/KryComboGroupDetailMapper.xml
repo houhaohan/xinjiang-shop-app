@@ -115,7 +115,7 @@
 
     <select id="getByShopSpecIdsAndShopProdId" resultType="com.pinet.rest.entity.vo.ComboGroupDetailVo">
         SELECT
-            sp.id,
+            sp.id as shopProdId,
             sp.product_name,
             sps.spec_name,
             sps.sku_id,
