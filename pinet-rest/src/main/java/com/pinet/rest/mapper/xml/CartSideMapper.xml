@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.CartSideMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.CartSide">
+        <result column="id" property="id" />
+        <result column="create_by" property="createBy" />
+        <result column="create_time" property="createTime" />
+        <result column="update_by" property="updateBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="del_flag" property="delFlag" />
+        <result column="cart_id" property="cartId" />
+        <result column="shop_prod_id" property="shopProdId" />
+        <result column="side_detail_id" property="sideDetailId" />
+        <result column="quantity" property="quantity" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,
+        create_by,
+        create_time,
+        update_by,
+        update_time,
+        del_flag,
+        cart_id, shop_prod_id, side_detail_id, quantity
+    </sql>
+
+    <select id="getByCartId" resultType="com.pinet.rest.entity.vo.CartSideVO">
+        select cs.cart_id,
+        cs.shop_prod_id,
+        cs.side_detail_id,
+        cs.quantity,
+        ksdgd.add_price
+        from cart_side cs
+        left join kry_side_dish_group_detail ksdgd on cs.side_detail_id = ksdgd.id and ksdgd.del_flag = 0
+        where cs.cart_id = #{cartId} and cs.del_flag = 0
+        order by cs.id,ksdgd.id
+    </select>
+
+</mapper>

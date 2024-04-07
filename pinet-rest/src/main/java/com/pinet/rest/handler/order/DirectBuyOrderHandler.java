@@ -51,6 +51,7 @@ public class DirectBuyOrderHandler extends OrderAbstractHandler {
         request.setComboDishDtoList(context.request.getOrderComboDishList());
         request.setCalculate(condition);
         request.setOrderType(orders.getOrderType());
+        request.setSideDishGroupList(context.request.getSideDishGroupList());
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         OrderProduct orderProduct = context.orderDishContext

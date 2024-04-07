@@ -14,12 +14,13 @@ import java.math.BigDecimal;
 @Data
 @ApiModel(description = "套餐明细")
 public class SideDishGroupDTO {
-    @ApiModelProperty("小料id")
+    @ApiModelProperty("id")
     private Long id;
-
-    @ApiModelProperty("加价（小料单价）")
-    private BigDecimal addPrice;
 
     @ApiModelProperty("小料数量")
     private Integer quantity;
+
+    @ApiModelProperty("加价（小料单价），添加购物车接口不用传")
+    private BigDecimal addPrice;
+
 }

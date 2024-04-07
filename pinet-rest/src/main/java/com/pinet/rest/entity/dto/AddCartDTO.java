@@ -53,6 +53,9 @@ public class AddCartDTO {
     @ApiModelProperty("是否是他人分享来的商品，0-否，1-是")
     private Integer shareFlag = 0;
 
+    @ApiModelProperty("加料明细")
+    private List<SideDishGroupDTO> sideDishGroupList;
+
     @Data
     @ApiModel(description = "套餐明细")
     public static class CartComboDishDTO{

@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @ApiModel(description = "小料明细")
 public class KrySideDishGroupDetailVo {
 
-    @ApiModelProperty("小料分组ID")
+    @ApiModelProperty("ID")
     private Long id;
 
     @ApiModelProperty("小料分组ID")

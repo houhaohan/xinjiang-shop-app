@@ -9,8 +9,10 @@ import com.pinet.core.util.FilterUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.CartProductSpec;
+import com.pinet.rest.entity.CartSide;
 import com.pinet.rest.entity.ShopProductSpec;
 
+import com.pinet.rest.entity.dto.SideDishGroupDTO;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -76,6 +78,20 @@ public class SingleDishCartHandler extends DishCartHandler {
             return cartProductSpec;
         }).collect(Collectors.toList());
         context.cartProductSpecService.saveBatch(cartProductSpecList);
+
+        //新增小料
+        List<SideDishGroupDTO> sideDishGroupList = context.request.getSideDishGroupList();
+        List<CartSide> cartSideList = sideDishGroupList.stream().map(side -> {
+            CartSide cartSide = new CartSide();
+            cartSide.setCartId(cart.getId());
+            cartSide.setQuantity(side.getQuantity());
+            cartSide.setShopProdId(cart.getShopProdId());
+            cartSide.setSideDetailId(side.getId());
+            return cartSide;
+        }).collect(Collectors.toList());
+        if(!CollectionUtils.isEmpty(cartSideList)){
+            context.cartSideService.saveBatch(cartSideList);
+        }
     }
 
     @Override
@@ -88,18 +104,15 @@ public class SingleDishCartHandler extends DishCartHandler {
             context.cartMapper.updateById(cart);
             return;
         }
-        context.cartProductSpecService.remove(new LambdaUpdateWrapper<CartProductSpec>().eq(CartProductSpec::getCartId,cartId));
+        context.cartProductSpecService.deleteByCartId(cartId);
+        context.cartSideService.deleteByCartId(cartId);
         context.cartMapper.deleteById(cartId);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void clear(List<Long> ids) {
-        if(CollectionUtils.isEmpty(ids)){
-            return;
-        }
-        LambdaUpdateWrapper<CartProductSpec> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.in(CartProductSpec::getCartId,ids);
-        context.cartProductSpecService.remove(wrapper);
+        context.cartProductSpecService.deleteByCartIds(ids);
+        context.cartSideService.deleteByCartIds(ids);
     }
 }

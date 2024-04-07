@@ -6,11 +6,14 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.FilterUtil;
 import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
+import com.pinet.rest.entity.dto.SideDishGroupDTO;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.request.CartOrderProductRequest;
 import com.pinet.rest.entity.request.DirectOrderRequest;
 import com.pinet.rest.entity.request.OrderProductRequest;
+import com.pinet.rest.entity.vo.CartSideVO;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -59,6 +62,8 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
 
         //新增订单商品样式
         saveOrderProductSpecs(shopProdSpecIds, request.getOrderId(), orderProduct.getId());
+        //新增订单小料
+        saveOrderSide(request.getCartId(),request.getOrderId(),orderProduct.getId());
         return orderProduct;
     }
 
@@ -75,6 +80,8 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
         context.orderProductService.save(orderProduct);
 
         saveOrderProductSpecs(request.getShopProdSpecIds(), request.getOrderId(), orderProduct.getId());
+        //新增订单小料
+        saveOrderSide(request.getSideDishGroupList(),request.getOrderId(),orderProduct.getId());
         return orderProduct;
     }
 
@@ -102,5 +109,53 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
         context.orderProductSpecService.saveBatch(orderProductSpecList);
     }
 
+    /**
+     * 购物车购买添加订单小料
+     * @param cartId
+     * @param orderId
+     * @param orderProductId
+     */
+    private void saveOrderSide(Long cartId,Long orderId,Long orderProductId){
+        List<CartSideVO> list = context.cartSideService.getByCartId(cartId);
+        if(CollectionUtils.isEmpty(list)){
+            return;
+        }
+
+        List<OrderSide> orderSideList = list.stream().map(side -> {
+            OrderSide orderSide = new OrderSide();
+            orderSide.setOrderId(orderId);
+            orderSide.setOrderProdId(orderProductId);
+            orderSide.setAddPrice(BigDecimalUtil.fenToYuan(side.getAddPrice()));
+            orderSide.setQuantity(side.getQuantity());
+            orderSide.setSideDetailId(side.getSideDetailId());
+            orderSide.setTotalPrice(BigDecimalUtil.multiply(orderSide.getAddPrice(),new BigDecimal(orderSide.getQuantity())));
+            return orderSide;
+        }).collect(Collectors.toList());
+        context.orderSideService.saveBatch(orderSideList);
+    }
+
+
+    /**
+     * 直接购买添加订单小料
+     * @param sideDishGroupList 小料明细
+     * @param orderId
+     * @param orderProductId
+     */
+    private void saveOrderSide(List<SideDishGroupDTO> sideDishGroupList,Long orderId,Long orderProductId){
+        if(CollectionUtils.isEmpty(sideDishGroupList)){
+            return;
+        }
+        List<OrderSide> orderSideList = sideDishGroupList.stream().map(side -> {
+            OrderSide orderSide = new OrderSide();
+            orderSide.setOrderId(orderId);
+            orderSide.setOrderProdId(orderProductId);
+            orderSide.setAddPrice(side.getAddPrice());
+            orderSide.setQuantity(side.getQuantity());
+            orderSide.setSideDetailId(side.getId());
+            orderSide.setTotalPrice(BigDecimalUtil.multiply(orderSide.getAddPrice(),new BigDecimal(orderSide.getQuantity())));
+            return orderSide;
+        }).collect(Collectors.toList());
+        context.orderSideService.saveBatch(orderSideList);
+    }
 
 }
