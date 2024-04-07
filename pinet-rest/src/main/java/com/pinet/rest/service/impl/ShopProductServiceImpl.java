@@ -123,8 +123,8 @@ public class ShopProductServiceImpl extends ServiceImpl<ShopProductMapper, ShopP
             return (T)comboDishVo;
         }
         ShopProductVo shopProductVo = baseMapper.getDetailById(id);
-        List<KrySideDishGroupDetail> krySideDishGroupDetails = krySideDishGroupDetailService.getByShopProdId(id);
-        shopProductVo.setSideDishGroupDetailList(krySideDishGroupDetails);
+        List<KrySideDishGroupVo> krySideDishGroupDetails = krySideDishGroupDetailService.getByShopProdId(id);
+        shopProductVo.setSideDishGroupList(krySideDishGroupDetails);
         return (T)shopProductVo;
     }
 

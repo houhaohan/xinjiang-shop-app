@@ -55,7 +55,7 @@ public class ShopProductVo extends ProductDetailVo{
     private Long saleCount;
 
     @ApiModelProperty("加料明细")
-    private List<KrySideDishGroupDetail> sideDishGroupDetailList = new ArrayList<>();
+    private List<KrySideDishGroupVo> sideDishGroupList = new ArrayList<>();
 
 
 }

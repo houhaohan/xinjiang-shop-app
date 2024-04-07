@@ -2,6 +2,7 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.KrySideDishGroupDetail;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.KrySideDishGroupVo;
 
 import java.util.List;
 
@@ -20,5 +21,5 @@ public interface IKrySideDishGroupDetailService extends IService<KrySideDishGrou
      * @param shopProdId
      * @return
      */
-    List<KrySideDishGroupDetail> getByShopProdId(Long shopProdId);
+    List<KrySideDishGroupVo> getByShopProdId(Long shopProdId);
 }

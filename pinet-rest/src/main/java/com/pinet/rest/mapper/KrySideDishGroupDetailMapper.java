@@ -2,6 +2,10 @@ package com.pinet.rest.mapper;
 
 import com.pinet.rest.entity.KrySideDishGroupDetail;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.vo.KrySideDishGroupVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface KrySideDishGroupDetailMapper extends BaseMapper<KrySideDishGroupDetail> {
 
+    /**
+     * 查询商品加料信息
+     * @param shopProdId
+     * @return
+     */
+    List<KrySideDishGroupVo> getByShopProdId(@Param("shopProdId") Long shopProdId);
 }
