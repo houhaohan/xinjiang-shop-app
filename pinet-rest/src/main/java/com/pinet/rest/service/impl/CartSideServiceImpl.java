@@ -47,4 +47,10 @@ public class CartSideServiceImpl extends ServiceImpl<CartSideMapper, CartSide> i
     public List<CartSideVO> getByCartId(Long cartId) {
         return baseMapper.getByCartId(cartId);
     }
+
+    @Override
+    public List<CartSideVO> getByUserIdAndShopId(Long userId, Long shopId) {
+        return baseMapper.getByUserIdAndShopId(userId,shopId);
+    }
+
 }

@@ -8,6 +8,8 @@ import lombok.Data;
 @Data
 @ApiModel(description = "购物车小料")
 public class CartSideVO{
+    @ApiModelProperty("购物车小料ID")
+    private Long cartSideId;
 
     @ApiModelProperty("购物车 ID")
     private Long cartId;
@@ -20,6 +22,9 @@ public class CartSideVO{
 
     @ApiModelProperty("数量")
     private Integer quantity;
+
+    @ApiModelProperty("小料名称")
+    private String sideDishName;
 
     @ApiModelProperty("加价")
     private Long addPrice;

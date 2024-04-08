@@ -23,4 +23,12 @@ public interface CartSideMapper extends BaseMapper<CartSide> {
      * @return
      */
     List<CartSideVO> getByCartId(@Param("cartId") Long cartId);
+
+    /**
+     * 根据用户ID和店铺ID查询
+     * @param userId
+     * @param shopId
+     * @return
+     */
+    List<CartSideVO> getByUserIdAndShopId(@Param("userId") Long userId,@Param("shopId") Long shopId);
 }

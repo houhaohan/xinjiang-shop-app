@@ -36,4 +36,15 @@ public interface ICartSideService extends IService<CartSide> {
      * @return
      */
     List<CartSideVO> getByCartId(Long cartId);
+
+
+    /**
+     * 根据用户ID和店铺ID查询
+     * @param userId
+     * @param shopId
+     * @return
+     */
+    List<CartSideVO> getByUserIdAndShopId(Long userId,Long shopId);
+
+
 }

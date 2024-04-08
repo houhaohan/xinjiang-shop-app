@@ -23,12 +23,12 @@ public class AddCartDTO {
     private Long shopId;
 
     @NotNull(message = "店铺商品id不能为空")
-    @ApiModelProperty(value = "店铺商品id",name = "shopProdId")
+    @ApiModelProperty(value = "店铺商品id",name = "shopProdId",required = true)
     private Long shopProdId;
 
     @NotNull(message = "数量不能为空")
     @Min(value = 0,message = "数量最小为0")
-    @ApiModelProperty(value = "商品数量",name = "prodNum")
+    @ApiModelProperty(value = "商品数量",name = "prodNum",required = true)
     private Integer prodNum;
 
     @ApiModelProperty(value = "商品单价",name = "price")
@@ -53,7 +53,7 @@ public class AddCartDTO {
     @ApiModelProperty("是否是他人分享来的商品，0-否，1-是")
     private Integer shareFlag = 0;
 
-    @ApiModelProperty("加料明细")
+    @ApiModelProperty(value = "加料明细")
     private List<SideDishGroupDTO> sideDishGroupList;
 
     @Data

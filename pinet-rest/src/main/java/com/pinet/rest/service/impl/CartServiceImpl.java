@@ -45,6 +45,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     private final ICartProductSpecService cartProductSpecService;
     private final IKryComboGroupDetailService kryComboGroupDetailService;
     private final ICartComboDishService cartComboDishService;
+    private final ICartSideService cartSideService;
 
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
@@ -67,18 +68,30 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                         ).collect(Collectors.toList());
 
                 List<ComboSingleProductSpecVo> comboSingleProductSpecVos = kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, cart.getShopProdId());
-                Long addPrice = comboSingleProductSpecVos.stream().map(ComboSingleProductSpecVo::getAddPrice).reduce(0L, Long::sum);
-                cart.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice + addPrice));
+                Long specAddPrice = comboSingleProductSpecVos.stream().map(ComboSingleProductSpecVo::getAddPrice).reduce(0L, Long::sum);
+                cart.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice + specAddPrice ));
                 cart.setAllPrice(BigDecimalUtil.multiply(cart.getProdPrice(),new BigDecimal(cart.getProdNum())));
             }else {
                 List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(cart.getCartId());
                 String prodSpecName = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecName).collect(Collectors.joining(","));
-                cart.setProdSpecName(prodSpecName);
                 BigDecimal price = cartProductSpecs.stream().map(CartProductSpec::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                List<CartSideVO> cartSideList = cartSideService.getByCartId(cart.getCartId());
+                StringBuilder specName = new StringBuilder(prodSpecName);
+                for(CartSideVO side : cartSideList){
+                    BigDecimal addPrice = BigDecimalUtil.fenToYuan(side.getAddPrice() * side.getQuantity());
+                    price = BigDecimalUtil.sum(price,addPrice);
+                    specName.append(",")
+                            .append(side.getSideDishName())
+                            .append("x")
+                            .append(side.getQuantity())
+                            .append("(+").append(BigDecimalUtil.stripTrailingZeros(addPrice))
+                            .append("元)");
+                }
+                cart.setProdSpecName(specName.toString());
                 cart.setProdPrice(price);
                 cart.setAllPrice(BigDecimalUtil.multiply(price,new BigDecimal(cart.getProdNum())));
             }
-
         });
 
         return cartListVos;
@@ -142,30 +155,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     @Override
     public CartVo getCartByUserIdAndShopId(Long shopId, Long customerId) {
-//        QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.eq("shop_id",shopId);
-//        queryWrapper.eq("customer_id",customerId);
-//        List<Cart> cartList = list(queryWrapper);
-//        CartVo cartVo = new CartVo();
-//        Integer prodNum = 0;
-//        BigDecimal price = BigDecimal.ZERO;
-//
-//        for(Cart cart : cartList){
-//            if(DishType.SINGLE.equals(cart.getDishType())){
-//                //单品单价
-//                BigDecimal unitPrice = cartMapper.getSingleByCartId(cart.getId());
-//                price = BigDecimalUtil.sum(price,BigDecimalUtil.multiply(unitPrice,new BigDecimal(cart.getProdNum())));
-//            }else {
-//                //套餐单价
-//                Long unitPrice = cartMapper.getComboByCartId(cart.getId());
-//                price = BigDecimalUtil.sum(price,BigDecimalUtil.multiply(BigDecimalUtil.fenToYuan(unitPrice),new BigDecimal(cart.getProdNum())));
-//            }
-//            prodNum = prodNum + cart.getProdNum();
-//        }
-//        cartVo.setPrice(price);
-//        cartVo.setProdNum(prodNum);
-
-//        return cartVo;
         return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
     }
 

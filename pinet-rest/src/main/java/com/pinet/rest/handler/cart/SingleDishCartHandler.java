@@ -13,11 +13,15 @@ import com.pinet.rest.entity.CartSide;
 import com.pinet.rest.entity.ShopProductSpec;
 
 import com.pinet.rest.entity.dto.SideDishGroupDTO;
+import com.pinet.rest.entity.vo.CartSideVO;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -43,20 +47,48 @@ public class SingleDishCartHandler extends DishCartHandler {
         //判断存不存在
         List<CartProductSpec> cartProductSpecs = context.cartProductSpecService.getByUserIdAndShopProdId(context.request.getCustomerId(), context.request.getShopProdId());
         List<Long> shopProdSpecIdDBs = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
-        boolean allMatch = singleProdSpecIds.stream().allMatch(shopProdSpecIdDBs::contains);
-
-        if(allMatch){
-            //购物车已存在，新增数量
-            context.prodNum += 1;
+        boolean specAllMatch = singleProdSpecIds.stream().allMatch(shopProdSpecIdDBs::contains);
+        List<SideDishGroupDTO> sideDishGroupList = context.request.getSideDishGroupList();
+        if(CollectionUtils.isEmpty(sideDishGroupList)){
+            //只判断样式
+        }else {
+            //判断样式和小料
+        }
+        List<CartSideVO> cartSideList = context.cartSideService.getByUserIdAndShopId(context.request.getCustomerId(), context.request.getShopId());
+        Map<Long, List<CartSideVO>> cartSideMap = cartSideList.stream().collect(Collectors.groupingBy(CartSideVO::getCartId));
+        //样式完全匹配，小料完全匹配
+        if(specAllMatch){
             Long cartId = cartProductSpecs.get(0).getCartId();
-            Cart cart = context.cartMapper.selectById(cartId);
-            cart.setProdNum(cart.getProdNum() + context.prodNum);
-            context.cartMapper.updateById(cart);
+            List<CartSideVO> sideList = cartSideMap.get(cartId);
+            List<Long> sideDetailIdDBs = sideList.stream().map(CartSideVO::getSideDetailId).collect(Collectors.toList());
+            boolean allMatch = sideDishGroupList.stream().map(SideDishGroupDTO::getId).allMatch(sideDetailIdDBs::contains);
+            if(allMatch){
+                //购物车已存在，新增数量
+                //新增购物车数量
+                context.prodNum += 1;
+                Cart cart = context.cartMapper.selectById(cartId);
+                cart.setProdNum(cart.getProdNum() + context.prodNum);
+                context.cartMapper.updateById(cart);
 
-            //查询单品价格
-            BigDecimal price = context.shopProductSpecService.getPriceByShopProdId(context.request.getShopProdId());
-            context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price);
-            return;
+                //新增小料数量
+                BigDecimal sideAddPrice = BigDecimal.ZERO;
+                for(CartSideVO side : sideList){
+                    CartSide cartSide = new CartSide();
+                    cartSide.setId(side.getCartSideId());
+                    Optional<Integer> optional = context.request.getSideDishGroupList().stream()
+                            .filter(s -> Objects.equals(s.getId(), side.getSideDetailId()))
+                            .map(SideDishGroupDTO::getQuantity)
+                            .findFirst();
+                    if(!optional.isPresent()){
+                        continue;
+                    }
+                    sideAddPrice = BigDecimalUtil.sum(sideAddPrice,BigDecimalUtil.fenToYuan(side.getAddPrice()));
+                }
+                //查询单品价格
+                BigDecimal price = context.shopProductSpecService.getPriceByShopProdId(context.request.getShopProdId());
+                context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price);
+                return;
+            }
         }
 
         //购物车不存在，新增购物车
@@ -80,17 +112,16 @@ public class SingleDishCartHandler extends DishCartHandler {
         context.cartProductSpecService.saveBatch(cartProductSpecList);
 
         //新增小料
-        List<SideDishGroupDTO> sideDishGroupList = context.request.getSideDishGroupList();
-        List<CartSide> cartSideList = sideDishGroupList.stream().map(side -> {
-            CartSide cartSide = new CartSide();
-            cartSide.setCartId(cart.getId());
-            cartSide.setQuantity(side.getQuantity());
-            cartSide.setShopProdId(cart.getShopProdId());
-            cartSide.setSideDetailId(side.getId());
-            return cartSide;
-        }).collect(Collectors.toList());
-        if(!CollectionUtils.isEmpty(cartSideList)){
-            context.cartSideService.saveBatch(cartSideList);
+        if(!CollectionUtils.isEmpty(sideDishGroupList)){
+            List<CartSide> cartSideData = sideDishGroupList.stream().map(side -> {
+                CartSide cartSide = new CartSide();
+                cartSide.setCartId(cart.getId());
+                cartSide.setQuantity(side.getQuantity());
+                cartSide.setShopProdId(cart.getShopProdId());
+                cartSide.setSideDetailId(side.getId());
+                return cartSide;
+            }).collect(Collectors.toList());
+            context.cartSideService.saveBatch(cartSideData);
         }
     }
 

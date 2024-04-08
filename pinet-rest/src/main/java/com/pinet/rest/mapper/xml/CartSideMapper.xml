@@ -32,11 +32,26 @@
         cs.shop_prod_id,
         cs.side_detail_id,
         cs.quantity,
+        ksdgd.side_dish_name,
         ksdgd.add_price
         from cart_side cs
         left join kry_side_dish_group_detail ksdgd on cs.side_detail_id = ksdgd.id and ksdgd.del_flag = 0
         where cs.cart_id = #{cartId} and cs.del_flag = 0
         order by cs.id,ksdgd.id
+    </select>
+
+    <select id="getByUserIdAndShopId" resultType="com.pinet.rest.entity.vo.CartSideVO">
+        select c.id as cartId,
+        cs.id as cartSideId,
+        cs.shop_prod_id as shopProdId,
+        cs.side_detail_id as sideDetailId,
+        cs.quantity,
+        ksdgd.add_price,
+        ksdgd.side_dish_name as sideDishName
+        from cart c
+        inner join cart_side cs on c.id = cs.cart_id and cs.del_flag = 0
+        left join kry_side_dish_group_detail ksdgd on cs.side_detail_id = ksdgd.id and ksdgd.del_flag = 0
+        where c.customer_id = #{userId} and c.shop_id = #{shopId} and c.del_flag = 0
     </select>
 
 </mapper>
