@@ -3,6 +3,8 @@ package com.pinet.rest.handler.settle;
 import cn.hutool.core.convert.Convert;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
+import com.pinet.rest.entity.dto.SideDishGroupDTO;
+import com.pinet.rest.entity.vo.CartSideVO;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -34,6 +36,7 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
 
         OrderProduct orderProduct = build(cart.getShopProdId(), cart.getProdNum());
         buildSpec(shopProdSpecIds,orderProduct);
+        buildSide(cart.getId(),orderProduct);
         context.response = orderProduct;
     }
 
@@ -47,6 +50,7 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
 
         List<Long> shopProdSpecIds = Convert.toList(Long.class, context.request.getShopProdSpecIds());
         buildSpec(shopProdSpecIds,orderProduct);
+        buildSide(orderProduct);
         context.response = orderProduct;
     }
 
@@ -61,8 +65,8 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
            return ;
         }
         BigDecimal unitPrice = BigDecimal.ZERO;
-        List<OrderProductSpec> orderProductSpecs = new ArrayList<>();
-        StringBuffer sb = new StringBuffer();
+        List<OrderProductSpec> orderProductSpecs = new ArrayList<>(shopProdSpecIds.size());
+        StringBuffer sb = new StringBuffer(shopProdSpecIds.size());
         for (Long shopProdSpecId : shopProdSpecIds) {
             //查询具体的样式并且校验
             OrderProductSpec orderProductSpec = new OrderProductSpec();
@@ -82,4 +86,62 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
         BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum(), RoundingMode.DOWN);
         orderProduct.setProdPrice(prodPrice);
     }
+
+    /**
+     * 购物车结算设置小料
+     * @param cartId
+     * @param orderProduct
+     */
+    private void buildSide(Long cartId,OrderProduct orderProduct){
+        List<CartSideVO> cartSideList = context.cartSideService.getByCartId(cartId);
+        if(CollectionUtils.isEmpty(cartSideList)){
+            return;
+        }
+        Long addPrice = 0L;
+        StringBuffer sb = new StringBuffer(orderProduct.getOrderProductSpecStr());
+        for(CartSideVO side : cartSideList){
+            Long totalSidePrice = side.getAddPrice() * side.getQuantity();
+            addPrice += totalSidePrice;
+            sb.append(",")
+                    .append(side.getSideDishName())
+                    .append("x")
+                    .append(side.getQuantity())
+                    .append("(+")
+                    .append(BigDecimalUtil.stripTrailingZeros(BigDecimalUtil.fenToYuan(addPrice)))
+                    .append("元)");
+        }
+        orderProduct.setOrderProductSpecStr(sb.toString());
+        orderProduct.setProdUnitPrice(BigDecimalUtil.sum(orderProduct.getProdUnitPrice(),BigDecimalUtil.fenToYuan(addPrice)));
+        BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum(), RoundingMode.DOWN);
+        orderProduct.setProdPrice(prodPrice);
+    }
+
+    /**
+     * 直接结束设置小料
+     * @param orderProduct
+     */
+    private void buildSide(OrderProduct orderProduct){
+        List<SideDishGroupDTO> sideDishGroupList = context.request.getSideDishGroupList();
+        if(CollectionUtils.isEmpty(sideDishGroupList)){
+            return;
+        }
+        BigDecimal addPrice = BigDecimal.ZERO;
+        StringBuffer sb = new StringBuffer(orderProduct.getOrderProductSpecStr());
+        for(SideDishGroupDTO side : sideDishGroupList){
+            BigDecimal totalSidePrice = BigDecimalUtil.multiply(side.getAddPrice(),new BigDecimal(side.getQuantity()));
+            addPrice =  BigDecimalUtil.sum(addPrice,totalSidePrice);
+            sb.append(",")
+                    .append(side.getSideDishName())
+                    .append("x")
+                    .append(side.getQuantity())
+                    .append("(+")
+                    .append(BigDecimalUtil.stripTrailingZeros(addPrice))
+                    .append("元)");
+        }
+        orderProduct.setOrderProductSpecStr(sb.toString());
+        orderProduct.setProdUnitPrice(BigDecimalUtil.sum(orderProduct.getProdUnitPrice(),addPrice));
+        BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum(), RoundingMode.DOWN);
+        orderProduct.setProdPrice(prodPrice);
+    }
+
 }

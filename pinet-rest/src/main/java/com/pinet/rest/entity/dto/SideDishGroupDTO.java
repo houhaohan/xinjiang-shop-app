@@ -17,6 +17,9 @@ public class SideDishGroupDTO {
     @ApiModelProperty("id")
     private Long id;
 
+    @ApiModelProperty("小料名称")
+    private String sideDishName;
+
     @ApiModelProperty("小料数量")
     private Integer quantity;
 
