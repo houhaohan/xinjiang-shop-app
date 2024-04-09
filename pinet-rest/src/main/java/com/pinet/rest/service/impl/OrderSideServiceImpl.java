@@ -24,4 +24,9 @@ public class OrderSideServiceImpl extends ServiceImpl<OrderSideMapper, OrderSide
     public List<OrderSideVo> getByOrderId(Long orderId) {
         return baseMapper.getByOrderId(orderId);
     }
+
+    @Override
+    public List<OrderSideVo> getByOrderProdId(Long orderProdId) {
+        return baseMapper.getByOrderProdId(orderProdId);
+    }
 }

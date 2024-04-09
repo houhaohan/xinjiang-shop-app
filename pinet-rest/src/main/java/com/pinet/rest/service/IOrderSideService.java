@@ -22,4 +22,11 @@ public interface IOrderSideService extends IService<OrderSide> {
      * @return
      */
     List<OrderSideVo> getByOrderId(Long orderId);
+
+    /**
+     * 根据订单商品ID查询
+     * @param orderProdId
+     * @return
+     */
+    List<OrderSideVo> getByOrderProdId(Long orderProdId);
 }

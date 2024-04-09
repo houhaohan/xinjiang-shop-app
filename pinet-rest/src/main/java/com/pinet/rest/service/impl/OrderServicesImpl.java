@@ -101,6 +101,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final DishSettleContext dishSettleContext;
     private final IShopProductSpecService shopProductSpecService;
     private final IOrderComboDishService orderComboDishService;
+    private final IOrderSideService orderSideService;
 
 
     @Override
@@ -823,12 +824,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders) {
         //生产环境才推单，其他环境就不推了吧
-        if (!Environment.isProd()) {
-            return null;
-        }
+//        if (!Environment.isProd()) {
+//            return null;
+//        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
+        dto.setOutBizNo(UUID.randomUUID().toString());
         dto.setRemark(orders.getRemark());
+        dto.setRemark("测试单，请勿出餐");
         dto.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         dto.setPromoFee(BigDecimalUtil.yuanToFen(orders.getDiscountAmount()));
         dto.setActualFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
@@ -836,6 +839,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
         paymentDetailRequest.setOutBizId(String.valueOf(orders.getId()));
+        paymentDetailRequest.setOutBizId(UUID.randomUUID().toString());
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
         paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
         paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
@@ -859,13 +863,15 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
+            request.setOutDishNo(IdUtil.simpleUUID());
             request.setDishId(orderProduct.getProdId());
             request.setDishName(orderProduct.getProductName());
             request.setDishCode(orderProduct.getDishCode());
             request.setDishQuantity(orderProduct.getProdNum());
             request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
-            request.setTotalFee(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum()));
+            BigDecimal unitPrice = BigDecimalUtil.sum(orderProduct.getProdUnitPrice(), orderProduct.getSidePrice());
+            request.setTotalFee(BigDecimalUtil.yuanToFen(unitPrice) * orderProduct.getProdNum());
             request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
             request.setPromoFee(request.getTotalFee().longValue() - request.getActualFee().longValue());
             request.setPackageFee("0");
@@ -1033,12 +1039,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private List<DishAttachProp> getDishAttachPropList(Long orderProdId) {
         List<OrderProductSpec> orderProductSpecs = orderProductSpecService.getByOrderProdId(orderProdId);
         List<DishAttachProp> dishAttachPropList = new ArrayList<>();
+        //做法
         for (OrderProductSpec spec : orderProductSpecs) {
             if ("标准".equals(spec.getProdSpecName()) && "规格".equals(spec.getProdSkuName())) {
                 //这个不是做法
                 continue;
             }
-            String id = String.valueOf(spec.getId());
+//            String id = String.valueOf(spec.getId());
+            String id = UUID.randomUUID().toString();
             DishAttachProp dishAttachProp = new DishAttachProp();
             dishAttachProp.setOutAttachPropNo(id);
             dishAttachProp.setAttachPropType("PRACTICE");
@@ -1051,6 +1059,26 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             dishAttachProp.setActualFee(0L);
             dishAttachProp.setAttachPropId(id);
             dishAttachPropList.add(dishAttachProp);
+        }
+
+        //加料
+        List<OrderSideVo> orderSideList = orderSideService.getByOrderProdId(orderProdId);
+        if(!CollectionUtils.isEmpty(orderSideList)){
+            for(OrderSideVo orderSide : orderSideList){
+                DishAttachProp dishAttachProp = new DishAttachProp();
+                String id = IdUtil.getSnowflake().nextIdStr();
+                dishAttachProp.setOutAttachPropNo(id);
+                dishAttachProp.setAttachPropType("PRACTICE");
+                dishAttachProp.setAttachPropCode(id);
+                dishAttachProp.setAttachPropName(orderSide.getSideDishName() + "x" + orderSide.getQuantity());
+                dishAttachProp.setPrice(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
+                dishAttachProp.setQuantity(orderSide.getQuantity());
+                dishAttachProp.setTotalFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
+                dishAttachProp.setPromoFee(0L);
+                dishAttachProp.setActualFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
+                dishAttachProp.setAttachPropId(id);
+                dishAttachPropList.add(dishAttachProp);
+            }
         }
         return CollectionUtils.isEmpty(dishAttachPropList) ? null : dishAttachPropList;
     }

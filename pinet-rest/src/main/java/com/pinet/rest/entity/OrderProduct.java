@@ -48,6 +48,9 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("商品单价")
     private BigDecimal prodUnitPrice;
 
+    @ApiModelProperty("小料总加价/每份单品")
+    private BigDecimal sidePrice;
+
     @ApiModelProperty("商品数量")
     private Integer prodNum;
 
@@ -74,8 +77,5 @@ public class OrderProduct extends BaseEntity {
 
     @ApiModelProperty("打包费")
     private BigDecimal packageFee = BigDecimal.ZERO;
-
-    @ApiModelProperty("小料总加价")
-    private BigDecimal sidePrice;
 
 }

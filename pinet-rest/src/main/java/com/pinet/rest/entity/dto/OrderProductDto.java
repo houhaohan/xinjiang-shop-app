@@ -50,6 +50,9 @@ public class OrderProductDto {
     @ApiModelProperty("商品单价")
     private BigDecimal prodUnitPrice;
 
+    @ApiModelProperty("小料总价/份")
+    private BigDecimal sidePrice;
+
     @ApiModelProperty("商品总价，等于 单价 * 数量")
     private BigDecimal prodPrice;
 
