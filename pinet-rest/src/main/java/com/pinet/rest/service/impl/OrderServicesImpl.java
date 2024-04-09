@@ -753,7 +753,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishQuantity(orderProduct.getProdNum());
             request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
-            request.setTotalFee(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum()));
+            BigDecimal totalPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum());
+            request.setTotalFee(BigDecimalUtil.yuanToFen(totalPrice));
             request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
             request.setPromoFee(request.getTotalFee().longValue() - request.getActualFee().longValue());
             request.setUnitId(orderProduct.getUnitId());

@@ -39,9 +39,9 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
             return orderProduct;
         }
         if(Objects.equals(context.dishType, DishType.COMBO)){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE, orderProduct.getProdNum(), RoundingMode.HALF_UP));
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE, orderProduct.getProdNum()));
         }else {
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, orderProduct.getProdNum(), RoundingMode.HALF_UP));
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, orderProduct.getProdNum()));
         }
         return orderProduct;
     }
@@ -130,7 +130,7 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
             orderSide.setAddPrice(BigDecimalUtil.fenToYuan(side.getAddPrice()));
             orderSide.setQuantity(side.getQuantity());
             orderSide.setSideDetailId(side.getSideDetailId());
-            orderSide.setTotalPrice(BigDecimalUtil.multiply(orderSide.getAddPrice(),new BigDecimal(orderSide.getQuantity())));
+            orderSide.setTotalPrice(BigDecimalUtil.multiply(orderSide.getAddPrice(),orderSide.getQuantity()));
             return orderSide;
         }).collect(Collectors.toList());
         context.orderSideService.saveBatch(orderSideList);
@@ -154,7 +154,7 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
             orderSide.setAddPrice(side.getAddPrice());
             orderSide.setQuantity(side.getQuantity());
             orderSide.setSideDetailId(side.getId());
-            orderSide.setTotalPrice(BigDecimalUtil.multiply(orderSide.getAddPrice(),new BigDecimal(orderSide.getQuantity())));
+            orderSide.setTotalPrice(BigDecimalUtil.multiply(orderSide.getAddPrice(),orderSide.getQuantity()));
             return orderSide;
         }).collect(Collectors.toList());
         context.orderSideService.saveBatch(orderSideList);

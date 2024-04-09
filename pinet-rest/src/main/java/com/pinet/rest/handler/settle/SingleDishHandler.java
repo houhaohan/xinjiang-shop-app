@@ -83,7 +83,7 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
         orderProduct.setProdUnitPrice(unitPrice);
         orderProduct.setOrderProductSpecs(orderProductSpecs);
         orderProduct.setOrderProductSpecStr(sb.substring(0,sb.length()-1));
-        BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum(), RoundingMode.DOWN);
+        BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum());
         orderProduct.setProdPrice(prodPrice);
     }
 
@@ -112,7 +112,7 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
         }
         orderProduct.setOrderProductSpecStr(sb.toString());
         orderProduct.setProdUnitPrice(BigDecimalUtil.sum(orderProduct.getProdUnitPrice(),BigDecimalUtil.fenToYuan(addPrice)));
-        BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum(), RoundingMode.DOWN);
+        BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum());
         orderProduct.setProdPrice(prodPrice);
     }
 
@@ -140,7 +140,7 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
         }
         orderProduct.setOrderProductSpecStr(sb.toString());
         orderProduct.setProdUnitPrice(BigDecimalUtil.sum(orderProduct.getProdUnitPrice(),addPrice));
-        BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum(), RoundingMode.DOWN);
+        BigDecimal prodPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum());
         orderProduct.setProdPrice(prodPrice);
     }
 

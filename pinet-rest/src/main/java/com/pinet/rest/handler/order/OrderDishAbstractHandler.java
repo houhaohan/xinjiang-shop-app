@@ -23,7 +23,7 @@ public abstract class OrderDishAbstractHandler implements OrderDishHandler {
         orderProduct.setProdUnitPrice(unitPrice);
         orderProduct.setSidePrice(sidePrice);
         orderProduct.setProdNum(request.getProdNum());
-        BigDecimal prodPrice = BigDecimalUtil.multiply(BigDecimalUtil.sum(unitPrice, sidePrice), orderProduct.getProdNum(), RoundingMode.HALF_UP);
+        BigDecimal prodPrice = BigDecimalUtil.multiply(BigDecimalUtil.sum(unitPrice, sidePrice), orderProduct.getProdNum());
         orderProduct.setProdPrice(prodPrice);
         orderProduct.setProdName(request.getProdName());
         orderProduct.setUnit(request.getUnit());

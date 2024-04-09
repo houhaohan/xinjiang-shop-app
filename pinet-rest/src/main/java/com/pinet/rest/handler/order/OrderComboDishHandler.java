@@ -40,7 +40,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
     protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice,BigDecimal sidePrice) {
         OrderProduct orderProduct = super.build(request, unitPrice, sidePrice);
         if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum()));
         }
         context.orderProductService.save(orderProduct);
         return orderProduct;
