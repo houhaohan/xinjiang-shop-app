@@ -2,6 +2,10 @@ package com.pinet.rest.mapper;
 
 import com.pinet.rest.entity.OrderSide;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pinet.rest.entity.vo.OrderSideVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface OrderSideMapper extends BaseMapper<OrderSide> {
 
+    /**
+     * 根据订单ID查找小料
+     * @param orderId
+     * @return
+     */
+    List<OrderSideVo> getByOrderId(@Param("orderId") Long orderId);
 }

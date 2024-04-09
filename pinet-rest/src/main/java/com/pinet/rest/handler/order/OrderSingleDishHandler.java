@@ -33,8 +33,8 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
     }
 
     @Override
-    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice) {
-        OrderProduct orderProduct = super.build(request, unitPrice);
+    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice,BigDecimal sidePrice) {
+        OrderProduct orderProduct = super.build(request, unitPrice,sidePrice);
         if (Objects.equals(request.getOrderType(), OrderTypeEnum.SELF_PICKUP.getCode())) {
             return orderProduct;
         }
@@ -56,8 +56,9 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
         List<CartProductSpec> cartProductSpecList = context.cartProductSpecService.getByCartId(request.getCartId());
         List<Long> shopProdSpecIds = cartProductSpecList.stream().map(CartProductSpec::getShopProdSpecId).collect(Collectors.toList());
         BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(shopProdSpecIds);
-
-        OrderProduct orderProduct = build(request, unitPrice);
+        List<CartSideVO> cartSideList = context.cartSideService.getByCartId(request.getCartId());
+        Long sidePrice = cartSideList.stream().map(side-> side.getAddPrice() * side.getQuantity()).reduce(0L, Long::sum);
+        OrderProduct orderProduct = build(request, unitPrice,BigDecimalUtil.fenToYuan(sidePrice));
         context.orderProductService.save(orderProduct);
 
         //新增订单商品样式
@@ -76,7 +77,8 @@ public class OrderSingleDishHandler extends OrderDishAbstractHandler {
     @Override
     public OrderProduct execute(DirectOrderRequest request) {
         BigDecimal unitPrice = context.shopProductSpecService.getPriceByIds(request.getShopProdSpecIds());
-        OrderProduct orderProduct = build(request, unitPrice);
+        BigDecimal sidePrice = request.getSideDishGroupList().stream().map(side -> BigDecimalUtil.multiply(side.getAddPrice(), new BigDecimal(side.getQuantity()))).reduce(BigDecimal.ZERO, BigDecimal::add);
+        OrderProduct orderProduct = build(request, unitPrice, sidePrice);
         context.orderProductService.save(orderProduct);
 
         saveOrderProductSpecs(request.getShopProdSpecIds(), request.getOrderId(), orderProduct.getId());

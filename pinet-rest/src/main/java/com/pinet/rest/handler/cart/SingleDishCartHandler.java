@@ -72,7 +72,7 @@ public class SingleDishCartHandler extends DishCartHandler {
             //样式不完全匹配，新增购物车
             if(!specAllMatch){
                 //新增购物车
-                saveCart(singleProdSpecIds);
+                save = true;
                 continue;
             }
 
@@ -83,18 +83,20 @@ public class SingleDishCartHandler extends DishCartHandler {
                 long count = cartSideList.stream().filter(side -> Objects.equals(context.request.getShopProdId(),side.getShopProdId())).count();
                 if(count > 0){
                     //新增购物车(样式相同，购物车此商品有小料)
-                    saveCart(singleProdSpecIds);
+                    save = true;
+                    continue;
                 }else {
                     //修改数量(样式相同，购物车此商品没有小料)
                     updateCart(cartId,null);
+                    save = false;
+                    break;
                 }
-                continue;
             }
 
             //前端传了小料，并且购物车没有小料
             if(CollectionUtils.isEmpty(cartSideList)){
                 //新增购物车
-                saveCart(singleProdSpecIds);
+                save = true;
                 continue;
             }
             //前端有小料，购物车也有小料，看小料ID是否完全匹配，是就修改，否就新增
@@ -103,6 +105,7 @@ public class SingleDishCartHandler extends DishCartHandler {
             if(allMatch){
                 exists = true;
                 updateCart(cartId,cartSideList);
+                break;
             }else {
                 save = true;
             }
@@ -201,25 +204,36 @@ public class SingleDishCartHandler extends DishCartHandler {
         Cart cart = context.cartMapper.selectById(cartId);
         cart.setProdNum(cart.getProdNum() + context.prodNum);
         context.cartMapper.updateById(cart);
-
-        //新增小料数量
-
-        BigDecimal addPrice = BigDecimal.ZERO;
-        if(!CollectionUtils.isEmpty(sideList)){
-            for(CartSideVO side : sideList){
-                Optional<Integer> optional = context.request.getSideDishGroupList().stream()
-                        .filter(s -> Objects.equals(s.getId(), side.getSideDetailId()))
-                        .map(SideDishGroupDTO::getQuantity)
-                        .findFirst();
-                if(!optional.isPresent()){
-                    continue;
-                }
-                addPrice = BigDecimalUtil.sum(addPrice,BigDecimalUtil.fenToYuan(side.getAddPrice()));
-            }
-        }
+        //小料价格
+        BigDecimal addPrice = calculateSidePrice(sideList);
         //查询单品价格
         BigDecimal price = context.shopProductSpecService.getPriceByShopProdId(context.request.getShopProdId());
         context.totalPrice = BigDecimalUtil.sum(context.totalPrice,price,addPrice);
         return;
     }
+
+    /**
+     * 计算小料价格
+     * @param sideList
+     * @return
+     */
+    private BigDecimal calculateSidePrice(List<CartSideVO> sideList){
+        BigDecimal addPrice = BigDecimal.ZERO;
+        if(CollectionUtils.isEmpty(sideList)){
+            return addPrice;
+        }
+        for(CartSideVO side : sideList){
+            Optional<Integer> optional = context.request.getSideDishGroupList().stream()
+                    .filter(s -> Objects.equals(s.getId(), side.getSideDetailId()))
+                    .map(SideDishGroupDTO::getQuantity)
+                    .findFirst();
+            if(!optional.isPresent()){
+                continue;
+            }
+            addPrice = BigDecimalUtil.sum(addPrice,BigDecimalUtil.fenToYuan(side.getAddPrice()));
+        }
+        return addPrice;
+    }
+
+
 }

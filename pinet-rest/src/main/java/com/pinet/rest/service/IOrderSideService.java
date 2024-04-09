@@ -2,6 +2,9 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.OrderSide;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.OrderSideVo;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IOrderSideService extends IService<OrderSide> {
 
+    /**
+     * 根据订单ID查找小料
+     * @param orderId
+     * @return
+     */
+    List<OrderSideVo> getByOrderId(Long orderId);
 }
