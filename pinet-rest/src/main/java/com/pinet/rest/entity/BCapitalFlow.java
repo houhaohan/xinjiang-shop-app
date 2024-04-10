@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * <p>
@@ -25,17 +26,28 @@ import lombok.Setter;
 @Setter
 @TableName("b_capital_flow")
 @ApiModel(value = "BCapitalFlow对象", description = "商家资金流水表")
-public class BCapitalFlow{
+public class BCapitalFlow extends BaseEntity{
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty("金额")
+    @ApiModelProperty("应收金额")
+    private BigDecimal actualAmount;
+
+    @ApiModelProperty("利率")
+    private Double rate;
+
+    @ApiModelProperty("手续费")
+    private BigDecimal extraAmount;
+
+    @ApiModelProperty("实收金额，应收金额 - 手续费")
     private BigDecimal amount;
 
     @ApiModelProperty("订单ID")
     private Long orderId;
 
     @ApiModelProperty("下单时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date orderTime;
 
     @ApiModelProperty("到账方式，1-支付宝，2-微信，3-银行卡")
@@ -49,27 +61,4 @@ public class BCapitalFlow{
 
     @ApiModelProperty("店铺id")
     private Long shopId;
-
-    @ApiModelProperty("主键")
-    @TableId(value = "id",type = IdType.AUTO)
-    private Long id;
-
-    @ApiModelProperty(value = "创建人ID")
-    private Long createBy;
-
-    @ApiModelProperty(value = "创建时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date createTime;
-
-    @ApiModelProperty(value = "更新人ID")
-    private Long updateBy;
-
-    @ApiModelProperty(value = "更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date updateTime;
-
-    @ApiModelProperty(value = "是否删除  0正常  1删除")
-    private Integer delFlag = 0;
-
-
 }
