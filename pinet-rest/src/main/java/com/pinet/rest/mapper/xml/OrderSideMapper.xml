@@ -45,6 +45,7 @@
         from order_side os
         left join kry_side_dish_group_detail ksdgd on ksdgd.id = os.side_detail_id and ksdgd.del_flag = 0
         where os.order_prod_id = #{orderProdId} and os.del_flag = 0
+        order by os.id desc
     </select>
 
 </mapper>

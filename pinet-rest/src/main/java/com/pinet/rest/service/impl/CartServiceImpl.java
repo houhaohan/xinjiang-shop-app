@@ -130,6 +130,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     public List<Cart> getByUserIdAndShopId(Long userId, Long shopId) {
         LambdaQueryWrapper<Cart> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Cart::getCustomerId, userId).eq(Cart::getShopId, shopId);
+        lambdaQueryWrapper.orderByDesc(Cart::getId);
         return list(lambdaQueryWrapper);
     }
 

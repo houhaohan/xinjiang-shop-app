@@ -99,6 +99,7 @@
         from qingshi.order_product op
         left join order_product_spec ops on op.id = ops.order_prod_id
         left join shop_product sp on sp.id =  op.shop_prod_id
+        left join order_side os on os.order_prod_id = op.id
         where op.order_id = #{orderId} and sp.dish_type = 'SINGLE' and op.del_flag = 0
     </select>
 

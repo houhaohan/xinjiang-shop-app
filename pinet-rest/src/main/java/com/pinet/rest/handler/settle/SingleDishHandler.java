@@ -107,7 +107,7 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
                     .append("x")
                     .append(side.getQuantity())
                     .append("(+")
-                    .append(BigDecimalUtil.stripTrailingZeros(BigDecimalUtil.fenToYuan(addPrice)))
+                    .append(BigDecimalUtil.stripTrailingZeros(BigDecimalUtil.fenToYuan(totalSidePrice)))
                     .append("元)");
         }
         orderProduct.setOrderProductSpecStr(sb.toString());
@@ -128,14 +128,14 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
         BigDecimal addPrice = BigDecimal.ZERO;
         StringBuffer sb = new StringBuffer(orderProduct.getOrderProductSpecStr());
         for(SideDishGroupDTO side : sideDishGroupList){
-            BigDecimal totalSidePrice = BigDecimalUtil.multiply(side.getAddPrice(),new BigDecimal(side.getQuantity()));
+            BigDecimal totalSidePrice = BigDecimalUtil.multiply(side.getAddPrice(),side.getQuantity());
             addPrice =  BigDecimalUtil.sum(addPrice,totalSidePrice);
             sb.append(",")
                     .append(side.getSideDishName())
                     .append("x")
                     .append(side.getQuantity())
                     .append("(+")
-                    .append(BigDecimalUtil.stripTrailingZeros(addPrice))
+                    .append(BigDecimalUtil.stripTrailingZeros(totalSidePrice))
                     .append("元)");
         }
         orderProduct.setOrderProductSpecStr(sb.toString());

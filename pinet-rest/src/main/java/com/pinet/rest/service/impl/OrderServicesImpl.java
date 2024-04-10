@@ -510,6 +510,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             addCartDto.setCustomerId(customerId);
             String shopProdSpecIds = k.getOrderProductSpecs().stream().map(OrderProductSpec::getShopProdSpecId).map(String::valueOf).collect(Collectors.joining(","));
             addCartDto.setShopProdSpecIds(shopProdSpecIds);
+            addCartDto.setSideDishGroupList(k.getSideDishGroupList());
             cartService.addCart(addCartDto);
         });
 
@@ -677,12 +678,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      */
     @Override
     public String takeoutOrderCreate(Orders order) {
-        if (!Environment.isProd()) {
-            return "";
-        }
+//        if (!Environment.isProd()) {
+//            return "";
+//        }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
         takeoutOrderCreateDTO.setRemark(order.getRemark());
+        takeoutOrderCreateDTO.setRemark("测试单，请勿出餐");
         takeoutOrderCreateDTO.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         takeoutOrderCreateDTO.setPromoFee(BigDecimalUtil.yuanToFen(order.getDiscountAmount()));//优惠
         takeoutOrderCreateDTO.setActualFee(BigDecimalUtil.yuan2Fen(order.getOrderPrice()));//应付
@@ -743,6 +745,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         takeoutOrderCreateDTO.setExtraFeeRequestList(extraFeeRequestList);
 
         List<OrderProductDto> orderProducts = orderProductService.selectByOrderId(order.getId());
+        orderProducts.sort(Comparator.comparing(OrderProductDto::getOrderProductId));
         List<OrderDishRequest> orderDishRequestList = new ArrayList<>(orderProducts.size());
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
@@ -753,8 +756,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setDishQuantity(orderProduct.getProdNum());
             request.setDishFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
             request.setDishOriginalFee(BigDecimalUtil.yuanToFen(orderProduct.getProdUnitPrice()));
-            BigDecimal totalPrice = BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(), orderProduct.getProdNum());
-            request.setTotalFee(BigDecimalUtil.yuanToFen(totalPrice));
+            BigDecimal unitPrice = BigDecimalUtil.sum(orderProduct.getProdUnitPrice(), orderProduct.getSidePrice());
+            request.setTotalFee(BigDecimalUtil.yuanToFen(unitPrice) * orderProduct.getProdNum());
             request.setActualFee(BigDecimalUtil.yuanToFen(orderProduct.getProdPrice()));
             request.setPromoFee(request.getTotalFee().longValue() - request.getActualFee().longValue());
             request.setUnitId(orderProduct.getUnitId());
@@ -860,6 +863,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         dto.setPromoDetailRequestList(getPromoDetailRequestList(orders.getId()));
 
         List<OrderProductDto> orderProducts = orderProductService.selectByOrderId(orders.getId());
+        orderProducts.sort(Comparator.comparing(OrderProductDto::getOrderProductId));
         List<OrderDishRequest> orderDishRequestList = new ArrayList<>();
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
@@ -1074,9 +1078,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 dishAttachProp.setAttachPropName(orderSide.getSideDishName() + "x" + orderSide.getQuantity());
                 dishAttachProp.setPrice(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
                 dishAttachProp.setQuantity(orderSide.getQuantity());
-                dishAttachProp.setTotalFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
+                dishAttachProp.setTotalFee(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
                 dishAttachProp.setPromoFee(0L);
-                dishAttachProp.setActualFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
+                dishAttachProp.setActualFee(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
                 dishAttachProp.setAttachPropId(id);
                 dishAttachPropList.add(dishAttachProp);
             }

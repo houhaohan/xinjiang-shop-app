@@ -70,7 +70,6 @@ public class AddCartDTO {
 
         @ApiModelProperty("单品样式明细")
         private List<CartComboDishSpecDTO> comboDetails;
-
     }
 
     @Data

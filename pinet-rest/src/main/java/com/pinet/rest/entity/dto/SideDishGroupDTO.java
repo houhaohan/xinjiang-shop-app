@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * @date: 2024-04-07 18:02
  */
 @Data
-@ApiModel(description = "套餐明细")
+@ApiModel(description = "小料明细")
 public class SideDishGroupDTO {
     @ApiModelProperty("id")
     private Long id;
