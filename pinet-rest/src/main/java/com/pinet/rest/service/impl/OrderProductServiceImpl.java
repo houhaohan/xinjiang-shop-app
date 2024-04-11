@@ -49,8 +49,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
                         .filter(o-> Objects.equals(o.getOrderProdId(),orderProduct.getId()))
                         .map(side -> {
                             BigDecimal totalPrice = BigDecimalUtil.multiply(side.getAddPrice(), side.getQuantity());
-                            String sideStr = sb.append(",")
-                                    .append(side.getSideDishName())
+                            String sideStr = sb.append(side.getSideDishName())
                                     .append("x")
                                     .append(side.getQuantity())
                                     .append("(+")
@@ -66,7 +65,7 @@ public class OrderProductServiceImpl extends ServiceImpl<OrderProductMapper, Ord
                             sideDishGroupList.add(sideDishGroupDTO);
                             return sideStr;
                         }).collect(Collectors.joining(","));
-                orderProduct.setOrderProductSpecStr(orderProduct.getOrderProductSpecStr() + str);
+                orderProduct.setOrderProductSpecStr(orderProduct.getOrderProductSpecStr() +","+ str);
                 orderProduct.setSideDishGroupList(sideDishGroupList);
             });
         }

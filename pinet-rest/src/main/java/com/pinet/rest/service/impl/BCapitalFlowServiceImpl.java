@@ -40,9 +40,10 @@ public class BCapitalFlowServiceImpl extends ServiceImpl<BCapitalFlowMapper, BCa
         entity.setShopId(shopId);
         entity.setActualAmount(orderAmount);
         entity.setRate(OrderConstant.WITHDRAW_RATE);
-        entity.setExtraAmount(BigDecimalUtil.multiply(orderAmount,OrderConstant.WITHDRAW_RATE));
+        entity.setExtraAmount(BigDecimalUtil.multiply(orderAmount,OrderConstant.WITHDRAW_RATE * 0.01));
         entity.setAmount(BigDecimalUtil.subtract(orderAmount,entity.getExtraAmount()));
         entity.setBalance(BigDecimalUtil.sum(bUserBalance.getAmount(),entity.getAmount()));
         save(entity);
     }
+
 }

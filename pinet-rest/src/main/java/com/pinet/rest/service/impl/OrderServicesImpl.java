@@ -1075,12 +1075,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 dishAttachProp.setOutAttachPropNo(id);
                 dishAttachProp.setAttachPropType("PRACTICE");
                 dishAttachProp.setAttachPropCode(id);
-                dishAttachProp.setAttachPropName(orderSide.getSideDishName() + "x" + orderSide.getQuantity());
+                dishAttachProp.setAttachPropName(orderSide.getSideDishName());
                 dishAttachProp.setPrice(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
                 dishAttachProp.setQuantity(orderSide.getQuantity());
-                dishAttachProp.setTotalFee(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
+                dishAttachProp.setTotalFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
                 dishAttachProp.setPromoFee(0L);
-                dishAttachProp.setActualFee(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
+                dishAttachProp.setActualFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
                 dishAttachProp.setAttachPropId(id);
                 dishAttachPropList.add(dishAttachProp);
             }
