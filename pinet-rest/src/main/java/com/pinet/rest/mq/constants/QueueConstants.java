@@ -39,6 +39,11 @@ public class QueueConstants {
     public static final String DELIVERY_ORDER_FAIL_SMS = "delivery.order.fail.sms.queue";
 
     /**
+     * 轻食外卖订单 配送平台创建订单取消 短信提醒 Delivery
+     */
+    public static final String DELIVERY_ORDER_CANCEL_SMS = "delivery.order.cancel.sms.queue";
+
+    /**
      * 轻食外卖订单 配送平台创建订单失败 短信提醒 Delivery
      */
     public static final String KRY_ORDER_PUSH = "kry.order.push.queue";

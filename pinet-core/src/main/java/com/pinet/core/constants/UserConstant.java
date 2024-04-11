@@ -9,4 +9,7 @@ public class UserConstant {
 
     //小程序默认名称
     public static final String DEFAULT_USER_NAME = "微信用户";
+
+    //小程序默认通知号码(可以考虑改成动态配置)
+    public static final String DEFAULT_NOTICE_PHONE = "15868805739";
 }
