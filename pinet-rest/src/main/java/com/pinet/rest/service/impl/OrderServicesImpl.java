@@ -767,20 +767,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setWeightDishFlag(false);
             request.setDishImgUrl(orderProduct.getProductImg());
             request.setIsPack(true);
-            //todo 打包费暂时不用
             request.setPackageFee("0");
-            List<ScanCodeDish> dishList = new ArrayList<>();
             if (Objects.equals(DishType.SINGLE, orderProduct.getDishType())) {
                 request.setItemOriginType(DishType.SINGLE);
                 request.setDishType(DishType.SINGLE_DISH);
                 request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
+                request.setDishList(getSideDishList(orderProduct.getOrderProductId(),order.getShopId()));
             } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
                 request.setItemOriginType(DishType.COMBO);
                 request.setDishType(DishType.COMBO_DISH);
-                dishList.addAll(getComboGroupDetail(orderProduct));
-            }
-            if (!CollectionUtils.isEmpty(dishList)) {
-                request.setDishList(dishList);
+                request.setDishList(getComboGroupDetail(orderProduct));
             }
             orderDishRequestList.add(request);
         }
@@ -887,7 +883,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setUnitId(orderProduct.getUnitId());
             request.setUnitName(orderProduct.getUnit());
 
-            List<ScanCodeDish> dishList = new ArrayList<>();
             //配料明细 或者 套餐明细
             if (Objects.equals(DishType.SINGLE, orderProduct.getDishType())) {
                 //配料明细
@@ -895,15 +890,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 request.setDishType(DishType.SINGLE_DISH);
                 request.setItemOriginType(DishType.SINGLE);
                 request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
-                dishList.addAll(getSideDishList(orderProduct.getOrderProductId(),orders.getShopId()));
+                request.setDishList(getSideDishList(orderProduct.getOrderProductId(),orders.getShopId()));
             } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
                 request.setDishType(DishType.COMBO_DISH);
                 request.setItemOriginType(DishType.COMBO);
                 //套餐明细
-                dishList.addAll(getComboGroupDetail(orderProduct));
-            }
-            if (!CollectionUtils.isEmpty(dishList)) {
-                request.setDishList(dishList);
+                request.setDishList(getComboGroupDetail(orderProduct));
             }
             request.setIsPack(false);
             orderDishRequestList.add(request);
@@ -969,6 +961,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      */
     private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct) {
         List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndOrderProdId(orderProduct.getOrderId(), orderProduct.getOrderProductId());
+        if(CollectionUtils.isEmpty(orderComboDishList)){
+            return null;
+        }
         Map<String, List<OrderComboDishVo>> singleOrderMap = orderComboDishList.stream().collect(Collectors.groupingBy(OrderComboDishVo::getSingleDishId,LinkedHashMap::new,Collectors.toList()));
 
         List<ScanCodeDish> dishList = new ArrayList<>(singleOrderMap.size());
