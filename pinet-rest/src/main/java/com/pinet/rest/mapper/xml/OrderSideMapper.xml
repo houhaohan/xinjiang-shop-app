@@ -40,10 +40,17 @@
         where os.order_id = #{orderId} and os.del_flag = 0
     </select>
 
-    <select id="getByOrderProdId" resultType="com.pinet.rest.entity.vo.OrderSideVo">
-        select <include refid="Order_Side_Column"/>
+    <select id="getByOrderProdIdAndShopId" resultType="com.pinet.rest.entity.vo.OrderSideVo">
+        select <include refid="Order_Side_Column"/>,
+        ksd.sku_id as dishSkuId,
+        ksd.sku_name as dishSkuName,
+        ksd.sku_code as dishSkuCode,
+        ksd.dish_code,
+        ksd.unit_id,
+        ksd.unit_name
         from order_side os
         left join kry_side_dish_group_detail ksdgd on ksdgd.id = os.side_detail_id and ksdgd.del_flag = 0
+        left join kry_side_dish ksd on ksd.side_dish_id = ksdgd.side_dish_id and ksd.shop_id = #{shopId} and ksd.del_flag = 0
         where os.order_prod_id = #{orderProdId} and os.del_flag = 0
         order by os.id desc
     </select>

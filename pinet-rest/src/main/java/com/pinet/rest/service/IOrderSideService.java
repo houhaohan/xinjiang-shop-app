@@ -26,7 +26,8 @@ public interface IOrderSideService extends IService<OrderSide> {
     /**
      * 根据订单商品ID查询
      * @param orderProdId
+     * @param shopId
      * @return
      */
-    List<OrderSideVo> getByOrderProdId(Long orderProdId);
+    List<OrderSideVo> getByOrderProdIdAndShopId(Long orderProdId,Long shopId);
 }

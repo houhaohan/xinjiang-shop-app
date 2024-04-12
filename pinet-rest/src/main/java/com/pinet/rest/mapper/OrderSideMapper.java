@@ -27,7 +27,8 @@ public interface OrderSideMapper extends BaseMapper<OrderSide> {
     /**
      * 根据订单商品ID查找小料
      * @param orderProdId
+     * @param shopId
      * @return
      */
-    List<OrderSideVo> getByOrderProdId(@Param("orderProdId") Long orderProdId);
+    List<OrderSideVo> getByOrderProdIdAndShopId(@Param("orderProdId") Long orderProdId,@Param("shopId") Long shopId);
 }

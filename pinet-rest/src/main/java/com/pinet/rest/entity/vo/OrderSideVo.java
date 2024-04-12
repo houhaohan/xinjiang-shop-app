@@ -35,4 +35,24 @@ public class OrderSideVo {
 
     @ApiModelProperty("总价（单价*数量）")
     private BigDecimal totalPrice;
+
+    @ApiModelProperty("SKU ID")
+    private String dishSkuId;
+
+    @ApiModelProperty("SKU 编码")
+    private String dishSkuCode;
+
+    @ApiModelProperty("SKU 名称")
+    private String dishSkuName;
+
+    @ApiModelProperty("菜品编码")
+    private String dishCode;
+
+    @ApiModelProperty("单位ID")
+    private String unitId;
+
+    @ApiModelProperty("单位名称")
+    private String unitName;
+
+
 }

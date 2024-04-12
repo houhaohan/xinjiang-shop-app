@@ -769,7 +769,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             request.setIsPack(true);
             //todo 打包费暂时不用
             request.setPackageFee("0");
-            //orderDishRequest.setPackageFee(BigDecimalUtil.yuan2FenStr(orderProduct.getPackageFee()));
             List<ScanCodeDish> dishList = new ArrayList<>();
             if (Objects.equals(DishType.SINGLE, orderProduct.getDishType())) {
                 request.setItemOriginType(DishType.SINGLE);
@@ -896,6 +895,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 request.setDishType(DishType.SINGLE_DISH);
                 request.setItemOriginType(DishType.SINGLE);
                 request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
+                dishList.addAll(getSideDishList(orderProduct.getOrderProductId(),orders.getShopId()));
             } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
                 request.setDishType(DishType.COMBO_DISH);
                 request.setItemOriginType(DishType.COMBO);
@@ -1065,27 +1065,48 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             dishAttachProp.setAttachPropId(id);
             dishAttachPropList.add(dishAttachProp);
         }
-
-        //加料
-        List<OrderSideVo> orderSideList = orderSideService.getByOrderProdId(orderProdId);
-        if(!CollectionUtils.isEmpty(orderSideList)){
-            for(OrderSideVo orderSide : orderSideList){
-                DishAttachProp dishAttachProp = new DishAttachProp();
-                String id = IdUtil.getSnowflake().nextIdStr();
-                dishAttachProp.setOutAttachPropNo(id);
-                dishAttachProp.setAttachPropType("PRACTICE");
-                dishAttachProp.setAttachPropCode(id);
-                dishAttachProp.setAttachPropName(orderSide.getSideDishName());
-                dishAttachProp.setPrice(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
-                dishAttachProp.setQuantity(orderSide.getQuantity());
-                dishAttachProp.setTotalFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
-                dishAttachProp.setPromoFee(0L);
-                dishAttachProp.setActualFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
-                dishAttachProp.setAttachPropId(id);
-                dishAttachPropList.add(dishAttachProp);
-            }
-        }
         return CollectionUtils.isEmpty(dishAttachPropList) ? null : dishAttachPropList;
+    }
+
+    /**
+     * 获取订单小料
+     * @param orderProdId
+     * @param shopId
+     * @return
+     */
+    private List<ScanCodeDish> getSideDishList(Long orderProdId,Long shopId) {
+        List<OrderSideVo> orderSideList = orderSideService.getByOrderProdIdAndShopId(orderProdId,shopId);
+        if(CollectionUtils.isEmpty(orderSideList)){
+            return null;
+        }
+        List<ScanCodeDish> sideDishList = new ArrayList<>();
+        for(OrderSideVo orderSide : orderSideList){
+            ScanCodeDish side = new ScanCodeDish();
+            side.setOutDishNo(IdUtil.getSnowflake().nextIdStr());
+            side.setDishId(orderSide.getSideDishId());
+            side.setDishName(orderSide.getSideDishName());
+            side.setDishCode(orderSide.getDishCode());
+            side.setDishQuantity(new BigDecimal(orderSide.getQuantity()));
+            side.setDishFee(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
+            side.setDishOriginalFee(BigDecimalUtil.yuan2Fen(orderSide.getAddPrice()));
+            side.setTotalFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
+            side.setActualFee(BigDecimalUtil.yuan2Fen(orderSide.getTotalPrice()));
+            side.setPromoFee(0L);
+            side.setPackageFee("0");
+            side.setDishSkuId(orderSide.getDishSkuId());
+            side.setDishSkuCode(orderSide.getDishSkuCode());
+            side.setDishSkuName(orderSide.getDishSkuName());
+            side.setWeightDishFlag("false");
+            side.setUnitCode(orderSide.getUnitId());
+            side.setUnitId(orderSide.getUnitId());
+            side.setUnitName(orderSide.getUnitName());
+            side.setDishType(DishType.SINGLE_DISH);
+            side.setItemOriginType(DishType.SIDE);
+            side.setIsPack("false");
+            side.setIsFixAdditionalItemQuantityFlag(false);
+            sideDishList.add(side);
+        }
+        return sideDishList;
     }
 
 
