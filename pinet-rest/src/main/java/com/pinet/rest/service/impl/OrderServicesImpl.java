@@ -678,13 +678,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      */
     @Override
     public String takeoutOrderCreate(Orders order) {
-//        if (!Environment.isProd()) {
-//            return "";
-//        }
+        if (!Environment.isProd()) {
+            return "";
+        }
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
         takeoutOrderCreateDTO.setRemark(order.getRemark());
-        takeoutOrderCreateDTO.setRemark("测试单，请勿出餐");
         takeoutOrderCreateDTO.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         takeoutOrderCreateDTO.setPromoFee(BigDecimalUtil.yuanToFen(order.getDiscountAmount()));//优惠
         takeoutOrderCreateDTO.setActualFee(BigDecimalUtil.yuan2Fen(order.getOrderPrice()));//应付
@@ -823,14 +822,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String scanCodePrePlaceOrder(Orders orders) {
         //生产环境才推单，其他环境就不推了吧
-//        if (!Environment.isProd()) {
-//            return null;
-//        }
+        if (!Environment.isProd()) {
+            return null;
+        }
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
-        dto.setOutBizNo(UUID.randomUUID().toString());
         dto.setRemark(orders.getRemark());
-        dto.setRemark("测试单，请勿出餐");
         dto.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         dto.setPromoFee(BigDecimalUtil.yuanToFen(orders.getDiscountAmount()));
         dto.setActualFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
@@ -863,7 +860,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
-            request.setOutDishNo(IdUtil.simpleUUID());
             request.setDishId(orderProduct.getProdId());
             request.setDishName(orderProduct.getProductName());
             request.setDishCode(orderProduct.getDishCode());
@@ -885,11 +881,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
             //配料明细 或者 套餐明细
             if (Objects.equals(DishType.SINGLE, orderProduct.getDishType())) {
-                //配料明细
-                //附加项（加料、做法）列表
                 request.setDishType(DishType.SINGLE_DISH);
                 request.setItemOriginType(DishType.SINGLE);
+                //做法
                 request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
+                //小料
                 request.setDishList(getSideDishList(orderProduct.getOrderProductId(),orders.getShopId()));
             } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
                 request.setDishType(DishType.COMBO_DISH);
@@ -1045,8 +1041,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 //这个不是做法
                 continue;
             }
-//            String id = String.valueOf(spec.getId());
-            String id = UUID.randomUUID().toString();
+            String id = String.valueOf(spec.getId());
             DishAttachProp dishAttachProp = new DishAttachProp();
             dishAttachProp.setOutAttachPropNo(id);
             dishAttachProp.setAttachPropType("PRACTICE");
@@ -1095,7 +1090,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             side.setUnitCode(orderSide.getUnitId());
             side.setUnitId(orderSide.getUnitId());
             side.setUnitName(orderSide.getUnitName());
-            side.setDishType(DishType.SINGLE_DISH);
+            side.setDishType(DishType.ADDITIONAL_ITEM);
             side.setItemOriginType(DishType.SIDE);
             side.setIsPack("false");
             side.setIsFixAdditionalItemQuantityFlag(false);
