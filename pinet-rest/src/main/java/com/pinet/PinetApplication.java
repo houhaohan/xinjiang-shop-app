@@ -24,7 +24,7 @@ public class PinetApplication {
     public static void main(String[] args) {
         log.info("------------------------service is start--------------------");
         SpringApplication.run(PinetApplication.class, args);
-        log.info("------------------------service is end ---------------------");
+        log.info("------------------------service is end ----------------------");
     }
 
 }
