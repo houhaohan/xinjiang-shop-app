@@ -20,11 +20,11 @@ import com.pinet.core.util.DateUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Coupon;
-import com.pinet.rest.entity.CouponProduct;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
+import com.pinet.rest.entity.dto.AvailableCouponDto;
 import com.pinet.rest.entity.vo.CustomerCouponVo;
 import com.pinet.rest.mapper.CustomerCouponMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
@@ -71,6 +71,16 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
                 .orderByDesc("cc.id")
                 .last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(queryWrapper);
+    }
+
+    @Override
+    public List<CustomerCouponVo> availableCouponList(AvailableCouponDto dto) {
+        List<CustomerCouponVo> list = customerCouponList(dto);
+        for(CustomerCouponVo customerCoupon : list){
+            Boolean isUsable = this.checkCoupon(customerCoupon, dto.getShopId(), dto.getOrderProducts());
+            customerCoupon.setIsUsable(isUsable);
+        }
+        return list;
     }
 
     @Override

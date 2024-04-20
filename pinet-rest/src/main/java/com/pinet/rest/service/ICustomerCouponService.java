@@ -5,6 +5,7 @@ import com.pinet.rest.entity.CustomerCoupon;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
+import com.pinet.rest.entity.dto.AvailableCouponDto;
 import com.pinet.rest.entity.vo.CustomerCouponVo;
 import java.util.List;
 
@@ -19,6 +20,13 @@ import java.util.List;
 public interface ICustomerCouponService extends IService<CustomerCoupon> {
 
     List<CustomerCouponVo> customerCouponList(PageRequest pageRequest);
+
+    /**
+     * 可用优惠券列表
+     * @param dto
+     * @return
+     */
+    List<CustomerCouponVo>  availableCouponList(AvailableCouponDto dto);
 
     boolean updateCouponStatus(UpdateCouponStatusDto dto);
 
