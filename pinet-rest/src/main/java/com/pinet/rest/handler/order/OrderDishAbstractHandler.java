@@ -15,14 +15,16 @@ import java.math.RoundingMode;
 public abstract class OrderDishAbstractHandler implements OrderDishHandler {
     protected OrderDishContext context;
 
-    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice){
+    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice,BigDecimal sidePrice){
         OrderProduct orderProduct = new OrderProduct();
         orderProduct.setOrderId(request.getOrderId());
         orderProduct.setShopProdId(request.getShopProdId());
         orderProduct.setDishId(request.getDishId());
         orderProduct.setProdUnitPrice(unitPrice);
+        orderProduct.setSidePrice(sidePrice);
         orderProduct.setProdNum(request.getProdNum());
-        orderProduct.setProdPrice(BigDecimalUtil.multiply(orderProduct.getProdUnitPrice(),orderProduct.getProdNum(), RoundingMode.HALF_UP));
+        BigDecimal prodPrice = BigDecimalUtil.multiply(BigDecimalUtil.sum(unitPrice, sidePrice), orderProduct.getProdNum());
+        orderProduct.setProdPrice(prodPrice);
         orderProduct.setProdName(request.getProdName());
         orderProduct.setUnit(request.getUnit());
         orderProduct.setProdImg(request.getProdImg());

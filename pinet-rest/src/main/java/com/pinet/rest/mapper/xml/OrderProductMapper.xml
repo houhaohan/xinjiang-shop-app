@@ -16,6 +16,7 @@
         <result column="shop_prod_id" property="shopProdId"/>
         <result column="prod_name" property="prodName"/>
         <result column="prod_unit_price" property="prodUnitPrice"/>
+        <result column="side_price" property="sidePrice"/>
         <result column="prod_num" property="prodNum"/>
         <result column="prod_price" property="prodPrice"/>
         <result column="prod_img" property="prodImg"/>
@@ -31,7 +32,7 @@
         op.update_by,
         op.update_time,
         op.del_flag,
-        op.order_id, op.dish_id, op.unit, op.shop_prod_id, op.prod_name, op.prod_unit_price, op.prod_num, op.prod_price, op.commission, op.package_fee, op.prod_img
+        op.order_id, op.dish_id, op.unit, op.shop_prod_id, op.prod_name, op.prod_unit_price, op.side_price, op.prod_num, op.prod_price, op.commission, op.package_fee, op.prod_img
     </sql>
 
 
@@ -98,6 +99,7 @@
         from qingshi.order_product op
         left join order_product_spec ops on op.id = ops.order_prod_id
         left join shop_product sp on sp.id =  op.shop_prod_id
+        left join order_side os on os.order_prod_id = op.id
         where op.order_id = #{orderId} and sp.dish_type = 'SINGLE' and op.del_flag = 0
     </select>
 
@@ -116,6 +118,7 @@
                 op.order_id ,
                 op.shop_prod_id ,
                 op.prod_unit_price ,
+                op.side_price ,
                 op.prod_num ,
                 op.prod_price ,
                 op.package_fee,
@@ -145,6 +148,7 @@
                 op.order_id ,
                 op.shop_prod_id ,
                 op.prod_unit_price ,
+                op.side_price ,
                 op.prod_num ,
                 op.prod_price ,
                 op.package_fee,

@@ -1,5 +1,7 @@
 package com.pinet.rest.service.impl;
 
+import com.pinet.core.constants.OrderConstant;
+import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.BCapitalFlow;
 import com.pinet.rest.entity.BUserBalance;
 import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -29,18 +30,20 @@ public class BCapitalFlowServiceImpl extends ServiceImpl<BCapitalFlowMapper, BCa
     private IBUserBalanceService balanceService;
 
     @Override
-    public void add(BigDecimal amount, Long orderId, Date orderTime, CapitalFlowWayEnum capitalFlowWayEnum, CapitalFlowStatusEnum capitalFlowStatusEnum, Long shopId) {
-        BCapitalFlow bCapitalFlow = new BCapitalFlow();
-        bCapitalFlow.setAmount(amount);
-        bCapitalFlow.setOrderId(orderId);
-        bCapitalFlow.setOrderTime(orderTime);
-        bCapitalFlow.setPaymentWay(capitalFlowWayEnum.getCode());
-        bCapitalFlow.setStatus(capitalFlowStatusEnum.getCode());
+    public void add(BigDecimal orderAmount, Long orderId, Date orderTime, CapitalFlowWayEnum capitalFlowWayEnum, CapitalFlowStatusEnum capitalFlowStatusEnum, Long shopId) {
+        BCapitalFlow entity = new BCapitalFlow();
+        entity.setOrderId(orderId);
+        entity.setOrderTime(orderTime);
+        entity.setPaymentWay(capitalFlowWayEnum.getCode());
+        entity.setStatus(capitalFlowStatusEnum.getCode());
         BUserBalance bUserBalance = balanceService.getByShopId(shopId);
-        bCapitalFlow.setBalance(bUserBalance.getAmount().add(amount));
-        bCapitalFlow.setShopId(shopId);
-        bCapitalFlow.setCreateTime(new Date());
-
-        save(bCapitalFlow);
+        entity.setShopId(shopId);
+        entity.setActualAmount(orderAmount);
+        entity.setRate(OrderConstant.WITHDRAW_RATE);
+        entity.setExtraAmount(BigDecimalUtil.multiply(orderAmount,OrderConstant.WITHDRAW_RATE * 0.01));
+        entity.setAmount(BigDecimalUtil.subtract(orderAmount,entity.getExtraAmount()));
+        entity.setBalance(BigDecimalUtil.sum(bUserBalance.getAmount(),entity.getAmount()));
+        save(entity);
     }
+
 }

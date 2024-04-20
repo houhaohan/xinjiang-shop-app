@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.pinet.rest.entity.dto.SideDishGroupDTO;
 import com.pinet.rest.entity.vo.ComboDishSpecVo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -48,6 +49,9 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("商品单价")
     private BigDecimal prodUnitPrice;
 
+    @ApiModelProperty("小料总加价/每份单品")
+    private BigDecimal sidePrice;
+
     @ApiModelProperty("商品数量")
     private Integer prodNum;
 
@@ -57,6 +61,12 @@ public class OrderProduct extends BaseEntity {
     @ApiModelProperty("商品图片")
     private String prodImg;
 
+    @ApiModelProperty("佣金")
+    private BigDecimal commission = BigDecimal.ZERO;
+
+    @ApiModelProperty("打包费")
+    private BigDecimal packageFee = BigDecimal.ZERO;
+
     @TableField(exist=false)
     @ApiModelProperty("订单商品样式信息")
     private List<OrderProductSpec> orderProductSpecs;
@@ -65,14 +75,12 @@ public class OrderProduct extends BaseEntity {
     @TableField(exist=false)
     private List<ComboDishSpecVo> comboDishDetails;
 
+    @ApiModelProperty(value = "加料明细")
+    @TableField(exist=false)
+    private List<SideDishGroupDTO> sideDishGroupList;
+
     @TableField(exist=false)
     @ApiModelProperty("订单商品样式信息字符串")
     private String orderProductSpecStr;
-
-    @ApiModelProperty("佣金")
-    private BigDecimal commission = BigDecimal.ZERO;
-
-    @ApiModelProperty("打包费")
-    private BigDecimal packageFee = BigDecimal.ZERO;
 
 }

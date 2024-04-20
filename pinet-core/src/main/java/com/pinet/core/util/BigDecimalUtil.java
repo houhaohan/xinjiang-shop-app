@@ -19,7 +19,7 @@ public class BigDecimalUtil {
      * @return
      */
     public static Integer yuanToFen(BigDecimal amount) {
-        return amount.multiply(new BigDecimal("100")).intValue();
+        return multiply(amount,100).intValue();
     }
 
     /**
@@ -28,7 +28,7 @@ public class BigDecimalUtil {
      * @return
      */
     public static Long yuan2Fen(BigDecimal amount) {
-        return amount.multiply(new BigDecimal("100")).longValue();
+        return multiply(amount,100).longValue();
     }
 
     /**
@@ -37,9 +37,7 @@ public class BigDecimalUtil {
      * @return string
      */
     public static String yuan2FenStr(BigDecimal amount) {
-        return amount.multiply(new BigDecimal("100"))
-                .stripTrailingZeros()
-                .toPlainString();
+        return stripTrailingZeros(multiply(amount,100));
     }
 
 
@@ -76,11 +74,10 @@ public class BigDecimalUtil {
      * 两数之积
      * @param unitPrice (单位元)
      * @param num
-     * @return 单位分
+     * @return 单位元
      */
-    public static Integer multiply(BigDecimal unitPrice, Integer num) {
-        BigDecimal yuan = unitPrice.multiply(new BigDecimal(num));
-        return yuanToFen(yuan);
+    public static BigDecimal multiply(BigDecimal unitPrice, Integer num) {
+        return unitPrice.multiply(new BigDecimal(num));
     }
 
     /**
@@ -111,7 +108,7 @@ public class BigDecimalUtil {
      * @return 单位元
      */
     public static BigDecimal multiply(BigDecimal amount, Integer num, Integer scale, RoundingMode roundingMode) {
-        return amount.multiply(new BigDecimal(num)).setScale(scale,roundingMode);
+        return multiply(amount,num).setScale(scale,roundingMode);
     }
 
     /**

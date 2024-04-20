@@ -30,4 +30,33 @@
         shop_prod_id, dish_id, side_dish_group_id, side_dish_id, side_dish_name, add_price, sort
     </sql>
 
+
+    <resultMap id="SideDishGroupMap" type="com.pinet.rest.entity.vo.KrySideDishGroupVo">
+        <result column="id" property="id" />
+        <result column="dish_id" property="dishId" />
+        <result column="group_name" property="groupName" />
+        <collection property="sideDishGroupDetailList" ofType="com.pinet.rest.entity.vo.KrySideDishGroupDetailVo">
+            <result column="side_detail_id" property="id"/>
+            <result column="side_dish_group_id" property="sideDishGroupId"/>
+            <result column="side_dish_id" property="sideDishId"/>
+            <result column="side_dish_name" property="sideDishName"/>
+            <result column="add_price" property="addPrice"/>
+        </collection>
+    </resultMap>
+
+    <select id="getByShopProdId" resultMap="SideDishGroupMap">
+        select ksdg.id,
+        ksdg.dish_id,
+        ksdg.group_name,
+        ksdgd.id as side_detail_id,
+        ksdgd.side_dish_group_id,
+        ksdgd.side_dish_id,
+        ksdgd.side_dish_name,
+        (ksdgd.add_price/100) as add_price
+        from kry_side_dish_group ksdg
+        left join kry_side_dish_group_detail ksdgd on ksdg.id = ksdgd.side_dish_group_id and ksdgd.del_flag = 0
+        where ksdg.shop_prod_id = #{shopProdId} and ksdg.del_flag = 0
+        order by ksdg.id, ksdgd.id
+    </select>
+
 </mapper>

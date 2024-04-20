@@ -20,6 +20,7 @@ public class DishSettleContext {
     protected final ICartComboDishService cartComboDishService;
     protected final ICartComboDishSpecService cartComboDishSpecService;
     protected final IKryComboGroupService kryComboGroupService;
+    protected final ICartSideService cartSideService;
 
     protected OrderSettlementDto request;
     protected OrderProduct response;

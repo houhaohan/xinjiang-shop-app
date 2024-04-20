@@ -24,6 +24,8 @@ public class CartContext {
 
     protected IShopProductSpecService shopProductSpecService;
 
+    protected ICartSideService cartSideService;
+
     protected CartMapper cartMapper;
 
     /**
@@ -86,6 +88,7 @@ public class CartContext {
         shopProductSpecService = SpringContextUtils.getBean(IShopProductSpecService.class);
         cartMapper = SpringContextUtils.getBean(CartMapper.class);
         cartProductSpecService = SpringContextUtils.getBean(ICartProductSpecService.class);
+        cartSideService = SpringContextUtils.getBean(ICartSideService.class);
     }
 
 

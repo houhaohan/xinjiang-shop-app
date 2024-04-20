@@ -1,11 +1,13 @@
 package com.pinet.rest.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.pinet.rest.entity.CartProductSpec;
 import com.pinet.rest.mapper.CartProductSpecMapper;
 import com.pinet.rest.service.ICartProductSpecService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.Collection;
@@ -43,6 +45,25 @@ public class CartProductSpecServiceImpl extends ServiceImpl<CartProductSpecMappe
     @Override
     public List<CartProductSpec> getByUserIdAndShopProdId(Long userId, Long shopProdId) {
         return cartProductSpecMapper.getByUserIdAndShopProdId(userId,shopProdId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteByCartId(Long cartId) {
+        UpdateWrapper<CartProductSpec> wrapper = new UpdateWrapper<>();
+        wrapper.eq("cart_id",cartId);
+        return remove(wrapper);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteByCartIds(List<Long> cartIds) {
+        if(CollectionUtils.isEmpty(cartIds)){
+            return true;
+        }
+        UpdateWrapper<CartProductSpec> wrapper = new UpdateWrapper<>();
+        wrapper.in("cart_id",cartIds);
+        return remove(wrapper);
     }
 
     @Override

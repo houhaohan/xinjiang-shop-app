@@ -41,9 +41,9 @@ public abstract class DishSettleAbstractHandler implements DishSettleHandler {
         //设置打包费   //自提没有打包费
         if (Objects.equals(context.request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())) {
             if(Objects.equals(shopProduct.getDishType(), DishType.COMBO)){
-                orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE, prodNum, RoundingMode.HALF_UP));
+                orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE, prodNum));
             }else {
-                orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, prodNum, RoundingMode.HALF_UP));
+                orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.SINGLE_PACKAGE_FEE, prodNum));
             }
         }
         orderProduct.setDishId(shopProduct.getProdId());

@@ -16,11 +16,13 @@ public class OrderDishContext {
     protected final ICartComboDishService cartComboDishService;
     protected final ICartComboDishSpecService cartComboDishSpecService;
     protected final IOrderProductService orderProductService;
+    protected final IOrderSideService orderSideService;
     protected final IKryComboGroupDetailService kryComboGroupDetailService;
     protected final IShopProductService shopProductService;
     protected final IShopProductSpecService shopProductSpecService;
     protected final IOrderProductSpecService orderProductSpecService;
     protected final ICartProductSpecService cartProductSpecService;
+    protected final ICartSideService cartSideService;
     protected String dishType;
 
     public OrderDishHandler handler(String dishType){
