@@ -1,33 +1,18 @@
 
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.fasterxml.jackson.core.type.TypeReference;
+
 import com.pinet.PinetApplication;
-import com.pinet.core.page.PageRequest;
-import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
-import com.pinet.keruyun.openapi.util.JsonUtil;
-import com.pinet.keruyun.openapi.vo.KryResponse;
-import com.pinet.keruyun.openapi.vo.OrderCreateVO;
-import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
-import com.pinet.keruyun.openapi.vo.TakeoutOrderCreateVo;
+
 import com.pinet.rest.entity.*;
-<<<<<<< Updated upstream
-import com.pinet.rest.service.ICustomerBalanceService;
-import com.pinet.rest.service.ICustomerService;
-=======
-import com.pinet.rest.entity.vo.CustomerCouponVo;
+
 import com.pinet.rest.service.ICustomerCouponService;
->>>>>>> Stashed changes
 import com.pinet.rest.service.impl.OrderServicesImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.util.CollectionUtils;
 
-import java.util.List;
 import java.util.UUID;
 
-import java.util.List;
 
 @SpringBootTest(classes = PinetApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductTest {
@@ -39,11 +24,7 @@ public class ProductTest {
     @Test
     public void test(){
 //        Orders orders = ordersService.getById(31785);//套餐
-<<<<<<< Updated upstream
-        Orders orders = ordersService.getById(54344);
-=======
-        Orders orders = ordersService.getById(54386);
->>>>>>> Stashed changes
+        Orders orders = ordersService.getById(56982);
 //        OrderCreateVO orderCreateVO = ordersService.pushOrderToKry(orders);
 //        String s = ordersService.takeoutOrderCreate(orders);
 //        System.out.println(JsonUtil.toJson(orderCreateVO));

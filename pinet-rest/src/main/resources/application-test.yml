@@ -85,7 +85,7 @@ mybatis-plus:
     ## 自动驼峰命名规则映射
     map-underscore-to-camel-case: true
     auto-mapping-behavior: full
-    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   #实体类扫描
   global-config:
     banner: false

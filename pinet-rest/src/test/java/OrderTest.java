@@ -6,8 +6,11 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.pinet.PinetApplication;
 import com.pinet.keruyun.openapi.dto.KryOrderDetailDTO;
 import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
+import com.pinet.keruyun.openapi.param.DetailDishParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.keruyun.openapi.type.AuthType;
+import com.pinet.keruyun.openapi.vo.DetailDishVO;
+import com.pinet.keruyun.openapi.vo.KryResult;
 import com.pinet.keruyun.openapi.vo.OrderDetailVO;
 import com.pinet.rest.entity.CustomerMember;
 import com.pinet.rest.service.ICustomerCouponService;
@@ -19,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -82,7 +86,6 @@ public class OrderTest {
         ordersService.performanceCall(dto);
     }
 
-<<<<<<< Updated upstream
     /**
      * 商家转账到零钱
      * @throws WxPayException
@@ -111,10 +114,6 @@ public class OrderTest {
 
 
 
-
-=======
-    //1058678830555
-
     /**
      * 菜品详情
      */
@@ -127,5 +126,4 @@ public class OrderTest {
         KryResult<List<DetailDishVO>> listKryResult = kryApiService.listQueryDetailDish(19844001L, token, param);
         System.out.println(JSON.toJSONString(listKryResult));
     }
->>>>>>> Stashed changes
 }
