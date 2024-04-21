@@ -294,9 +294,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     private void checkShop(Shop shop) {
         //判断店铺是否营业
-//        if (!shopService.checkShopStatus(shop)) {
-//            throw new PinetException("店铺已经打烊了~");
-//        }
+        if (!shopService.checkShopStatus(shop)) {
+            throw new PinetException("店铺已经打烊了~");
+        }
     }
 
     private Long getExpireTime(Date createTime) {
