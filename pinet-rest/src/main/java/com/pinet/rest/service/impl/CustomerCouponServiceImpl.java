@@ -113,7 +113,6 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         queryWrapper.eq("cc.customer_id", userId);
         queryWrapper.eq("cc.del_flag", 0);
         queryWrapper.orderByDesc("cc.id");
-//        queryWrapper.last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(page,queryWrapper);
     }
 
@@ -123,7 +122,6 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(),pageRequest.getPageSize());
         QueryWrapper queryWrapper = initWrapper(userId, false);
         queryWrapper.orderByDesc("cc.id");
-//        queryWrapper.last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
         return baseMapper.selectCustomerCouponList(page,queryWrapper);
     }
 
