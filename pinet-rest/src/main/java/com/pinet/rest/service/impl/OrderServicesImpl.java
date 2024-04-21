@@ -860,7 +860,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
-//            request.setOutDishNo(UUID.randomUUID().toString());
             request.setDishId(orderProduct.getProdId());
             request.setDishName(orderProduct.getProductName());
             request.setDishCode(orderProduct.getDishCode());
@@ -898,26 +897,23 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
-        System.err.println(JSON.toJSONString(dto));
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
         //记录日志
-//        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
+        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
 
-//        if (scanCodePrePlaceOrderVo == null) {
-//            return null;
-//        }
-//        if ("fail".equals(scanCodePrePlaceOrderVo.getSuccess())) {
-//            //推送失败，重试
-//            pushKryOrderMessage(orders, scanCodePrePlaceOrderVo.getFormatMsgInfo());
-//            return null;
-//        }
-//        if (scanCodePrePlaceOrderVo.getData() == null) {
-//            return null;
-//        }
-//        return scanCodePrePlaceOrderVo.getData().getOrderNo();
-        return null;
-
+        if (scanCodePrePlaceOrderVo == null) {
+            return null;
+        }
+        if ("fail".equals(scanCodePrePlaceOrderVo.getSuccess())) {
+            //推送失败，重试
+            pushKryOrderMessage(orders, scanCodePrePlaceOrderVo.getFormatMsgInfo());
+            return null;
+        }
+        if (scanCodePrePlaceOrderVo.getData() == null) {
+            return null;
+        }
+        return scanCodePrePlaceOrderVo.getData().getOrderNo();
     }
 
 
@@ -971,9 +967,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             List<OrderComboDishVo> orderComboDishVoList = entry.getValue();
             OrderComboDishVo orderComboDishVo = orderComboDishVoList.get(0);
             ScanCodeDish dish = new ScanCodeDish();
-            dish.setOutDishNo(UUID.randomUUID().toString());
+            dish.setOutDishNo(IdUtil.getSnowflake().nextIdStr());
             dish.setDishId(entry.getKey());
-            dish.setDishType("COMBO_DETAIL");
+            dish.setDishType(DishType.COMBO_DISH);
             dish.setDishCode(orderComboDishVo.getDishCode());
             dish.setDishName(orderComboDishVo.getSingleProdName());
             //做法
@@ -1010,7 +1006,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             dish.setDishImgUrl(orderComboDishVo.getImageUrl());
             dish.setIsPack("false");
             dish.setDishGiftFlag("false");
-            dish.setItemOriginType("SINGLE");
+            dish.setItemOriginType(DishType.SINGLE);
             String dishSkuId = orderComboDishVoList.stream()
                     .filter(o -> StringUtil.isNotBlank(o.getDishSkuId()))
                     .map(OrderComboDishVo::getDishSkuId)
