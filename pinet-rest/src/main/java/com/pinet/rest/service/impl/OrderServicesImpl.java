@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -293,9 +294,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     private void checkShop(Shop shop) {
         //判断店铺是否营业
-        if (!shopService.checkShopStatus(shop)) {
-            throw new PinetException("店铺已经打烊了~");
-        }
+//        if (!shopService.checkShopStatus(shop)) {
+//            throw new PinetException("店铺已经打烊了~");
+//        }
     }
 
     private Long getExpireTime(Date createTime) {
@@ -835,7 +836,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
         paymentDetailRequest.setOutBizId(String.valueOf(orders.getId()));
-        paymentDetailRequest.setOutBizId(UUID.randomUUID().toString());
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
         paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
         paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
@@ -860,6 +860,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         for (OrderProductDto orderProduct : orderProducts) {
             OrderDishRequest request = new OrderDishRequest();
             request.setOutDishNo(String.valueOf(orderProduct.getOrderProductId()));
+//            request.setOutDishNo(UUID.randomUUID().toString());
             request.setDishId(orderProduct.getProdId());
             request.setDishName(orderProduct.getProductName());
             request.setDishCode(orderProduct.getDishCode());
@@ -897,23 +898,26 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDishRequestList.add(request);
         }
         dto.setOrderDishRequestList(orderDishRequestList);
+        System.err.println(JSON.toJSONString(dto));
         String token = kryApiService.getToken(AuthType.SHOP, orders.getKryShopId());
         ScanCodePrePlaceOrderVo scanCodePrePlaceOrderVo = kryApiService.scanCodePrePlaceOrder(orders.getKryShopId(), token, dto);
         //记录日志
-        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
+//        pushKryOrderLog(orders.getId(), JSONObject.toJSONString(dto), JSONObject.toJSONString(scanCodePrePlaceOrderVo), scanCodePrePlaceOrderVo.getSuccess());
 
-        if (scanCodePrePlaceOrderVo == null) {
-            return null;
-        }
-        if ("fail".equals(scanCodePrePlaceOrderVo.getSuccess())) {
-            //推送失败，重试
-            pushKryOrderMessage(orders, scanCodePrePlaceOrderVo.getFormatMsgInfo());
-            return null;
-        }
-        if (scanCodePrePlaceOrderVo.getData() == null) {
-            return null;
-        }
-        return scanCodePrePlaceOrderVo.getData().getOrderNo();
+//        if (scanCodePrePlaceOrderVo == null) {
+//            return null;
+//        }
+//        if ("fail".equals(scanCodePrePlaceOrderVo.getSuccess())) {
+//            //推送失败，重试
+//            pushKryOrderMessage(orders, scanCodePrePlaceOrderVo.getFormatMsgInfo());
+//            return null;
+//        }
+//        if (scanCodePrePlaceOrderVo.getData() == null) {
+//            return null;
+//        }
+//        return scanCodePrePlaceOrderVo.getData().getOrderNo();
+        return null;
+
     }
 
 

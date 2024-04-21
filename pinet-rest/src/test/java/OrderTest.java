@@ -82,6 +82,7 @@ public class OrderTest {
         ordersService.performanceCall(dto);
     }
 
+<<<<<<< Updated upstream
     /**
      * 商家转账到零钱
      * @throws WxPayException
@@ -111,4 +112,20 @@ public class OrderTest {
 
 
 
+=======
+    //1058678830555
+
+    /**
+     * 菜品详情
+     */
+    @Test
+    public void dishDetail(){
+
+        String token = kryApiService.getToken(AuthType.SHOP, 19844001L);
+        DetailDishParam param = new DetailDishParam();
+        param.setDishIds(Arrays.asList("1058678830555"));
+        KryResult<List<DetailDishVO>> listKryResult = kryApiService.listQueryDetailDish(19844001L, token, param);
+        System.out.println(JSON.toJSONString(listKryResult));
+    }
+>>>>>>> Stashed changes
 }
