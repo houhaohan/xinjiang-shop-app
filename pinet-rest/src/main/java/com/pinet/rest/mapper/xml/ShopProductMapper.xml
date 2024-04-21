@@ -310,12 +310,7 @@
 		t.price/100 as price,
         t.sell_price/100 as market_price,
         t.dish_sku_price/100 as add_price,
-        t.default_flag,1
-       <!-- ksdgd.id as comboGroupDetailId,
-        ksdgd.side_dish_id,
-        ksdgd.side_dish_name,
-        ksdgd.side_dish_group_id,
-        ksdgd.add_price / 100 as sideAddPrice-->
+        sps.default_flag
         from shop_product sp
         left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0
         inner join (
@@ -337,14 +332,7 @@
             inner join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id and kcgd.del_flag = 0
         where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
         ) t on t.single_dish_id = sp.prod_id
-       <!-- and sps.spec_name = t.spec_name
-        and t.dish_name = sp.product_name -->
-        <!--left join kry_side_dish_group_detail ksdgd on ksdgd.shop_prod_id = sp.id and ksdgd.del_flag = 0-->
         where sp.shop_id = #{shopId} and sp.del_flag = 0
-        and sp.prod_id in
-        <foreach collection="dishIds" item="item" separator="," open="(" close=")">
-            #{item}
-        </foreach>
         order by sps.sku_id,sps.id
 
     </select>

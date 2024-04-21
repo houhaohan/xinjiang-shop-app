@@ -58,7 +58,16 @@
 
            union all
 
-            <!-- 套餐价格，数量-->
+           <!-- 小料加价-->
+           select sum(ksdgd.add_price / 100 * cs.quantity * c.prod_num) as price ,0 as prod_num
+           from cart c
+           left join cart_side cs on c.id = cs.cart_id and cs.del_flag = 0
+           left join kry_side_dish_group_detail ksdgd on cs.side_detail_id = ksdgd.id and ksdgd.del_flag = 0
+           where c.shop_id = #{shopId} and c.customer_id = #{customerId} and c.del_flag = 0
+
+           union all
+
+           <!-- 套餐价格，数量-->
            select
            sum((kcgd.price / 100 * c.prod_num)) as price,sum(c.prod_num)  as prod_num
            from cart c

@@ -37,10 +37,10 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
 
 
     @Override
-    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice) {
-        OrderProduct orderProduct = super.build(request, unitPrice);
+    protected OrderProduct build(OrderProductRequest request, BigDecimal unitPrice,BigDecimal sidePrice) {
+        OrderProduct orderProduct = super.build(request, unitPrice, sidePrice);
         if(Objects.equals(request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())){
-            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum(),RoundingMode.HALF_UP));
+            orderProduct.setPackageFee(BigDecimalUtil.multiply(OrderConstant.COMBO_PACKAGE_FEE,orderProduct.getProdNum()));
         }
         context.orderProductService.save(orderProduct);
         return orderProduct;
@@ -55,7 +55,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
     public OrderProduct execute(CartOrderProductRequest request){
         Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(request.getShopProdId());
 
-        OrderProduct orderProduct = build(request, BigDecimalUtil.fenToYuan(unitPrice));
+        OrderProduct orderProduct = build(request, BigDecimalUtil.fenToYuan(unitPrice), BigDecimal.ZERO);
         List<CartComboDish> cartComboDishList = context.cartComboDishService.getByCartId(request.getCartId());
 
         List<Long> shopProdIds = cartComboDishList.stream().map(CartComboDish::getShopProdId).collect(Collectors.toList());
@@ -115,7 +115,7 @@ public class OrderComboDishHandler extends OrderDishAbstractHandler{
     @Override
     public OrderProduct execute(DirectOrderRequest request){
         Long unitPrice = context.kryComboGroupDetailService.getPriceByShopProdId(request.getShopProdId());
-        OrderProduct orderProduct = build(request, BigDecimalUtil.fenToYuan(unitPrice));
+        OrderProduct orderProduct = build(request, BigDecimalUtil.fenToYuan(unitPrice), BigDecimal.ZERO);
         List<Long> singleProdIds = request.getComboDishDtoList().stream().map(OrderComboDishDto::getSingleProdId).collect(Collectors.toList());
         List<ShopProduct> shopProducts = context.shopProductService.listByIds(singleProdIds);
 

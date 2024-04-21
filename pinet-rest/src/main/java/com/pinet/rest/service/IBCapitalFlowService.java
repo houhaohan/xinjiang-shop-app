@@ -21,12 +21,12 @@ public interface IBCapitalFlowService extends IService<BCapitalFlow> {
 
     /**
      * 添加流水
-     * @param amount 金额
+     * @param orderAmount 订单金额
      * @param orderId 订单id
      * @param orderTime  下单时间
      * @param capitalFlowWayEnum  支付方式
      * @param capitalFlowStatusEnum 状态
      * @param shopId 店铺id
      */
-    void add(BigDecimal amount, Long orderId, Date orderTime, CapitalFlowWayEnum capitalFlowWayEnum, CapitalFlowStatusEnum capitalFlowStatusEnum, Long shopId);
+    void add(BigDecimal orderAmount, Long orderId, Date orderTime, CapitalFlowWayEnum capitalFlowWayEnum, CapitalFlowStatusEnum capitalFlowStatusEnum, Long shopId);
 }

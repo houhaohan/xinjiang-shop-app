@@ -52,5 +52,6 @@ public class OrderSettlementDto {
     @ApiModelProperty(value = "套餐菜明细")
     private List<OrderComboDishDto> orderComboDishList;
 
-
+    @ApiModelProperty(value = "小料明细")
+    private List<SideDishGroupDTO> sideDishGroupList;
 }

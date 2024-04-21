@@ -34,4 +34,18 @@ public interface ICartProductSpecService extends IService<CartProductSpec> {
      */
     List<CartProductSpec> getByUserIdAndShopProdId(Long userId,Long shopProdId);
 
+
+    /**
+     * 根据购物车ID删除
+     * @param cartId
+     * @return
+     */
+    boolean deleteByCartId(Long cartId);
+
+    /**
+     * 根据购物车ID批量删除
+     * @param cartIds
+     * @return
+     */
+    boolean deleteByCartIds(List<Long> cartIds);
 }

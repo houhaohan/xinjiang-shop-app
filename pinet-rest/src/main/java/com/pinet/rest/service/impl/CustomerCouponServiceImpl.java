@@ -340,10 +340,10 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         if (coupon.getDisableFlag() == 0) {
             throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
         }
-        if (CouponStatusEnum.NOT_STARTED.getCode() == coupon.getStatus()) {
+        if (Objects.equals(CouponStatusEnum.NOT_STARTED.getCode(),coupon.getStatus())) {
             throw new PinetException(ApiExceptionEnum.COUPON_NOT_STARTED);
         }
-        if (CouponStatusEnum.EXPIRED.getCode() == coupon.getStatus()) {
+        if (Objects.equals(CouponStatusEnum.EXPIRED.getCode(),coupon.getStatus())) {
             throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
         }
         if (coupon.getUseTime() != null && DateUtil.compare(new Date(), coupon.getUseTime()) < 0) {
@@ -371,12 +371,12 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("customer_id", userId);
         queryWrapper.eq("coupon_id", coupon.getId());
-        if (coupon.getRecType() == CouponClaimedTypeEnum.USER_LIMIT.getCode()) {
+        if (Objects.equals(coupon.getRecType(),CouponClaimedTypeEnum.USER_LIMIT.getCode())) {
             long count = count(queryWrapper);
             if (count >= coupon.getRestrictNum()) {
                 throw new PinetException(ApiExceptionEnum.COUPON_RECEIVE_UPPER_LIMIT);
             }
-        } else if (coupon.getRecType() == CouponClaimedTypeEnum.TIME_LIMIT.getCode()) {
+        } else if (Objects.equals(coupon.getRecType(),CouponClaimedTypeEnum.TIME_LIMIT.getCode())) {
             Date firstCouponReceiveTime = getFirstCouponReceiveTime(userId, coupon.getId());
             queryWrapper.le("create_time", DateUtils.endOfDay(DateUtils.addDays(firstCouponReceiveTime, coupon.getRecCycle())));
             long count = count(queryWrapper);
