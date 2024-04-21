@@ -6,32 +6,19 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.pinet.PinetApplication;
 import com.pinet.keruyun.openapi.dto.KryOrderDetailDTO;
 import com.pinet.keruyun.openapi.dto.PerformanceCallDTO;
-import com.pinet.keruyun.openapi.param.DetailDishParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.keruyun.openapi.type.AuthType;
-import com.pinet.keruyun.openapi.vo.DetailDishVO;
-import com.pinet.keruyun.openapi.vo.KryResult;
 import com.pinet.keruyun.openapi.vo.OrderDetailVO;
 import com.pinet.rest.entity.CustomerMember;
-import com.pinet.rest.entity.Orders;
-import com.pinet.rest.entity.Shop;
-import com.pinet.rest.entity.dto.CreateOrderDto;
-import com.pinet.rest.entity.enums.OrderSourceEnum;
-import com.pinet.rest.entity.enums.OrderTypeEnum;
-import com.pinet.rest.entity.param.OrderRefundNotifyParam;
-import com.pinet.rest.handler.OrderContext;
 import com.pinet.rest.service.ICustomerCouponService;
 import com.pinet.rest.service.ICustomerMemberService;
 import com.pinet.rest.service.IOrdersService;
-import com.pinet.rest.service.IShopService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -121,32 +108,7 @@ public class OrderTest {
         miniPayService.getTransferService().transferBatches(request);
     }
 
-    @Autowired
-    private IShopService shopService;
 
-    @Test
-    public void createOrder(){
-        Shop shop = shopService.getById(24);
-        CreateOrderDto request = new CreateOrderDto();
-//        request.setOrderType(OrderTypeEnum.SELF_PICKUP.getCode());
-        request.setOrderType(OrderTypeEnum.TAKEAWAY.getCode());
-        request.setShopId(shop.getId());
-        request.setSettlementType(2);
-        request.setShopProdId(252L);//
-        request.setProdNum(1);
-        request.setShopProdSpecIds("1281,1282");//
-        request.setCustomerCouponId(104L);
-        request.setCustomerAddressId(10329L);
-        request.setOrderPrice(new BigDecimal("14"));
-        request.setLat("31.182291");
-        request.setLng("121.198238");
-        request.setRemark("测试单1111");
-        request.setOrderSource(OrderSourceEnum.WE_CHAT.getCode());
 
-        OrderContext context = new OrderContext(12034L, OrderTypeEnum.TAKEAWAY);
-        context.setRequest(request);
-        context.setShop(shop);
-        context.createOrder();
-    }
 
 }

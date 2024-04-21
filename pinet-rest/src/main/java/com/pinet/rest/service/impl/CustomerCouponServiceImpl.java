@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.common.redis.util.RedisUtil;
@@ -25,6 +26,7 @@ import com.pinet.rest.entity.CustomerCoupon;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
+import com.pinet.rest.entity.request.UsableCouponRequest;
 import com.pinet.rest.entity.vo.CustomerCouponVo;
 import com.pinet.rest.mapper.CustomerCouponMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
@@ -34,8 +36,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -65,12 +69,25 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     public List<CustomerCouponVo> customerCouponList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
+        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(),pageRequest.getPageSize());
         QueryWrapper<CustomerCoupon> queryWrapper = initWrapper(userId, true);
         queryWrapper.in("cc.coupon_status", 1,2)
                 .orderByAsc("cc.coupon_status")
-                .orderByDesc("cc.id")
-                .last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
-        return baseMapper.selectCustomerCouponList(queryWrapper);
+                .orderByDesc("cc.id");
+        return baseMapper.selectCustomerCouponList(page,queryWrapper);
+    }
+
+    @Override
+    public List<CustomerCouponVo> usableCouponList(UsableCouponRequest request) {
+        List<CustomerCouponVo> list = customerCouponList(request);
+        if(CollectionUtils.isEmpty(list)){
+            return new ArrayList<>();
+        }
+        list.forEach(item -> {
+            Boolean usable = this.checkCoupon(item, request.getShopId(), request.getOrderProducts());
+            item.setIsUsable(usable);
+        });
+        return list;
     }
 
     @Override
@@ -91,21 +108,23 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     @Override
     public List<CustomerCouponVo> customerCouponListDetailList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(),pageRequest.getPageSize());
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cc.customer_id", userId);
         queryWrapper.eq("cc.del_flag", 0);
         queryWrapper.orderByDesc("cc.id");
-        queryWrapper.last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
-        return baseMapper.selectCustomerCouponList(queryWrapper);
+//        queryWrapper.last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
+        return baseMapper.selectCustomerCouponList(page,queryWrapper);
     }
 
     @Override
     public List<CustomerCouponVo> customerCouponInvalidList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(),pageRequest.getPageSize());
         QueryWrapper queryWrapper = initWrapper(userId, false);
         queryWrapper.orderByDesc("cc.id");
-        queryWrapper.last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
-        return baseMapper.selectCustomerCouponList(queryWrapper);
+//        queryWrapper.last("limit " + ((pageRequest.getPageNum() - 1) * pageRequest.getPageSize()) + "," + pageRequest.getPageSize());
+        return baseMapper.selectCustomerCouponList(page,queryWrapper);
     }
 
     @Override
@@ -119,10 +138,11 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         if (!StringUtil.isBlank(lastIdStr)) {
             lastId = Long.parseLong(lastIdStr);
         }
+        Page<CustomerCoupon> page = new Page<>(1,20);
         QueryWrapper queryWrapper = initWrapper(userId, true);
         queryWrapper.gt("cc.id", lastId);
         queryWrapper.orderByDesc("cc.id");
-        List<CustomerCouponVo> customerCoupons = baseMapper.selectCustomerCouponList(queryWrapper);
+        List<CustomerCouponVo> customerCoupons = baseMapper.selectCustomerCouponList(page,queryWrapper);
 
         if (CollUtil.isNotEmpty(customerCoupons)) {
             redisUtil.set(redisKey, customerCoupons.get(0).getId().toString());
