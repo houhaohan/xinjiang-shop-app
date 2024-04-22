@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -835,7 +836,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         PaymentDetailRequest paymentDetailRequest = new PaymentDetailRequest();
         paymentDetailRequest.setOutBizId(String.valueOf(orders.getId()));
-        paymentDetailRequest.setOutBizId(UUID.randomUUID().toString());
         paymentDetailRequest.setAmount(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
         paymentDetailRequest.setPayMode("KEEP_ACCOUNT");
         paymentDetailRequest.setChannelCode("OPENTRADE_WECHAT_PAY");
@@ -967,9 +967,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             List<OrderComboDishVo> orderComboDishVoList = entry.getValue();
             OrderComboDishVo orderComboDishVo = orderComboDishVoList.get(0);
             ScanCodeDish dish = new ScanCodeDish();
-            dish.setOutDishNo(UUID.randomUUID().toString());
+            dish.setOutDishNo(IdUtil.getSnowflake().nextIdStr());
             dish.setDishId(entry.getKey());
-            dish.setDishType("COMBO_DETAIL");
+            dish.setDishType(DishType.COMBO_DISH);
             dish.setDishCode(orderComboDishVo.getDishCode());
             dish.setDishName(orderComboDishVo.getSingleProdName());
             //做法
@@ -1006,7 +1006,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             dish.setDishImgUrl(orderComboDishVo.getImageUrl());
             dish.setIsPack("false");
             dish.setDishGiftFlag("false");
-            dish.setItemOriginType("SINGLE");
+            dish.setItemOriginType(DishType.SINGLE);
             String dishSkuId = orderComboDishVoList.stream()
                     .filter(o -> StringUtil.isNotBlank(o.getDishSkuId()))
                     .map(OrderComboDishVo::getDishSkuId)
