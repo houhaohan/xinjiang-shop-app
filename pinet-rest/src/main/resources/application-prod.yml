@@ -125,10 +125,10 @@ social:
     mini:
       appid: wx2cf61e93a478f54f
       secret: 8cb2cf16e9334e123de200549a7e3afb
-      mch_id: 1502776411
+      mch_id: 1674836473
       notify_url: http://xinjiangapi.ypxlbz.com/qingshi/api/notify/order/wxMini/pay
       key: ZHANGSHUOwudi1234567891011121314
-      p12url: /usr/project/jars/apiclient_cert.p12
+      p12url: /usr/project/jars/wx_mini/apiclient_cert.p12
       refund_notify_url: http://xinjiangapi.ypxlbz.com/qingshi/api/notify/order/wxMini/refund
   alipay:
     app:
