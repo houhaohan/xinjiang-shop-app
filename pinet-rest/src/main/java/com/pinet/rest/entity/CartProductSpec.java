@@ -39,5 +39,9 @@ public class CartProductSpec extends BaseEntity {
     @TableField(exist = false)
     private BigDecimal price;
 
+    @TableField(exist = false)
+    @ApiModelProperty("店铺商品样式状态")
+    private Integer shopProdDelFlag;
+
 
 }

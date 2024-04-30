@@ -1,6 +1,8 @@
 package com.pinet.rest.handler.settle;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ObjectUtil;
+import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.SideDishGroupDTO;
@@ -71,6 +73,10 @@ public class SingleDishHandler extends DishSettleAbstractHandler{
             //查询具体的样式并且校验
             OrderProductSpec orderProductSpec = new OrderProductSpec();
             ShopProductSpec shopProductSpec = context.shopProductSpecService.getById(shopProdSpecId);
+            //判断样式是否存在
+            if (ObjectUtil.isNull(shopProductSpec)){
+                throw new PinetException("商品:"+orderProduct.getProdName()+"已下架,请重新购买");
+            }
             unitPrice = BigDecimalUtil.sum(unitPrice, shopProductSpec.getPrice());
             ProductSku productSku = context.productSkuService.getById(shopProductSpec.getSkuId());
             orderProductSpec.setProdSkuId(shopProductSpec.getSkuId());

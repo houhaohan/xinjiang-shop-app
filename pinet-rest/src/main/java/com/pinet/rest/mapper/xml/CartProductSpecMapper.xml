@@ -42,7 +42,7 @@
 
 
     <select id="selectByCartId" resultType="com.pinet.rest.entity.CartProductSpec">
-        select cps.*, sps.price
+        select cps.cart_id, cps.shop_prod_spec_id, sps.spec_name shopProdSpecName, sps.price,sps.del_flag shopProdDelFlag
         from cart_product_spec cps
                  left join shop_product_spec sps on cps.shop_prod_spec_id = sps.id
         where cps.cart_id = #{cartId}
