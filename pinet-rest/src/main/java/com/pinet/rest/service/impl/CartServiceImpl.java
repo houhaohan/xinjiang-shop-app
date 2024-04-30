@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pinet.core.constants.DB;
@@ -12,6 +13,8 @@ import com.pinet.rest.entity.dto.AddCartDTO;
 import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
+import com.pinet.rest.entity.enums.CartStatusEnum;
+import com.pinet.rest.entity.enums.ShopProdStatusEnum;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.handler.cart.CartContext;
 import com.pinet.rest.mapper.CartMapper;
@@ -46,6 +49,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     private final IKryComboGroupDetailService kryComboGroupDetailService;
     private final ICartComboDishService cartComboDishService;
     private final ICartSideService cartSideService;
+    private final IKryComboGroupService kryComboGroupService;
 
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
@@ -56,8 +60,13 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         }
         List<CartListVo> cartListVos = cartMapper.selectCartList(dto);
         cartListVos.forEach(cart -> {
-            if(DishType.COMBO.equalsIgnoreCase(cart.getDishType())){
-                List<CartComboDishVo> cartComboDishVos = cartComboDishService.getComboDishByCartId(cart.getCartId(),cart.getShopProdId());
+            if (DishType.COMBO.equalsIgnoreCase(cart.getDishType())) {
+                List<CartComboDishVo> cartComboDishVos = cartComboDishService.getComboDishByCartId(cart.getCartId(), cart.getShopProdId());
+                //判断套餐是否删除|下架
+                ShopProduct shopProduct = shopProductService.getById(cart.getShopProdId());
+                if (ObjectUtil.isNull(shopProduct) || shopProduct.getShopProdStatus().equals(ShopProdStatusEnum.OFF_SHELF.getCode())) {
+                    cart.setCartStatus(CartStatusEnum.EXPIRE.getCode());
+                }
                 cart.setCartComboDishVos(cartComboDishVos);
                 Long unitPrice = kryComboGroupDetailService.getPriceByShopProdId(cart.getShopProdId());
 
@@ -69,18 +78,23 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
                 List<ComboSingleProductSpecVo> comboSingleProductSpecVos = kryComboGroupDetailService.getSpecByShopProdSpecIds(shopProdSpecIds, cart.getShopProdId());
                 Long specAddPrice = comboSingleProductSpecVos.stream().map(ComboSingleProductSpecVo::getAddPrice).reduce(0L, Long::sum);
-                cart.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice + specAddPrice ));
-                cart.setAllPrice(BigDecimalUtil.multiply(cart.getProdPrice(),new BigDecimal(cart.getProdNum())));
-            }else {
+                cart.setProdPrice(BigDecimalUtil.fenToYuan(unitPrice + specAddPrice));
+                cart.setAllPrice(BigDecimalUtil.multiply(cart.getProdPrice(), new BigDecimal(cart.getProdNum())));
+            } else {
                 List<CartProductSpec> cartProductSpecs = cartProductSpecService.getByCartId(cart.getCartId());
+                for (CartProductSpec cartProductSpec : cartProductSpecs) {
+                    if (cartProductSpec.getShopProdDelFlag() == 1) {
+                        cart.setCartStatus(CartStatusEnum.EXPIRE.getCode());
+                    }
+                }
                 String prodSpecName = cartProductSpecs.stream().map(CartProductSpec::getShopProdSpecName).collect(Collectors.joining(","));
                 BigDecimal price = cartProductSpecs.stream().map(CartProductSpec::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
                 List<CartSideVO> cartSideList = cartSideService.getByCartId(cart.getCartId());
                 StringBuilder specName = new StringBuilder(prodSpecName);
-                for(CartSideVO side : cartSideList){
+                for (CartSideVO side : cartSideList) {
                     BigDecimal addPrice = BigDecimalUtil.fenToYuan(side.getAddPrice() * side.getQuantity());
-                    price = BigDecimalUtil.sum(price,addPrice);
+                    price = BigDecimalUtil.sum(price, addPrice);
                     specName.append(",")
                             .append(side.getSideDishName())
                             .append("x")
@@ -90,7 +104,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                 }
                 cart.setProdSpecName(specName.toString());
                 cart.setProdPrice(price);
-                cart.setAllPrice(BigDecimalUtil.multiply(price,new BigDecimal(cart.getProdNum())));
+                cart.setAllPrice(BigDecimalUtil.multiply(price, new BigDecimal(cart.getProdNum())));
             }
         });
 
@@ -103,7 +117,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     public AddCartVo addCart(AddCartDTO dto) {
         ShopProduct shopProduct = shopProductService.getById(dto.getShopProdId());
         //校验店铺商品id是否存在
-        if (shopProduct == null){
+        if (shopProduct == null) {
             throw new PinetException("店铺商品不存在");
         }
         dto.setShopId(shopProduct.getShopId());
@@ -122,7 +136,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             throw new PinetException("购物车不存在");
         }
         CartContext context = new CartContext(cart.getDishType());
-        context.refreshCart(cart.getId(),dto.getProdNum());
+        context.refreshCart(cart.getId(), dto.getProdNum());
         return true;
     }
 
@@ -156,14 +170,14 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     @Override
     public CartVo getCartByUserIdAndShopId(Long shopId, Long customerId) {
-        return cartMapper.getCartByUserIdAndShopId(shopId,customerId);
+        return cartMapper.getCartByUserIdAndShopId(shopId, customerId);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean clearCart(ClearCartDto dto) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        delCartByShopId(dto.getShopId(),userId);
+        delCartByShopId(dto.getShopId(), userId);
         return true;
     }
 
