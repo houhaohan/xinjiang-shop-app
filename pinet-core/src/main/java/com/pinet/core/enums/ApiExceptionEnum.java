@@ -13,6 +13,7 @@ public enum ApiExceptionEnum {
     SPEC_ID_NOT_BLANK(1006,"店铺商品样式id不能为空"),
     SPEC_NOT_EXISTS(1007,"样式不存在"),
     PROD_NOT_EXISTS(1008,"商品不存在"),
+    CART_REFRESH(1009,"套餐已更新，请重置购物车"),
     ;
 
     private int code;

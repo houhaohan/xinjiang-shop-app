@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
+import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
@@ -49,7 +50,6 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     private final IKryComboGroupDetailService kryComboGroupDetailService;
     private final ICartComboDishService cartComboDishService;
     private final ICartSideService cartSideService;
-    private final IKryComboGroupService kryComboGroupService;
 
     @Override
     public List<CartListVo> cartList(CartListDto dto) {
@@ -62,9 +62,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         cartListVos.forEach(cart -> {
             if (DishType.COMBO.equalsIgnoreCase(cart.getDishType())) {
                 List<CartComboDishVo> cartComboDishVos = cartComboDishService.getComboDishByCartId(cart.getCartId(), cart.getShopProdId());
-                //判断套餐是否删除|下架
-                ShopProduct shopProduct = shopProductService.getById(cart.getShopProdId());
-                if (ObjectUtil.isNull(shopProduct) || shopProduct.getShopProdStatus().equals(ShopProdStatusEnum.OFF_SHELF.getCode())) {
+                long count = cartComboDishVos.stream().filter(item -> Objects.equals(item.getCartStatus(), CartStatusEnum.EXPIRE.getCode())).count();
+                if(count > 0){
                     cart.setCartStatus(CartStatusEnum.EXPIRE.getCode());
                 }
                 cart.setCartComboDishVos(cartComboDishVos);

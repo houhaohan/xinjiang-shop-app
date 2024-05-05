@@ -73,7 +73,7 @@ public class ComboDishHandler extends DishSettleAbstractHandler{
                 ComboGroupDetailVo comboGroupDetailVo = comboGroupDetailVoList.stream()
                         .filter(item -> Objects.equals(item.getId(), s.getComboGroupDetailId()))
                         .findFirst()
-                        .orElseThrow(() -> new PinetException(ApiExceptionEnum.SPEC_NOT_EXISTS));
+                        .orElseThrow(() -> new PinetException(ApiExceptionEnum.CART_REFRESH));
                 orderProductSpecVo.setProdSkuId(comboGroupDetailVo.getSkuId());
                 orderProductSpecVo.setProdSkuName(comboGroupDetailVo.getSkuName());
                 orderProductSpecVo.setProdSpecName(s.getShopProdSpecName());
