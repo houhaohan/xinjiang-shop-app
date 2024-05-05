@@ -10,8 +10,6 @@ import com.pinet.rest.entity.ShopProduct;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.entity.enums.ShopProdStatusEnum;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Objects;
 
 public abstract class DishSettleAbstractHandler implements DishSettleHandler {
@@ -29,7 +27,7 @@ public abstract class DishSettleAbstractHandler implements DishSettleHandler {
         ShopProduct shopProduct = context.shopProductService.getById(shopProdId);
 
         //判断店铺商品是否下架
-        if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_SHELF.getCode())) {
+        if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_LINE.getCode())) {
             throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
         }
 

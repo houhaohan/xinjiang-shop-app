@@ -28,7 +28,7 @@ public class DirectBuyOrderHandler extends OrderAbstractHandler {
         Orders orders = buildOrder();
         ShopProduct shopProduct = context.shopProductService.getById(context.request.getShopProdId());
         //判断店铺商品是否下架
-        if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_SHELF.getCode())) {
+        if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_LINE.getCode())) {
             throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
         }
 

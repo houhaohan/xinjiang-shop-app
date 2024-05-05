@@ -1,12 +1,11 @@
 package com.pinet.rest.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pinet.core.constants.DB;
+import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
-import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.keruyun.openapi.constants.DishType;
 import com.pinet.rest.entity.*;
@@ -15,7 +14,6 @@ import com.pinet.rest.entity.dto.CartListDto;
 import com.pinet.rest.entity.dto.ClearCartDto;
 import com.pinet.rest.entity.dto.EditCartProdNumDto;
 import com.pinet.rest.entity.enums.CartStatusEnum;
-import com.pinet.rest.entity.enums.ShopProdStatusEnum;
 import com.pinet.rest.entity.vo.*;
 import com.pinet.rest.handler.cart.CartContext;
 import com.pinet.rest.mapper.CartMapper;
@@ -117,7 +115,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         ShopProduct shopProduct = shopProductService.getById(dto.getShopProdId());
         //校验店铺商品id是否存在
         if (shopProduct == null) {
-            throw new PinetException("店铺商品不存在");
+            throw new PinetException(ApiExceptionEnum.PROD_OFF_LINE);
         }
         dto.setShopId(shopProduct.getShopId());
         CartContext context = new CartContext(shopProduct.getDishType());
