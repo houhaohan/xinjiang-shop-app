@@ -27,6 +27,9 @@ public class CartComboDishVo {
     @ApiModelProperty("套餐内单品图片")
     private String productImg;
 
+    @ApiModelProperty("套餐内单品状态，1-正常，,2-失效")
+    private Integer cartStatus;
+
     @ApiModelProperty("套餐内单品样式")
     private List<CartComboDishSpecVo> comboDishSpecs;
 

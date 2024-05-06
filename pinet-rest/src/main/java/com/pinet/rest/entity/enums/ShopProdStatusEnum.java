@@ -9,8 +9,8 @@ public enum ShopProdStatusEnum {
     /**
      * 商品状态
      */
-    NORMAL(1,"正常"),
-    OFF_SHELF(2,"下架");
+    ON_LINE(1,"正常"),
+    OFF_LINE(2,"下架");
 
 
     private Integer code;
