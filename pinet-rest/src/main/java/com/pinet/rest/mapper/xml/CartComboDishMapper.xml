@@ -46,6 +46,7 @@
             #{shopProdId} as shopProdId,
             ccd.shop_prod_id as singleProdId,
             sp.product_name,
+            sp.prod_id,
             sp.product_img,
             ccds.shop_prod_spec_id,
             ccds.shop_prod_spec_name,
@@ -54,11 +55,11 @@
         left join cart_combo_dish_spec ccds on ccd.shop_prod_id = ccds.shop_prod_id and ccd.cart_id = ccds.cart_id and ccds.del_flag = 0
         left join shop_product sp on sp.id = ccd.shop_prod_id
         left join (
-            select kcgd.single_dish_id,kcgd.dish_name,kcgd.spec_name,kcgd.del_flag,kcgd.price
+            select kcgd.single_dish_id, kcgd.dish_name, kcgd.spec_name, kcgd.price
             from kry_combo_group kcg
 			inner join kry_combo_group_detail kcgd on kcg.id = kcgd.combo_group_id  and kcgd.del_flag = 0
 			where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
-        ) t on t.single_dish_id = sp.prod_id
+        ) t on t.single_dish_id = sp.prod_id and t.spec_name = ccds.shop_prod_spec_name
         where ccd.cart_id = #{cartId}
     </select>
 </mapper>

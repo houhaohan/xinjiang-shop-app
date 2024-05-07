@@ -117,7 +117,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
     @Override
     public OrderDetailVO getOrderDetail(Long orgId, String token,KryOrderDetailDTO dto) {
         String responseStr = super.postCall(KryAPI.ORDER_DETAIL, AuthType.SHOP, orgId, token, dto);
-        log.info("客如云外卖订单同步结果=============>{}",responseStr);
+        log.info("客如云订单详情结果=============>{}",responseStr);
         KryResponse<KryOrderDetailResult> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<KryOrderDetailResult>>() {
         });
         if (0 == response.getCode()) {

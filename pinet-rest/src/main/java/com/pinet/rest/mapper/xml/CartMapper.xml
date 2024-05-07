@@ -36,7 +36,7 @@
                sp.product_img  prodImg,
                c.prod_num      prodNum,
                c.dish_type      dishType,
-               c.cart_status   cartStatus,
+               (case when sp.del_flag = 0 and sp.shop_prod_status = 1 and c.cart_status = 1 then 1 else 2 end ) cartStatus,
                c.shop_prod_id  shopProdId
         from qingshi.cart c
                  left join shop_product sp on sp.id = c.shop_prod_id

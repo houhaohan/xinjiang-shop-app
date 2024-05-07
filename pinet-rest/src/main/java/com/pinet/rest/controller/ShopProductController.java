@@ -69,7 +69,6 @@ public class ShopProductController extends BaseController {
     public Result<ShopProductListVo> list(Long shopId,
                                           BigDecimal lat,
                                           BigDecimal lng) {
-        log.info("商品列表参数:shopId={},lat={},lng={}", shopId, lat, lng);
         if (shopId == null && lat == null && lng == null) {
             shopId = 24L;//默认保利店
         }

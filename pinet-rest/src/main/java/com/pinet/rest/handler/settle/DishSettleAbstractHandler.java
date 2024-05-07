@@ -25,16 +25,15 @@ public abstract class DishSettleAbstractHandler implements DishSettleHandler {
      */
     protected OrderProduct build(Long shopProdId, Integer prodNum) {
         ShopProduct shopProduct = context.shopProductService.getById(shopProdId);
-
-        //判断店铺商品是否下架
-        if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_LINE.getCode())) {
-            throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
-        }
-
         //判断店铺商品是否删除
         if (shopProduct.getDelFlag() == 1) {
             throw new PinetException(shopProduct.getProductName() + "已下架,请重新选择");
         }
+        //判断店铺商品是否下架
+        if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_LINE.getCode())) {
+            throw new PinetException(shopProduct.getProductName() + "有数据更新,请重新选择");
+        }
+
         OrderProduct orderProduct = new OrderProduct();
         //设置打包费   //自提没有打包费
         if (Objects.equals(context.request.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())) {
