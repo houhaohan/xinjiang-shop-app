@@ -50,7 +50,7 @@
             sp.product_img,
             ccds.shop_prod_spec_id,
             ccds.shop_prod_spec_name,
-            (case when t.del_flag is null or sp.del_flag = 1 or sp.shop_prod_status = 2 then 2 else 1 end ) cart_status
+            (case when t.single_dish_id is null or sp.del_flag = 1 or sp.shop_prod_status = 2 then 2 else 1 end ) cart_status
         from cart_combo_dish ccd
         left join cart_combo_dish_spec ccds on ccd.shop_prod_id = ccds.shop_prod_id and ccd.cart_id = ccds.cart_id and ccds.del_flag = 0
         left join shop_product sp on sp.id = ccd.shop_prod_id
