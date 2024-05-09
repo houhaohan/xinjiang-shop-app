@@ -99,6 +99,17 @@
 
 
     <!--多环境的日志输出-->
+    <springProfile name="local">
+        <logger name="com.pinet.rest" level="DEBUG"/>
+        <root level="info">
+            <appender-ref ref="CONSOLE-LOG"/>
+            <appender-ref ref="DEBUG-LOG"/>
+            <appender-ref ref="INFO-LOG"/>
+            <appender-ref ref="WARN-LOG"/>
+            <appender-ref ref="ERROR-LOG"/>
+        </root>
+    </springProfile>
+
     <springProfile name="dev">
         <logger name="com.pinet.rest" level="DEBUG"/>
         <root level="info">
