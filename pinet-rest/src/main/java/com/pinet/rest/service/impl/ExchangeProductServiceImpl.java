@@ -10,6 +10,7 @@ import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Coupon;
+import com.pinet.rest.entity.CustomerBalance;
 import com.pinet.rest.entity.CustomerCoupon;
 import com.pinet.rest.entity.ExchangeProduct;
 import com.pinet.rest.entity.dto.ExchangeDto;
@@ -85,6 +86,12 @@ public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMappe
         if (ObjectUtil.isNull(exchangeProduct)) {
             throw new PinetException("兑换商品不存在");
         }
+
+        CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
+        if (customerBalance.getScore() < exchangeProduct.getScore()){
+            throw new PinetException("积分不足 无法兑换");
+        }
+
         //扣减积分
         customerBalanceService.subtractAvailableBalance(customerId, exchangeProduct.getScore());
 

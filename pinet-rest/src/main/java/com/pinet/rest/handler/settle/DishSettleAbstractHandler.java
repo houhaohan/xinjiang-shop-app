@@ -31,7 +31,7 @@ public abstract class DishSettleAbstractHandler implements DishSettleHandler {
         }
         //判断店铺商品是否下架
         if (Objects.equals(shopProduct.getShopProdStatus(), ShopProdStatusEnum.OFF_LINE.getCode())) {
-            throw new PinetException(shopProduct.getProductName() + "有数据更新,请重新选择");
+            throw new PinetException(shopProduct.getProductName() + "已失效,请重新选择");
         }
 
         OrderProduct orderProduct = new OrderProduct();
