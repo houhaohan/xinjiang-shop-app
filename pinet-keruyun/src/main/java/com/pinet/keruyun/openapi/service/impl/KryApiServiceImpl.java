@@ -125,7 +125,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
 
     @Override
     public CustomerCreateVO createCustomer(Long orgId, String token, CustomerCreateDTO dto) {
-        String responseStr = super.postCall(KryAPI.CUSTOMER_CREATE, AuthType.SHOP, orgId, token, dto);
+        String responseStr = super.postCall(KryAPI.CUSTOMER_CREATE, AuthType.BRAND, orgId, token, dto);
         log.info("客如云创建会员结果=============>{}",responseStr);
         KryResponse<Result<CustomerCreateVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<CustomerCreateVO>>>() {
         });
@@ -137,7 +137,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
 
     @Override
     public CustomerQueryVO queryByMobile(Long orgId, String token, CustomerParam param) {
-        String responseStr = super.postCall(KryAPI.CUSTOMER_QUERY, AuthType.SHOP, orgId, token, param);
+        String responseStr = super.postCall(KryAPI.CUSTOMER_QUERY, AuthType.BRAND, orgId, token, param);
         log.info("客如云查询会员结果=============>{}",responseStr);
         KryResponse<Result<CustomerQueryVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<CustomerQueryVO>>>() {
         });
@@ -149,7 +149,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
 
     @Override
     public CustomerPropertyVO queryCustomerProperty(Long orgId, String token, CustomerPropertyParam param) {
-        String responseStr = super.postCall(KryAPI.CUSTOMER_PROPERTY, AuthType.SHOP, orgId, token, param);
+        String responseStr = super.postCall(KryAPI.CUSTOMER_PROPERTY, AuthType.BRAND, orgId, token, param);
         log.info("客如云查询会员资产结果=============>{}",responseStr);
         KryResponse<Result<CustomerPropertyVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<CustomerPropertyVO>>>() {
         });
@@ -161,7 +161,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
 
     @Override
     public DirectChargeVO directCharge(Long orgId, String token, DirectChargeDTO dto) {
-        String responseStr = super.postCall(KryAPI.CUSTOMER_PROPERTY, AuthType.SHOP, orgId, token, dto);
+        String responseStr = super.postCall(KryAPI.CUSTOMER_PROPERTY, AuthType.BRAND, orgId, token, dto);
         log.info("客如云查询会员资产结果=============>{}",responseStr);
         KryResponse<Result<DirectChargeVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<DirectChargeVO>>>() {
         });
