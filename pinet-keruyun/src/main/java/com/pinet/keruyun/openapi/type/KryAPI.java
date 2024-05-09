@@ -24,7 +24,11 @@ public enum KryAPI {
     BRAND_SHOP_LIST("品牌门店列表", "/open/standard/shop/MerchantOrgReadService.queryBrandStores"),
     BRAND_SHOP_DISH("菜品列表信息", "/open/standard/dish/shop/pageQueryBaseDish"),
     BRAND_SHOP_DETAIL_DISH("菜品详情信息", "/open/standard/dish/shop/listQueryDetailDish"),
-    BRAND_SHOP_CATEGORY("菜品分类信息", "/open/standard/dish/shop/listQueryCategory");
+    BRAND_SHOP_CATEGORY("菜品分类信息", "/open/standard/dish/shop/listQueryCategory"),
+    CUSTOMER_CREATE("创建会员", "/open/standard/crm/CustomerOpenFacade/createCustomer"),
+    CUSTOMER_QUERY("查询会员", "/open/standard/crm/CustomerOpenFacade/queryByMobile"),
+    CUSTOMER_PROPERTY("会员资产", "/open/standard/crm/CustomerOpenFacade/queryCustomerProperty"),
+    DIRECT_CHARGE("会员储值充值", "/open/standard/crm/RechargeOpenFacade/directCharge");
 
     private String description;
     @Getter
