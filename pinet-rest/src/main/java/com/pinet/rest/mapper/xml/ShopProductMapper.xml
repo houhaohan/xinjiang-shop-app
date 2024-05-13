@@ -179,7 +179,6 @@
                                     #{item}
                                 </foreach>
                             </if>
-
                             and sp.del_flag = 0
                           group by sps.sku_id
                       ) temp

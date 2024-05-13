@@ -12,7 +12,8 @@ package com.pinet.core;
 public enum ApiErrorEnum {
     ERROR_NOT_FOUNT(404, "访问地址未找到"),
     ERROR(500, "系统出错了"),
-    ERROR_NULL_POINT(901, "出现空指针异常"),
+//    ERROR_NULL_POINT(901, "出现空指针异常"),
+    ERROR_NULL_POINT(901, "网络异常,请稍后重试"),
     ERROR_REQUEST_PARAMS_INVALID(1001, "参数无效"),
     ERROR_SYSTEM_IS_NOT_EXIST(1002, "业务系统不存在"),
     ERROR_SERVICE_UNAUTHORIZED(1003, "服务未被授权"),
