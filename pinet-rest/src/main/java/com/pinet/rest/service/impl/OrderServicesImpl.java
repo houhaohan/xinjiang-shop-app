@@ -264,14 +264,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     public CreateOrderVo createOrder(CreateOrderDto request) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         String redisKey = "qingshi:order:repetition:user_id:"+userId;
-        //判断是否重复提交
-        String redisStr = redisUtil.get(redisKey);
-        if (StringUtil.isNotBlank(redisStr)){
-            throw new PinetException("你点击的太快啦！");
+        boolean lock = redisUtil.setIfAbsent(redisKey, "1", 5, TimeUnit.SECONDS);
+        if(!lock){
+            throw new PinetException("您点击的太快啦，请稍后重试！");
         }
-        //不管成功失败一个用户5秒钟只能调用一次该接口
-        redisUtil.set(redisKey,"1",5, TimeUnit.SECONDS);
-
         //店铺是否营业
         Shop shop = shopService.getById(request.getShopId());
         checkShop(shop);

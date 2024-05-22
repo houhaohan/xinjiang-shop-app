@@ -21,7 +21,7 @@ public enum ApiErrorEnum {
     ERROR_ACCESS_TOKEN_INVALID(1004, "访问令牌无效"),
     ERROR_EXCEED_MAX_TIMES(1100, "超过最大次数"),
     ERROR_INTERNAL_SERVER_ERROR(999, "服务器内部错误"),
-    ERROR_TO_INDEX(1006, "最近店铺没有该商品，请跳转首页购买其他商品"),//轻食小程序
+    ERROR_TO_INDEX(1006, "最近店铺没有该商品，请跳转首页购买其他商品"),
 
     PARAM_APPID_NULL_ERROR(1200, "appid参数不能为空"),
     PARAM_APPID_NOT_EXSIST_ERROR(1201, "appid参数不存在"),
