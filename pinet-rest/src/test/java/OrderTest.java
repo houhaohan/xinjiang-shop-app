@@ -126,4 +126,10 @@ public class OrderTest {
         KryResult<List<DetailDishVO>> listKryResult = kryApiService.listQueryDetailDish(19844001L, token, param);
         System.out.println(JSON.toJSONString(listKryResult));
     }
+
+
+    @Test
+    public void exp(){
+        customerCouponService.pushCouponExpireMsg(2120L);
+    }
 }

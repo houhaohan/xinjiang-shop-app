@@ -20,10 +20,7 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.rest.entity.Coupon;
-import com.pinet.rest.entity.CouponProduct;
-import com.pinet.rest.entity.CustomerCoupon;
-import com.pinet.rest.entity.OrderProduct;
+import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
 import com.pinet.rest.entity.request.UsableCouponRequest;
@@ -64,6 +61,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     private final ICouponService couponService;
     private final ICouponShopService couponShopService;
     private final ICouponProductService couponProductService;
+    private final ICustomerService customerService;
 
     @Override
     public List<CustomerCouponVo> customerCouponList(PageRequest pageRequest) {
@@ -220,22 +218,19 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     @Override
-    public void pushCouponExpireMsg(String data1, String data2, String data3, String data4, String data5, String openId) {
+    public void pushCouponExpireMsg(String tips, String couponName, String couponType, String expireTime, String openId) {
         try {
-
             wxMaService.getMsgService().sendSubscribeMsg(WxMaSubscribeMessage.builder()
                     .templateId(CommonConstant.COUPON_EXPIRE_TEMPLATE_ID)
                     .data(Lists.newArrayList(
-                            //描述
-                            new WxMaSubscribeMessage.MsgData("thing3", data1),
+                            //优惠券名称
+                            new WxMaSubscribeMessage.MsgData("thing10", couponName),
+                            //优惠券类型
+                            new WxMaSubscribeMessage.MsgData("thing8", couponType),
                             //过期时间
-                            new WxMaSubscribeMessage.MsgData("time4", data2),
-                            //优惠券金额
-                            new WxMaSubscribeMessage.MsgData("amount5", data3),
+                            new WxMaSubscribeMessage.MsgData("time4", expireTime),
                             //温馨提示
-                            new WxMaSubscribeMessage.MsgData("thing6", data4),
-                            //商家名称
-                            new WxMaSubscribeMessage.MsgData("thing9", data5)
+                            new WxMaSubscribeMessage.MsgData("thing6", tips)
                     ))
                     .toUser(openId)
                     .page("/pickCodePackage/list/Coupons")
@@ -248,19 +243,16 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     @Override
     public void pushCouponExpireMsg(Long customerCouponId) {
-//        CustomerCoupon customerCoupon = getById(customerCouponId);
-//        String data1 = "你的优惠券将在1天后过期,请及时使用";
-//        String data2 = DateUtil.format(customerCoupon.getExpireTime(), "yyyy-MM-dd HH:mm:ss");
-//        String data3 = customerCoupon.getCouponAmount().toString();
-//        String data4 = "你的优惠券即将过期";
-//        String data5 = "所有门店可用";
-//        if (customerCoupon.getShopId() != null && customerCoupon.getShopId() > 0) {
-//            Shop shop = shopService.getById(customerCoupon.getShopId());
-//            data5 = shop.getShopName();
-//        }
-//        Customer customer = customerService.getById(customerCoupon.getCustomerId());
-//
-//        pushCouponExpireMsg(data1, data2, data3, data4, data5, customer.getQsOpenId());
+
+        CustomerCoupon customerCoupon = getById(customerCouponId);
+        //温馨提示
+        String tips = "你的优惠券将在1天后过期,请尽快使用";
+        String couponName = customerCoupon.getCouponName();
+        String couponType = CouponTypeEnum.getDescByCode(customerCoupon.getCouponType());
+        String expireTime = DateUtil.format(customerCoupon.getExpireTime(), "yyyy-MM-dd HH:mm:ss");
+        Customer customer = customerService.getById(customerCoupon.getCustomerId());
+
+        pushCouponExpireMsg(tips, couponName, couponType, expireTime, customer.getQsOpenId());
     }
 
     @Override

@@ -63,7 +63,7 @@ public interface ICustomerCouponService extends IService<CustomerCoupon> {
     /**
      * 推送优惠券过期提醒
      */
-    void pushCouponExpireMsg(String data1,String data2,String data3,String data4,String data5,String openId);
+    void pushCouponExpireMsg(String tips, String couponName, String couponType, String expireTime,String openId);
 
     void pushCouponExpireMsg(Long customerCouponId);
 
