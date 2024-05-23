@@ -127,9 +127,4 @@ public class OrderTest {
         System.out.println(JSON.toJSONString(listKryResult));
     }
 
-
-    @Test
-    public void exp(){
-        customerCouponService.pushCouponExpireMsg(2120L);
-    }
 }

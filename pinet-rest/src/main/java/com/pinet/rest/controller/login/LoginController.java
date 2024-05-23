@@ -51,8 +51,9 @@ public class LoginController {
         try{
             UserInfo userInfo = wxLoginService.login(request);
             return Result.ok(userInfo);
-        }
-        catch (Exception e){
+        } catch (LoginException e){
+            return Result.error(500,e.getMsg());
+        } catch (Exception e){
             log.error("微信登入失败，失败原因=======》{}",e);
         }
         return Result.error(500,"登入失败");
@@ -95,7 +96,7 @@ public class LoginController {
             UserInfo response = phoneLoginService.login(request);
             return Result.ok(response);
         }catch (LoginException e){
-            return Result.error(500,e.getMsg());
+            return Result.error(e.getCode(),e.getMsg());
         }catch (WxErrorException e){
             log.error("手机验证码登入失败，失败原因=======》{}",e.getMessage());
         }catch (Exception e){

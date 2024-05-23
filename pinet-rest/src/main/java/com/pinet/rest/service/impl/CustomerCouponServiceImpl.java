@@ -1,17 +1,13 @@
 package com.pinet.rest.service.impl;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.google.common.collect.Lists;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.common.redis.util.RedisUtil;
-import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.DB;
 import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
@@ -57,11 +53,9 @@ import java.util.stream.Collectors;
 public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper, CustomerCoupon> implements ICustomerCouponService {
     private final RedisUtil redisUtil;
     private final JmsUtil jmsUtil;
-    private final WxMaService wxMaService;
     private final ICouponService couponService;
     private final ICouponShopService couponShopService;
     private final ICouponProductService couponProductService;
-    private final ICustomerService customerService;
 
     @Override
     public List<CustomerCouponVo> customerCouponList(PageRequest pageRequest) {
@@ -217,43 +211,6 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     }
 
-    @Override
-    public void pushCouponExpireMsg(String tips, String couponName, String couponType, String expireTime, String openId) {
-        try {
-            wxMaService.getMsgService().sendSubscribeMsg(WxMaSubscribeMessage.builder()
-                    .templateId(CommonConstant.COUPON_EXPIRE_TEMPLATE_ID)
-                    .data(Lists.newArrayList(
-                            //优惠券名称
-                            new WxMaSubscribeMessage.MsgData("thing10", couponName),
-                            //优惠券类型
-                            new WxMaSubscribeMessage.MsgData("thing8", couponType),
-                            //过期时间
-                            new WxMaSubscribeMessage.MsgData("time4", expireTime),
-                            //温馨提示
-                            new WxMaSubscribeMessage.MsgData("thing6", tips)
-                    ))
-                    .toUser(openId)
-                    .page("/pickCodePackage/list/Coupons")
-                    .build());
-        } catch (Exception e) {
-            log.error("优惠券过期提醒发送失败,error{}", e);
-        }
-
-    }
-
-    @Override
-    public void pushCouponExpireMsg(Long customerCouponId) {
-
-        CustomerCoupon customerCoupon = getById(customerCouponId);
-        //温馨提示
-        String tips = "你的优惠券将在1天后过期,请尽快使用";
-        String couponName = customerCoupon.getCouponName();
-        String couponType = CouponTypeEnum.getDescByCode(customerCoupon.getCouponType());
-        String expireTime = DateUtil.format(customerCoupon.getExpireTime(), "yyyy-MM-dd HH:mm:ss");
-        Customer customer = customerService.getById(customerCoupon.getCustomerId());
-
-        pushCouponExpireMsg(tips, couponName, couponType, expireTime, customer.getQsOpenId());
-    }
 
     @Override
     public void grantNewCustomerCoupon(Long customerId) {

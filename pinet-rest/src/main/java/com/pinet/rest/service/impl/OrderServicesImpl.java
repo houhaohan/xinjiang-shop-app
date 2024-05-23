@@ -1,12 +1,10 @@
 package com.pinet.rest.service.impl;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -33,7 +31,6 @@ import com.pinet.keruyun.openapi.vo.OrderDetailVO;
 import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
 import com.pinet.keruyun.openapi.vo.TakeoutOrderCreateVo;
 import com.pinet.rest.entity.*;
-import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.enums.*;
@@ -98,13 +95,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final IScoreRecordService scoreRecordService;
     private final ICustomerBalanceService customerBalanceService;
     private final OrderPreferentialManager orderPreferentialManager;
-    private final WxMaService wxMaService;
-    private final ICustomerService customerService;
     private final OrderContext context;
     private final DishSettleContext dishSettleContext;
     private final IShopProductSpecService shopProductSpecService;
     private final IOrderComboDishService orderComboDishService;
     private final IOrderSideService orderSideService;
+    private final WechatTemplateMessageDeliver wechatTemplateMessageDeliver;
     private final RedisUtil redisUtil;
 
 
@@ -451,8 +447,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new PinetException("只有待付款状态下才可以取消");
         }
         orders.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
-        boolean res = updateById(orders);
-        return res;
+        return updateById(orders);
     }
 
     @Override
@@ -655,24 +650,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("order_no", dto.getOutBizNo());
             Orders orders = getOne(queryWrapper);
-            Customer customer = customerService.getById(orders.getCustomerId());
             List<OrderProduct> orderProducts = orderProductService.getByOrderId(orders.getId());
 
             String prodNames = orderProducts.stream().map(OrderProduct::getProdName).collect(Collectors.joining(",\n"));
-            ArrayList<WxMaSubscribeMessage.MsgData> msgDataList = new ArrayList<>(5);
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("date15", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, orders.getCreateTime())));//下单时间
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing11", prodNames));//餐品详情
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("amount13", String.valueOf(orders.getOrderPrice())));//订单金额
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("character_string19", orders.getMealCode()));//取餐号
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing7", "您的餐品已制作完成，请到前台领取"));//温馨提醒
+            ArrayList<WxMaSubscribeMessage.MsgData> data = new ArrayList<>(5);
+            data.add(new WxMaSubscribeMessage.MsgData("date15", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, orders.getCreateTime())));//下单时间
+            data.add(new WxMaSubscribeMessage.MsgData("thing11", prodNames));//餐品详情
+            data.add(new WxMaSubscribeMessage.MsgData("amount13", String.valueOf(orders.getOrderPrice())));//订单金额
+            data.add(new WxMaSubscribeMessage.MsgData("character_string19", orders.getMealCode()));//取餐号
+            data.add(new WxMaSubscribeMessage.MsgData("thing7", "您的餐品已制作完成，请到前台领取"));//温馨提醒
 
-            WxMaSubscribeMessage wxMaSubscribeMessage = WxMaSubscribeMessage.builder()
-                    .templateId(CommonConstant.PERFORMANCE_CALL_TEMPLATE_ID)
-                    .data(msgDataList)
-                    .toUser(customer.getQsOpenId())
-                    .page("packageA/orderClose/orderDetails?orderId=" + orders.getId())
-                    .build();
-            wxMaService.getMsgService().sendSubscribeMsg(wxMaSubscribeMessage);
+            String templateId = WeChatTemplateEnum.PERFORMANCE_CALL.getKey();
+            String url = WeChatTemplateEnum.PERFORMANCE_CALL.getPageUrl();
+            wechatTemplateMessageDeliver.asyncSend(templateId,url,orders.getCustomerId(),data);
         } catch (WxErrorException e) {
             e.printStackTrace();
         }
