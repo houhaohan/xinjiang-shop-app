@@ -42,7 +42,7 @@ public class CustomerPropertyVO {
         @ApiModelProperty("卡类型，MEMBER：会员卡；GIFT：礼品卡；PAY_MEMBER：付费会员卡")
         private String cardType;
         @ApiModelProperty("储值账户")
-        private List posRechargeAccountList;
+        private List<PosRechargeAccount> posRechargeAccountList;
     }
 
     @Data
@@ -50,7 +50,7 @@ public class CustomerPropertyVO {
     public static class PosRechargeAccount{
 
         @ApiModelProperty("当前剩余可用储值")
-        private Object remainAvailableValue;
+        private RemainAvailable remainAvailableValue;
     }
 
     @Data

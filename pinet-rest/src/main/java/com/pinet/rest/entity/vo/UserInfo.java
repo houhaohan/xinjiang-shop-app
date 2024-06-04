@@ -3,6 +3,7 @@ package com.pinet.rest.entity.vo;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.CustomerMember;
+import com.pinet.rest.entity.VipUser;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,6 +22,8 @@ public class UserInfo {
     @ApiModelProperty("会员信息")
     private CustomerMember customerMember;
 
+    @ApiModelProperty("会员信息")
+    private VipUser vipUser;
 
     /**
      * token

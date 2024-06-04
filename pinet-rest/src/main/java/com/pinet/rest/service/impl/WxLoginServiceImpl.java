@@ -40,6 +40,8 @@ public class WxLoginServiceImpl implements ILoginService {
 
     private final ICustomerMemberService customerMemberService;
 
+    private final IVipUserService vipUserService;
+
     /**
      * 此接口只用于新用户登入，老用户登入走 oldUserLogin 接口
      * @param loginRequest
@@ -96,6 +98,8 @@ public class WxLoginServiceImpl implements ILoginService {
             //添加用户账户表
             customerBalanceService.addByCustomerId(customer.getCustomerId());
         }
+        //成为VIP1
+        vipUserService.create(customer,wxLoginRequest.getShopId());
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());
         redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,String.valueOf(customer.getCustomerId()),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
         UserInfo userInfo = new UserInfo();
@@ -128,7 +132,6 @@ public class WxLoginServiceImpl implements ILoginService {
         CustomerMember customerMember = customerMemberService.getByCustomerId(customer.getCustomerId());
         userInfo.setCustomerMember(customerMember);
         userInfo.setUser(customer);
-
 
         String newToken = JwtTokenUtils.generateToken(customer.getCustomerId());
         redisUtil.set(UserConstant.PREFIX_USER_TOKEN+newToken,String.valueOf(customer.getCustomerId()),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);

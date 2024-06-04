@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pinet.rest.mapper.VipUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pinet.rest.entity.VipUser">
+        <result column="id" property="id" />
+        <result column="create_by" property="createBy" />
+        <result column="create_time" property="createTime" />
+        <result column="update_by" property="updateBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="del_flag" property="delFlag" />
+        <result column="customer_id" property="customerId" />
+        <result column="kry_customer_id" property="kryCustomerId" />
+        <result column="sex" property="sex" />
+        <result column="level" property="level" />
+        <result column="vip_name" property="vipName" />
+        <result column="phone" property="phone" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,
+        create_by,
+        create_time,
+        update_by,
+        update_time,
+        del_flag,
+        customer_id, kry_customer_id, sex, `level`, vip_name, phone, status
+    </sql>
+
+</mapper>

@@ -9,6 +9,7 @@ import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.vo.*;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -37,4 +38,12 @@ public interface OrdersMapper extends BaseMapper<Orders> {
     List<PickUpListVo> selectPickUpList(@Param("customerId") Long customerId);
 
     Orders selectByOrderNo(@Param("orderNo") Long orderNo);
+
+    /**
+     * 用户已支付总额
+     * @param customerId
+     * @return
+     */
+    BigDecimal getPaidAmount(@Param("customerId") Long customerId);
+
 }

@@ -13,6 +13,13 @@ public class BigDecimalUtil {
                 .setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
+    //分转元
+    public static BigDecimal fenToYuan(Integer amount) {
+        return new BigDecimal(String.valueOf(amount))
+                .multiply(new BigDecimal("0.01"))
+                .setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
     /**
      * 元转分，返回Integer
      * @param amount

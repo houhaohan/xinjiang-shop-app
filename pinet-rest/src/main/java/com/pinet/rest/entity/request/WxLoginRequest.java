@@ -34,4 +34,7 @@ public class WxLoginRequest extends LoginRequest {
 
     @ApiModelProperty("openid")
     private String openid;
+
+    @ApiModelProperty(value = "店铺Id",notes = "默认保利店")
+    private Long shopId = 24L;
 }
