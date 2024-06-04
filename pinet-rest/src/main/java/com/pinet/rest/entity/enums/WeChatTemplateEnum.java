@@ -2,6 +2,11 @@ package com.pinet.rest.entity.enums;
 
 import lombok.Getter;
 
+/**
+ * @description: 消息订阅枚举
+ * @author: chengshuanghui
+ * @date: 2024-05-24 10:23
+ */
 @Getter
 public enum WeChatTemplateEnum {
     COUPON_EXPIRE("1VuNBumcd3eIRf4ZpT5wFN9yiyAh7SZQpF24T3pDIJ8","/pickCodePackage/list/Coupons","优惠券过期提醒"),

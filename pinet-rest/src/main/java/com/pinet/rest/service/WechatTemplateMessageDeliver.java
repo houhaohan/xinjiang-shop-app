@@ -24,18 +24,18 @@ public class WechatTemplateMessageDeliver {
     /**
      * 推送订阅消息
      * @param templateId 消息模版ID
-     * @param urlReturn
+     * @param pageUrl
      * @param customerId
      * @param data
      * @throws WxErrorException
      */
-    public void asyncSend(String templateId, String urlReturn, Long customerId, List<WxMaSubscribeMessage.MsgData> data) throws WxErrorException {
+    public void asyncSend(String templateId, String pageUrl, Long customerId, List<WxMaSubscribeMessage.MsgData> data) throws WxErrorException {
         Customer customer = customerService.getById(customerId);
         WxMaSubscribeMessage message = WxMaSubscribeMessage.builder()
                 .templateId(templateId)
                 .data(data)
                 .toUser(customer.getQsOpenId())
-                .page(urlReturn)
+                .page(pageUrl)
                 .build();
         wxMaService.getMsgService().sendSubscribeMsg(message);
     }

@@ -24,7 +24,7 @@ public class ProductTest {
     @Test
     public void test(){
 //        Orders orders = ordersService.getById(31785);//套餐
-        Orders orders = ordersService.getById(56982);
+        Orders orders = ordersService.getById(58226);
 //        OrderCreateVO orderCreateVO = ordersService.pushOrderToKry(orders);
 //        String s = ordersService.takeoutOrderCreate(orders);
 //        System.out.println(JsonUtil.toJson(orderCreateVO));
