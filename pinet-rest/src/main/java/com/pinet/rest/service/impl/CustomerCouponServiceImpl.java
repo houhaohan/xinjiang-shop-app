@@ -1,17 +1,13 @@
 package com.pinet.rest.service.impl;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.google.common.collect.Lists;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.common.redis.util.RedisUtil;
-import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.DB;
 import com.pinet.core.enums.ApiExceptionEnum;
 import com.pinet.core.exception.PinetException;
@@ -20,10 +16,7 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.rest.entity.Coupon;
-import com.pinet.rest.entity.CouponProduct;
-import com.pinet.rest.entity.CustomerCoupon;
-import com.pinet.rest.entity.OrderProduct;
+import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.UpdateCouponStatusDto;
 import com.pinet.rest.entity.enums.*;
 import com.pinet.rest.entity.request.UsableCouponRequest;
@@ -60,7 +53,6 @@ import java.util.stream.Collectors;
 public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper, CustomerCoupon> implements ICustomerCouponService {
     private final RedisUtil redisUtil;
     private final JmsUtil jmsUtil;
-    private final WxMaService wxMaService;
     private final ICouponService couponService;
     private final ICouponShopService couponShopService;
     private final ICouponProductService couponProductService;
@@ -69,18 +61,18 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     public List<CustomerCouponVo> customerCouponList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
-        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(),pageRequest.getPageSize());
+        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         QueryWrapper<CustomerCoupon> queryWrapper = initWrapper(userId, true);
-        queryWrapper.in("cc.coupon_status", 1,2)
+        queryWrapper.in("cc.coupon_status", 1, 2)
                 .orderByAsc("cc.coupon_status")
                 .orderByDesc("cc.id");
-        return baseMapper.selectCustomerCouponList(page,queryWrapper);
+        return baseMapper.selectCustomerCouponList(page, queryWrapper);
     }
 
     @Override
     public List<CustomerCouponVo> usableCouponList(UsableCouponRequest request) {
         List<CustomerCouponVo> list = customerCouponList(request);
-        if(CollectionUtils.isEmpty(list)){
+        if (CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
         }
         list.forEach(item -> {
@@ -108,21 +100,21 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     @Override
     public List<CustomerCouponVo> customerCouponListDetailList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(),pageRequest.getPageSize());
+        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("cc.customer_id", userId);
         queryWrapper.eq("cc.del_flag", 0);
         queryWrapper.orderByDesc("cc.id");
-        return baseMapper.selectCustomerCouponList(page,queryWrapper);
+        return baseMapper.selectCustomerCouponList(page, queryWrapper);
     }
 
     @Override
     public List<CustomerCouponVo> customerCouponInvalidList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(),pageRequest.getPageSize());
+        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         QueryWrapper queryWrapper = initWrapper(userId, false);
         queryWrapper.orderByDesc("cc.id");
-        return baseMapper.selectCustomerCouponList(page,queryWrapper);
+        return baseMapper.selectCustomerCouponList(page, queryWrapper);
     }
 
     @Override
@@ -136,11 +128,14 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         if (!StringUtil.isBlank(lastIdStr)) {
             lastId = Long.parseLong(lastIdStr);
         }
-        Page<CustomerCoupon> page = new Page<>(1,20);
+        Page<CustomerCoupon> page = new Page<>(1, 20);
         QueryWrapper queryWrapper = initWrapper(userId, true);
         queryWrapper.gt("cc.id", lastId);
         queryWrapper.orderByDesc("cc.id");
-        List<CustomerCouponVo> customerCoupons = baseMapper.selectCustomerCouponList(page,queryWrapper);
+        List<CustomerCouponVo> customerCoupons = baseMapper.selectCustomerCouponList(page, queryWrapper);
+
+        customerCoupons = customerCoupons.stream().filter(coupon -> coupon != null && coupon.getDisableFlag() == 1).collect(Collectors.toList());
+
 
         if (CollUtil.isNotEmpty(customerCoupons)) {
             redisUtil.set(redisKey, customerCoupons.get(0).getId().toString());
@@ -155,7 +150,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     }
 
     @Override
-    public  Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts) {
+    public Boolean checkCoupon(CustomerCouponVo customerCoupon, Long shopId, List<OrderProduct> orderProducts) {
         BigDecimal orderProdPrice = orderProducts.stream().map(OrderProduct::getProdPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         //优惠券不存在
@@ -205,7 +200,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     @Override
     public void couponWarn(Long customerCouponId) {
         CustomerCoupon customerCoupon = getById(customerCouponId);
-        if(Objects.isNull(customerCoupon)){
+        if (Objects.isNull(customerCoupon)) {
             return;
         }
         Date remindTime = DateUtil.offsetDay(customerCoupon.getExpireTime(), -1);
@@ -216,49 +211,6 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
 
     }
 
-    @Override
-    public void pushCouponExpireMsg(String data1, String data2, String data3, String data4, String data5, String openId) {
-        try {
-
-            wxMaService.getMsgService().sendSubscribeMsg(WxMaSubscribeMessage.builder()
-                    .templateId(CommonConstant.COUPON_EXPIRE_TEMPLATE_ID)
-                    .data(Lists.newArrayList(
-                            //描述
-                            new WxMaSubscribeMessage.MsgData("thing3", data1),
-                            //过期时间
-                            new WxMaSubscribeMessage.MsgData("time4", data2),
-                            //优惠券金额
-                            new WxMaSubscribeMessage.MsgData("amount5", data3),
-                            //温馨提示
-                            new WxMaSubscribeMessage.MsgData("thing6", data4),
-                            //商家名称
-                            new WxMaSubscribeMessage.MsgData("thing9", data5)
-                    ))
-                    .toUser(openId)
-                    .page("/pickCodePackage/list/Coupons")
-                    .build());
-        } catch (Exception e) {
-            log.error("优惠券过期提醒发送失败,error{}", e);
-        }
-
-    }
-
-    @Override
-    public void pushCouponExpireMsg(Long customerCouponId) {
-//        CustomerCoupon customerCoupon = getById(customerCouponId);
-//        String data1 = "你的优惠券将在1天后过期,请及时使用";
-//        String data2 = DateUtil.format(customerCoupon.getExpireTime(), "yyyy-MM-dd HH:mm:ss");
-//        String data3 = customerCoupon.getCouponAmount().toString();
-//        String data4 = "你的优惠券即将过期";
-//        String data5 = "所有门店可用";
-//        if (customerCoupon.getShopId() != null && customerCoupon.getShopId() > 0) {
-//            Shop shop = shopService.getById(customerCoupon.getShopId());
-//            data5 = shop.getShopName();
-//        }
-//        Customer customer = customerService.getById(customerCoupon.getCustomerId());
-//
-//        pushCouponExpireMsg(data1, data2, data3, data4, data5, customer.getQsOpenId());
-    }
 
     @Override
     public void grantNewCustomerCoupon(Long customerId) {
@@ -274,9 +226,9 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     public Long countByCustomerId(Long customerId) {
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
-                .eq(CustomerCoupon::getCustomerId,customerId)
-                .in(CustomerCoupon::getCouponStatus,1,2)
-                .gt(CustomerCoupon::getExpireTime,new Date());
+                .eq(CustomerCoupon::getCustomerId, customerId)
+                .in(CustomerCoupon::getCouponStatus, 1, 2)
+                .gt(CustomerCoupon::getExpireTime, new Date());
         return count(queryWrapper);
     }
 
@@ -309,7 +261,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         save(customerCoupon);
 
         //3、更新优惠券领取数量
-        coupon.setClaimedNum(coupon.getClaimedNum()+1);
+        coupon.setClaimedNum(coupon.getClaimedNum() + 1);
         couponService.updateById(coupon);
         return customerCoupon;
     }
@@ -358,10 +310,10 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         if (coupon.getDisableFlag() == 0) {
             throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
         }
-        if (Objects.equals(CouponStatusEnum.NOT_STARTED.getCode(),coupon.getStatus())) {
+        if (Objects.equals(CouponStatusEnum.NOT_STARTED.getCode(), coupon.getStatus())) {
             throw new PinetException(ApiExceptionEnum.COUPON_NOT_STARTED);
         }
-        if (Objects.equals(CouponStatusEnum.EXPIRED.getCode(),coupon.getStatus())) {
+        if (Objects.equals(CouponStatusEnum.EXPIRED.getCode(), coupon.getStatus())) {
             throw new PinetException(ApiExceptionEnum.COUPON_EXPIRED);
         }
         if (coupon.getUseTime() != null && DateUtil.compare(new Date(), coupon.getUseTime()) < 0) {
@@ -389,12 +341,12 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("customer_id", userId);
         queryWrapper.eq("coupon_id", coupon.getId());
-        if (Objects.equals(coupon.getRecType(),CouponClaimedTypeEnum.USER_LIMIT.getCode())) {
+        if (Objects.equals(coupon.getRecType(), CouponClaimedTypeEnum.USER_LIMIT.getCode())) {
             long count = count(queryWrapper);
             if (count >= coupon.getRestrictNum()) {
                 throw new PinetException(ApiExceptionEnum.COUPON_RECEIVE_UPPER_LIMIT);
             }
-        } else if (Objects.equals(coupon.getRecType(),CouponClaimedTypeEnum.TIME_LIMIT.getCode())) {
+        } else if (Objects.equals(coupon.getRecType(), CouponClaimedTypeEnum.TIME_LIMIT.getCode())) {
             Date firstCouponReceiveTime = getFirstCouponReceiveTime(userId, coupon.getId());
             queryWrapper.le("create_time", DateUtils.endOfDay(DateUtils.addDays(firstCouponReceiveTime, coupon.getRecCycle())));
             long count = count(queryWrapper);

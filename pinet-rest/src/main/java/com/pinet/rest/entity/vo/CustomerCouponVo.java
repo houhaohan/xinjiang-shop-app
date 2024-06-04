@@ -65,6 +65,9 @@ public class CustomerCouponVo {
     @ApiModelProperty("优惠券描述")
     private String couponDesc;
 
+    @ApiModelProperty("0-禁用，1-启用")
+    private Integer disableFlag;
+
     public String getRule() {
         List<String> list = new ArrayList<>();
         if (this.useShop == 1) {

@@ -12,7 +12,8 @@ package com.pinet.core;
 public enum ApiErrorEnum {
     ERROR_NOT_FOUNT(404, "访问地址未找到"),
     ERROR(500, "系统出错了"),
-    ERROR_NULL_POINT(901, "出现空指针异常"),
+//    ERROR_NULL_POINT(901, "出现空指针异常"),
+    ERROR_NULL_POINT(901, "网络异常,请稍后重试"),
     ERROR_REQUEST_PARAMS_INVALID(1001, "参数无效"),
     ERROR_SYSTEM_IS_NOT_EXIST(1002, "业务系统不存在"),
     ERROR_SERVICE_UNAUTHORIZED(1003, "服务未被授权"),
@@ -20,7 +21,7 @@ public enum ApiErrorEnum {
     ERROR_ACCESS_TOKEN_INVALID(1004, "访问令牌无效"),
     ERROR_EXCEED_MAX_TIMES(1100, "超过最大次数"),
     ERROR_INTERNAL_SERVER_ERROR(999, "服务器内部错误"),
-    ERROR_TO_INDEX(1006, "最近店铺没有该商品，请跳转首页购买其他商品"),//轻食小程序
+    ERROR_TO_INDEX(1006, "最近店铺没有该商品，请跳转首页购买其他商品"),
 
     PARAM_APPID_NULL_ERROR(1200, "appid参数不能为空"),
     PARAM_APPID_NOT_EXSIST_ERROR(1201, "appid参数不存在"),

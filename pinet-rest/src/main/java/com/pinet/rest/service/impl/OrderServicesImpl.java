@@ -1,12 +1,10 @@
 package com.pinet.rest.service.impl;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
@@ -17,6 +15,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pinet.common.mq.util.JmsUtil;
+import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.DB;
 import com.pinet.core.constants.OrderConstant;
@@ -32,7 +31,6 @@ import com.pinet.keruyun.openapi.vo.OrderDetailVO;
 import com.pinet.keruyun.openapi.vo.ScanCodePrePlaceOrderVo;
 import com.pinet.keruyun.openapi.vo.TakeoutOrderCreateVo;
 import com.pinet.rest.entity.*;
-import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.dto.*;
 import com.pinet.rest.entity.enums.*;
@@ -60,6 +58,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -96,13 +95,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final IScoreRecordService scoreRecordService;
     private final ICustomerBalanceService customerBalanceService;
     private final OrderPreferentialManager orderPreferentialManager;
-    private final WxMaService wxMaService;
-    private final ICustomerService customerService;
     private final OrderContext context;
     private final DishSettleContext dishSettleContext;
     private final IShopProductSpecService shopProductSpecService;
     private final IOrderComboDishService orderComboDishService;
     private final IOrderSideService orderSideService;
+    private final WechatTemplateMessageDeliver wechatTemplateMessageDeliver;
+    private final RedisUtil redisUtil;
 
 
     @Override
@@ -116,7 +115,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             k.setOrderStatusStr(OrderStatusEnum.getEnumByCode(k.getOrderStatus()));
             //如果是自提订单并且是配送中 修改状态状态str为可领取
             if (k.getOrderStatus().equals(OrderStatusEnum.SEND_OUT.getCode())
-                    && Objects.equals(k.getOrderType(),OrderTypeEnum.SELF_PICKUP.getCode())) {
+                    && Objects.equals(k.getOrderType(), OrderTypeEnum.SELF_PICKUP.getCode())) {
                 k.setOrderStatusStr("可领取");
             }
             List<OrderProduct> orderProducts = new ArrayList<>();
@@ -140,12 +139,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         List<OrderProduct> singleOrderProducts = orderProductService.getByOrderId(orderId);
         List<OrderProduct> comboOrderProducts = orderProductService.getComboByOrderId(orderId);
-        List<OrderProduct> orderProducts = new ArrayList<>(singleOrderProducts.size()+comboOrderProducts.size());
+        List<OrderProduct> orderProducts = new ArrayList<>(singleOrderProducts.size() + comboOrderProducts.size());
         orderProducts.addAll(singleOrderProducts);
         orderProducts.addAll(comboOrderProducts);
         orderDetailVo.setOrderProducts(orderProducts);
         //判断是自提还是外卖
-        if (Objects.equals(orderDetailVo.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())) {
+        if (Objects.equals(orderDetailVo.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())) {
             OrderAddress orderAddress = orderAddressService.getOrderAddress(orderId);
             orderDetailVo.setAddress(orderAddress.getAddress());
             //脱敏
@@ -186,6 +185,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 订单结算重构
+     *
      * @param dto
      * @return
      */
@@ -195,8 +195,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Shop shop = shopService.getById(dto.getShopId());
         //判断店铺是否营业
         checkShop(shop);
-        if (Objects.equals(dto.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())
-                && Objects.equals(shop.getSupportDelivery(),CommonConstant.NO)) {
+        if (Objects.equals(dto.getOrderType(), OrderTypeEnum.TAKEAWAY.getCode())
+                && Objects.equals(shop.getSupportDelivery(), CommonConstant.NO)) {
             throw new PinetException("该门店暂不支持外卖");
         }
         Double distance = getDistance(dto.getCustomerAddressId(), dto.getOrderType(), shop);
@@ -226,7 +226,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //订单优惠处理
         PreferentialVo preferentialVo = orderPreferentialManager.doPreferential(customerId, dto.getCustomerCouponId(), orderSetterContext.getOrderProdPrice(), orderProducts);
-        vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(),orderSetterContext.getPackageFee(),orderSetterContext.getShippingFee()));
+        vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(), orderSetterContext.getPackageFee(), orderSetterContext.getShippingFee()));
 
         //返回预计送达时间
         Date now = new Date();
@@ -258,15 +258,20 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @DSTransactional
     @Override
     public CreateOrderVo createOrder(CreateOrderDto request) {
+        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+        String redisKey = "qingshi:order:repetition:user_id:"+userId;
+        boolean lock = redisUtil.setIfAbsent(redisKey, "1", 5, TimeUnit.SECONDS);
+        if(!lock){
+            throw new PinetException("您点击的太快啦，请稍后重试！");
+        }
         //店铺是否营业
         Shop shop = shopService.getById(request.getShopId());
         checkShop(shop);
 
-        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         context.setCustomerId(userId);
         context.setShop(shop);
         context.setRequest(request);
-        context.setDistance(getDistance(request.getCustomerAddressId(),request.getOrderType(),shop));
+        context.setDistance(getDistance(request.getCustomerAddressId(), request.getOrderType(), shop));
         context.handler();
         return context.getResponse();
     }
@@ -277,10 +282,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      */
     private double getDistance(Long customerAddressId, Integer orderType, Shop shop) {
         CustomerAddress customerAddress = customerAddressService.getById(customerAddressId);
-        if(!Objects.equals(orderType,OrderTypeEnum.TAKEAWAY.getCode())){
+        if (!Objects.equals(orderType, OrderTypeEnum.TAKEAWAY.getCode())) {
             return 0D;
         }
-        if (Objects.equals(shop.getSupportDelivery(),CommonConstant.NO)) {
+        if (Objects.equals(shop.getSupportDelivery(), CommonConstant.NO)) {
             throw new PinetException("该店铺暂不支持外卖订单");
         }
         double distance = LatAndLngUtils.getDistance(customerAddress.getLng().doubleValue(), customerAddress.getLat().doubleValue(),
@@ -313,13 +318,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (Objects.isNull(orders)) {
             throw new PinetException("订单不存在");
         }
-        if(BigDecimalUtil.ne(orders.getOrderPrice(),dto.getOrderPrice())){
+        if (BigDecimalUtil.ne(orders.getOrderPrice(), dto.getOrderPrice())) {
             throw new PinetException("支付金额异常,请重新支付");
         }
         //根据不同支付渠道获取调用不同支付方法
         IPayService payService = SpringContextUtils.getBean(dto.getChannelId() + "_" + "service", IPayService.class);
         OrderPay orderPay = orderPayService.getByOrderIdAndChannelId(orders.getId(), dto.getChannelId());
-        if(Objects.nonNull(orderPay) && Objects.equals(orderPay.getPayStatus(),OrderConstant.PAID)){
+        if (Objects.nonNull(orderPay) && Objects.equals(orderPay.getPayStatus(), OrderConstant.PAID)) {
             throw new PinetException("订单已支付");
         }
 
@@ -370,7 +375,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderPayService.updateById(orderPay);
 
         //商家该订单收益= 用户支付总金额  - 平台配送费
-        BigDecimal shopEarnings = BigDecimalUtil.subtract(orderPay.getPayPrice(),orders.getShippingFeePlat());
+        BigDecimal shopEarnings = BigDecimalUtil.subtract(orderPay.getPayPrice(), orders.getShippingFeePlat());
         Integer memberLevel = customerMemberService.getMemberLevel(orders.getCustomerId());
         Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(memberLevel);
         orders.setScore(score);
@@ -425,7 +430,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         updateById(orders);
         //推送客如云,异步处理
-        jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH,String.valueOf(orders.getId()));
+        jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH, String.valueOf(orders.getId()));
         log.info("支付回调更新订单信息为{}", JSONObject.toJSONString(orders));
         return true;
     }
@@ -442,8 +447,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new PinetException("只有待付款状态下才可以取消");
         }
         orders.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
-        boolean res = updateById(orders);
-        return res;
+        return updateById(orders);
     }
 
     @Override
@@ -517,7 +521,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //套餐
         List<OrderProduct> comboProducts = orderProductService.getComboByOrderId(orderId);
-        comboProducts.forEach(p->{
+        comboProducts.forEach(p -> {
             AddCartDTO addCartDto = new AddCartDTO();
             addCartDto.setShopId(order.getShopId());
             addCartDto.setShopProdId(p.getShopProdId());
@@ -527,7 +531,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 AddCartDTO.CartComboDishDTO dto = new AddCartDTO.CartComboDishDTO();
                 dto.setShopProdId(p.getShopProdId());
                 dto.setSingleProdId(item.getSingleDishId());
-                String shopProdSpecIds = item.getOrderProductSpecs().stream().map(spec->String.valueOf(spec.getShopProdSpecId())).collect(Collectors.joining(","));
+                String shopProdSpecIds = item.getOrderProductSpecs().stream().map(spec -> String.valueOf(spec.getShopProdSpecId())).collect(Collectors.joining(","));
                 dto.setShopProdSpecIds(shopProdSpecIds);
                 return dto;
             }).collect(Collectors.toList());
@@ -646,24 +650,19 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("order_no", dto.getOutBizNo());
             Orders orders = getOne(queryWrapper);
-            Customer customer = customerService.getById(orders.getCustomerId());
             List<OrderProduct> orderProducts = orderProductService.getByOrderId(orders.getId());
 
             String prodNames = orderProducts.stream().map(OrderProduct::getProdName).collect(Collectors.joining(",\n"));
-            ArrayList<WxMaSubscribeMessage.MsgData> msgDataList = new ArrayList<>(5);
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("date15", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, orders.getCreateTime())));//下单时间
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing11", prodNames));//餐品详情
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("amount13", String.valueOf(orders.getOrderPrice())));//订单金额
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("character_string19", orders.getMealCode()));//取餐号
-            msgDataList.add(new WxMaSubscribeMessage.MsgData("thing7", "您的餐品已制作完成，请到前台领取"));//温馨提醒
+            ArrayList<WxMaSubscribeMessage.MsgData> data = new ArrayList<>(5);
+            data.add(new WxMaSubscribeMessage.MsgData("date15", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, orders.getCreateTime())));//下单时间
+            data.add(new WxMaSubscribeMessage.MsgData("thing11", prodNames));//餐品详情
+            data.add(new WxMaSubscribeMessage.MsgData("amount13", String.valueOf(orders.getOrderPrice())));//订单金额
+            data.add(new WxMaSubscribeMessage.MsgData("character_string19", orders.getMealCode()));//取餐号
+            data.add(new WxMaSubscribeMessage.MsgData("thing7", "您的餐品已制作完成，请到前台领取"));//温馨提醒
 
-            WxMaSubscribeMessage wxMaSubscribeMessage = WxMaSubscribeMessage.builder()
-                    .templateId(CommonConstant.PERFORMANCE_CALL_TEMPLATE_ID)
-                    .data(msgDataList)
-                    .toUser(customer.getQsOpenId())
-                    .page("packageA/orderClose/orderDetails?orderId=" + orders.getId())
-                    .build();
-            wxMaService.getMsgService().sendSubscribeMsg(wxMaSubscribeMessage);
+            String templateId = WeChatTemplateEnum.PERFORMANCE_CALL.getKey();
+            String url = WeChatTemplateEnum.PERFORMANCE_CALL.getPageUrl();
+            wechatTemplateMessageDeliver.asyncSend(templateId,url,orders.getCustomerId(),data);
         } catch (WxErrorException e) {
             e.printStackTrace();
         }
@@ -772,7 +771,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 request.setItemOriginType(DishType.SINGLE);
                 request.setDishType(DishType.SINGLE_DISH);
                 request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
-                request.setDishList(getSideDishList(orderProduct.getOrderProductId(),order.getShopId()));
+                request.setDishList(getSideDishList(orderProduct.getOrderProductId(), order.getShopId()));
             } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
                 request.setItemOriginType(DishType.COMBO);
                 request.setDishType(DishType.COMBO_DISH);
@@ -886,7 +885,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 //做法
                 request.setDishAttachPropList(getDishAttachPropList(orderProduct.getOrderProductId()));
                 //小料
-                request.setDishList(getSideDishList(orderProduct.getOrderProductId(),orders.getShopId()));
+                request.setDishList(getSideDishList(orderProduct.getOrderProductId(), orders.getShopId()));
             } else if (Objects.equals(DishType.COMBO, orderProduct.getDishType())) {
                 request.setDishType(DishType.COMBO_DISH);
                 request.setItemOriginType(DishType.COMBO);
@@ -949,18 +948,18 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
 
-
     /**
      * 套餐明细
+     *
      * @param orderProduct
      * @param
      */
     private List<ScanCodeDish> getComboGroupDetail(OrderProductDto orderProduct) {
         List<OrderComboDishVo> orderComboDishList = orderComboDishService.getByOrderIdAndOrderProdId(orderProduct.getOrderId(), orderProduct.getOrderProductId());
-        if(CollectionUtils.isEmpty(orderComboDishList)){
+        if (CollectionUtils.isEmpty(orderComboDishList)) {
             return null;
         }
-        Map<String, List<OrderComboDishVo>> singleOrderMap = orderComboDishList.stream().collect(Collectors.groupingBy(OrderComboDishVo::getSingleDishId,LinkedHashMap::new,Collectors.toList()));
+        Map<String, List<OrderComboDishVo>> singleOrderMap = orderComboDishList.stream().collect(Collectors.groupingBy(OrderComboDishVo::getSingleDishId, LinkedHashMap::new, Collectors.toList()));
 
         List<ScanCodeDish> dishList = new ArrayList<>(singleOrderMap.size());
         for (Map.Entry<String, List<OrderComboDishVo>> entry : singleOrderMap.entrySet()) {
@@ -974,7 +973,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             dish.setDishName(orderComboDishVo.getSingleProdName());
             //做法
             List<DishAttachProp> dishAttachPropList = orderComboDishVoList.stream()
-                    .filter(o -> !Objects.equals("标准",o.getShopProdSpecName()))
+                    .filter(o -> !Objects.equals("标准", o.getShopProdSpecName()))
                     .map(o -> {
                         DishAttachProp dishAttachProp = new DishAttachProp();
                         dishAttachProp.setOutAttachPropNo(IdUtil.getSnowflake().nextIdStr());
@@ -989,7 +988,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                         dishAttachProp.setAttachPropId(dishAttachProp.getOutAttachPropNo());
                         return dishAttachProp;
                     }).collect(Collectors.toList());
-            if(!CollectionUtils.isEmpty(dishAttachPropList)){
+            if (!CollectionUtils.isEmpty(dishAttachPropList)) {
                 dish.setDishAttachPropList(dishAttachPropList);
             }
             dish.setDishQuantity(BigDecimal.ONE);
@@ -1000,7 +999,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             dish.setDishOriginalFee(dish.getDishFee());
             dish.setTotalFee(dish.getDishFee() * dish.getDishQuantity().longValue());//菜品总金额
             dish.setActualFee(dish.getDishFee() * dish.getDishQuantity().longValue());//应付金额
-            dish.setPromoFee(dish.getTotalFee() -  dish.getActualFee());//优惠
+            dish.setPromoFee(dish.getTotalFee() - dish.getActualFee());//优惠
             dish.setPackageFee("0");
             dish.setWeightDishFlag("0");
             dish.setDishImgUrl(orderComboDishVo.getImageUrl());
@@ -1011,10 +1010,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     .filter(o -> StringUtil.isNotBlank(o.getDishSkuId()))
                     .map(OrderComboDishVo::getDishSkuId)
                     .findFirst()
-                    .orElseGet(()->{
+                    .orElseGet(() -> {
                         List<ShopProductSpec> shopProductSpecList = shopProductSpecService.getByShopProdId(orderComboDishVo.getSingleProdId());
                         return shopProductSpecList.stream()
-                                .filter(spec->StringUtil.isBlank(spec.getCookingWayId()))
+                                .filter(spec -> StringUtil.isBlank(spec.getCookingWayId()))
                                 .map(ShopProductSpec::getKrySkuId)
                                 .findFirst()
                                 .get();
@@ -1060,17 +1059,18 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     /**
      * 获取订单小料
+     *
      * @param orderProdId
      * @param shopId
      * @return
      */
-    private List<ScanCodeDish> getSideDishList(Long orderProdId,Long shopId) {
-        List<OrderSideVo> orderSideList = orderSideService.getByOrderProdIdAndShopId(orderProdId,shopId);
-        if(CollectionUtils.isEmpty(orderSideList)){
+    private List<ScanCodeDish> getSideDishList(Long orderProdId, Long shopId) {
+        List<OrderSideVo> orderSideList = orderSideService.getByOrderProdIdAndShopId(orderProdId, shopId);
+        if (CollectionUtils.isEmpty(orderSideList)) {
             return null;
         }
         List<ScanCodeDish> sideDishList = new ArrayList<>();
-        for(OrderSideVo orderSide : orderSideList){
+        for (OrderSideVo orderSide : orderSideList) {
             ScanCodeDish side = new ScanCodeDish();
             side.setOutDishNo(IdUtil.getSnowflake().nextIdStr());
             side.setDishId(orderSide.getSideDishId());
