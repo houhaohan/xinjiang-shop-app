@@ -31,7 +31,7 @@ import java.util.List;
  * @create: 2023-06-13 14:09
  **/
 @Service("recharge_notify_service")
-public class RechargeNotifyServiceImpl implements IPayNotifyService {
+public class DbzRechargeNotifyServiceImpl implements IPayNotifyService {
     @Resource
     private IOrderPayService orderPayService;
 

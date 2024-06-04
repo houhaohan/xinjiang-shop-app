@@ -3,6 +3,7 @@ package com.pinet.rest.service;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.VipUser;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
 import com.pinet.rest.entity.vo.VipUserVO;
 
@@ -24,6 +25,7 @@ public interface IVipUserService extends IService<VipUser> {
      * 会员充值
      * @param dto
      */
+//    void recharge(PayDto dto);
     void recharge(VipRechargeDTO dto);
 
     /**

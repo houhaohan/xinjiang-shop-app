@@ -67,36 +67,37 @@ public class CustomerMemberServiceImpl extends ServiceImpl<CustomerMemberMapper,
 
     @Override
     public Object recharge(PayDto dto) {
-        if (dto.getOrderPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new PinetException("充值金额不能为0");
-        }
-        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-
-        PayParam param = new PayParam();
-        param.setOpenId(dto.getOpenId());
-        param.setPayPrice(dto.getOrderPrice());
-        param.setPayDesc("店帮主充值");
-        param.setOrderNo(IdUtil.getSnowflake().nextIdStr());
-        param.setPayType(PayTypeEnum._2.getCode());
-        IPayService payService = SpringContextUtils.getBean(dto.getChannelId() + "_" + "service", IPayService.class);
-        Object res = payService.pay(param);
-
-        //构造orderPay
-        OrderPay orderPay = new OrderPay();
-        orderPay.setOrderId(0L);
-        orderPay.setPayType(2);
-        orderPay.setOrderNo(Long.valueOf(param.getOrderNo()));
-        orderPay.setCustomerId(userId);
-        orderPay.setPayStatus(1);
-        orderPay.setOrderPrice(dto.getOrderPrice());
-        orderPay.setPayPrice(dto.getOrderPrice());
-        orderPay.setOpenId(dto.getOpenId());
-        orderPay.setChannelId(dto.getChannelId());
-        orderPay.setPayName(payService.getPayName());
-        orderPay.setIp(IPUtils.getIpAddr());
-        orderPayService.save(orderPay);
-
-        return res;
+//        if (dto.getOrderPrice().compareTo(BigDecimal.ZERO) <= 0) {
+//            throw new PinetException("充值金额不能为0");
+//        }
+//        Long userId = ThreadLocalUtil.getUserLogin().getUserId();
+//
+//        PayParam param = new PayParam();
+//        param.setOpenId(dto.getOpenId());
+//        param.setPayPrice(dto.getOrderPrice());
+//        param.setPayDesc("会员充值");
+//        param.setOrderNo(IdUtil.getSnowflake().nextIdStr());
+//        param.setPayType(PayTypeEnum.VIP_RECHARGE.getCode());
+//        IPayService payService = SpringContextUtils.getBean(dto.getChannelId() + "_" + "service", IPayService.class);
+//        Object res = payService.pay(param);
+//
+//        //构造orderPay
+//        OrderPay orderPay = new OrderPay();
+//        orderPay.setOrderId(0L);
+//        orderPay.setPayType(2);
+//        orderPay.setOrderNo(Long.valueOf(param.getOrderNo()));
+//        orderPay.setCustomerId(userId);
+//        orderPay.setPayStatus(1);
+//        orderPay.setOrderPrice(dto.getOrderPrice());
+//        orderPay.setPayPrice(dto.getOrderPrice());
+//        orderPay.setOpenId(dto.getOpenId());
+//        orderPay.setChannelId(dto.getChannelId());
+//        orderPay.setPayName(payService.getPayName());
+//        orderPay.setIp(IPUtils.getIpAddr());
+//        orderPayService.save(orderPay);
+//
+//        return res;
+        return false;
     }
 
     @Override

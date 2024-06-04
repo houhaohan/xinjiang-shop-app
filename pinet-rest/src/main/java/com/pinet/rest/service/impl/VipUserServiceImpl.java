@@ -1,13 +1,13 @@
 package com.pinet.rest.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.DB;
+import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.exception.PinetException;
-import com.pinet.core.util.BigDecimalUtil;
-import com.pinet.core.util.DateUtils;
-import com.pinet.core.util.ThreadLocalUtil;
+import com.pinet.core.util.*;
 import com.pinet.keruyun.openapi.dto.CustomerCreateDTO;
 import com.pinet.keruyun.openapi.dto.DirectChargeDTO;
 import com.pinet.keruyun.openapi.param.CustomerPropertyParam;
@@ -17,9 +17,11 @@ import com.pinet.keruyun.openapi.vo.customer.CustomerCreateVO;
 import com.pinet.keruyun.openapi.vo.customer.CustomerPropertyVO;
 import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
 import com.pinet.rest.entity.*;
+import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
-import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
+import com.pinet.rest.entity.enums.PayTypeEnum;
 import com.pinet.rest.entity.enums.VipLevelEnum;
+import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.VipUserVO;
 import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.mapper.VipUserMapper;
@@ -51,8 +53,9 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     private final ShopMapper shopMapper;
     private final IVipShopBalanceService vipShopBalanceService;
     private final IVipRechargeRecordService vipRechargeRecordService;
-    private final ICustomerBalanceRecordService customerBalanceRecordService;
     private final IVipLevelService vipLevelService;
+    private final IOrderPayService orderPayService;
+    private final ICustomerService customerService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -91,47 +94,45 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void recharge(VipRechargeDTO dto) {
-        Shop shop = shopMapper.selectById(dto.getShopId());
-        String token = kryApiService.getToken(AuthType.SHOP, shop.getKryShopId());
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
-        VipUser user = this.getByCustomerId(userId);
-
-        DirectChargeDTO directChargeDTO = new DirectChargeDTO();
-        directChargeDTO.setShopId(shop.getKryShopId().toString());
-        directChargeDTO.setBizDate(DateUtils.getTime());
-        directChargeDTO.setOperatorName("管理员");
-        directChargeDTO.setRealValue(BigDecimalUtil.yuan2Fen(dto.getAmount()));
-        directChargeDTO.setCustomerId(user.getKryCustomerId());
-        DirectChargeVO directChargeVO = kryApiService.directCharge(shop.getKryShopId(), token, directChargeDTO);
-        if(directChargeVO == null){
-            throw new PinetException("充值异常，请联系商家");
+        Customer customer = customerService.getById(userId);
+        PayParam param = new PayParam();
+        param.setOpenId(customer.getQsOpenId());
+        param.setPayPrice(dto.getAmount());
+        param.setPayDesc("会员充值");
+        param.setOrderNo(IdUtil.getSnowflake().nextIdStr());
+        param.setPayType(PayTypeEnum.VIP_RECHARGE.getCode());
+        IPayService payService = SpringContextUtils.getBean("weixin_mini_service", IPayService.class);
+        Object res = payService.pay(param);
+        if(res == null){
+            //失败
+            throw new PinetException("支付失败");
         }
 
-        //店铺余额
-        VipShopBalance shopBalance = new VipShopBalance();
-        shopBalance.setCustomerId(userId);
-        shopBalance.setShopId(shop.getId());
-        shopBalance.setAmount(BigDecimalUtil.fenToYuan(directChargeVO.getRemainAvailableValue().getTotalValue()));
-        vipShopBalanceService.save(shopBalance);
+        //构造orderPay
+        OrderPay orderPay = new OrderPay();
+        orderPay.setOrderId(0L);
+        orderPay.setPayType(PayTypeEnum.VIP_RECHARGE.getCode());
+        orderPay.setOrderNo(Long.valueOf(param.getOrderNo()));
+        orderPay.setCustomerId(userId);
+        orderPay.setPayStatus(OrderConstant.UNPAID);
+        orderPay.setOrderPrice(dto.getAmount());
+        orderPay.setPayPrice(dto.getAmount());
+        orderPay.setOpenId(customer.getQsOpenId());
+        orderPay.setChannelId("weixin_mini_service");
+        orderPay.setPayName(payService.getPayName());
+        orderPay.setIp(IPUtils.getIpAddr());
+        orderPayService.save(orderPay);
 
-        //充值记录
+        //VIP充值记录
         VipRechargeRecord rechargeRecord = new VipRechargeRecord();
         rechargeRecord.setCustomerId(userId);
-        rechargeRecord.setShopId(shop.getId());
+        rechargeRecord.setShopId(dto.getShopId());
         rechargeRecord.setRealAmount(dto.getAmount());
-        BigDecimal giftAmount = BigDecimalUtil.fenToYuan(directChargeVO.getRemainAvailableValue().getGiftValue());
-        rechargeRecord.setGiftAmount(giftAmount);
+        rechargeRecord.setOutTradeNo(param.getOrderNo());
         rechargeRecord.setGiftCouponId(dto.getCouponId());
+        rechargeRecord.setTemplateId(dto.getTemplateId());
         vipRechargeRecordService.save(rechargeRecord);
-
-        //资金流水
-        CustomerBalanceRecord customerBalanceRecord = new CustomerBalanceRecord();
-        customerBalanceRecord.setCustomerId(userId);
-        customerBalanceRecord.setType(BalanceRecordTypeEnum._5.getCode());
-        customerBalanceRecord.setTypeStr(BalanceRecordTypeEnum._5.getMsg());
-        customerBalanceRecord.setMoney(dto.getAmount());
-        customerBalanceRecord.setFkId(userId);
-        customerBalanceRecordService.save(customerBalanceRecord);
     }
 
     @Override
@@ -144,13 +145,13 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         BigDecimal nextLevelDiffAmount = vipLevelService.nextLevelDiffAmount(customerId, user.getLevel());
         vipUserVO.setNextLevelDiffAmount(nextLevelDiffAmount);
 
-        List<VipShopBalance> vipShopBalances = vipShopBalanceService.getByCustomerId(customerId);
-        if(CollectionUtils.isEmpty(vipShopBalances)){
+        List<VipShopBalance> vipShopBalanceList = vipShopBalanceService.getByCustomerId(customerId);
+        if(CollectionUtils.isEmpty(vipShopBalanceList)){
             vipUserVO.setAmount(BigDecimal.ZERO);
             return vipUserVO;
         }
 
-        VipShopBalance shopBalance = vipShopBalances.get(0);
+        VipShopBalance shopBalance = vipShopBalanceList.get(0);
         Shop shop = shopMapper.selectById(shopBalance.getShopId());
 
         String token = kryApiService.getToken(AuthType.SHOP, shop.getKryShopId());

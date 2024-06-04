@@ -5,6 +5,7 @@ import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
 import com.pinet.rest.entity.request.SmsSendRequest;
+import com.pinet.rest.entity.vo.VipUserVO;
 import com.pinet.rest.service.IVipUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,7 +23,7 @@ import com.pinet.core.controller.BaseController;
  * VIP用户 前端控制器
  * </p>
  *
- * @author wlbz
+ * @author chengshaunghui
  * @since 2024-06-04
  */
 @RestController
@@ -44,8 +45,8 @@ public class VipUserController extends BaseController {
     @ApiOperation("会员信息")
     @RequestMapping(value = "/info",method = RequestMethod.GET)
     @ApiVersion(1)
-    public Result<?> info(@Validated @RequestBody VipRechargeDTO dto){
-        vipUserService.info(currentUserId());
-        return Result.ok();
+    public Result<VipUserVO> info(){
+        VipUserVO vipUserVO = vipUserService.info(currentUserId());
+        return Result.ok(vipUserVO);
     }
 }
