@@ -38,6 +38,7 @@ public class VipUserController extends BaseController {
     @ApiOperation("会员充值")
     @RequestMapping(value = "/recharge",method = RequestMethod.POST)
     @ApiVersion(1)
+    @NotTokenSign
     public Result<?> recharge(@Validated @RequestBody VipRechargeDTO dto){
         vipUserService.recharge(dto);
         return Result.ok();

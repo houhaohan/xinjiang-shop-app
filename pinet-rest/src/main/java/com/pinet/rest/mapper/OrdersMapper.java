@@ -8,6 +8,7 @@ import com.pinet.rest.entity.bo.RecommendTimeBo;
 import com.pinet.rest.entity.dto.RecommendListDto;
 import com.pinet.rest.entity.vo.*;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -21,6 +22,7 @@ import java.util.List;
  * @author wlbz
  * @since 2022-12-06
  */
+@Repository
 public interface OrdersMapper extends BaseMapper<Orders> {
 
     Page<OrderListVo> selectOrderList(Page<OrderListVo> page , @Param("customerId") Long customerId);

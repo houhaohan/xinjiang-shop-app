@@ -31,7 +31,7 @@ public class OrderPay extends BaseEntity {
     @ApiModelProperty("订单id")
     private Long orderId;
 
-    @ApiModelProperty("支付类型 1-轻食订单支付  2-店帮主充值 3-VIP支付")
+    @ApiModelProperty("支付类型 1-轻食订单支付  2-店帮主充值 3-VIP充值")
     private Integer payType;
 
     @ApiModelProperty("订单编号")

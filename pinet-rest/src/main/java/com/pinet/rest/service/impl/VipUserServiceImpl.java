@@ -1,47 +1,33 @@
 package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.IdUtil;
-import com.alibaba.fastjson.JSON;
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.CommonConstant;
-import com.pinet.core.constants.DB;
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.*;
-import com.pinet.keruyun.openapi.config.KryApiParamConfig;
-import com.pinet.keruyun.openapi.dto.CustomerCreateDTO;
-import com.pinet.keruyun.openapi.dto.DirectChargeDTO;
-import com.pinet.keruyun.openapi.param.CustomerParam;
 import com.pinet.keruyun.openapi.param.CustomerPropertyParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
-import com.pinet.keruyun.openapi.type.AuthType;
-import com.pinet.keruyun.openapi.vo.customer.CustomerCreateVO;
 import com.pinet.keruyun.openapi.vo.customer.CustomerPropertyVO;
-import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
-import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
 import com.pinet.rest.entity.*;
-import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
 import com.pinet.rest.entity.enums.PayTypeEnum;
 import com.pinet.rest.entity.enums.VipLevelEnum;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.VipUserVO;
-import com.pinet.rest.mapper.CustomerMapper;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.mapper.VipUserMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -56,7 +42,6 @@ import java.util.List;
  * @since 2024-06-04
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> implements IVipUserService {
     private final IKryApiService kryApiService;
@@ -68,11 +53,33 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     private final ICustomerService customerService;
     private final OrdersMapper ordersMapper;
     private final JmsUtil jmsUtil;
+    private final IPayService payService;
     @Value("${kry.brandId}")
     private Long brandId;
     @Value("${kry.brandToken}")
     private String brandToken;
 
+    public VipUserServiceImpl(IKryApiService kryApiService,
+                              ShopMapper shopMapper,
+                              IVipShopBalanceService vipShopBalanceService,
+                              IVipRechargeRecordService vipRechargeRecordService,
+                              IVipLevelService vipLevelService,
+                              IOrderPayService orderPayService,
+                              ICustomerService customerService,
+                              OrdersMapper ordersMapper,
+                              JmsUtil jmsUtil,
+                              @Qualifier("weixin_mini_service") IPayService payService){
+        this.kryApiService = kryApiService;
+        this.shopMapper = shopMapper;
+        this.vipShopBalanceService = vipShopBalanceService;
+        this.vipRechargeRecordService = vipRechargeRecordService;
+        this.vipLevelService = vipLevelService;
+        this.orderPayService = orderPayService;
+        this.customerService = customerService;
+        this.ordersMapper = ordersMapper;
+        this.jmsUtil = jmsUtil;
+        this.payService = payService;
+    }
 
     @Override
     public void create(Customer customer,Long shopId) {
@@ -102,7 +109,6 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         param.setPayDesc("会员充值");
         param.setOrderNo(IdUtil.getSnowflake().nextIdStr());
         param.setPayType(PayTypeEnum.VIP_RECHARGE.getCode());
-        IPayService payService = SpringContextUtils.getBean("weixin_mini_service", IPayService.class);
         Object res = payService.pay(param);
         if(res == null){
             //失败
@@ -132,6 +138,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         rechargeRecord.setOutTradeNo(param.getOrderNo());
         rechargeRecord.setGiftCouponId(dto.getCouponId());
         rechargeRecord.setTemplateId(dto.getTemplateId());
+        rechargeRecord.setStatus(CommonConstant.UNPAY);
         vipRechargeRecordService.save(rechargeRecord);
     }
 

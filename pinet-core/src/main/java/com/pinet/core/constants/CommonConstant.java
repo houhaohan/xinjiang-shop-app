@@ -45,8 +45,15 @@ public class CommonConstant {
     /**
      * 成功/失败
      */
+
     public static final String SUCCESS = "SUCCESS";
     public static final String FAIL = "FAIL";
+
+    /**
+     * 未支付
+     */
+    public static final String UNPAY = "UNPAY";
+
 
 
 }

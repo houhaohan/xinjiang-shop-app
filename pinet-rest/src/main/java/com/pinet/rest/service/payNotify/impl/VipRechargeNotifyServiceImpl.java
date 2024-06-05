@@ -3,7 +3,6 @@ package com.pinet.rest.service.payNotify.impl;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.OrderConstant;
-import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
 import com.pinet.keruyun.openapi.dto.DirectChargeDTO;
@@ -19,7 +18,6 @@ import com.pinet.rest.service.payNotify.IPayNotifyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -58,7 +56,7 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
 
         VipRechargeRecord vipRechargeRecord = vipRechargeRecordService.getByOutTradeNo(param.getOutTradeNo());
 
-        VipUser user = vipUserService.getByCustomerId(vipRechargeRecord.getCustomerId());
+        VipUser user = vipUserService.getByCustomerId(orderPay.getCustomerId());
 
         Shop shop = shopMapper.selectById(vipRechargeRecord.getShopId());
         String token = kryApiService.getToken(AuthType.SHOP, shop.getKryShopId());
@@ -70,13 +68,13 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
         directChargeDTO.setCustomerId(user.getKryCustomerId());
         DirectChargeVO directChargeVO = kryApiService.directCharge(shop.getKryShopId(), token, directChargeDTO);
         if(directChargeVO == null){
-            log.error("VIP充值异常，请联系商家");
+            log.error("VIP充值异常");
             return false;
         }
 
         //VIP店铺充值余额
         VipShopBalance shopBalance = new VipShopBalance();
-        shopBalance.setCustomerId(vipRechargeRecord.getCustomerId());
+        shopBalance.setCustomerId(orderPay.getCustomerId());
         shopBalance.setShopId(shop.getId());
         shopBalance.setAmount(BigDecimalUtil.fenToYuan(directChargeVO.getRemainAvailableValue().getTotalValue()));
         vipShopBalanceService.save(shopBalance);
