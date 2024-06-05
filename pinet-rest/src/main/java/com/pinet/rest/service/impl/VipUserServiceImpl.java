@@ -1,20 +1,27 @@
 package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.IdUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.DB;
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.*;
+import com.pinet.keruyun.openapi.config.KryApiParamConfig;
 import com.pinet.keruyun.openapi.dto.CustomerCreateDTO;
 import com.pinet.keruyun.openapi.dto.DirectChargeDTO;
+import com.pinet.keruyun.openapi.param.CustomerParam;
 import com.pinet.keruyun.openapi.param.CustomerPropertyParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.vo.customer.CustomerCreateVO;
 import com.pinet.keruyun.openapi.vo.customer.CustomerPropertyVO;
+import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
 import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.PayDto;
@@ -23,12 +30,16 @@ import com.pinet.rest.entity.enums.PayTypeEnum;
 import com.pinet.rest.entity.enums.VipLevelEnum;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.VipUserVO;
+import com.pinet.rest.mapper.CustomerMapper;
+import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.mapper.VipUserMapper;
+import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -47,7 +58,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@DS(DB.MASTER)
 public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> implements IVipUserService {
     private final IKryApiService kryApiService;
     private final ShopMapper shopMapper;
@@ -56,9 +66,15 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     private final IVipLevelService vipLevelService;
     private final IOrderPayService orderPayService;
     private final ICustomerService customerService;
+    private final OrdersMapper ordersMapper;
+    private final JmsUtil jmsUtil;
+    @Value("${kry.brandId}")
+    private Long brandId;
+    @Value("${kry.brandToken}")
+    private String brandToken;
+
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void create(Customer customer,Long shopId) {
         VipUser user = new VipUser();
         user.setCustomerId(customer.getCustomerId());
@@ -67,32 +83,16 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         user.setPhone(customer.getPhone());
         user.setSex(customer.getSex());
         user.setStatus(CommonConstant.ENABLE);
+        user.setNickname(customer.getNickname());
         user.setShopId(shopId);
-
-        Shop shop = shopMapper.selectById(shopId);
-        String token = kryApiService.getToken(AuthType.SHOP, shop.getKryShopId());
-        CustomerCreateDTO customerCreateDTO = new CustomerCreateDTO();
-        customerCreateDTO.setShopId(shop.getKryShopId().toString());
-        customerCreateDTO.setMobile(customer.getPhone());
-        customerCreateDTO.setName(customer.getNickname());
-        if(customer.getSex() == 0){
-            customerCreateDTO.setGender(2);
-        }else if(customer.getSex() == 1){
-            customerCreateDTO.setGender(1);
-        }else {
-            customerCreateDTO.setGender(0);
-        }
-        CustomerCreateVO customerCreateVO = kryApiService.createCustomer(shop.getKryShopId(), token, customerCreateDTO);
-        if(customerCreateVO == null){
-            log.error("手机号{}创建会员失败",customer.getPhone());
-            throw new PinetException("创建会员失败");
-        }
-        user.setKryCustomerId(customerCreateVO.getCustomerId());
         this.save(user);
+
+        //异步创建客如云会员
+        jmsUtil.sendMsgQueue(QueueConstants.KRY_VIP_CREATE, String.valueOf(user.getId()));
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
     public void recharge(VipRechargeDTO dto) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Customer customer = customerService.getById(userId);
@@ -154,11 +154,10 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         VipShopBalance shopBalance = vipShopBalanceList.get(0);
         Shop shop = shopMapper.selectById(shopBalance.getShopId());
 
-        String token = kryApiService.getToken(AuthType.SHOP, shop.getKryShopId());
         CustomerPropertyParam param = new CustomerPropertyParam();
         param.setShopId(shop.getKryShopId().toString());
         param.setCustomerId(user.getKryCustomerId());
-        CustomerPropertyVO customerPropertyVO = kryApiService.queryCustomerProperty(shop.getKryShopId(), token, param);
+        CustomerPropertyVO customerPropertyVO = kryApiService.queryCustomerProperty(brandId, brandToken, param);
         CustomerPropertyVO.RemainAvailable remainAvailable = customerPropertyVO.getPosCardDTOList().get(0).getPosRechargeAccountList().get(0).getRemainAvailableValue();
         vipUserVO.setAmount(BigDecimalUtil.fenToYuan(remainAvailable.getTotalValue()));
         return vipUserVO;
@@ -170,4 +169,37 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         queryWrapper.eq("customer_id",customerId);
         return getOne(queryWrapper);
     }
+
+    @Override
+    public void updateLevelByCustomerId(Long customerId) {
+        BigDecimal paidAmount = ordersMapper.getPaidAmount(customerId);
+        Integer level = currVipLevel(paidAmount);
+
+        UpdateWrapper<VipUser> wrapper = new UpdateWrapper<>();
+        wrapper.eq("customer_id",customerId);
+        VipUser entity = new VipUser();
+        entity.setLevel(level);
+        entity.setVipName(VipLevelEnum.getNameByCode(level));
+        this.update(entity,wrapper);
+    }
+
+    /**
+     * 根据支付金额获取当前VIP等级
+     * @param paidAmount
+     * @return
+     */
+    private Integer currVipLevel(BigDecimal paidAmount) {
+        //倒序排列
+        QueryWrapper<VipLevel> queryWrapper = new QueryWrapper<>();
+        queryWrapper.orderByDesc("id");
+        List<VipLevel> list = vipLevelService.list();
+        for(VipLevel vipLevel : list){
+            if(BigDecimalUtil.gt(paidAmount,vipLevel.getMinAmount())){
+                return vipLevel.getLevel();
+            }
+        }
+        return VipLevelEnum.VIP1.getLevel();
+    }
+
+
 }

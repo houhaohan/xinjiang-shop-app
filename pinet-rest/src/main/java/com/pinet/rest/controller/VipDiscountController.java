@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2024-06-04
  */
 @RestController
-@RequestMapping("/{version}/vipDiscount")
+@RequestMapping("/{version}/vip/discount")
 public class VipDiscountController extends BaseController {
 
 }

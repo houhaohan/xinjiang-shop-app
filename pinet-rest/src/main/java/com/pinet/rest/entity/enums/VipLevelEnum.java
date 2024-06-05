@@ -51,4 +51,22 @@ public enum VipLevelEnum {
         }
         return null;
     }
+
+    /**
+     * 通过code取 VIP名称
+     *
+     * @param level 值
+     * @return
+     */
+    public static String getNameByCode(Integer level) {
+        if (level == null) {
+            return null;
+        }
+        for (VipLevelEnum e : VipLevelEnum.values()) {
+            if (e.getLevel().equals(level)) {
+                return e.getName();
+            }
+        }
+        return null;
+    }
 }

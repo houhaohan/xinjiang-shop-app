@@ -47,4 +47,9 @@ public class QueueConstants {
      * 轻食外卖订单 配送平台创建订单失败 短信提醒 Delivery
      */
     public static final String KRY_ORDER_PUSH = "kry.order.push.queue";
+
+    /**
+     * 创建客如云会员
+     */
+    public static final String KRY_VIP_CREATE = "kry.vip.create.queue";
 }

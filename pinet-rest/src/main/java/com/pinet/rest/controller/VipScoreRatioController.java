@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2024-06-04
  */
 @RestController
-@RequestMapping("/{version}/vipScoreRatio")
+@RequestMapping("/{version}/vip/scoreRatio")
 public class VipScoreRatioController extends BaseController {
 
 }

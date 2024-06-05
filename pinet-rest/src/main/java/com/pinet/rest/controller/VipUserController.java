@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
+import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
 import com.pinet.rest.entity.request.SmsSendRequest;
 import com.pinet.rest.entity.vo.VipUserVO;
@@ -27,7 +28,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2024-06-04
  */
 @RestController
-@RequestMapping("/{version}/vipUser")
+@RequestMapping("/{version}/vip/user")
 @RequiredArgsConstructor
 @Api(tags = "会员")
 public class VipUserController extends BaseController {

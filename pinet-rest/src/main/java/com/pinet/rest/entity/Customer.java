@@ -5,10 +5,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pinet.core.constants.CommonConstant;

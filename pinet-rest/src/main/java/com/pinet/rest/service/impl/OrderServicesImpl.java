@@ -101,6 +101,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final IOrderComboDishService orderComboDishService;
     private final IOrderSideService orderSideService;
     private final WechatTemplateMessageDeliver wechatTemplateMessageDeliver;
+    private final IVipUserService vipUserService;
     private final RedisUtil redisUtil;
 
 
@@ -398,37 +399,13 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             customerCoupon.setCouponStatus(CouponReceiveStatusEnum.USED.getCode());
             customerCouponService.updateById(customerCoupon);
         }
-
-/*        //判断订单状态  如果订单状态是已取消  就退款
-        if (orders.getOrderStatus().equals(OrderStatusEnum.CANCEL.getCode())) {
-
-            IPayService payService = SpringContextUtils.getBean(orderPay.getChannelId() + "_" + "service", IPayService.class);
-            //构造退款记录
-            Snowflake snowflake = IdUtil.getSnowflake();
-
-            OrderRefund orderRefund = new OrderRefund();
-            orderRefund.setRefundNo(snowflake.nextId());
-            orderRefund.setOrderId(orders.getId());
-            orderRefund.setOrderPayId(orderPay.getId());
-            orderRefund.setRefundPrice(orders.getOrderPrice());
-            orderRefund.setOrderPrice(orders.getOrderPrice());
-            orderRefund.setIsAllRefund(true);
-            orderRefund.setRefundDesc("订单超时支付,系统默认退款");
-            orderRefund.setRefundStatus(1);
-            orderRefundService.save(orderRefund);
-
-            //调用退款方法
-            RefundParam refundParam = new RefundParam(orders.getOrderPrice().toString(),
-                    orders.getOrderNo().toString(),
-                    orderRefund.getRefundNo().toString(),
-                    orders.getOrderPrice().toString(),
-                    orderRefund.getId(), orders.getCustomerId());
-            payService.refund(refundParam);
-            orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
-            return updateById(orders);
-        } else {*/
-
         updateById(orders);
+
+        //更新VIP等级
+        BigDecimal paidAmount = baseMapper.getPaidAmount(orders.getCustomerId());
+//        vipUserService.getByCustomerId()
+
+
         //推送客如云,异步处理
         jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH, String.valueOf(orders.getId()));
         log.info("支付回调更新订单信息为{}", JSONObject.toJSONString(orders));

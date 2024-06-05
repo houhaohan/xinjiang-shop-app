@@ -23,7 +23,7 @@ import java.util.List;
  * @since 2024-06-04
  */
 @RestController
-@RequestMapping("/{version}/vipRechargeTemplate")
+@RequestMapping("/{version}/vip/rechargeTemplate")
 @RequiredArgsConstructor
 @Api(tags = "会员充值模板")
 public class VipRechargeTemplateController extends BaseController {

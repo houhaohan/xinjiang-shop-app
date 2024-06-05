@@ -41,4 +41,11 @@ public interface IVipUserService extends IService<VipUser> {
      * @return
      */
     VipUser getByCustomerId(Long customerId);
+
+    /**
+     * 更新用户VIP等级
+     * @param customerId
+     * @return
+     */
+    void updateLevelByCustomerId(Long customerId);
 }

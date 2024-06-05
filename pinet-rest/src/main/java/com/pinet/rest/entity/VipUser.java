@@ -28,6 +28,9 @@ public class VipUser extends BaseEntity {
     @ApiModelProperty("用户 ID")
     private Long customerId;
 
+    @ApiModelProperty("用户名")
+    private String nickname;
+
     @ApiModelProperty("客如云用户ID")
     private String kryCustomerId;
 

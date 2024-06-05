@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2024-06-04
  */
 @RestController
-@RequestMapping("/{version}/vipShopBalance")
+@RequestMapping("/{version}/vip/shopBalance")
 public class VipShopBalanceController extends BaseController {
 
 }

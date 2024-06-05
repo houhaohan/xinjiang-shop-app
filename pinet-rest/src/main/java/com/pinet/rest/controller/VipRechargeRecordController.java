@@ -15,7 +15,7 @@ import com.pinet.core.controller.BaseController;
  * @since 2024-06-04
  */
 @RestController
-@RequestMapping("/{version}/vipRechargeRecord")
+@RequestMapping("/{version}/vip/rechargeRecord")
 public class VipRechargeRecordController extends BaseController {
 
 }

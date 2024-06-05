@@ -6,16 +6,15 @@ import com.pinet.core.constants.DB;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.VipLevel;
 import com.pinet.rest.entity.enums.VipLevelEnum;
-import com.pinet.rest.mapper.OrderPayMapper;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mapper.VipLevelMapper;
 import com.pinet.rest.service.IVipLevelService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+
 
 /**
  * <p>
@@ -45,4 +44,5 @@ public class VipLevelServiceImpl extends ServiceImpl<VipLevelMapper, VipLevel> i
         queryWrapper.eq("`level`",level);
         return getOne(queryWrapper);
     }
+
 }

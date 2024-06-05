@@ -16,6 +16,7 @@
         <result column="gift_amount" property="giftAmount" />
         <result column="gift_coupon_id" property="giftCouponId" />
         <result column="out_trade_no" property="outTradeNo" />
+        <result column="template_id" property="templateId" />
         <result column="status" property="status" />
     </resultMap>
 
@@ -27,7 +28,7 @@
         update_by,
         update_time,
         del_flag,
-        customer_id, shop_id, real_amount, gift_amount, gift_coupon_id, out_trade_no, status
+        customer_id, shop_id, real_amount, gift_amount, gift_coupon_id, out_trade_no, template_id, status
     </sql>
 
 </mapper>
