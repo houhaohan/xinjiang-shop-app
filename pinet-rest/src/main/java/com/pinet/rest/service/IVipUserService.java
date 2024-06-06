@@ -9,6 +9,7 @@ import com.pinet.rest.entity.dto.VipRechargeDTO;
 import com.pinet.rest.entity.vo.VipUserVO;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -21,6 +22,8 @@ import java.math.BigDecimal;
 public interface IVipUserService extends IService<VipUser> {
     /**
      * 创建会员
+     * @param customer
+     * @param shopId
      */
     void create(Customer customer,Long shopId);
 

@@ -5,10 +5,11 @@ import com.pinet.keruyun.openapi.param.CustomerPropertyParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.vo.customer.CustomerPropertyVO;
-import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
+import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 
 /**
  * @description:
@@ -43,4 +44,5 @@ public class VIPCustomer {
         System.err.println(JSON.toJSONString(customerQueryVO));
         //{"customerId":"3324054679950","gender":1,"levelDTO":{"levelName":"VIP1","levelNo":"1"},"mobile":"15868805739","state":1}
     }
+
 }

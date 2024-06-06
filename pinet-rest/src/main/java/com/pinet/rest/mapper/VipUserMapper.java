@@ -3,6 +3,8 @@ package com.pinet.rest.mapper;
 import com.pinet.rest.entity.VipUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
+import java.util.List;
+
 /**
  * <p>
  * VIP用户 Mapper 接口
