@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @description: 会员信息
@@ -21,9 +22,26 @@ public class VipUserVO {
     @ApiModelProperty("VIP名称")
     private String vipName;
 
-    @ApiModelProperty("可用余额")
-    private BigDecimal amount;
-
     @ApiModelProperty("距离下个等级相差金额")
     private BigDecimal nextLevelDiffAmount;
+
+    @ApiModelProperty("会员门店余额")
+    private List<Amount> amounts;
+
+
+    /**
+     * 会员门店余额
+     */
+    @Data
+    public static class Amount{
+        @ApiModelProperty("门店ID")
+        private Long shopId;
+
+        @ApiModelProperty("门店名称")
+        private String shopName;
+
+        @ApiModelProperty("可用余额")
+        private BigDecimal amount;
+
+    }
 }

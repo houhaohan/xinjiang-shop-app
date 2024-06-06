@@ -49,4 +49,9 @@ public class PayParam {
      */
     private String payPassWord;
 
+    /**
+     * 店铺ID
+     */
+    private Long shopId;
+
 }

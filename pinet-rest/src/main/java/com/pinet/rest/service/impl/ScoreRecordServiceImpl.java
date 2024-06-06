@@ -8,11 +8,9 @@ import com.pinet.rest.entity.ScoreRecord;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.enums.ScoreRecordTypeEnum;
 import com.pinet.rest.mapper.ScoreRecordMapper;
-import com.pinet.rest.service.ICustomerBalanceService;
-import com.pinet.rest.service.ICustomerMemberService;
-import com.pinet.rest.service.IScoreRecordService;
+import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pinet.rest.service.IShopService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -27,18 +25,15 @@ import java.util.List;
  * @since 2023-12-22
  */
 @Service
+@RequiredArgsConstructor
 public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, ScoreRecord> implements IScoreRecordService {
-    @Resource
-    private IShopService shopService;
 
-    @Resource
-    private ICustomerMemberService customerMemberService;
-
-    @Resource
-    private ICustomerBalanceService customerBalanceService;
+    private final IShopService shopService;
+    private final IVipUserService vipUserService;
+    private final ICustomerBalanceService customerBalanceService;
 
     @Override
-    public void addScoreRecord(Long shopId, String scoreTitle, Integer score, Long fkId, ScoreRecordTypeEnum scoreRecordTypeEnum,Long customerId) {
+    public void addScoreRecord(Long shopId, String scoreTitle, Double score, Long fkId, ScoreRecordTypeEnum scoreRecordTypeEnum,Long customerId) {
         Shop shop = shopService.getById(shopId);
         ScoreRecord scoreRecord = new ScoreRecord();
         scoreRecord.setCustomerId(customerId);
@@ -48,7 +43,7 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
         scoreRecord.setScore(score);
         scoreRecord.setFkId(fkId);
         scoreRecord.setScoreType(scoreRecordTypeEnum.getCode());
-        scoreRecord.setCustomerMember(customerMemberService.getMemberLevel(customerId));
+        scoreRecord.setCustomerMember(vipUserService.getLevelByCustomerId(customerId));
         CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
         scoreRecord.setCustomerScore(customerBalance.getScore() + score);
 

@@ -29,10 +29,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -172,19 +173,30 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         }
         List<VipShopBalance> vipShopBalanceList = vipShopBalanceService.getByCustomerId(customerId);
         if(CollectionUtils.isEmpty(vipShopBalanceList)){
-            vipUserVO.setAmount(BigDecimal.ZERO);
+            VipUserVO.Amount amount = new VipUserVO.Amount();
+            amount.setAmount(BigDecimal.ZERO);
+            vipUserVO.setAmounts(Arrays.asList(amount));
             return vipUserVO;
         }
 
-        VipShopBalance shopBalance = vipShopBalanceList.get(0);
-        Shop shop = shopMapper.selectById(shopBalance.getShopId());
+        List<VipUserVO.Amount> shopAmountList = new ArrayList<>(vipShopBalanceList.size());
+        for(VipShopBalance vipShopBalance : vipShopBalanceList){
+            Shop shop = shopMapper.selectById(vipShopBalance.getShopId());
 
-        CustomerPropertyParam param = new CustomerPropertyParam();
-        param.setShopId(shop.getKryShopId().toString());
-        param.setCustomerId(user.getKryCustomerId());
-        CustomerPropertyVO customerPropertyVO = kryApiService.queryCustomerProperty(brandId, brandToken, param);
-        CustomerPropertyVO.RemainAvailable remainAvailable = customerPropertyVO.getPosCardDTOList().get(0).getPosRechargeAccountList().get(0).getRemainAvailableValue();
-        vipUserVO.setAmount(BigDecimalUtil.fenToYuan(remainAvailable.getTotalValue()));
+            CustomerPropertyParam param = new CustomerPropertyParam();
+            param.setShopId(shop.getKryShopId().toString());
+            param.setCustomerId(user.getKryCustomerId());
+            CustomerPropertyVO customerPropertyVO = kryApiService.queryCustomerProperty(brandId, brandToken, param);
+            CustomerPropertyVO.RemainAvailable remainAvailable = customerPropertyVO.getPosCardDTOList().get(0).getPosRechargeAccountList().get(0).getRemainAvailableValue();
+
+            VipUserVO.Amount amount = new VipUserVO.Amount();
+            amount.setAmount(BigDecimalUtil.fenToYuan(remainAvailable.getTotalValue()));
+            amount.setShopId(shop.getId());
+            amount.setShopName(shop.getShopName());
+            shopAmountList.add(amount);
+            //更新余额
+        }
+        vipUserVO.setAmounts(shopAmountList);
         return vipUserVO;
     }
 
@@ -193,6 +205,12 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         QueryWrapper<VipUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("customer_id",customerId);
         return getOne(queryWrapper);
+    }
+
+    @Override
+    public Integer getLevelByCustomerId(Long customerId) {
+        VipUser user = this.getByCustomerId(customerId);
+        return user == null ? VipLevelEnum.VIP1.getLevel() : user.getLevel();
     }
 
     @Override

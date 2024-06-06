@@ -45,4 +45,9 @@ public class RefundParam {
      */
     private Long customerId;
 
+    /**
+     * 店铺ID
+     */
+    private Long shopId;
+
 }

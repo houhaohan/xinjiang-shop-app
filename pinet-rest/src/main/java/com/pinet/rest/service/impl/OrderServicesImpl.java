@@ -45,7 +45,7 @@ import com.pinet.rest.handler.settle.OrderSetterContext;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
-import com.pinet.rest.strategy.MemberLevelStrategyContext;
+import com.pinet.rest.strategy.VipStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -82,7 +82,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final IOrderPayService orderPayService;
     private final IOrderProductSpecService orderProductSpecService;
     private final IOrderRefundService orderRefundService;
-    private final ICustomerMemberService customerMemberService;
     private final IBCapitalFlowService bCapitalFlowService;
     private final IBUserBalanceService ibUserBalanceService;
     private final ICustomerCouponService customerCouponService;
@@ -93,7 +92,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final IDaDaService daDaService;
     private final ICustomerAddressService customerAddressService;
     private final IScoreRecordService scoreRecordService;
-    private final ICustomerBalanceService customerBalanceService;
     private final OrderPreferentialManager orderPreferentialManager;
     private final OrderContext context;
     private final DishSettleContext dishSettleContext;
@@ -102,6 +100,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final IOrderSideService orderSideService;
     private final WechatTemplateMessageDeliver wechatTemplateMessageDeliver;
     private final IVipUserService vipUserService;
+    private final ICustomerScoreService customerScoreService;
     private final RedisUtil redisUtil;
 
 
@@ -377,8 +376,11 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //商家该订单收益= 用户支付总金额  - 平台配送费
         BigDecimal shopEarnings = BigDecimalUtil.subtract(orderPay.getPayPrice(), orders.getShippingFeePlat());
-        Integer memberLevel = customerMemberService.getMemberLevel(orders.getCustomerId());
-        Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(memberLevel);
+
+
+        //积分
+        Integer vipLevel = vipUserService.getLevelByCustomerId(orders.getCustomerId());
+        Double score = new VipStrategy(vipLevel).score(orders.getOrderPrice());
         orders.setScore(score);
 
         //资金流水
@@ -391,7 +393,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //修改余额 和 积分
         ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
-        customerBalanceService.addAvailableBalance(orders.getCustomerId(), score);
+
+        customerScoreService.updateScore(orders.getCustomerId(),score);
+
+//        customerBalanceService.addAvailableBalance(orders.getCustomerId(), score);
 
         //更新优惠券状态
         CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
@@ -459,8 +464,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());
 
         //修改积分
-        customerBalanceService.subtractAvailableBalance(orders.getCustomerId(), orders.getScore());
-
+        customerScoreService.updateScore(orders.getCustomerId(),orders.getScore() * -1);
 
         //退款退回优惠券
         CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
@@ -522,8 +526,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     public BigDecimal getDiscountedPrice(Long customerId, BigDecimal originalPrice, List<OrderDiscount> orderDiscounts) {
-        Integer memberLevel = customerMemberService.getMemberLevel(customerId);
-        MemberLevelEnum memberLevelEnum = MemberLevelEnum.getEnumByCode(memberLevel);
+//        Integer memberLevel = customerMemberService.getMemberLevel(customerId);
+        Integer vipLevel = vipUserService.getLevelByCustomerId(customerId);
+        VipLevelEnum vipLevelEnum = VipLevelEnum.getEnumByCode(vipLevel);
 
         BigDecimal discountedPrice = originalPrice.multiply(memberLevelEnum.getDiscount()).setScale(2, RoundingMode.HALF_UP);
 
@@ -592,7 +597,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 orders.getOrderNo().toString(),
                 orderRefund.getRefundNo().toString(),
                 orders.getOrderPrice().toString(),
-                orderRefund.getId(), orders.getCustomerId());
+                orderRefund.getId(), orders.getCustomerId(),
+                orders.getShopId());
         payService.refund(refundParam);
         //更新订单状态
         orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
