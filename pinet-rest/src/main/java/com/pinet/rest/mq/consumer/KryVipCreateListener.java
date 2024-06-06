@@ -1,6 +1,5 @@
 package com.pinet.rest.mq.consumer;
 
-import com.alibaba.fastjson.JSON;
 import com.pinet.core.exception.PinetException;
 import com.pinet.keruyun.openapi.dto.CustomerCreateDTO;
 import com.pinet.keruyun.openapi.param.CustomerParam;
@@ -45,7 +44,7 @@ public class KryVipCreateListener {
         CustomerQueryVO customerQueryVO = kryApiService.queryByMobile(shop.getKryShopId(), token, param);
         if(customerQueryVO != null){
             user.setKryCustomerId(customerQueryVO.getCustomerId());
-            vipUserService.save(user);
+            vipUserService.updateById(user);
             return;
         }
         CustomerCreateDTO customerCreateDTO = new CustomerCreateDTO();

@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.OrderConstant;
@@ -83,24 +84,30 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
 
     @Override
     public void create(Customer customer,Long shopId) {
-        VipUser user = new VipUser();
-        user.setCustomerId(customer.getCustomerId());
-        user.setLevel(VipLevelEnum.VIP1.getLevel());
-        user.setVipName(VipLevelEnum.VIP1.getName());
-        user.setPhone(customer.getPhone());
-        user.setSex(customer.getSex());
-        user.setStatus(CommonConstant.ENABLE);
-        user.setNickname(customer.getNickname());
-        user.setShopId(shopId);
-        this.save(user);
-
+        VipUser user = this.getByCustomerId(customer.getCustomerId());
+        if(user == null){
+            user = new VipUser();
+            user.setCustomerId(customer.getCustomerId());
+            user.setLevel(VipLevelEnum.VIP1.getLevel());
+            user.setVipName(VipLevelEnum.VIP1.getName());
+            user.setPhone(customer.getPhone());
+            user.setSex(customer.getSex());
+            user.setStatus(CommonConstant.ENABLE);
+            user.setNickname(customer.getNickname());
+            user.setShopId(shopId);
+            this.save(user);
+        }else {
+            if(StringUtil.isNotBlank(user.getKryCustomerId())){
+                return;
+            }
+        }
         //异步创建客如云会员
         jmsUtil.sendMsgQueue(QueueConstants.KRY_VIP_CREATE, String.valueOf(user.getId()));
     }
 
     @Override
     @DSTransactional
-    public void recharge(VipRechargeDTO dto) {
+    public WxPayMpOrderResult recharge(VipRechargeDTO dto) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Customer customer = customerService.getById(userId);
         PayParam param = new PayParam();
@@ -140,6 +147,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         rechargeRecord.setTemplateId(dto.getTemplateId());
         rechargeRecord.setStatus(CommonConstant.UNPAY);
         vipRechargeRecordService.save(rechargeRecord);
+        return (WxPayMpOrderResult)res;
     }
 
     @Override

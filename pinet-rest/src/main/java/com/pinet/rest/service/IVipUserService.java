@@ -1,5 +1,6 @@
 package com.pinet.rest.service;
 
+import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.VipUser;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -24,9 +25,9 @@ public interface IVipUserService extends IService<VipUser> {
     /**
      * 会员充值
      * @param dto
+     * @return
      */
-//    void recharge(PayDto dto);
-    void recharge(VipRechargeDTO dto);
+    WxPayMpOrderResult recharge(VipRechargeDTO dto);
 
     /**
      * 会员信息

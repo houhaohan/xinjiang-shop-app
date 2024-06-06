@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * VIP充值回调
@@ -46,7 +47,7 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
     @DSTransactional
     public boolean payNotify(OrderPayNotifyParam param) {
         OrderPay orderPay = orderPayService.getByOrderNo(param.getOrderNo());
-        if (orderPay == null) {
+        if (orderPay == null || Objects.equals(orderPay.getPayStatus(),OrderConstant.PAID)) {
             return false;
         }
         orderPay.setPayStatus(OrderConstant.PAID);
@@ -55,7 +56,10 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
         orderPayService.updateById(orderPay);
 
         VipRechargeRecord vipRechargeRecord = vipRechargeRecordService.getByOutTradeNo(param.getOutTradeNo());
-
+        if(Objects.equals(CommonConstant.SUCCESS,vipRechargeRecord.getStatus())){
+            //避免重复执行
+            return false;
+        }
         VipUser user = vipUserService.getByCustomerId(orderPay.getCustomerId());
 
         Shop shop = shopMapper.selectById(vipRechargeRecord.getShopId());
@@ -89,7 +93,7 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
         customerBalanceRecord.setCustomerId(user.getCustomerId());
         customerBalanceRecord.setType(BalanceRecordTypeEnum._5.getCode());
         customerBalanceRecord.setTypeStr(BalanceRecordTypeEnum._5.getMsg());
-        customerBalanceRecord.setMoney(vipRechargeRecord.getRealAmount());
+        customerBalanceRecord.setMoney(BigDecimalUtil.sum(vipRechargeRecord.getRealAmount(),vipRechargeRecord.getGiftAmount()));
         customerBalanceRecord.setFkId(user.getCustomerId());
         return customerBalanceRecordService.save(customerBalanceRecord);
     }

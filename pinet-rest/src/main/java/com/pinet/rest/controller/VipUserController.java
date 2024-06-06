@@ -1,11 +1,10 @@
 package com.pinet.rest.controller;
 
 
+import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
-import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
-import com.pinet.rest.entity.request.SmsSendRequest;
 import com.pinet.rest.entity.vo.VipUserVO;
 import com.pinet.rest.service.IVipUserService;
 import io.swagger.annotations.Api;
@@ -38,10 +37,9 @@ public class VipUserController extends BaseController {
     @ApiOperation("会员充值")
     @RequestMapping(value = "/recharge",method = RequestMethod.POST)
     @ApiVersion(1)
-    @NotTokenSign
-    public Result<?> recharge(@Validated @RequestBody VipRechargeDTO dto){
-        vipUserService.recharge(dto);
-        return Result.ok();
+    public Result<WxPayMpOrderResult> recharge(@Validated @RequestBody VipRechargeDTO dto){
+        WxPayMpOrderResult result = vipUserService.recharge(dto);
+        return Result.ok(result);
     }
 
     @ApiOperation("会员信息")
