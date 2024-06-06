@@ -161,7 +161,7 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
 
     @Override
     public DirectChargeVO directCharge(Long orgId, String token, DirectChargeDTO dto) {
-        String responseStr = super.postCall(KryAPI.CUSTOMER_PROPERTY, AuthType.BRAND, orgId, token, dto);
+        String responseStr = super.postCall(KryAPI.DIRECT_CHARGE, AuthType.BRAND, orgId, token, dto);
         log.info("客如云查询会员资产结果=============>{}",responseStr);
         KryResponse<Result<DirectChargeVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<DirectChargeVO>>>() {
         });

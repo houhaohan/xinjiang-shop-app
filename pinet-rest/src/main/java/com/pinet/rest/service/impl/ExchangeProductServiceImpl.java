@@ -110,8 +110,8 @@ public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMappe
                 exchangeProduct.getProdType(), exchangeProduct.getProdName(), 1,
                 exchangeProduct.getShopId(), exchangeProduct.getShopName());
 
-        //添加积分记录
-        scoreRecordService.addScoreRecord(exchangeProduct.getShopId(), "兑换" + exchangeProduct.getProdName(),
-                exchangeProduct.getScore(), exchangeRecordId, ScoreRecordTypeEnum.EXCHANGE,customerId);
+//        //添加积分记录
+//        scoreRecordService.addScoreRecord(exchangeProduct.getShopId(), "兑换" + exchangeProduct.getProdName(),
+//                exchangeProduct.getScore(), exchangeRecordId, ScoreRecordTypeEnum.EXCHANGE,customerId);
     }
 }

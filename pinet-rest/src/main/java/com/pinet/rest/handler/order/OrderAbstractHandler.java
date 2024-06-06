@@ -171,8 +171,8 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         entity.setCommission(commission);
         entity.setDiscountAmount(preferentialVo.getDiscountAmount());
         Integer level = context.customerMemberService.getMemberLevel(orders.getCustomerId());
-        Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(level);
-        entity.setScore(score);
+//        Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(level);
+//        entity.setScore(score);
         entity.setShippingFeePlat(getShippingFeePlat(orders.getOrderType(),context.shop,context.request.getCustomerAddressId(),orders.getOrderProdPrice()));
         context.ordersMapper.updateById(entity);
 

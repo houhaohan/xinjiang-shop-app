@@ -10,9 +10,7 @@ import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.*;
-import com.pinet.keruyun.openapi.param.CustomerPropertyParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
-import com.pinet.keruyun.openapi.vo.customer.CustomerPropertyVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
 import com.pinet.rest.entity.enums.PayTypeEnum;
@@ -47,14 +45,12 @@ import java.util.List;
 @Service
 @Slf4j
 public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> implements IVipUserService {
-    private final IKryApiService kryApiService;
     private final ShopMapper shopMapper;
     private final IVipShopBalanceService vipShopBalanceService;
     private final IVipRechargeRecordService vipRechargeRecordService;
     private final IVipLevelService vipLevelService;
     private final IOrderPayService orderPayService;
     private final ICustomerService customerService;
-    private final OrdersMapper ordersMapper;
     private final JmsUtil jmsUtil;
     private final IPayService payService;
     @Value("${kry.brandId}")
@@ -62,24 +58,20 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     @Value("${kry.brandToken}")
     private String brandToken;
 
-    public VipUserServiceImpl(IKryApiService kryApiService,
-                              ShopMapper shopMapper,
+    public VipUserServiceImpl(ShopMapper shopMapper,
                               IVipShopBalanceService vipShopBalanceService,
                               IVipRechargeRecordService vipRechargeRecordService,
                               IVipLevelService vipLevelService,
                               IOrderPayService orderPayService,
                               ICustomerService customerService,
-                              OrdersMapper ordersMapper,
                               JmsUtil jmsUtil,
                               @Qualifier("weixin_mini_service") IPayService payService){
-        this.kryApiService = kryApiService;
         this.shopMapper = shopMapper;
         this.vipShopBalanceService = vipShopBalanceService;
         this.vipRechargeRecordService = vipRechargeRecordService;
         this.vipLevelService = vipLevelService;
         this.orderPayService = orderPayService;
         this.customerService = customerService;
-        this.ordersMapper = ordersMapper;
         this.jmsUtil = jmsUtil;
         this.payService = payService;
     }
@@ -164,7 +156,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         if(user == null){
             vipUserVO.setLevel(VipLevelEnum.VIP1.getLevel());
             vipUserVO.setVipName(VipLevelEnum.VIP1.getName());
-            vipUserVO.setNextLevelDiffAmount(new BigDecimal("500"));
+            vipUserVO.setNextLevelDiffAmount(new BigDecimal(VipLevelEnum.VIP2.getMinAmount()));
         }else {
             vipUserVO.setLevel(user.getLevel());
             vipUserVO.setVipName(user.getVipName());
@@ -182,19 +174,11 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         List<VipUserVO.Amount> shopAmountList = new ArrayList<>(vipShopBalanceList.size());
         for(VipShopBalance vipShopBalance : vipShopBalanceList){
             Shop shop = shopMapper.selectById(vipShopBalance.getShopId());
-
-            CustomerPropertyParam param = new CustomerPropertyParam();
-            param.setShopId(shop.getKryShopId().toString());
-            param.setCustomerId(user.getKryCustomerId());
-            CustomerPropertyVO customerPropertyVO = kryApiService.queryCustomerProperty(brandId, brandToken, param);
-            CustomerPropertyVO.RemainAvailable remainAvailable = customerPropertyVO.getPosCardDTOList().get(0).getPosRechargeAccountList().get(0).getRemainAvailableValue();
-
             VipUserVO.Amount amount = new VipUserVO.Amount();
-            amount.setAmount(BigDecimalUtil.fenToYuan(remainAvailable.getTotalValue()));
-            amount.setShopId(shop.getId());
+            amount.setAmount(vipShopBalance.getAmount());
+            amount.setShopId(vipShopBalance.getId());
             amount.setShopName(shop.getShopName());
             shopAmountList.add(amount);
-            //更新余额
         }
         vipUserVO.setAmounts(shopAmountList);
         return vipUserVO;

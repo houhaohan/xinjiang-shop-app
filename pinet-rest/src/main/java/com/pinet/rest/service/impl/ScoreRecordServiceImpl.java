@@ -46,7 +46,6 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
         scoreRecord.setCustomerMember(vipUserService.getLevelByCustomerId(customerId));
         CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
         scoreRecord.setCustomerScore(customerBalance.getScore() + score);
-
         save(scoreRecord);
     }
 

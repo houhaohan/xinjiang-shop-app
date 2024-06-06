@@ -56,7 +56,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -391,12 +390,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         scoreRecordService.addScoreRecord(orders.getShopId(), "消费" + orders.getOrderPrice().toString() + "元",
                 score, orders.getId(), ScoreRecordTypeEnum.ORDER, orders.getCustomerId());
 
-        //修改余额 和 积分
+        //修改商家余额
         ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
-
-        customerScoreService.updateScore(orders.getCustomerId(),score);
-
-//        customerBalanceService.addAvailableBalance(orders.getCustomerId(), score);
+        //修改用户积分
+        customerScoreService.addScore(orders.getCustomerId(),score);
 
         //更新优惠券状态
         CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
@@ -434,10 +431,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     @DSTransactional
     public Boolean  orderRefundNotify(OrderRefundNotifyParam param) {
-
-        LambdaQueryWrapper<OrderRefund> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(OrderRefund::getRefundNo, param.getRefundNo()).eq(BaseEntity::getDelFlag, 0);
-        OrderRefund orderRefund = orderRefundService.getOne(lambdaQueryWrapper);
+        OrderRefund orderRefund = orderRefundService.getByRefundNo(param.getRefundNo());
         if (orderRefund == null) {
             log.error("微信退款回调失败，退款单号不存在" + param.getRefundNo());
             throw new PinetException("退款单号不存在");
@@ -447,26 +441,21 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //订单支付信息
         OrderPay orderPay = orderPayService.getById(orderRefund.getOrderPayId());
 
-        //商家该订单收益= 用户支付总金额  - 配送费
-        BigDecimal shopEarnings = orderPay.getPayPrice().subtract(orders.getShippingFee());
-
-
-        //暂时退款配送费由商家承担
-        //资金流水
+        //商家资金流水
         bCapitalFlowService.add(orderPay.getPayPrice().negate(), orders.getId(), orders.getCreateTime(),
                 CapitalFlowWayEnum.getEnumByChannelId(orderPay.getChannelId()), CapitalFlowStatusEnum.REFUND, orders.getShopId());
 
         //积分流水
-        scoreRecordService.addScoreRecord(orders.getShopId(), "退款" + orders.getOrderPrice().toString() + "元", -orders.getScore()
-                , orders.getId(), ScoreRecordTypeEnum.REFUND, orders.getCustomerId());
+        scoreRecordService.addScoreRecord(orders.getShopId(), "退款" + orders.getOrderPrice().toString() + "元", orders.getScore() * -1,
+                orders.getId(), ScoreRecordTypeEnum.REFUND, orders.getCustomerId());
 
         //修改余额
         ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());
 
-        //修改积分
-        customerScoreService.updateScore(orders.getCustomerId(),orders.getScore() * -1);
+        //扣除用户这笔订单积分
+        customerScoreService.subScore(orders.getCustomerId(),orders.getScore());
 
-        //退款退回优惠券
+        //退回优惠券
         CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());
         if (Objects.nonNull(customerCoupon)) {
             customerCoupon.setCouponStatus(CouponReceiveStatusEnum.RECEIVED.getCode());
@@ -523,24 +512,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         });
     }
 
-
-    @Override
-    public BigDecimal getDiscountedPrice(Long customerId, BigDecimal originalPrice, List<OrderDiscount> orderDiscounts) {
-//        Integer memberLevel = customerMemberService.getMemberLevel(customerId);
-        Integer vipLevel = vipUserService.getLevelByCustomerId(customerId);
-        VipLevelEnum vipLevelEnum = VipLevelEnum.getEnumByCode(vipLevel);
-
-        BigDecimal discountedPrice = originalPrice.multiply(memberLevelEnum.getDiscount()).setScale(2, RoundingMode.HALF_UP);
-
-        //如果不是门客  添加优惠明细信息
-        if (!memberLevel.equals(MemberLevelEnum._0.getCode())) {
-            OrderDiscount orderDiscount = new OrderDiscount();
-            orderDiscount.setDiscountMsg(memberLevelEnum.getMsg() + memberLevelEnum.getDiscount().multiply(new BigDecimal(10)) + "优惠")
-                    .setDiscountAmount(originalPrice.subtract(discountedPrice)).setType(1);
-            orderDiscounts.add(orderDiscount);
-        }
-        return discountedPrice;
-    }
 
 
     @Override

@@ -53,8 +53,8 @@ public class OrderConstant {
     public static final Long ORDER_AUTO_CANCEL_TIME = 15 * 60 * 1000L;
 
     /**
-     * 商家提现税率 0.54%
+     * 商家提现税率 0.2%
      */
-    public static final Double WITHDRAW_RATE = 0.54;
+    public static final Double WITHDRAW_RATE = 0.2;
 
 }

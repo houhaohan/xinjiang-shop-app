@@ -13,4 +13,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IOrderRefundService extends IService<OrderRefund> {
 
+    OrderRefund getByRefundNo(Long refundNo);
+
 }

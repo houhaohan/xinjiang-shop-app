@@ -13,10 +13,18 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ICustomerScoreService extends IService<CustomerScore> {
 
+
     /**
-     * 更细用户积分
+     * 添加积分
      * @param customerId
      * @param score
      */
-    void updateScore(Long customerId,Double score);
+    void addScore(Long customerId,Double score);
+
+    /**
+     * 减少积分
+     * @param customerId
+     * @param score
+     */
+    void subScore(Long customerId,Double score);
 }

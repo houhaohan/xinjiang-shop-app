@@ -46,6 +46,11 @@ public class VipShopBalanceServiceImpl extends ServiceImpl<VipShopBalanceMapper,
     public void updateAmount(Long customerId, Long shopId, BigDecimal amount) {
         VipShopBalance vipShopBalance = getByCustomerIdAndShopId(customerId, shopId);
         if(vipShopBalance == null){
+            vipShopBalance = new VipShopBalance();
+            vipShopBalance.setCustomerId(customerId);
+            vipShopBalance.setShopId(shopId);
+            vipShopBalance.setAmount(amount);
+            save(vipShopBalance);
             return;
         }
         vipShopBalance.setAmount(BigDecimalUtil.sum(vipShopBalance.getAmount(),amount));

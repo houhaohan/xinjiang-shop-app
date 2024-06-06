@@ -19,18 +19,26 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerScoreServiceImpl extends ServiceImpl<CustomerScoreMapper, CustomerScore> implements ICustomerScoreService {
 
+
     @Override
-    public void updateScore(Long customerId, Double score) {
+    public void addScore(Long customerId, Double score) {
         if(score == 0){
             return;
         }
         UpdateWrapper<CustomerScore> wrapper = new UpdateWrapper<>();
         wrapper.eq("customer_id",customerId);
-        if(score > 0){
-            wrapper.setSql("score = score + " + score);
-        }else {
-            wrapper.setSql("score = score - " + score);
+        wrapper.setSql("score = score + " + score);
+        update(wrapper);
+    }
+
+    @Override
+    public void subScore(Long customerId, Double score) {
+        if(score == 0){
+            return;
         }
+        UpdateWrapper<CustomerScore> wrapper = new UpdateWrapper<>();
+        wrapper.eq("customer_id",customerId);
+        wrapper.setSql("score = score - " + score);
         update(wrapper);
     }
 }

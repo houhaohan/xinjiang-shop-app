@@ -9,18 +9,20 @@ import lombok.Getter;
  */
 @Getter
 public enum VipLevelEnum {
-    VIP1(1,"VIP1"),
-    VIP2(2,"VIP2"),
-    VIP3(3,"VIP3"),
-    VIP4(4,"VIP4"),
-    VIP5(5,"VIP5");
+    VIP1(1,"VIP1", 0),
+    VIP2(2,"VIP2", 500),
+    VIP3(3,"VIP3",1000),
+    VIP4(4,"VIP4",2000),
+    VIP5(5,"VIP5",4000);
 
     private Integer level;
     private String name;
+    private Integer minAmount;
 
-    VipLevelEnum(Integer level, String name) {
+    VipLevelEnum(Integer level, String name,Integer minAmount) {
         this.level = level;
         this.name = name;
+        this.minAmount = minAmount;
     }
 
     public static VipLevelEnum next(Integer level){
