@@ -110,6 +110,9 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     public WxPayMpOrderResult recharge(VipRechargeDTO dto) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Customer customer = customerService.getById(userId);
+        //创建会员
+        this.create(customer,dto.getShopId());
+
         PayParam param = new PayParam();
         param.setOpenId(customer.getQsOpenId());
         param.setPayPrice(dto.getAmount());
@@ -153,13 +156,19 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     @Override
     public VipUserVO info(Long customerId) {
         VipUser user = getByCustomerId(customerId);
+
         VipUserVO vipUserVO = new VipUserVO();
         vipUserVO.setCustomerId(customerId);
-        vipUserVO.setLevel(user.getLevel());
-        vipUserVO.setVipName(user.getVipName());
-        BigDecimal nextLevelDiffAmount = vipLevelService.nextLevelDiffAmount(customerId, user.getLevel());
-        vipUserVO.setNextLevelDiffAmount(nextLevelDiffAmount);
-
+        if(user == null){
+            vipUserVO.setLevel(VipLevelEnum.VIP1.getLevel());
+            vipUserVO.setVipName(VipLevelEnum.VIP1.getName());
+            vipUserVO.setNextLevelDiffAmount(new BigDecimal("500"));
+        }else {
+            vipUserVO.setLevel(user.getLevel());
+            vipUserVO.setVipName(user.getVipName());
+            BigDecimal nextLevelDiffAmount = vipLevelService.nextLevelDiffAmount(customerId, vipUserVO.getLevel());
+            vipUserVO.setNextLevelDiffAmount(nextLevelDiffAmount);
+        }
         List<VipShopBalance> vipShopBalanceList = vipShopBalanceService.getByCustomerId(customerId);
         if(CollectionUtils.isEmpty(vipShopBalanceList)){
             vipUserVO.setAmount(BigDecimal.ZERO);
@@ -186,8 +195,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     }
 
     @Override
-    public void updateLevelByCustomerId(Long customerId) {
-        BigDecimal paidAmount = ordersMapper.getPaidAmount(customerId);
+    public void updateLevel(Long customerId,BigDecimal paidAmount) {
         Integer level = currVipLevel(paidAmount);
 
         UpdateWrapper<VipUser> wrapper = new UpdateWrapper<>();

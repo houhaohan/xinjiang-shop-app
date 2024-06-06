@@ -12,7 +12,6 @@ import com.pinet.core.util.IPUtils;
 import com.pinet.core.util.JwtTokenUtils;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Customer;
-import com.pinet.rest.entity.CustomerMember;
 import com.pinet.rest.entity.request.LoginRequest;
 import com.pinet.rest.entity.request.WxLoginRequest;
 import com.pinet.rest.entity.vo.UserInfo;
@@ -37,10 +36,6 @@ public class WxLoginServiceImpl implements ILoginService {
     private final ICustomerCouponService customerCouponService;
 
     private final ICustomerBalanceService customerBalanceService;
-
-    private final ICustomerMemberService customerMemberService;
-
-    private final IVipUserService vipUserService;
 
     /**
      * 此接口只用于新用户登入，老用户登入走 oldUserLogin 接口
@@ -98,8 +93,7 @@ public class WxLoginServiceImpl implements ILoginService {
             //添加用户账户表
             customerBalanceService.addByCustomerId(customer.getCustomerId());
         }
-        //成为VIP1
-        vipUserService.create(customer,wxLoginRequest.getShopId());
+
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());
         redisUtil.set(UserConstant.PREFIX_USER_TOKEN+token,String.valueOf(customer.getCustomerId()),JwtTokenUtils.EXPIRE_TIME/1000, TimeUnit.SECONDS);
         UserInfo userInfo = new UserInfo();
@@ -129,8 +123,6 @@ public class WxLoginServiceImpl implements ILoginService {
         customer.setQsOpenId(sessionInfo.getOpenid());
         customerService.updateById(customer);
 
-        CustomerMember customerMember = customerMemberService.getByCustomerId(customer.getCustomerId());
-        userInfo.setCustomerMember(customerMember);
         userInfo.setUser(customer);
 
         String newToken = JwtTokenUtils.generateToken(customer.getCustomerId());

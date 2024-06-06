@@ -57,7 +57,6 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
 
         VipRechargeRecord vipRechargeRecord = vipRechargeRecordService.getByOutTradeNo(param.getOutTradeNo());
         if(Objects.equals(CommonConstant.SUCCESS,vipRechargeRecord.getStatus())){
-            //避免重复执行
             return false;
         }
         VipUser user = vipUserService.getByCustomerId(orderPay.getCustomerId());

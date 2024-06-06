@@ -403,8 +403,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //更新VIP等级
         BigDecimal paidAmount = baseMapper.getPaidAmount(orders.getCustomerId());
-//        vipUserService.getByCustomerId()
-
+        vipUserService.updateLevel(orders.getCustomerId(),paidAmount);
 
         //推送客如云,异步处理
         jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH, String.valueOf(orders.getId()));
@@ -429,7 +428,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
     @Override
     @DSTransactional
-    public Boolean orderRefundNotify(OrderRefundNotifyParam param) {
+    public Boolean  orderRefundNotify(OrderRefundNotifyParam param) {
 
         LambdaQueryWrapper<OrderRefund> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(OrderRefund::getRefundNo, param.getRefundNo()).eq(BaseEntity::getDelFlag, 0);
@@ -469,6 +468,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             customerCoupon.setCouponStatus(CouponReceiveStatusEnum.RECEIVED.getCode());
             customerCouponService.updateById(customerCoupon);
         }
+        //更新VIP等级
+        BigDecimal paidAmount = baseMapper.getPaidAmount(orders.getCustomerId());
+        vipUserService.updateLevel(orders.getCustomerId(),paidAmount);
 
         orderRefund.setRefundStatus(OrderConstant.NOT_RECEIVED);
         orderRefund.setOutTradeNo(param.getOutTradeNo());

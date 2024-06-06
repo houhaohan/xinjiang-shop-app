@@ -8,6 +8,8 @@ import com.pinet.rest.entity.dto.PayDto;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
 import com.pinet.rest.entity.vo.VipUserVO;
 
+import java.math.BigDecimal;
+
 /**
  * <p>
  * VIP用户 服务类
@@ -46,7 +48,8 @@ public interface IVipUserService extends IService<VipUser> {
     /**
      * 更新用户VIP等级
      * @param customerId
+     * @param orderPrice
      * @return
      */
-    void updateLevelByCustomerId(Long customerId);
+    void updateLevel(Long customerId,BigDecimal orderPrice);
 }

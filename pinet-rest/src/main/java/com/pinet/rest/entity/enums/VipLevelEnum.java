@@ -9,15 +9,11 @@ import lombok.Getter;
  */
 @Getter
 public enum VipLevelEnum {
-    /**
-     * 商品状态
-     */
     VIP1(1,"VIP1"),
     VIP2(2,"VIP2"),
     VIP3(3,"VIP3"),
     VIP4(4,"VIP4"),
     VIP5(5,"VIP5");
-
 
     private Integer level;
     private String name;

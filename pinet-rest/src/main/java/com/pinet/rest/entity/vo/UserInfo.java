@@ -19,12 +19,6 @@ public class UserInfo {
     @ApiModelProperty("用户信息")
     private Customer user;
 
-    @ApiModelProperty("会员信息")
-    private CustomerMember customerMember;
-
-    @ApiModelProperty("会员信息")
-    private VipUser vipUser;
-
     /**
      * token
      */
