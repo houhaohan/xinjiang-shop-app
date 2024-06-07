@@ -44,9 +44,10 @@ public class CustomerScoreServiceImpl extends ServiceImpl<CustomerScoreMapper, C
     @Override
     public Double getScoreByCustomerId(Long customerId) {
         QueryWrapper<CustomerScore> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("ifnull(score,0)");
+        queryWrapper.select("score");
         queryWrapper.eq("customer_id",customerId);
-        return getObj(queryWrapper,o->Double.valueOf(o.toString()));
+        Double score = getObj(queryWrapper, o -> Double.valueOf(o.toString()));
+        return score == null ? 0D : score;
     }
 
     @Override

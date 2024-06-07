@@ -1,6 +1,9 @@
 package com.pinet.rest.entity.enums;
 
+import com.pinet.core.util.BigDecimalUtil;
 import lombok.Getter;
+
+import java.math.BigDecimal;
 
 /**
  * @description: VIP 折扣
@@ -10,10 +13,10 @@ import lombok.Getter;
 @Getter
 public enum VipDiscountEnum {
     VIP1(1,"VIP1",100,""),
-    VIP2(2,"VIP2",98,"VIP2 98折优惠"),
-    VIP3(3,"VIP3",97,"VIP3 97折优惠"),
-    VIP4(4,"VIP4",96,"VIP4 96折优惠"),
-    VIP5(5,"VIP5",95,"VIP5 95折优惠");
+    VIP2(2,"VIP2",98,"VIP 9.8折优惠"),
+    VIP3(3,"VIP3",97,"VIP 9.7折优惠"),
+    VIP4(4,"VIP4",96,"VIP 9.6折优惠"),
+    VIP5(5,"VIP5",95,"VIP 9.5折优惠");
 
     private Integer level;
     private String name;
@@ -38,4 +41,9 @@ public enum VipDiscountEnum {
         }
         return null;
     }
+
+    public static Double getDiscountDouble(VipDiscountEnum e) {
+        return e.discount * 0.01;
+    }
+
 }

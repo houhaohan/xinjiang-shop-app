@@ -4,6 +4,7 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.DiscountTypeEnum;
 import com.pinet.rest.entity.enums.VipDiscountEnum;
+import com.pinet.rest.entity.enums.VipLevelEnum;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.factory.PromotionStrategyFactory;
 import org.springframework.stereotype.Component;
@@ -43,14 +44,14 @@ public class OrderPreferentialManager {
 
         VipUser vipUser = vipUserService.getByCustomerId(customerId);
         //店帮主、会员 折扣
-        if(Objects.nonNull(vipUser)){
+        if(Objects.nonNull(vipUser) && vipUser.getLevel() > VipLevelEnum.VIP1.getLevel()){
             //优惠后金额
             VipDiscountEnum e = VipDiscountEnum.getEnumByCode(vipUser.getLevel());
-            BigDecimal discountedPrice = BigDecimalUtil.multiply(orderProductPrice, e.getDiscount());
+            BigDecimal discountedPrice = BigDecimalUtil.multiply(orderProductPrice, VipDiscountEnum.getDiscountDouble(e));
             OrderDiscount orderDiscount = new OrderDiscount();
             orderDiscount.setDiscountMsg(e.getDescription())
                     .setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountedPrice))
-                    .setType(DiscountTypeEnum.VIP_1.getCode());
+                    .setType(DiscountTypeEnum.VIP_2.getCode());
             orderDiscounts.add(orderDiscount);
             preferentialVo.setOrderDiscounts(orderDiscounts);
             preferentialVo.setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountedPrice));

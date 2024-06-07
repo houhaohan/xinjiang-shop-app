@@ -77,9 +77,18 @@ public class HomeController extends BaseController {
     @ApiOperation("我的页面上方统计")
     @RequestMapping("/topCount")
     @ApiVersion(1)
+    @NotTokenSign
     public Result<TopCountDto> topCount(Long shopId) {
-        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         TopCountDto topCountDto = new TopCountDto();
+        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
+        if(customerId == null || customerId == 0L){
+            //未登入状态
+            topCountDto.setBalance(BigDecimal.ZERO);
+            topCountDto.setPoint(0D);
+            topCountDto.setCouponCount(0L);
+            return Result.ok(topCountDto);
+        }
+
         Long couponCount = customerCouponService.countByCustomerId(customerId);
         topCountDto.setCouponCount(couponCount);
 
