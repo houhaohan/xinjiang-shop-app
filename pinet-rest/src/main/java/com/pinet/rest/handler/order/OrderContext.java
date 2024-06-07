@@ -11,6 +11,7 @@ import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,7 +28,6 @@ public class OrderContext {
 
     protected final OrderPreferentialManager orderPreferentialManager;
     protected final IVipUserService vipUserService;
-//    protected final ICustomerMemberService customerMemberService;
     protected final OrdersMapper ordersMapper;
     protected final IShopProductService shopProductService;
     protected final IOrderAddressService orderAddressService;
@@ -45,6 +45,10 @@ public class OrderContext {
     protected CreateOrderDto request;
     protected CreateOrderVo response;
     protected OrderHandler orderHandler;
+    @Value("${kry.brandId}")
+    protected Long brandId;
+    @Value("${kry.brandToken}")
+    protected String brandToken;
 
     public void setCustomerId(Long customerId){
         this.customerId =  customerId;

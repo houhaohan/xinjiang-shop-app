@@ -4,7 +4,6 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.keruyun.openapi.dto.CustomerCreateDTO;
 import com.pinet.keruyun.openapi.param.CustomerParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
-import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.vo.customer.CustomerCreateVO;
 import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
 import com.pinet.rest.entity.Shop;
@@ -14,6 +13,7 @@ import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.IVipUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,23 +30,27 @@ public class KryVipCreateListener {
     private final IKryApiService kryApiService;
     private final IVipUserService vipUserService;
     private final ShopMapper shopMapper;
+    @Value("${kry.brandId}")
+    private Long brandId;
+    @Value("${kry.brandToken}")
+    private String brandToken;
+
 
     @JmsListener(destination = QueueConstants.KRY_VIP_CREATE, containerFactory = "queueListener")
     @Transactional(rollbackFor = Exception.class)
     public void vipCreate(String message){
         VipUser user = vipUserService.getById(Long.valueOf(message));
-        Shop shop = shopMapper.selectById(user.getShopId());
-        String token = kryApiService.getToken(AuthType.SHOP, shop.getKryShopId());
 
         //查询下客如云是否已经注册过会员
         CustomerParam param = new CustomerParam();
         param.setMobile(user.getPhone());
-        CustomerQueryVO customerQueryVO = kryApiService.queryByMobile(shop.getKryShopId(), token, param);
+        CustomerQueryVO customerQueryVO = kryApiService.queryByMobile(brandId, brandToken, param);
         if(customerQueryVO != null){
             user.setKryCustomerId(customerQueryVO.getCustomerId());
             vipUserService.updateById(user);
             return;
         }
+        Shop shop = shopMapper.selectById(user.getShopId());
         CustomerCreateDTO customerCreateDTO = new CustomerCreateDTO();
         customerCreateDTO.setShopId(shop.getKryShopId().toString());
         customerCreateDTO.setMobile(user.getPhone());
@@ -58,7 +62,7 @@ public class KryVipCreateListener {
         }else {
             customerCreateDTO.setGender(0);
         }
-        CustomerCreateVO customerCreateVO = kryApiService.createCustomer(shop.getKryShopId(), token, customerCreateDTO);
+        CustomerCreateVO customerCreateVO = kryApiService.createCustomer(shop.getKryShopId(), brandToken, customerCreateDTO);
         if(customerCreateVO == null){
             log.error("手机号{}创建会员失败",user.getPhone());
             throw new PinetException("创建会员失败");

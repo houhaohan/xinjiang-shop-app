@@ -1,20 +1,14 @@
 package com.pinet.rest.strategy;
 
-import com.pinet.core.util.BigDecimalUtil;
-import com.pinet.rest.entity.enums.VipLevelEnum;
-
 import java.math.BigDecimal;
 
 /**
  * 会员策略
  * @author chengshuanghui
  */
-public class VipStrategy implements MemberLevelStrategy {
+public class VipStrategy implements VipLevelStrategy {
 
     private Integer level;
-
-    public VipStrategy(){
-    }
 
     public VipStrategy(Integer level){
         this.level = level;
@@ -43,10 +37,6 @@ public class VipStrategy implements MemberLevelStrategy {
                 ratio = BigDecimal.ONE;
         }
         return ratio;
-    }
-
-    public Double score(BigDecimal price){
-        return BigDecimalUtil.multiply(price, this.ratio()).doubleValue();
     }
 
 }

@@ -6,7 +6,7 @@ import java.math.BigDecimal;
  * 门客（普通用户）策略
  * @author chengshuanghui
  */
-public class MkStrategy implements MemberLevelStrategy {
+public class MkStrategy implements VipLevelStrategy {
 
     public MkStrategy(){
     }
@@ -14,7 +14,7 @@ public class MkStrategy implements MemberLevelStrategy {
 
     @Override
     public BigDecimal ratio() {
-        return new BigDecimal("0.5");
+        return BigDecimal.ONE;
     }
 
 }

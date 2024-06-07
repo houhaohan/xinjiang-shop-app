@@ -13,11 +13,13 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.Environment;
 import com.pinet.core.util.StringUtil;
 import com.pinet.keruyun.openapi.param.CustomerParam;
+import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.*;
 import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.mq.constants.QueueConstants;
+import com.pinet.rest.strategy.VipLevelStrategyContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -147,12 +149,17 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
     }
 
 
-    protected void beforeHandler(String phone){
-        //校验下单用户是否是客如云会员
+    protected void checkVipUser(){
+        //客如云是会员，小程序不是会员，需要添加为小程序会员（线下收银机添加会员的情况）
+        Customer customer = context.customerService.getById(context.customerId);
         CustomerParam param = new CustomerParam();
-        param.setMobile(phone);
-        context.kryApiService.queryByMobile(12698040L,"ae5f960130e9d2ed01b406be6988b576",null);
+        param.setMobile(customer.getPhone());
+        CustomerQueryVO customerQueryVO = context.kryApiService.queryByMobile(context.brandId, context.brandToken, param);
+        if(Objects.nonNull(customerQueryVO)){
+            context.vipUserService.create(customer,context.shop.getId());
+        }
     }
+
 
 
     /**
@@ -180,12 +187,8 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         BigDecimal commission = orderProducts.stream().map(OrderProduct::getCommission).reduce(BigDecimal.ZERO, BigDecimal::add);
         entity.setCommission(commission);
         entity.setDiscountAmount(preferentialVo.getDiscountAmount());
-//        Integer level = context.customerMemberService.getMemberLevel(orders.getCustomerId());
-        Integer level = context.vipUserService.getLevelByCustomerId(orders.getCustomerId());
-        VipLevelEnum e = VipLevelEnum.getEnumByCode(level);
-
-//        Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(level);
-//        entity.setScore(score);
+        //创建订单不set积分，积分在支付回调里set
+        //entity.setScore(0D);
         entity.setShippingFeePlat(getShippingFeePlat(orders.getOrderType(),context.shop,context.request.getCustomerAddressId(),orders.getOrderProdPrice()));
         context.ordersMapper.updateById(entity);
 

@@ -45,6 +45,7 @@ import com.pinet.rest.handler.settle.OrderSetterContext;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
+import com.pinet.rest.strategy.VipLevelStrategyContext;
 import com.pinet.rest.strategy.VipStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -376,11 +377,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //商家该订单收益= 用户支付总金额  - 平台配送费
         BigDecimal shopEarnings = BigDecimalUtil.subtract(orderPay.getPayPrice(), orders.getShippingFeePlat());
 
-
         //积分
         Integer vipLevel = vipUserService.getLevelByCustomerId(orders.getCustomerId());
-        Double score = new VipStrategy(vipLevel).score(orders.getOrderPrice());
-        orders.setScore(score);
+        BigDecimal ratio = new VipLevelStrategyContext().ratio(vipLevel);
+        orders.setScore(BigDecimalUtil.multiply(orders.getOrderPrice(),ratio).doubleValue());
 
         //资金流水
         bCapitalFlowService.add(shopEarnings, orders.getId(), orders.getCreateTime(),
@@ -388,12 +388,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //积分流水
         scoreRecordService.addScoreRecord(orders.getShopId(), "消费" + orders.getOrderPrice().toString() + "元",
-                score, orders.getId(), ScoreRecordTypeEnum.ORDER, orders.getCustomerId());
+                orders.getScore(), orders.getId(), ScoreRecordTypeEnum.ORDER, orders.getCustomerId());
 
         //修改商家余额
         ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
         //修改用户积分
-        customerScoreService.addScore(orders.getCustomerId(),score);
+        customerScoreService.addScore(orders.getCustomerId(),orders.getScore());
 
         //更新优惠券状态
         CustomerCoupon customerCoupon = customerCouponService.getById(orders.getCustomerCouponId());

@@ -23,4 +23,5 @@ public class DirectOrderRequest extends OrderProductRequest {
      * 小料明细
      */
     private List<SideDishGroupDTO> sideDishGroupList;
+
 }

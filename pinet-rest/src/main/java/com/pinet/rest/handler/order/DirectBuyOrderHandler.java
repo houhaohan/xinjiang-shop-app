@@ -25,6 +25,8 @@ public class DirectBuyOrderHandler extends OrderAbstractHandler {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create() {
+        super.checkVipUser();
+
         Orders orders = buildOrder();
         ShopProduct shopProduct = context.shopProductService.getById(context.request.getShopProdId());
         //判断店铺商品是否下架
@@ -63,6 +65,5 @@ public class DirectBuyOrderHandler extends OrderAbstractHandler {
 
         afterHandler(orders,orderProducts);
     }
-
 
 }
