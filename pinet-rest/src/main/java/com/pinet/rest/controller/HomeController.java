@@ -1,11 +1,9 @@
 package com.pinet.rest.controller;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.controller.BaseController;
 import com.pinet.core.exception.PinetException;
-import com.pinet.core.page.PageRequest;
 import com.pinet.core.result.Result;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
@@ -14,6 +12,7 @@ import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.CustomerBalance;
 import com.pinet.rest.entity.CustomerBalanceRecord;
+import com.pinet.rest.entity.VipShopBalance;
 import com.pinet.rest.entity.dto.BalanceRecordListDto;
 import com.pinet.rest.entity.dto.ForgetPayPasswordDto;
 import com.pinet.rest.entity.dto.SetPayPasswordDto;
@@ -26,33 +25,29 @@ import com.pinet.rest.entity.vo.RecommendProductVo;
 import com.pinet.rest.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/{version}/home")
+@RequiredArgsConstructor
 @Api(tags = "首页")
 @Slf4j
 public class HomeController extends BaseController {
-    @Autowired
-    private IShopProductService shopProductService;
 
-    @Resource
-    private ICustomerCouponService customerCouponService;
-
-    @Resource
-    private ICustomerBalanceService customerBalanceService;
-
-    @Resource
-    private ICustomerBalanceRecordService customerBalanceRecordService;
-
-    @Resource
-    private ICustomerService customerService;
+    private final IShopProductService shopProductService;
+    private final ICustomerCouponService customerCouponService;
+    private final IVipShopBalanceService vipShopBalanceService;
+    private final ICustomerBalanceRecordService customerBalanceRecordService;
+    private final ICustomerService customerService;
+    private final ICustomerScoreService customerScoreService;
 
 
     @ApiOperation("热卖排行版")
@@ -82,32 +77,50 @@ public class HomeController extends BaseController {
     @ApiOperation("我的页面上方统计")
     @RequestMapping("/topCount")
     @ApiVersion(1)
-    public Result<TopCountDto> topCount() {
+    public Result<TopCountDto> topCount(Long shopId) {
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         TopCountDto topCountDto = new TopCountDto();
         Long couponCount = customerCouponService.countByCustomerId(customerId);
         topCountDto.setCouponCount(couponCount);
 
         //余额
-        CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
-        if (ObjectUtil.isNotNull(customerBalance)){
-            topCountDto.setBalance(customerBalance.getAvailableBalance());
-            topCountDto.setPoint(customerBalance.getScore());
+        List<VipShopBalance> shopBalanceList = vipShopBalanceService.getByCustomerId(customerId);
+        if(shopId == null){
+            if(!CollectionUtils.isEmpty(shopBalanceList)){
+                topCountDto.setBalance(shopBalanceList.get(0).getAmount());
+            }
+        }else {
+            BigDecimal balance = shopBalanceList.stream()
+                    .filter(item -> Objects.equals(item.getShopId(), shopId))
+                    .map(VipShopBalance::getAmount)
+                    .findFirst()
+                    .orElse(BigDecimal.ZERO);
+            topCountDto.setBalance(balance);
         }
+        Double score = customerScoreService.getScoreByCustomerId(customerId);
+        topCountDto.setPoint(score);
         return Result.ok(topCountDto);
     }
-
-
-
 
     @PostMapping("/balance")
     @ApiOperation("余额")
     @ApiVersion(1)
-    public Result<BalanceVo> balance(){
+    public Result<BalanceVo> balance(Long shopId){
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         BalanceVo vo = new BalanceVo();
-        CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
-        vo.setBalance(customerBalance.getAvailableBalance());
+        List<VipShopBalance> shopBalanceList = vipShopBalanceService.getByCustomerId(customerId);
+        if(shopId == null){
+            if(!CollectionUtils.isEmpty(shopBalanceList)){
+                vo.setBalance(shopBalanceList.get(0).getAmount());
+            }
+        }else {
+            BigDecimal balance = shopBalanceList.stream()
+                    .filter(item -> Objects.equals(item.getShopId(), shopId))
+                    .map(VipShopBalance::getAmount)
+                    .findFirst()
+                    .orElse(BigDecimal.ZERO);
+            vo.setBalance(balance);
+        }
         List<CustomerBalanceRecord> customerBalanceRecords = customerBalanceRecordService.getListLimit5(customerId);
         vo.setCustomerBalanceRecords(customerBalanceRecords);
         return Result.ok(vo);
@@ -152,10 +165,9 @@ public class HomeController extends BaseController {
     public Result<Boolean> isPayPassword(){
         Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
         Customer customer = customerService.getById(customerId);
-        if (customer.getPayPassword() != null && StringUtil.isNotBlank(customer.getPayPassword())){
-            return Result.ok(true);
-        }
-        return Result.ok(false);
+        boolean flag = StringUtil.isNotBlank(customer.getPayPassword());
+        return Result.ok(flag);
+
     }
 
 
@@ -165,7 +177,7 @@ public class HomeController extends BaseController {
     public Result<?> checkPayPassword(String payPassword){
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Customer customer = customerService.getById(userId);
-        if (customer.getPayPassword() == null || StringUtil.isBlank(customer.getPayPassword())){
+        if (StringUtil.isBlank(customer.getPayPassword())){
             throw new PinetException("请先设置支付密码");
         }
         return Result.ok(customer.getPayPassword().equals(payPassword));

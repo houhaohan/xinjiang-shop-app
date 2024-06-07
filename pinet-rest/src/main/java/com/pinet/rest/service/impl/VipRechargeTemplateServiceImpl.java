@@ -1,6 +1,8 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.pinet.core.constants.DB;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.VipRechargeTemplate;
 import com.pinet.rest.entity.vo.VipRechargeTemplateVO;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
  * @since 2024-06-04
  */
 @Service
+@DS(DB.MASTER)
 public class VipRechargeTemplateServiceImpl extends ServiceImpl<VipRechargeTemplateMapper, VipRechargeTemplate> implements IVipRechargeTemplateService {
 
     @Override

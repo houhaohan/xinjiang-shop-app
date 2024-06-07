@@ -9,16 +9,14 @@ import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.DB;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.rest.entity.Coupon;
-import com.pinet.rest.entity.CustomerBalance;
-import com.pinet.rest.entity.CustomerCoupon;
-import com.pinet.rest.entity.ExchangeProduct;
+import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.ExchangeDto;
 import com.pinet.rest.entity.dto.ExchangeProductListDto;
 import com.pinet.rest.entity.enums.ScoreRecordTypeEnum;
 import com.pinet.rest.mapper.ExchangeProductMapper;
 import com.pinet.rest.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,25 +31,16 @@ import java.util.List;
  * @since 2024-01-16
  */
 @Service
+@RequiredArgsConstructor
 @DS(DB.MASTER)
 public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMapper, ExchangeProduct> implements IExchangeProductService {
-    @Resource
-    private ICouponService couponService;
-
-    @Resource
-    private ICustomerBalanceService customerBalanceService;
-
-    @Resource
-    private ICustomerCouponService customerCouponService;
-
-    @Resource
-    private IExchangeRecordService exchangeRecordService;
-
-    @Resource
-    private IScoreRecordService scoreRecordService;
-
-    @Resource
-    private RedisUtil redisUtil;
+    private final ICouponService couponService;
+    private final ICustomerBalanceService customerBalanceService;
+    private final ICustomerCouponService customerCouponService;
+    private final IExchangeRecordService exchangeRecordService;
+    private final IScoreRecordService scoreRecordService;
+    private final ICustomerScoreService customerScoreService;
+    private final RedisUtil redisUtil;
 
     @Override
     public List<ExchangeProduct> exchangeProductList(ExchangeProductListDto dto) {
@@ -87,14 +76,13 @@ public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMappe
             throw new PinetException("兑换商品不存在");
         }
 
-        CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
-        if (customerBalance.getScore() < exchangeProduct.getScore()){
+        CustomerScore customerScore = customerScoreService.getByCustomerId(customerId);
+        if(customerScore.getScore() < exchangeProduct.getScore()){
             throw new PinetException("积分不足 无法兑换");
         }
-
         //扣减积分
-        customerBalanceService.subtractAvailableBalance(customerId, exchangeProduct.getScore());
-
+        customerScore.setScore(customerScore.getScore()-exchangeProduct.getScore());
+        customerScoreService.updateById(customerScore);
         //判断是否是优惠券
         if (exchangeProduct.getProdType() == 2) {
             //发放优惠券
@@ -111,7 +99,7 @@ public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMappe
                 exchangeProduct.getShopId(), exchangeProduct.getShopName());
 
 //        //添加积分记录
-//        scoreRecordService.addScoreRecord(exchangeProduct.getShopId(), "兑换" + exchangeProduct.getProdName(),
-//                exchangeProduct.getScore(), exchangeRecordId, ScoreRecordTypeEnum.EXCHANGE,customerId);
+        scoreRecordService.addScoreRecord(exchangeProduct.getShopId(), "兑换" + exchangeProduct.getProdName(),
+                exchangeProduct.getScore(), exchangeRecordId, ScoreRecordTypeEnum.EXCHANGE,customerId);
     }
 }

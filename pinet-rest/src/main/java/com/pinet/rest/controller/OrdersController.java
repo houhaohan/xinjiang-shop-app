@@ -56,15 +56,12 @@ public class OrdersController extends BaseController {
         return Result.ok(orderListVos);
     }
 
-
     @RequestMapping(value = "/orderDetail",method = RequestMethod.GET)
     @ApiOperation("订单详情")
     @ApiVersion(1)
-    @NotTokenSign
     public Result<OrderDetailVo> orderDetail(Long orderId) {
         OrderDetailVo orderDetailVo = ordersService.orderDetail(orderId);
         return Result.ok(orderDetailVo);
-
     }
 
     @PostMapping("/orderSettlement")
@@ -75,7 +72,6 @@ public class OrdersController extends BaseController {
         OrderSettlementVo orderSettlementVo = ordersService.orderSettlement(dto);
         return Result.ok(orderSettlementVo);
     }
-
 
     @PostMapping("/createOrder")
     @ApiOperation("创建订单")

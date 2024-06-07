@@ -27,7 +27,7 @@ import java.util.List;
 public class ExchangeRecordServiceImpl extends ServiceImpl<ExchangeRecordMapper, ExchangeRecord> implements IExchangeRecordService {
 
     @Override
-    public Long addExchangeRecord(Long customerId, Long exchangeProductId, Integer score, Integer prodType, String prodName, Integer exchangeNum, Long shopId, String shopName) {
+    public Long addExchangeRecord(Long customerId, Long exchangeProductId, Double score, Integer prodType, String prodName, Integer exchangeNum, Long shopId, String shopName) {
         ExchangeRecord exchangeRecord = new ExchangeRecord();
         exchangeRecord.setCustomerId(customerId);
         exchangeRecord.setExchangeProductId(exchangeProductId);

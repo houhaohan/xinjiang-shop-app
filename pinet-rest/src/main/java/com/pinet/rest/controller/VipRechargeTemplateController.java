@@ -3,6 +3,7 @@ package com.pinet.rest.controller;
 
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
+import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.vo.VipRechargeTemplateVO;
 import com.pinet.rest.service.IVipRechargeTemplateService;
 import io.swagger.annotations.Api;
@@ -33,6 +34,7 @@ public class VipRechargeTemplateController extends BaseController {
     @ApiOperation("门店充值模板列表")
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     @ApiVersion(1)
+    @NotTokenSign
     public Result<List<VipRechargeTemplateVO>> list(@RequestParam("shopId") Long shopId){
         List<VipRechargeTemplateVO> list = vipRechargeTemplateService.templateList(shopId);
         return Result.ok(list);

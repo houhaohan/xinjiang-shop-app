@@ -24,70 +24,70 @@ import java.math.BigDecimal;
 @DS(DB.SLAVE)
 public class CustomerBalanceServiceImpl extends ServiceImpl<CustomerBalanceMapper, CustomerBalance> implements ICustomerBalanceService {
 
-    @Override
-    public boolean addAvailableBalance(Long customerId, BigDecimal availableBalance) {
-        return addAvailableBalance(customerId,availableBalance,0);
-    }
-
-    @Override
-    public boolean addAvailableBalance(Long customerId, Integer score) {
-        return addAvailableBalance(customerId,BigDecimal.ZERO,score);
-    }
-
-    @Override
-    public boolean addAvailableBalance(Long customerId, BigDecimal availableBalance, Integer score) {
-        CustomerBalance customerBalance = getById(customerId);
-        if (ObjectUtil.isNull(customerBalance)) {
-            return false;
-        }
-        customerBalance.setAvailableBalance(customerBalance.getAvailableBalance().add(availableBalance));
-        customerBalance.setBalance(customerBalance.getBalance().add(availableBalance));
-        customerBalance.setScore(customerBalance.getScore() + score);
-        return updateById(customerBalance);
-    }
-
-    @Override
-    public boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance) {
-        return subtractAvailableBalance(customerId,availableBalance,0);
-    }
-
-    @Override
-    public boolean subtractAvailableBalance(Long customerId, Integer score) {
-        return subtractAvailableBalance(customerId,BigDecimal.ZERO,score);
-    }
-
-    @Override
-    public boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance, Integer score) {
-        CustomerBalance customerBalance = getById(customerId);
-        if (ObjectUtil.isNull(customerBalance)) {
-            return false;
-        }
-        customerBalance.setAvailableBalance(customerBalance.getAvailableBalance().subtract(availableBalance));
-        customerBalance.setBalance(customerBalance.getBalance().subtract(availableBalance));
-        customerBalance.setScore(customerBalance.getScore() - score);
-        return updateById(customerBalance);
-    }
-
-
-    @Override
-    public CustomerBalance getByCustomerId(Long customerId) {
-        QueryWrapper<CustomerBalance> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("customer_id",customerId);
-        return getOne(queryWrapper);
-    }
-
-    @Override
-    public boolean addByCustomerId(Long customerId) {
-        CustomerBalance query = getByCustomerId(customerId);
-        if (ObjectUtil.isNotNull(query)){
-            return true;
-        }
-        CustomerBalance customerBalance = new CustomerBalance();
-        customerBalance.setCustomerId(customerId);
-        customerBalance.setBalance(BigDecimal.ZERO);
-        customerBalance.setAvailableBalance(BigDecimal.ZERO);
-        customerBalance.setBlockedBalance(BigDecimal.ZERO);
-        customerBalance.setScore(0);
-        return save(customerBalance);
-    }
+//    @Override
+//    public boolean addAvailableBalance(Long customerId, BigDecimal availableBalance) {
+//        return addAvailableBalance(customerId,availableBalance,0);
+//    }
+//
+//    @Override
+//    public boolean addAvailableBalance(Long customerId, Integer score) {
+//        return addAvailableBalance(customerId,BigDecimal.ZERO,score);
+//    }
+//
+//    @Override
+//    public boolean addAvailableBalance(Long customerId, BigDecimal availableBalance, Integer score) {
+//        CustomerBalance customerBalance = getById(customerId);
+//        if (ObjectUtil.isNull(customerBalance)) {
+//            return false;
+//        }
+//        customerBalance.setAvailableBalance(customerBalance.getAvailableBalance().add(availableBalance));
+//        customerBalance.setBalance(customerBalance.getBalance().add(availableBalance));
+//        customerBalance.setScore(customerBalance.getScore() + score);
+//        return updateById(customerBalance);
+//    }
+//
+//    @Override
+//    public boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance) {
+//        return subtractAvailableBalance(customerId,availableBalance,0);
+//    }
+//
+//    @Override
+//    public boolean subtractAvailableBalance(Long customerId, Integer score) {
+//        return subtractAvailableBalance(customerId,BigDecimal.ZERO,score);
+//    }
+//
+//    @Override
+//    public boolean subtractAvailableBalance(Long customerId, BigDecimal availableBalance, Integer score) {
+//        CustomerBalance customerBalance = getById(customerId);
+//        if (ObjectUtil.isNull(customerBalance)) {
+//            return false;
+//        }
+//        customerBalance.setAvailableBalance(customerBalance.getAvailableBalance().subtract(availableBalance));
+//        customerBalance.setBalance(customerBalance.getBalance().subtract(availableBalance));
+//        customerBalance.setScore(customerBalance.getScore() - score);
+//        return updateById(customerBalance);
+//    }
+//
+//
+//    @Override
+//    public CustomerBalance getByCustomerId(Long customerId) {
+//        QueryWrapper<CustomerBalance> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("customer_id",customerId);
+//        return getOne(queryWrapper);
+//    }
+//
+//    @Override
+//    public boolean addByCustomerId(Long customerId) {
+//        CustomerBalance query = getByCustomerId(customerId);
+//        if (ObjectUtil.isNotNull(query)){
+//            return true;
+//        }
+//        CustomerBalance customerBalance = new CustomerBalance();
+//        customerBalance.setCustomerId(customerId);
+//        customerBalance.setBalance(BigDecimal.ZERO);
+//        customerBalance.setAvailableBalance(BigDecimal.ZERO);
+//        customerBalance.setBlockedBalance(BigDecimal.ZERO);
+//        customerBalance.setScore(0);
+//        return save(customerBalance);
+//    }
 }

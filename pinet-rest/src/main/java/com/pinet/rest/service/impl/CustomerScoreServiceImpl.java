@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerScoreServiceImpl extends ServiceImpl<CustomerScoreMapper, CustomerScore> implements ICustomerScoreService {
 
-
     @Override
     public void addScore(Long customerId, Double score) {
         if(score == 0){
@@ -40,5 +39,20 @@ public class CustomerScoreServiceImpl extends ServiceImpl<CustomerScoreMapper, C
         wrapper.eq("customer_id",customerId);
         wrapper.setSql("score = score - " + score);
         update(wrapper);
+    }
+
+    @Override
+    public Double getScoreByCustomerId(Long customerId) {
+        QueryWrapper<CustomerScore> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("ifnull(score,0)");
+        queryWrapper.eq("customer_id",customerId);
+        return getObj(queryWrapper,o->Double.valueOf(o.toString()));
+    }
+
+    @Override
+    public CustomerScore getByCustomerId(Long customerId) {
+        QueryWrapper<CustomerScore> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("customer_id",customerId);
+        return getOne(queryWrapper);
     }
 }

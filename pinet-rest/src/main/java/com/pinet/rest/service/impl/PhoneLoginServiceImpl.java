@@ -35,8 +35,6 @@ public class PhoneLoginServiceImpl implements ILoginService {
 
     private final ICustomerCouponService customerCouponService;
 
-    private final ICustomerBalanceService customerBalanceService;
-
     @Override
     @DSTransactional
     public UserInfo login(LoginRequest loginRequest) throws WxErrorException {
@@ -81,8 +79,6 @@ public class PhoneLoginServiceImpl implements ILoginService {
             customerService.save(customer);
             //发放新人优惠券
             customerCouponService.grantNewCustomerCoupon(customer.getCustomerId());
-            //添加用户账户表
-            customerBalanceService.addByCustomerId(customer.getCustomerId());
         }
 
         String userId = "" + customer.getCustomerId();

@@ -39,7 +39,7 @@ public class ScoreRecord extends BaseEntity {
     @ApiModelProperty("积分")
     private Double score;
 
-    @ApiModelProperty("用户等级 0普通用户 10普通会员  20店帮主")
+    @ApiModelProperty("VIP等级 1-VIP1,2-VIP2,3-VIP3,4-VIP4,5-VIP5")
     private Integer customerMember;
 
     @ApiModelProperty("外键id")

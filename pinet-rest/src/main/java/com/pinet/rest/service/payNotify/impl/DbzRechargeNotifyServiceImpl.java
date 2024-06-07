@@ -62,7 +62,7 @@ public class DbzRechargeNotifyServiceImpl implements IPayNotifyService {
         orderPayService.updateById(orderPay);
 
         //更新用户钱包表
-        customerBalanceService.addAvailableBalance(orderPay.getCustomerId(), orderPay.getPayPrice());
+        //customerBalanceService.addAvailableBalance(orderPay.getCustomerId(), orderPay.getPayPrice());
 
 
         //插入流水记录表

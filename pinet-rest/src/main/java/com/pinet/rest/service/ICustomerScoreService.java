@@ -27,4 +27,18 @@ public interface ICustomerScoreService extends IService<CustomerScore> {
      * @param score
      */
     void subScore(Long customerId,Double score);
+
+    /**
+     * 查询用户积分
+     * @param customerId
+     * @return
+     */
+    Double getScoreByCustomerId(Long customerId);
+
+    /**
+     * 查询用户积分对象
+     * @param customerId
+     * @return
+     */
+    CustomerScore getByCustomerId(Long customerId);
 }

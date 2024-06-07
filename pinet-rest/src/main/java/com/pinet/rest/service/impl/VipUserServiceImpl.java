@@ -1,12 +1,14 @@
 package com.pinet.rest.service.impl;
 
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.constants.CommonConstant;
+import com.pinet.core.constants.DB;
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.*;
@@ -44,6 +46,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
+@DS(DB.MASTER)
 public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> implements IVipUserService {
     private final ShopMapper shopMapper;
     private final IVipShopBalanceService vipShopBalanceService;

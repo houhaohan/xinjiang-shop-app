@@ -29,7 +29,7 @@ public interface IExchangeRecordService extends IService<ExchangeRecord> {
      * @param shopName 店铺名称
      * @return 兑换记录id
      */
-    Long addExchangeRecord(Long customerId,Long exchangeProductId,Integer score,Integer prodType,String prodName,
+    Long addExchangeRecord(Long customerId,Long exchangeProductId,Double score,Integer prodType,String prodName,
                            Integer exchangeNum,Long shopId,String shopName);
 
     List<ExchangeRecordListVo> exchangeRecordList(PageRequest request);

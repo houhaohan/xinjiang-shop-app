@@ -1,5 +1,6 @@
 import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.PinetApplication;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
@@ -11,11 +12,19 @@ import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.vo.customer.CustomerPropertyVO;
 import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;;
 import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
-import com.pinet.rest.entity.Shop;
+import com.pinet.rest.entity.*;
+import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mapper.ShopMapper;
+import com.pinet.rest.service.ICustomerBalanceService;
+import com.pinet.rest.service.ICustomerScoreService;
+import com.pinet.rest.service.IVipShopBalanceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -77,6 +86,51 @@ public class VIPCustomer {
             System.err.println(JSON.toJSONString(directChargeVO));
         }
 
+    }
+
+
+    @Autowired
+    private ICustomerScoreService customerScoreService;
+    @Autowired
+    private IVipShopBalanceService vipShopBalanceService;
+    @Autowired
+    private ICustomerBalanceService customerBalanceService;
+    @Autowired
+    OrdersMapper ordersMapper;
+
+    @Test
+    public void syncScore(){
+        List<CustomerBalance> list = customerBalanceService.list();
+        List<CustomerScore> scoreList = new ArrayList<>();
+        for(CustomerBalance customerBalance : list){
+            CustomerScore customerScore = new CustomerScore();
+            customerScore.setCreateBy(1L);
+            customerScore.setScore(customerBalance.getScore().doubleValue());
+            customerScore.setCustomerId(customerBalance.getCustomerId());
+            scoreList.add(customerScore);
+        }
+        customerScoreService.saveBatch(scoreList);
+
+    }
+
+    @Test
+    public void syncBalance(){
+        List<CustomerBalance> list = customerBalanceService.list();
+        List<VipShopBalance> shopBalances = new ArrayList<>();
+        for(CustomerBalance customerBalance : list){
+            QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("customer_id",customerBalance.getCustomerId());
+            List<Orders> orders = ordersMapper.selectList(queryWrapper);
+            if(CollectionUtils.isEmpty(orders)){
+                continue;
+            }
+            VipShopBalance vipShopBalance = new VipShopBalance();
+            vipShopBalance.setCustomerId(customerBalance.getCustomerId());
+            vipShopBalance.setShopId(orders.get(0).getShopId());
+            vipShopBalance.setAmount(customerBalance.getAvailableBalance());
+            shopBalances.add(vipShopBalance);
+        }
+        vipShopBalanceService.saveBatch(shopBalances);
     }
 
 }

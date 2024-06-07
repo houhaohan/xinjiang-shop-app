@@ -90,8 +90,6 @@ public class WxLoginServiceImpl implements ILoginService {
             customerService.save(customer);
             //发放新人优惠券
             customerCouponService.grantNewCustomerCoupon(customer.getCustomerId());
-            //添加用户账户表
-            customerBalanceService.addByCustomerId(customer.getCustomerId());
         }
 
         String token = JwtTokenUtils.generateToken(customer.getCustomerId());

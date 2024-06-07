@@ -3,7 +3,6 @@ package com.pinet.rest.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pinet.core.page.PageRequest;
 import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.rest.entity.CustomerBalance;
 import com.pinet.rest.entity.ScoreRecord;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.enums.ScoreRecordTypeEnum;
@@ -13,7 +12,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -30,7 +28,7 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
 
     private final IShopService shopService;
     private final IVipUserService vipUserService;
-    private final ICustomerBalanceService customerBalanceService;
+    private final ICustomerScoreService customerScoreService;
 
     @Override
     public void addScoreRecord(Long shopId, String scoreTitle, Double score, Long fkId, ScoreRecordTypeEnum scoreRecordTypeEnum,Long customerId) {
@@ -44,8 +42,8 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
         scoreRecord.setFkId(fkId);
         scoreRecord.setScoreType(scoreRecordTypeEnum.getCode());
         scoreRecord.setCustomerMember(vipUserService.getLevelByCustomerId(customerId));
-        CustomerBalance customerBalance = customerBalanceService.getByCustomerId(customerId);
-        scoreRecord.setCustomerScore(customerBalance.getScore() + score);
+        Double haveScore = customerScoreService.getScoreByCustomerId(customerId);
+        scoreRecord.setCustomerScore(score + haveScore);
         save(scoreRecord);
     }
 
