@@ -12,12 +12,12 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.Environment;
 import com.pinet.core.util.StringUtil;
+import com.pinet.keruyun.openapi.param.CustomerParam;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.*;
 import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.mq.constants.QueueConstants;
-import com.pinet.rest.strategy.MemberLevelStrategyContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -35,7 +35,6 @@ import java.util.Objects;
 @Slf4j
 public abstract class OrderAbstractHandler extends ShippingFeeHandler implements OrderHandler{
     protected OrderContext context;
-
 
     protected Orders buildOrder(){
         Orders order = new Orders();
@@ -128,20 +127,31 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
      * @param shareId 分享人 ID
      */
     protected boolean commissionCondition(Long customerId,Long shareId) {
-        if (Objects.isNull(shareId) || shareId <= 0) {
-            return false;
-        }
 
-        //判断下单人和分享人是否是同一个人
-        if (Objects.equals(customerId,shareId)) {
-            return false;
-        }
-        //分享人会员等级
-        Integer shareMemberLevel = context.customerMemberService.getMemberLevel(shareId);
-        Integer orderMemberLevel = context.customerMemberService.getMemberLevel(customerId);
+        //todo 店帮主逻辑暂时没有了，等后面版本再继续更新店帮主逻辑
+        return false;
+//        if (Objects.isNull(shareId) || shareId <= 0) {
+//            return false;
+//        }
+//
+//        //判断下单人和分享人是否是同一个人
+//        if (Objects.equals(customerId,shareId)) {
+//            return false;
+//        }
+//        //分享人会员等级
+//        Integer shareMemberLevel = context.customerMemberService.getMemberLevel(shareId);
+//        Integer orderMemberLevel = context.customerMemberService.getMemberLevel(customerId);
+//
+//        //邀请人必须是店帮主  被邀人不能是店帮主
+//        return shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !orderMemberLevel.equals(MemberLevelEnum._20.getCode());
+    }
 
-        //邀请人必须是店帮主  被邀人不能是店帮主
-        return shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !orderMemberLevel.equals(MemberLevelEnum._20.getCode());
+
+    protected void beforeHandler(String phone){
+        //校验下单用户是否是客如云会员
+        CustomerParam param = new CustomerParam();
+        param.setMobile(phone);
+        context.kryApiService.queryByMobile(12698040L,"ae5f960130e9d2ed01b406be6988b576",null);
     }
 
 
@@ -170,7 +180,10 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         BigDecimal commission = orderProducts.stream().map(OrderProduct::getCommission).reduce(BigDecimal.ZERO, BigDecimal::add);
         entity.setCommission(commission);
         entity.setDiscountAmount(preferentialVo.getDiscountAmount());
-        Integer level = context.customerMemberService.getMemberLevel(orders.getCustomerId());
+//        Integer level = context.customerMemberService.getMemberLevel(orders.getCustomerId());
+        Integer level = context.vipUserService.getLevelByCustomerId(orders.getCustomerId());
+        VipLevelEnum e = VipLevelEnum.getEnumByCode(level);
+
 //        Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(level);
 //        entity.setScore(score);
         entity.setShippingFeePlat(getShippingFeePlat(orders.getOrderType(),context.shop,context.request.getCustomerAddressId(),orders.getOrderProdPrice()));

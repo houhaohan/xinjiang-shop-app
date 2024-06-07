@@ -1,9 +1,6 @@
 package com.pinet.rest.entity.enums;
 
-import com.pinet.core.util.BigDecimalUtil;
 import lombok.Getter;
-
-import java.math.BigDecimal;
 
 /**
  * @description: VIP 折扣
@@ -42,8 +39,13 @@ public enum VipDiscountEnum {
         return null;
     }
 
-    public static Double getDiscountDouble(VipDiscountEnum e) {
+    public static Double getDiscountValue(VipDiscountEnum e) {
         return e.discount * 0.01;
+    }
+
+    public static void main(String[] args) {
+        Double discountDouble = getDiscountValue(VipDiscountEnum.VIP3);
+        System.out.println(discountDouble);
     }
 
 }

@@ -26,6 +26,7 @@ public class CartOrderHandler extends OrderAbstractHandler {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create() {
+        beforeHandler("");
         Orders orders = buildOrder();
         boolean condition = commissionCondition(orders.getCustomerId(),orders.getShareId());
         List<Cart> cartList = context.cartService.getByUserIdAndShopId(context.customerId, context.request.getShopId());

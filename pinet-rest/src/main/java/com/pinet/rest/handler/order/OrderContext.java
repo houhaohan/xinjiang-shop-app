@@ -1,6 +1,7 @@
 package com.pinet.rest.handler.order;
 
 import com.pinet.common.mq.util.JmsUtil;
+import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.CreateOrderDto;
@@ -25,7 +26,8 @@ import java.util.Objects;
 public class OrderContext {
 
     protected final OrderPreferentialManager orderPreferentialManager;
-    protected final ICustomerMemberService customerMemberService;
+    protected final IVipUserService vipUserService;
+//    protected final ICustomerMemberService customerMemberService;
     protected final OrdersMapper ordersMapper;
     protected final IShopProductService shopProductService;
     protected final IOrderAddressService orderAddressService;
@@ -34,6 +36,7 @@ public class OrderContext {
     protected final IDaDaService daDaService;
     protected final ICustomerAddressService customerAddressService;
     protected final ICartService cartService;
+    protected final IKryApiService kryApiService;
     protected final OrderDishContext orderDishContext;
     protected final JmsUtil jmsUtil;
     protected Long customerId;
