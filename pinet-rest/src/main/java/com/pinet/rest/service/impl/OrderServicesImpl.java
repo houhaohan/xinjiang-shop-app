@@ -414,7 +414,6 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Boolean cancelOrder(Long orderId) {
         Orders orders = getById(orderId);
         if (orders == null) {
@@ -563,13 +562,15 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderRefundService.save(orderRefund);
         //调退款
         IPayService payService = SpringContextUtils.getBean(orderPay.getChannelId() + "_" + "service", IPayService.class);
-        RefundParam refundParam = new RefundParam(
-                orders.getOrderPrice().toString(),
-                orders.getOrderNo().toString(),
-                orderRefund.getRefundNo().toString(),
-                orders.getOrderPrice().toString(),
-                orderRefund.getId(), orders.getCustomerId(),
-                orders.getShopId());
+        RefundParam refundParam = RefundParam.builder()
+                .customerId(orders.getCustomerId())
+                .orderNo(orders.getOrderNo().toString())
+                .outRefundNo(orderRefund.getRefundNo().toString())
+                .orderRefundId(orderRefund.getId())
+                .refundFee(orders.getOrderPrice().toString())
+                .shopId(orders.getShopId())
+                .totalFee(orders.getOrderPrice().toString())
+                .build();
         payService.refund(refundParam);
         //更新订单状态
         orders.setOrderStatus(OrderStatusEnum.REFUND.getCode());
@@ -578,7 +579,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
 
         //取消配送
-        if (orders.getOrderType() == 1) {
+        if(Objects.equals(orders.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())){
             daDaService.cancelOrder(orders.getOrderNo());
         }
         return true;
@@ -591,8 +592,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         updateById(orders);
 
         //判断订单是否有佣金 如果有佣金 && 订单状态是已完成 设置佣金三天后到账
-        if (orders.getCommission().compareTo(BigDecimal.ZERO) > 0) {
-            jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), (long) (15 * 60 * 1000));
+        if (BigDecimalUtil.gtZero(orders.getCommission())) {
+            jmsUtil.delaySend(QueueConstants.QING_SHI_ORDER_COMMISSION, orders.getId().toString(), 15 * 60 * 1000L);
         }
         return true;
     }

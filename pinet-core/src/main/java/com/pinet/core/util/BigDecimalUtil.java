@@ -168,6 +168,15 @@ public class BigDecimalUtil {
     }
 
     /**
+     * val 大于 0
+     * @param val
+     * @return
+     */
+    public static boolean gtZero(BigDecimal val) {
+        return gt(val,BigDecimal.ZERO);
+    }
+
+    /**
      * val1 大于 val2
      * @param val1
      * @param val2

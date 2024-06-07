@@ -57,7 +57,7 @@ public class VIPCustomer {
         String token = kryApiService.getToken(AuthType.BRAND, 12698040L);
 
         CustomerParam param = new CustomerParam();
-        param.setMobile("15868805739");
+        param.setMobile("15868805730");
         CustomerQueryVO customerQueryVO = kryApiService.queryByMobile(12698040L, token, param);
         System.err.println(JSON.toJSONString(customerQueryVO));
         //{"customerId":"3324054679950","gender":1,"levelDTO":{"levelName":"VIP1","levelNo":"1"},"mobile":"15868805739","state":1}
