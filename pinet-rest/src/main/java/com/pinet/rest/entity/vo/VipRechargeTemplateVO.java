@@ -23,4 +23,7 @@ public class VipRechargeTemplateVO {
 
     @ApiModelProperty("总金额 = 充值金额 + 赠送金额 ")
     private BigDecimal totalAmount;
+
+    @ApiModelProperty("描述 ")
+    private String description;
 }

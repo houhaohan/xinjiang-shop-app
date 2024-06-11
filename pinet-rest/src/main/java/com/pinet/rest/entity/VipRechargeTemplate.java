@@ -34,5 +34,8 @@ public class VipRechargeTemplate extends BaseEntity {
     @ApiModelProperty("赠送金额")
     private BigDecimal giftAmount;
 
+    @ApiModelProperty("描述")
+    private String description;
+
 
 }

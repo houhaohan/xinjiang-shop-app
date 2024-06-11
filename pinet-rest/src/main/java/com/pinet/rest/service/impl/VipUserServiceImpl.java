@@ -204,12 +204,16 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     public void updateLevel(Long customerId,BigDecimal paidAmount) {
         Integer level = currVipLevel(paidAmount);
 
-        UpdateWrapper<VipUser> wrapper = new UpdateWrapper<>();
-        wrapper.eq("customer_id",customerId);
-        VipUser entity = new VipUser();
-        entity.setLevel(level);
-        entity.setVipName(VipLevelEnum.getNameByCode(level));
-        this.update(entity,wrapper);
+        //如果目前等级大于level, 那就不用更新了，有些会员等级是在客如云那边直接设置的
+        QueryWrapper<VipUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("customer_id",customerId);
+        VipUser user = getOne(queryWrapper);
+        if(user.getLevel() >= level){
+            return;
+        }
+        user.setLevel(level);
+        user.setVipName(VipLevelEnum.getNameByCode(level));
+        updateById(user);
     }
 
     /**

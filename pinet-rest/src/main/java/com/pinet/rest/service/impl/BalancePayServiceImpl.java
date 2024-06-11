@@ -85,7 +85,7 @@ public class BalancePayServiceImpl implements IPayService {
     @Override
     public void refund(RefundParam param) {
         //退回可用资金
-        vipShopBalanceService.updateAmount(param.getCustomerId(),param.getShopId(),new BigDecimal(param.getRefundFee()).negate());
+        vipShopBalanceService.updateAmount(param.getCustomerId(),param.getShopId(),new BigDecimal(param.getRefundFee()));
         //插入资金流水
         customerBalanceRecordService.addCustomerBalanceRecord(param.getCustomerId(), new BigDecimal(param.getRefundFee()), BalanceRecordTypeEnum._7, param.getOrderRefundId());
 
