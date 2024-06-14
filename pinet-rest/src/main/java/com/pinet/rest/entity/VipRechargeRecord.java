@@ -40,6 +40,9 @@ public class VipRechargeRecord extends BaseEntity {
     @ApiModelProperty("赠送优惠券")
     private Long giftCouponId;
 
+    @ApiModelProperty("充值单号")
+    private String orderNo;
+
     @ApiModelProperty("微信/支付宝 充值单号")
     private String outTradeNo;
 

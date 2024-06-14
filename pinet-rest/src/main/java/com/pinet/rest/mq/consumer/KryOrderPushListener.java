@@ -12,11 +12,13 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.Orders;
+import com.pinet.rest.entity.VipUser;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.IDaDaService;
 import com.pinet.rest.service.IOrdersService;
+import com.pinet.rest.service.IVipUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -39,6 +41,8 @@ public class KryOrderPushListener {
     private final IOrdersService ordersService;
     private final JmsUtil jmsUtil;
     private final IDaDaService daDaService;
+    private final IVipUserService vipUserService;
+
 
     /**
      *  推送订单到客如云
@@ -87,6 +91,13 @@ public class KryOrderPushListener {
         }
         entity.setOrderStatus(order.getOrderStatus());
         ordersService.updateById(entity);
+
+        VipUser vipUser = vipUserService.getByCustomerId(order.getCustomerId());
+        if(vipUser != null){
+            //会员下单，企业微信消息通知
+            String msg = "会员["+vipUser.getPhone()+"]已创建小程序订单，订单ID["+order.getId()+"]，请及时同步客如云余额。";
+            jmsUtil.sendMsgQueue(QueueConstants.MESSAGE_SEND,msg);
+        }
     }
 
 }

@@ -448,7 +448,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         scoreRecordService.addScoreRecord(orders.getShopId(), "退款" + orders.getOrderPrice().toString() + "元", orders.getScore() * -1,
                 orders.getId(), ScoreRecordTypeEnum.REFUND, orders.getCustomerId());
 
-        //修改余额
+        //修改商家余额
         ibUserBalanceService.addAmount(orders.getShopId(), orderPay.getPayPrice().negate());
 
         //扣除用户这笔订单积分
@@ -466,7 +466,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         orderRefund.setRefundStatus(OrderConstant.NOT_RECEIVED);
         orderRefund.setOutTradeNo(param.getOutTradeNo());
-        return orderRefundService.updateById(orderRefund);
+        orderRefundService.updateById(orderRefund);
+        return true;
     }
 
     @Override

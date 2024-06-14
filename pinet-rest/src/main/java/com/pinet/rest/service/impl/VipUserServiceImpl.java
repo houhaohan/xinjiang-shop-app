@@ -142,7 +142,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         rechargeRecord.setCustomerId(userId);
         rechargeRecord.setShopId(dto.getShopId());
         rechargeRecord.setRealAmount(dto.getAmount());
-        rechargeRecord.setOutTradeNo(param.getOrderNo());
+        rechargeRecord.setOrderNo(param.getOrderNo());
         rechargeRecord.setGiftCouponId(dto.getCouponId());
         rechargeRecord.setTemplateId(dto.getTemplateId());
         rechargeRecord.setStatus(CommonConstant.UNPAY);
@@ -159,7 +159,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         if(user == null){
             vipUserVO.setLevel(VipLevelEnum.VIP1.getLevel());
             vipUserVO.setVipName(VipLevelEnum.VIP1.getName());
-            vipUserVO.setNextLevelDiffAmount(new BigDecimal(VipLevelEnum.VIP2.getMinAmount()));
+            vipUserVO.setNextLevelDiffAmount(VipLevelEnum.VIP2.getMinAmount());
         }else {
             vipUserVO.setLevel(user.getLevel());
             vipUserVO.setVipName(user.getVipName());

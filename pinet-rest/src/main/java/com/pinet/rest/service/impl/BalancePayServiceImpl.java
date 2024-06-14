@@ -1,14 +1,12 @@
 package com.pinet.rest.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
+import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.Customer;
-import com.pinet.rest.entity.CustomerBalance;
 import com.pinet.rest.entity.VipShopBalance;
 import com.pinet.rest.entity.VipUser;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
@@ -16,16 +14,13 @@ import com.pinet.rest.entity.param.OrderPayNotifyParam;
 import com.pinet.rest.entity.param.OrderRefundNotifyParam;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.param.RefundParam;
+import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @program: xinjiang-shop-app
@@ -42,6 +37,7 @@ public class BalancePayServiceImpl implements IPayService {
     private final ICustomerBalanceRecordService customerBalanceRecordService;
     private final IVipUserService vipUserService;
     private final IVipShopBalanceService vipShopBalanceService;
+    private final JmsUtil jmsUtil;
 
     @Override
     @DSTransactional
@@ -74,7 +70,6 @@ public class BalancePayServiceImpl implements IPayService {
 
         OrderPayNotifyParam orderPayNotifyParam = new OrderPayNotifyParam(Long.valueOf(param.getOrderNo()), new Date(), null, "balance");
         return ordersService.orderPayNotify(orderPayNotifyParam);
-
     }
 
     @Override
@@ -93,5 +88,8 @@ public class BalancePayServiceImpl implements IPayService {
         orderRefundNotifyParam.setRefundNo(Long.valueOf(param.getOutRefundNo()));
         orderRefundNotifyParam.setOutTradeNo("");
         ordersService.orderRefundNotify(orderRefundNotifyParam);
+        //消息通知
+        String msg = "会员订单已退款，订单号["+param.getOrderNo()+"]，请及时同步客如云余额。";
+        jmsUtil.sendMsgQueue(QueueConstants.MESSAGE_SEND,msg);
     }
 }

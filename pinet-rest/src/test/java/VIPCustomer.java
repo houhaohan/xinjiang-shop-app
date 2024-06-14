@@ -77,7 +77,7 @@ public class VIPCustomer {
         directChargeDTO.setOperatorName("管理员");
         directChargeDTO.setOperatorId("3324054679950");
         directChargeDTO.setRealValue(1L);
-        directChargeDTO.setCustomerId("x");
+        directChargeDTO.setCustomerId("3324054679950");
         directChargeDTO.setBizId(IdUtil.simpleUUID());
         DirectChargeVO directChargeVO = kryApiService.directCharge(12698040L, "ae5f960130e9d2ed01b406be6988b576", directChargeDTO);
         if(directChargeVO == null){
@@ -87,6 +87,8 @@ public class VIPCustomer {
         }
 
     }
+
+
 
 
     @Autowired
@@ -115,7 +117,9 @@ public class VIPCustomer {
 
     @Test
     public void syncBalance(){
-        List<CustomerBalance> list = customerBalanceService.list();
+        QueryWrapper<CustomerBalance> qw = new QueryWrapper<>();
+        qw.in("customer_id","select DISTINCT customer_id from qingshi.orders ");
+        List<CustomerBalance> list = customerBalanceService.list(qw);
         List<VipShopBalance> shopBalances = new ArrayList<>();
         for(CustomerBalance customerBalance : list){
             QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
@@ -124,13 +128,20 @@ public class VIPCustomer {
             if(CollectionUtils.isEmpty(orders)){
                 continue;
             }
+            VipShopBalance shopBalance = vipShopBalanceService.getByCustomerIdAndShopId(customerBalance.getCustomerId(), orders.get(0).getShopId());
+            if(shopBalance != null){
+                continue;
+            }
             VipShopBalance vipShopBalance = new VipShopBalance();
             vipShopBalance.setCustomerId(customerBalance.getCustomerId());
             vipShopBalance.setShopId(orders.get(0).getShopId());
             vipShopBalance.setAmount(customerBalance.getAvailableBalance());
             shopBalances.add(vipShopBalance);
         }
-        vipShopBalanceService.saveBatch(shopBalances);
+        if(!CollectionUtils.isEmpty(shopBalances)){
+            vipShopBalanceService.saveBatch(shopBalances);
+        }
+
     }
 
 }

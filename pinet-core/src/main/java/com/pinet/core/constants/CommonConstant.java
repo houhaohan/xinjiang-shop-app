@@ -54,6 +54,12 @@ public class CommonConstant {
      */
     public static final String UNPAY = "UNPAY";
 
+    /**
+     * 消息类型1:通知公告2:系统消息
+     */
+    public static final String MSG_CATEGORY_1 = "1";
+    public static final String MSG_CATEGORY_2 = "2";
+
 
 
 }

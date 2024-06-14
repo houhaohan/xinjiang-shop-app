@@ -10,11 +10,15 @@
         <result column="update_by" property="updateBy" />
         <result column="update_time" property="updateTime" />
         <result column="del_flag" property="delFlag" />
+        <result column="title" property="title" />
+        <result column="description" property="description" />
         <result column="vip_id" property="vipId" />
         <result column="vip_level" property="vipLevel" />
         <result column="vip_name" property="vipName" />
         <result column="content" property="content" />
+        <result column="icon" property="icon" />
     </resultMap>
+
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
@@ -24,7 +28,20 @@
         update_by,
         update_time,
         del_flag,
-        vip_id, vip_level, vip_name, content
+        title, description, vip_id, vip_level, vip_name, content, icon
     </sql>
 
+    <select id="equityList" resultType="com.pinet.rest.entity.vo.VipEquityVO">
+        select ve.id,
+        ve.title,
+        ve.description,
+        ve.vip_id,
+        ve.vip_level,
+        ve.vip_name,
+        ve.icon,
+        (case when veq.id is null then 0 else 1 end) as have
+        from vip_equity ve
+        left join vip_equity veq on ve.id = veq.id and veq.vip_level = #{level} and veq.del_flag = 0
+        where ve.del_flag = 0
+    </select>
 </mapper>

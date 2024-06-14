@@ -1,6 +1,8 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.pinet.core.constants.DB;
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.entity.BaseEntity;
 import com.pinet.core.exception.PinetException;
@@ -23,6 +25,7 @@ import java.util.Objects;
  * @since 2023-07-12
  */
 @Service
+@DS(DB.MASTER)
 public class BUserBalanceServiceImpl extends ServiceImpl<BUserBalanceMapper, BUserBalance> implements IBUserBalanceService {
 
     @Override

@@ -24,6 +24,12 @@ public class VipEquity extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    @ApiModelProperty("标题")
+    private String title;
+
+    @ApiModelProperty("描述")
+    private String description;
+
     @ApiModelProperty("VIP ID")
     private Long vipId;
 
@@ -35,6 +41,9 @@ public class VipEquity extends BaseEntity {
 
     @ApiModelProperty("权益内容")
     private String content;
+
+    @ApiModelProperty("图标")
+    private String icon;
 
 
 }

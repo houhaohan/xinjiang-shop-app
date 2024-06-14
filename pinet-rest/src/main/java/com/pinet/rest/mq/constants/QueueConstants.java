@@ -52,4 +52,9 @@ public class QueueConstants {
      * 创建客如云会员
      */
     public static final String KRY_VIP_CREATE = "kry.vip.create.queue";
+
+    /**
+     * 消息通知发送,消费者在后台消费
+     */
+    public static final String MESSAGE_SEND = "message.send.queue";
 }

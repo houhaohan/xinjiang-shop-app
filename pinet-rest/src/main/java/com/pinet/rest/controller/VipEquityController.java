@@ -4,6 +4,7 @@ package com.pinet.rest.controller;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
 import com.pinet.rest.entity.VipEquity;
+import com.pinet.rest.entity.vo.VipEquityVO;
 import com.pinet.rest.service.IVipEquityService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,8 +34,8 @@ public class VipEquityController extends BaseController {
     @ApiOperation("会员权益列表")
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     @ApiVersion(1)
-    public Result<List<VipEquity>> recharge(){
-        List<VipEquity> list = vipEquityService.equityList();
+    public Result<List<VipEquityVO>> list(){
+        List<VipEquityVO> list = vipEquityService.equityList();
         return Result.ok(list);
     }
 }

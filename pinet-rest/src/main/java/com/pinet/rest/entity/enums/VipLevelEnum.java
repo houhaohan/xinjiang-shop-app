@@ -2,6 +2,8 @@ package com.pinet.rest.entity.enums;
 
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 /**
  * @description:vip等级枚举
  * @author: chengshuanghui
@@ -9,17 +11,17 @@ import lombok.Getter;
  */
 @Getter
 public enum VipLevelEnum {
-    VIP1(1,"VIP1", 0),
-    VIP2(2,"VIP2", 500),
-    VIP3(3,"VIP3",1000),
-    VIP4(4,"VIP4",2000),
-    VIP5(5,"VIP5",4000);
+    VIP1(1,"VIP1", BigDecimal.ZERO),
+    VIP2(2,"VIP2", new BigDecimal("500")),
+    VIP3(3,"VIP3",new BigDecimal("1000")),
+    VIP4(4,"VIP4",new BigDecimal("2000")),
+    VIP5(5,"VIP5",new BigDecimal("4000"));
 
     private Integer level;
     private String name;
-    private Integer minAmount;
+    private BigDecimal minAmount;
 
-    VipLevelEnum(Integer level, String name,Integer minAmount) {
+    VipLevelEnum(Integer level, String name,BigDecimal minAmount) {
         this.level = level;
         this.name = name;
         this.minAmount = minAmount;

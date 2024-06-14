@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.constants.DB;
 import com.pinet.core.util.ThreadLocalUtil;
 import com.pinet.rest.entity.VipEquity;
+import com.pinet.rest.entity.vo.VipEquityVO;
 import com.pinet.rest.mapper.VipEquityMapper;
 import com.pinet.rest.service.IVipEquityService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -29,13 +30,10 @@ public class VipEquityServiceImpl extends ServiceImpl<VipEquityMapper, VipEquity
     private final IVipUserService vipUserService;
 
     @Override
-    public List<VipEquity> equityList() {
+    public List<VipEquityVO> equityList() {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
         Integer level = vipUserService.getLevelByCustomerId(userId);
 
-        QueryWrapper<VipEquity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("vip_level",level);
-        queryWrapper.orderByAsc("id");
-        return list(queryWrapper);
+        return baseMapper.equityList(level);
     }
 }

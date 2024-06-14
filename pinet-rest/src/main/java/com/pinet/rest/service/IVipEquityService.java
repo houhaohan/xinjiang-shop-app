@@ -2,6 +2,7 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.VipEquity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.VipEquityVO;
 
 import java.util.List;
 
@@ -19,5 +20,5 @@ public interface IVipEquityService extends IService<VipEquity> {
      * 权益列表
      * @return
      */
-    List<VipEquity> equityList();
+    List<VipEquityVO> equityList();
 }

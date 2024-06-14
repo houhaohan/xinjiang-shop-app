@@ -8,18 +8,17 @@ import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
 import com.pinet.keruyun.openapi.dto.DirectChargeDTO;
 import com.pinet.keruyun.openapi.service.IKryApiService;
-import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
 import com.pinet.rest.entity.enums.CapitalFlowStatusEnum;
 import com.pinet.rest.entity.enums.CapitalFlowWayEnum;
 import com.pinet.rest.entity.param.OrderPayNotifyParam;
-import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.service.*;
 import com.pinet.rest.service.payNotify.IPayNotifyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -39,9 +38,13 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
     private final IVipShopBalanceService vipShopBalanceService;
     private final ICustomerBalanceRecordService customerBalanceRecordService;
     private final IKryApiService kryApiService;
-    private final ShopMapper shopMapper;
+    private final IShopService shopService;
     private final IBUserBalanceService userBalanceService;
     private final IBCapitalFlowService capitalFlowService;
+    @Value("${kry.brandId}")
+    private Long brandId;
+    @Value("${kry.brandToken}")
+    private String brandToken;
 
     @Override
     @DSTransactional
@@ -55,14 +58,13 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
         orderPay.setOutTradeNo(param.getOutTradeNo());
         orderPayService.updateById(orderPay);
 
-        VipRechargeRecord vipRechargeRecord = vipRechargeRecordService.getByOutTradeNo(param.getOutTradeNo());
+        VipRechargeRecord vipRechargeRecord = vipRechargeRecordService.getByOrderNo(param.getOrderNo().toString());
         if(Objects.equals(CommonConstant.SUCCESS,vipRechargeRecord.getStatus())){
             return false;
         }
         VipUser user = vipUserService.getByCustomerId(orderPay.getCustomerId());
 
-        Shop shop = shopMapper.selectById(vipRechargeRecord.getShopId());
-        String token = kryApiService.getToken(AuthType.SHOP, shop.getKryShopId());
+        Shop shop = shopService.getById(vipRechargeRecord.getShopId());
         DirectChargeDTO directChargeDTO = new DirectChargeDTO();
         directChargeDTO.setShopId(shop.getKryShopId().toString());
         directChargeDTO.setBizDate(DateUtils.getTime());
@@ -71,12 +73,11 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
         directChargeDTO.setCustomerId(user.getKryCustomerId());
         directChargeDTO.setOperatorId(user.getKryCustomerId());
         directChargeDTO.setBizId(IdUtil.randomUUID());
-        DirectChargeVO directChargeVO = kryApiService.directCharge(shop.getKryShopId(), token, directChargeDTO);
+        DirectChargeVO directChargeVO = kryApiService.directCharge(brandId, brandToken, directChargeDTO);
         if(directChargeVO == null){
             log.error("VIP充值异常");
             return false;
         }
-
         //更新用户余额
         vipShopBalanceService.updateAmount(orderPay.getCustomerId(),shop.getId(),BigDecimalUtil.fenToYuan(directChargeVO.getRemainAvailableValue().getTotalValue()));
 
@@ -84,6 +85,7 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
         BigDecimal giftAmount = BigDecimalUtil.fenToYuan(directChargeVO.getRemainAvailableValue().getGiftValue());
         vipRechargeRecord.setGiftAmount(giftAmount);
         vipRechargeRecord.setStatus(CommonConstant.SUCCESS);
+        vipRechargeRecord.setOutTradeNo(param.getOutTradeNo());
         vipRechargeRecordService.updateById(vipRechargeRecord);
 
         //用户资金流水

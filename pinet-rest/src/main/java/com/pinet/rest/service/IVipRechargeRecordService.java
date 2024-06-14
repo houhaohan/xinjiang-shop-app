@@ -14,9 +14,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface IVipRechargeRecordService extends IService<VipRechargeRecord> {
 
     /**
-     * 根据第三方支付单号查询记录
-     * @param outTradeNo
+     * 根据充值单号查询记录
+     * @param orderNo
      * @return
      */
-    VipRechargeRecord getByOutTradeNo(String outTradeNo);
+    VipRechargeRecord getByOrderNo(String orderNo);
 }

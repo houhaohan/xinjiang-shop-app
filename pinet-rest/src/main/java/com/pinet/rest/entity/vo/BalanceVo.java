@@ -1,6 +1,5 @@
 package com.pinet.rest.entity.vo;
 
-import com.pinet.rest.controller.CustomerBalanceRecordController;
 import com.pinet.rest.entity.CustomerBalanceRecord;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -17,7 +16,7 @@ import java.util.List;
 @Data
 public class BalanceVo {
     @ApiModelProperty("余额")
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     private List<CustomerBalanceRecord> customerBalanceRecords;
 }

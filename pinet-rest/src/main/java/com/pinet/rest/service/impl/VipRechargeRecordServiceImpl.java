@@ -22,9 +22,9 @@ import org.springframework.stereotype.Service;
 public class VipRechargeRecordServiceImpl extends ServiceImpl<VipRechargeRecordMapper, VipRechargeRecord> implements IVipRechargeRecordService {
 
     @Override
-    public VipRechargeRecord getByOutTradeNo(String outTradeNo) {
+    public VipRechargeRecord getByOrderNo(String orderNo) {
         QueryWrapper<VipRechargeRecord> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("out_trade_no",outTradeNo);
+        queryWrapper.eq("order_no",orderNo);
         return getOne(queryWrapper);
     }
 }
