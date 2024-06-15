@@ -50,9 +50,8 @@ public class VipUserController extends BaseController {
     @ApiOperation("会员信息")
     @RequestMapping(value = "/info",method = RequestMethod.GET)
     @ApiVersion(1)
-    @NotTokenSign
-    public Result<VipUserVO> info(Long customerId){
-//        Long userId = currentUser().getUserId();
+    public Result<VipUserVO> info(){
+        Long customerId = currentUser().getUserId();
         if(customerId == null || customerId == 0L){
             VipUserVO vipUserVO = new VipUserVO();
             vipUserVO.setLevel(VipLevelEnum.VIP1.getLevel());
