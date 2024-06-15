@@ -34,7 +34,7 @@ public class VipUser extends BaseEntity {
     @ApiModelProperty("客如云用户ID")
     private String kryCustomerId;
 
-    @ApiModelProperty("性别，0代表女,1代表男,2代表其他")
+    @ApiModelProperty("性别(0:未知,1:男,2:女")
     private Integer sex;
 
     @ApiModelProperty("VIP等级，1-VIP1,2-VIP2,3-VIP3,4-VIP4,5-VIP5")

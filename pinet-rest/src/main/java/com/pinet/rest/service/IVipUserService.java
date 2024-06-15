@@ -20,6 +20,7 @@ import java.util.List;
  * @since 2024-06-04
  */
 public interface IVipUserService extends IService<VipUser> {
+
     /**
      * 创建会员
      * @param customer

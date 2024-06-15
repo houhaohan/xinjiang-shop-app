@@ -151,13 +151,12 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
 
     protected void checkVipUser(){
         //客如云是会员，小程序不是会员，需要添加为小程序会员（线下收银机添加会员的情况）
-        Customer customer = context.customerService.getById(context.customerId);
-        CustomerParam param = new CustomerParam();
-        param.setMobile(customer.getPhone());
-        CustomerQueryVO customerQueryVO = context.kryApiService.queryByMobile(context.brandId, context.brandToken, param);
-        if(Objects.nonNull(customerQueryVO)){
-            context.vipUserService.create(customer,context.shop.getId());
+        VipUser vipUser = context.vipUserService.getByCustomerId(context.customerId);
+        if(vipUser != null && StringUtil.isNotBlank(vipUser.getKryCustomerId())){
+            return;
         }
+        Customer customer = context.customerService.getById(context.customerId);
+        context.vipUserService.create(customer,context.shop.getId());
     }
 
 

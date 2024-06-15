@@ -68,6 +68,6 @@ public class KryVipCreateListener {
             throw new PinetException("创建会员失败");
         }
         user.setKryCustomerId(customerCreateVO.getCustomerId());
-        vipUserService.save(user);
+        vipUserService.updateById(user);
     }
 }

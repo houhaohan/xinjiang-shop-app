@@ -87,6 +87,7 @@ public class NotifyController extends BaseController {
     @SystemErrorLog
     public String wxMiniPayNotify(HttpServletRequest request){
         log.info("进入微信小程序支付回调");
+        log.info("小程序回调参数"+JSONObject.toJSONString(request.getParameterMap()));
         try {
             String xmlResult = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
             WxPayOrderNotifyResult notifyResult = miniPayService.parseOrderNotifyResult(xmlResult);

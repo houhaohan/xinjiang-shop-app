@@ -67,7 +67,7 @@ public class VIPCustomer {
      * 充值
      */
     @Test
-    public void recharge(){
+    public void ΩΩ(){
 
         Shop shop = shopMapper.selectById(24);
 //        String token = kryApiService.getToken(AuthType.SHOP, shop.getKryShopId());

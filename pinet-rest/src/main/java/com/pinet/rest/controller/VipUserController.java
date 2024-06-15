@@ -4,7 +4,9 @@ package com.pinet.rest.controller;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.pinet.core.result.Result;
 import com.pinet.core.version.ApiVersion;
+import com.pinet.inter.annotation.NotTokenSign;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
+import com.pinet.rest.entity.enums.VipLevelEnum;
 import com.pinet.rest.entity.vo.VipUserVO;
 import com.pinet.rest.service.IVipUserService;
 import io.swagger.annotations.Api;
@@ -17,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import com.pinet.core.controller.BaseController;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
 
 /**
  * <p>
@@ -45,8 +50,20 @@ public class VipUserController extends BaseController {
     @ApiOperation("会员信息")
     @RequestMapping(value = "/info",method = RequestMethod.GET)
     @ApiVersion(1)
-    public Result<VipUserVO> info(){
-        VipUserVO vipUserVO = vipUserService.info(currentUserId());
+    @NotTokenSign
+    public Result<VipUserVO> info(Long customerId){
+//        Long userId = currentUser().getUserId();
+        if(customerId == null || customerId == 0L){
+            VipUserVO vipUserVO = new VipUserVO();
+            vipUserVO.setLevel(VipLevelEnum.VIP1.getLevel());
+            vipUserVO.setVipName(VipLevelEnum.VIP1.getName());
+            VipUserVO.Amount amount = new VipUserVO.Amount();
+            amount.setAmount(BigDecimal.ZERO);
+            vipUserVO.setAmounts(Arrays.asList(amount));
+            vipUserVO.setNextLevelDiffAmount(VipLevelEnum.VIP2.getMinAmount());
+            return Result.ok(vipUserVO);
+        }
+        VipUserVO vipUserVO = vipUserService.info(customerId);
         return Result.ok(vipUserVO);
     }
 }

@@ -69,7 +69,8 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
         directChargeDTO.setShopId(shop.getKryShopId().toString());
         directChargeDTO.setBizDate(DateUtils.getTime());
         directChargeDTO.setOperatorName("管理员");
-        directChargeDTO.setRealValue(BigDecimalUtil.yuan2Fen(vipRechargeRecord.getRealAmount()));
+        BigDecimal totalAmount = BigDecimalUtil.sum(vipRechargeRecord.getRealAmount(), vipRechargeRecord.getGiftAmount());
+        directChargeDTO.setRealValue(BigDecimalUtil.yuan2Fen(totalAmount));
         directChargeDTO.setCustomerId(user.getKryCustomerId());
         directChargeDTO.setOperatorId(user.getKryCustomerId());
         directChargeDTO.setBizId(IdUtil.randomUUID());
@@ -79,11 +80,9 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
             return false;
         }
         //更新用户余额
-        vipShopBalanceService.updateAmount(orderPay.getCustomerId(),shop.getId(),BigDecimalUtil.fenToYuan(directChargeVO.getRemainAvailableValue().getTotalValue()));
+        vipShopBalanceService.updateAmount(orderPay.getCustomerId(),shop.getId(),totalAmount);
 
         //更新充值记录状态
-        BigDecimal giftAmount = BigDecimalUtil.fenToYuan(directChargeVO.getRemainAvailableValue().getGiftValue());
-        vipRechargeRecord.setGiftAmount(giftAmount);
         vipRechargeRecord.setStatus(CommonConstant.SUCCESS);
         vipRechargeRecord.setOutTradeNo(param.getOutTradeNo());
         vipRechargeRecordService.updateById(vipRechargeRecord);
@@ -93,7 +92,7 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
         customerBalanceRecord.setCustomerId(user.getCustomerId());
         customerBalanceRecord.setType(BalanceRecordTypeEnum._5.getCode());
         customerBalanceRecord.setTypeStr(BalanceRecordTypeEnum._5.getMsg());
-        customerBalanceRecord.setMoney(BigDecimalUtil.sum(vipRechargeRecord.getRealAmount(),vipRechargeRecord.getGiftAmount()));
+        customerBalanceRecord.setMoney(totalAmount);
         customerBalanceRecord.setFkId(user.getCustomerId());
         customerBalanceRecordService.save(customerBalanceRecord);
 

@@ -23,6 +23,9 @@ public class VipRechargeDTO {
     @Positive(message = "充值金额必须大于0")
     private BigDecimal amount;
 
+    @ApiModelProperty("赠送金额")
+    private BigDecimal giftAmount;
+
     @ApiModelProperty("赠送的优惠券ID")
     private Long couponId;
 

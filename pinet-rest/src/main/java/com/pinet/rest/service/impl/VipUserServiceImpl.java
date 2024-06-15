@@ -4,22 +4,26 @@ import cn.hutool.core.util.IdUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.pinet.common.mq.util.JmsUtil;
+import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.DB;
 import com.pinet.core.constants.OrderConstant;
+import com.pinet.core.constants.RedisKeyConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.*;
+import com.pinet.keruyun.openapi.param.CustomerParam;
+import com.pinet.keruyun.openapi.param.CustomerPropertyParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
+import com.pinet.keruyun.openapi.vo.customer.CustomerPropertyVO;
+import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
 import com.pinet.rest.entity.enums.PayTypeEnum;
 import com.pinet.rest.entity.enums.VipLevelEnum;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.VipUserVO;
-import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.mapper.VipUserMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
@@ -35,6 +39,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -56,6 +62,8 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     private final ICustomerService customerService;
     private final JmsUtil jmsUtil;
     private final IPayService payService;
+    private final RedisUtil redisUtil;
+    private final IKryApiService kryApiService;
     @Value("${kry.brandId}")
     private Long brandId;
     @Value("${kry.brandToken}")
@@ -68,7 +76,9 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
                               IOrderPayService orderPayService,
                               ICustomerService customerService,
                               JmsUtil jmsUtil,
-                              @Qualifier("weixin_mini_service") IPayService payService){
+                              @Qualifier("weixin_mini_service") IPayService payService,
+                              RedisUtil redisUtil,
+                              IKryApiService kryApiService){
         this.shopMapper = shopMapper;
         this.vipShopBalanceService = vipShopBalanceService;
         this.vipRechargeRecordService = vipRechargeRecordService;
@@ -77,11 +87,13 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         this.customerService = customerService;
         this.jmsUtil = jmsUtil;
         this.payService = payService;
+        this.redisUtil = redisUtil;
+        this.kryApiService = kryApiService;
     }
 
     @Override
     public void create(Customer customer,Long shopId) {
-        VipUser user = this.getByCustomerId(customer.getCustomerId());
+        VipUser user = getByCustomerId(customer.getCustomerId());
         if(user == null){
             user = new VipUser();
             user.setCustomerId(customer.getCustomerId());
@@ -93,10 +105,6 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
             user.setNickname(customer.getNickname());
             user.setShopId(shopId);
             this.save(user);
-        }else {
-            if(StringUtil.isNotBlank(user.getKryCustomerId())){
-                return;
-            }
         }
         //异步创建客如云会员
         jmsUtil.sendMsgQueue(QueueConstants.KRY_VIP_CREATE, String.valueOf(user.getId()));
@@ -142,6 +150,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         rechargeRecord.setCustomerId(userId);
         rechargeRecord.setShopId(dto.getShopId());
         rechargeRecord.setRealAmount(dto.getAmount());
+        rechargeRecord.setGiftAmount(dto.getGiftAmount());
         rechargeRecord.setOrderNo(param.getOrderNo());
         rechargeRecord.setGiftCouponId(dto.getCouponId());
         rechargeRecord.setTemplateId(dto.getTemplateId());
@@ -157,9 +166,40 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         VipUserVO vipUserVO = new VipUserVO();
         vipUserVO.setCustomerId(customerId);
         if(user == null){
-            vipUserVO.setLevel(VipLevelEnum.VIP1.getLevel());
-            vipUserVO.setVipName(VipLevelEnum.VIP1.getName());
-            vipUserVO.setNextLevelDiffAmount(VipLevelEnum.VIP2.getMinAmount());
+            Customer customer = customerService.getById(customerId);
+            CustomerQueryVO customerQueryVO = null;
+            //查询是否是客如云的会员,需要控制查询频率,每个用户每2分钟查询一次
+            boolean ok = redisUtil.setIfAbsent(RedisKeyConstant.QUERY_KRY_VIP_USER + customerId, "1", 120, TimeUnit.SECONDS);
+            if(ok){
+
+                CustomerParam customerParam = new CustomerParam();
+                customerParam.setMobile(customer.getPhone());
+                customerQueryVO = kryApiService.queryByMobile(brandId, brandToken, customerParam);
+            }
+
+            if(customerQueryVO == null){
+                vipUserVO.setLevel(VipLevelEnum.VIP1.getLevel());
+                vipUserVO.setVipName(VipLevelEnum.VIP1.getName());
+                vipUserVO.setNextLevelDiffAmount(VipLevelEnum.VIP2.getMinAmount());
+            }else {
+                //是客如云的会员
+                user = new VipUser();
+                user.setCustomerId(customer.getCustomerId());
+                user.setLevel(Integer.valueOf(customerQueryVO.getLevelDTO().getLevelNo()));
+                user.setVipName(customerQueryVO.getLevelDTO().getLevelName());
+                user.setPhone(customerQueryVO.getMobile());
+                user.setSex(customer.getSex());
+                user.setStatus(CommonConstant.ENABLE);
+                user.setNickname(customerQueryVO.getName());
+                user.setShopId(24L);
+                user.setKryCustomerId(customerQueryVO.getCustomerId());
+                this.save(user);
+
+                vipUserVO.setLevel(user.getLevel());
+                vipUserVO.setVipName(user.getVipName());
+                BigDecimal nextLevelDiffAmount = vipLevelService.nextLevelDiffAmount(customerId, vipUserVO.getLevel());
+                vipUserVO.setNextLevelDiffAmount(nextLevelDiffAmount);
+            }
         }else {
             vipUserVO.setLevel(user.getLevel());
             vipUserVO.setVipName(user.getVipName());
@@ -177,9 +217,27 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         List<VipUserVO.Amount> shopAmountList = new ArrayList<>(vipShopBalanceList.size());
         for(VipShopBalance vipShopBalance : vipShopBalanceList){
             Shop shop = shopMapper.selectById(vipShopBalance.getShopId());
+            //查询客如云的余额，控制查询频率，30分钟查询一次
+            boolean ok = redisUtil.setIfAbsent(RedisKeyConstant.SYNC_KRY_BALANCE + customerId+"_"+shop.getId(), "1", 30 * 60L, TimeUnit.SECONDS);
+            if(ok){
+                CustomerPropertyParam param = new CustomerPropertyParam();
+                param.setCustomerId(user.getKryCustomerId());
+                param.setShopId(shop.getKryShopId().toString());
+                CustomerPropertyVO customerPropertyVO = kryApiService.queryCustomerProperty(brandId, brandToken, param);
+                if(customerPropertyVO != null){
+                    Integer totalValue = customerPropertyVO.getPosCardDTOList().stream()
+                            .map(CustomerPropertyVO.PosCardDTO::getPosRechargeAccountList)
+                            .filter(item -> !CollectionUtils.isEmpty(item))
+                            .map(item -> item.get(0).getRemainAvailableValue())
+                            .map(CustomerPropertyVO.RemainAvailable::getTotalValue)
+                            .findFirst()
+                            .orElse(0);
+                    vipShopBalance.setAmount(BigDecimalUtil.fenToYuan(totalValue));
+                }
+            }
             VipUserVO.Amount amount = new VipUserVO.Amount();
             amount.setAmount(vipShopBalance.getAmount());
-            amount.setShopId(vipShopBalance.getId());
+            amount.setShopId(vipShopBalance.getShopId());
             amount.setShopName(shop.getShopName());
             shopAmountList.add(amount);
         }
