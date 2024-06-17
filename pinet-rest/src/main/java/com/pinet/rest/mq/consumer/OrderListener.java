@@ -1,6 +1,5 @@
 package com.pinet.rest.mq.consumer;
 
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.pinet.rest.entity.vo.OrderDetailVo;
 import com.pinet.rest.mq.constants.QueueConstants;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,13 +72,7 @@ public class OrderListener {
 
 
     private static final String PHONE = "18162077139";
-//    private static final Long SHOP_ID = 22L;
     private static final Long SHOP_ID = 24L;
-    /**
-     * 发送短信的时间
-     */
-    private static final String START_TIME = "07:00";
-    private static final String END_TIME = "10:00";
     /**
      * 保利店早上订单发送短信到手机号
      * @param message orders
@@ -94,13 +87,13 @@ public class OrderListener {
         }
         //判断当前时间是否发送短信
         //判断当前时间是否执行
-        Date startTime = DateUtil.parse(START_TIME, "HH:mm");
-        Date endTime = DateUtil.parse(END_TIME, "HH:mm");
-        Date now = DateUtil.parse(DateUtil.format(new Date(), "HH:mm"), "HH:mm");
-
-        if (!DateUtil.isIn(now, startTime, endTime)) {
+        LocalTime now = LocalTime.now();
+        LocalTime startTime = LocalTime.of(7, 0, 0);
+        LocalTime endTime = LocalTime.of(10, 0, 0);
+        if(now.isBefore(startTime) || now.isAfter(endTime)){
             return;
         }
+
         OrderDetailVo vo =  ordersService.orderDetail(order.getId());
 
         StringBuilder productMsg = new StringBuilder("");
