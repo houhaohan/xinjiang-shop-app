@@ -2,6 +2,7 @@ package com.pinet.rest.service;
 
 import com.pinet.rest.entity.VipShopBalance;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pinet.rest.entity.vo.BalanceVo;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,4 +39,11 @@ public interface IVipShopBalanceService extends IService<VipShopBalance> {
      * @param amount
      */
     void updateAmount(Long customerId, Long shopId, BigDecimal amount);
+
+    /**
+     * 查询用户余额
+     * @param shopId
+     * @return
+     */
+    BalanceVo queryBalance(Long shopId);
 }

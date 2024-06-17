@@ -1,5 +1,6 @@
 package com.pinet.rest.entity.enums;
 
+import com.pinet.core.util.BigDecimalUtil;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -68,5 +69,35 @@ public enum VipLevelEnum {
             }
         }
         return null;
+    }
+
+    /**
+     * 通过金额取等级
+     *
+     * @param amount 值
+     * @return
+     */
+    public static VipLevelEnum getEnumByAmount(BigDecimal amount) {
+        if (amount == null) {
+            return VipLevelEnum.VIP1;
+        }
+        if(BigDecimalUtil.le(amount,VipLevelEnum.VIP2.getMinAmount())){
+            return VipLevelEnum.VIP1;
+        }
+        if(BigDecimalUtil.le(amount,VipLevelEnum.VIP3.getMinAmount())){
+            return VipLevelEnum.VIP2;
+        }
+        if(BigDecimalUtil.le(amount,VipLevelEnum.VIP4.getMinAmount())){
+            return VipLevelEnum.VIP3;
+        }
+        if(BigDecimalUtil.le(amount,VipLevelEnum.VIP5.getMinAmount())){
+            return VipLevelEnum.VIP4;
+        }
+        return VipLevelEnum.VIP5;
+    }
+
+    public static void main(String[] args) {
+        VipLevelEnum e = getEnumByAmount(new BigDecimal("582.7"));
+        System.out.println(e);
     }
 }

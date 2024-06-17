@@ -30,7 +30,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -112,25 +114,9 @@ public class HomeController extends BaseController {
     @PostMapping("/balance")
     @ApiOperation("余额")
     @ApiVersion(1)
-    public Result<BalanceVo> balance(Long shopId){
-        Long customerId = ThreadLocalUtil.getUserLogin().getUserId();
-        BalanceVo vo = new BalanceVo();
-        List<VipShopBalance> shopBalanceList = vipShopBalanceService.getByCustomerId(customerId);
-        if(shopId == null){
-            if(!CollectionUtils.isEmpty(shopBalanceList)){
-                vo.setBalance(shopBalanceList.get(0).getAmount());
-            }
-        }else {
-            BigDecimal balance = shopBalanceList.stream()
-                    .filter(item -> Objects.equals(item.getShopId(), shopId))
-                    .map(VipShopBalance::getAmount)
-                    .findFirst()
-                    .orElse(BigDecimal.ZERO);
-            vo.setBalance(balance);
-        }
-        List<CustomerBalanceRecord> customerBalanceRecords = customerBalanceRecordService.getListLimit5(customerId);
-        vo.setCustomerBalanceRecords(customerBalanceRecords);
-        return Result.ok(vo);
+    public Result<BalanceVo> balance(@RequestBody Map<String,Long> param){
+        BalanceVo balanceVo = vipShopBalanceService.queryBalance(param.get("shopId"));
+        return Result.ok(balanceVo);
     }
 
     @PostMapping("/balanceRecordList")

@@ -56,9 +56,6 @@ public class VipUserController extends BaseController {
             VipUserVO vipUserVO = new VipUserVO();
             vipUserVO.setLevel(VipLevelEnum.VIP1.getLevel());
             vipUserVO.setVipName(VipLevelEnum.VIP1.getName());
-            VipUserVO.Amount amount = new VipUserVO.Amount();
-            amount.setAmount(BigDecimal.ZERO);
-            vipUserVO.setAmounts(Arrays.asList(amount));
             vipUserVO.setNextLevelDiffAmount(VipLevelEnum.VIP2.getMinAmount());
             return Result.ok(vipUserVO);
         }

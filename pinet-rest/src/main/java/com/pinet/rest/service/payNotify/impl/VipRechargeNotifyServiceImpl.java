@@ -6,8 +6,11 @@ import com.pinet.core.constants.CommonConstant;
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
+import com.pinet.core.util.StringUtil;
 import com.pinet.keruyun.openapi.dto.DirectChargeDTO;
+import com.pinet.keruyun.openapi.param.CustomerParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
+import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
 import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.BalanceRecordTypeEnum;
@@ -63,6 +66,15 @@ public class VipRechargeNotifyServiceImpl implements IPayNotifyService {
             return false;
         }
         VipUser user = vipUserService.getByCustomerId(orderPay.getCustomerId());
+        if(StringUtil.isBlank(user.getKryCustomerId())){
+            log.info("==========充值回调查询客如云VIP接口，手机号=======》{}",user.getPhone());
+            CustomerParam customerParam = new CustomerParam();
+            customerParam.setMobile(user.getPhone());
+            CustomerQueryVO customerQueryVO = kryApiService.queryByMobile(brandId, brandToken, customerParam);
+            if(customerQueryVO != null){
+                user.setKryCustomerId(customerQueryVO.getCustomerId());
+            }
+        }
 
         Shop shop = shopService.getById(vipRechargeRecord.getShopId());
         DirectChargeDTO directChargeDTO = new DirectChargeDTO();

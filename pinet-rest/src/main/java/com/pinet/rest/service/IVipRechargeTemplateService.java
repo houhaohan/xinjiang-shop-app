@@ -22,4 +22,11 @@ public interface IVipRechargeTemplateService extends IService<VipRechargeTemplat
      * @return
      */
     List<VipRechargeTemplateVO> templateList(Long shopId);
+
+    /**
+     * 根据店铺ID查询
+     * @param shopId
+     * @return
+     */
+    List<VipRechargeTemplate> getByShopId(Long shopId);
 }

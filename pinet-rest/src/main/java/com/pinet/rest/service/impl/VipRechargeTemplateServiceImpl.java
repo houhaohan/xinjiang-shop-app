@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.constants.DB;
@@ -10,7 +11,10 @@ import com.pinet.rest.mapper.VipRechargeTemplateMapper;
 import com.pinet.rest.service.IVipRechargeTemplateService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -29,9 +33,25 @@ public class VipRechargeTemplateServiceImpl extends ServiceImpl<VipRechargeTempl
 
     @Override
     public List<VipRechargeTemplateVO> templateList(Long shopId) {
+        List<VipRechargeTemplate> list = getByShopId(shopId);
+        if(CollectionUtil.isEmpty(list)){
+            //默认模板
+            list = getByShopId(0L);
+        }
+        return convert(list);
+    }
+
+    @Override
+    public List<VipRechargeTemplate> getByShopId(Long shopId) {
         QueryWrapper<VipRechargeTemplate> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("shop_id",shopId);
-        List<VipRechargeTemplate> list = list(queryWrapper);
+        return list(queryWrapper);
+    }
+
+    private List<VipRechargeTemplateVO> convert(List<VipRechargeTemplate> list){
+        if(CollectionUtils.isEmpty(list)){
+            return new ArrayList<>();
+        }
         return list.stream().map(item->{
             VipRechargeTemplateVO vipRechargeTemplateVO = new VipRechargeTemplateVO();
             vipRechargeTemplateVO.setShopId(item.getShopId());
@@ -42,4 +62,5 @@ public class VipRechargeTemplateServiceImpl extends ServiceImpl<VipRechargeTempl
             return vipRechargeTemplateVO;
         }).collect(Collectors.toList());
     }
+
 }

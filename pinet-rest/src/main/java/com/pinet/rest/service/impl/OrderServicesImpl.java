@@ -350,6 +350,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         param.setPayType(1);
         param.setPayPassWord(dto.getPayPassword());
         param.setOrderId(dto.getOrderId());
+        param.setShopId(orders.getShopId());
         return payService.pay(param);
     }
 
@@ -403,7 +404,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //更新VIP等级
         BigDecimal paidAmount = baseMapper.getPaidAmount(orders.getCustomerId());
-        vipUserService.updateLevel(orders.getCustomerId(),paidAmount);
+        vipUserService.updateLevel(orders.getCustomerId(),BigDecimalUtil.sum(paidAmount,orders.getOrderPrice()));
 
         //推送客如云,异步处理
         jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH, String.valueOf(orders.getId()));

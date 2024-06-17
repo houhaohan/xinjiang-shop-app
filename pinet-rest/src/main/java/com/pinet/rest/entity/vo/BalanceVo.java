@@ -16,7 +16,23 @@ import java.util.List;
 @Data
 public class BalanceVo {
     @ApiModelProperty("余额")
-    private BigDecimal balance = BigDecimal.ZERO;
+    private Amount balance;
 
     private List<CustomerBalanceRecord> customerBalanceRecords;
+
+    /**
+     * 会员门店余额
+     */
+    @Data
+    public static class Amount{
+        @ApiModelProperty("门店ID")
+        private Long shopId;
+
+        @ApiModelProperty("门店名称")
+        private String shopName;
+
+        @ApiModelProperty("可用余额")
+        private BigDecimal amount;
+
+    }
 }

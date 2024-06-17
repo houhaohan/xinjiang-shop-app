@@ -15,6 +15,7 @@ import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.mapper.ShopMapper;
+import com.pinet.rest.mq.consumer.KryVipCreateListener;
 import com.pinet.rest.service.ICustomerBalanceService;
 import com.pinet.rest.service.ICustomerScoreService;
 import com.pinet.rest.service.IVipShopBalanceService;
@@ -44,10 +45,18 @@ public class VIPCustomer {
         String token = kryApiService.getToken(AuthType.BRAND, 12698040L);
 
         CustomerPropertyParam param = new CustomerPropertyParam();
-        param.setCustomerId("3324054679950");
+        param.setCustomerId("3324054679951");
         param.setShopId("13290197");
         CustomerPropertyVO customerPropertyVO = kryApiService.queryCustomerProperty(12698040L, token, param);
+        Integer totalValue = customerPropertyVO.getPosCardDTOList().stream()
+                .map(CustomerPropertyVO.PosCardDTO::getPosRechargeAccountList)
+                .filter(item -> !CollectionUtils.isEmpty(item))
+                .map(item -> item.get(0).getRemainAvailableValue())
+                .map(CustomerPropertyVO.RemainAvailable::getTotalValue)
+                .findFirst()
+                .orElse(0);
         System.err.println(JSON.toJSONString(customerPropertyVO));
+        System.err.println(totalValue);
         //{"customerDTO":{"customerId":"3324054679950","mobile":"15868805739","state":1},"normalVoucherInstanceCount":0,"pointAccountDTO":{"remainAvailableValue":0},"posCardDTOList":[{"cardId":"233608741961020434","cardType":"MEMBER","posRechargeAccountList":[{"remainAvailableValue":{"totalValue":10000.0,"realValue":10000.0,"giftValue":0.0}}],"status":"ACTIVED"}]}
     }
 
@@ -142,6 +151,14 @@ public class VIPCustomer {
             vipShopBalanceService.saveBatch(shopBalances);
         }
 
+    }
+
+    @Autowired
+    private KryVipCreateListener kryVipCreateListener;
+
+    @Test
+    public void vipCreate(){
+        kryVipCreateListener.vipCreate("6");
     }
 
 }

@@ -62,7 +62,7 @@ public class KryVipCreateListener {
         }else {
             customerCreateDTO.setGender(0);
         }
-        CustomerCreateVO customerCreateVO = kryApiService.createCustomer(shop.getKryShopId(), brandToken, customerCreateDTO);
+        CustomerCreateVO customerCreateVO = kryApiService.createCustomer(brandId, brandToken, customerCreateDTO);
         if(customerCreateVO == null){
             log.error("手机号{}创建会员失败",user.getPhone());
             throw new PinetException("创建会员失败");

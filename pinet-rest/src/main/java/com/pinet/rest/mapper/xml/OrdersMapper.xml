@@ -161,6 +161,6 @@
     </select>
 
     <select id="getPaidAmount" resultType="java.math.BigDecimal">
-        select ifnull(sum(order_price - discount_amount),0) from orders where customer_id = #{customerId} and order_status = 100 and del_flag = 0
+        select ifnull(sum(order_price),0) from orders where customer_id = #{customerId} and order_status = 100 and del_flag = 0
     </select>
 </mapper>

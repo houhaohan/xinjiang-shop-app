@@ -37,20 +37,20 @@ spring:
         filter: stat,wall,slf4j
       datasource:
         master:
-          url: jdbc:mysql://127.0.0.1:3306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+          url: jdbc:mysql://47.110.9.224:13306/qingshi?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
           username: root
-          password: root
+          password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
         slave:
-          url: jdbc:mysql://127.0.0.1:3306/xinjiang-shop?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+          url: jdbc:mysql://47.110.9.224:13306/xinjiang-shop?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
           username: root
-          password: root
+          password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
     database: 0
-    host: 192.168.1.91
+    host: 127.0.0.1
     password: qwer1234
-    port: 6379
+    port: 8379
     lettuce:
       pool:
         max-active: 8   #最大连接数据库连接数,设 0 为没有限制
@@ -60,7 +60,7 @@ spring:
       shutdown-timeout: 100ms
 
   activemq:
-    broker-url: tcp://192.168.1.91:61616
+    broker-url: tcp://127.0.0.1:61616
     user: admin
     password: admin
     pool:

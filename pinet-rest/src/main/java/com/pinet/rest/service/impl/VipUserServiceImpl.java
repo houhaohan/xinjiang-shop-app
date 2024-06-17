@@ -14,9 +14,7 @@ import com.pinet.core.constants.RedisKeyConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.*;
 import com.pinet.keruyun.openapi.param.CustomerParam;
-import com.pinet.keruyun.openapi.param.CustomerPropertyParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
-import com.pinet.keruyun.openapi.vo.customer.CustomerPropertyVO;
 import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
@@ -24,7 +22,6 @@ import com.pinet.rest.entity.enums.PayTypeEnum;
 import com.pinet.rest.entity.enums.VipLevelEnum;
 import com.pinet.rest.entity.param.PayParam;
 import com.pinet.rest.entity.vo.VipUserVO;
-import com.pinet.rest.mapper.ShopMapper;
 import com.pinet.rest.mapper.VipUserMapper;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
@@ -33,13 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,8 +47,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @DS(DB.MASTER)
 public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> implements IVipUserService {
-    private final ShopMapper shopMapper;
-    private final IVipShopBalanceService vipShopBalanceService;
     private final IVipRechargeRecordService vipRechargeRecordService;
     private final IVipLevelService vipLevelService;
     private final IOrderPayService orderPayService;
@@ -69,9 +60,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     @Value("${kry.brandToken}")
     private String brandToken;
 
-    public VipUserServiceImpl(ShopMapper shopMapper,
-                              IVipShopBalanceService vipShopBalanceService,
-                              IVipRechargeRecordService vipRechargeRecordService,
+    public VipUserServiceImpl(IVipRechargeRecordService vipRechargeRecordService,
                               IVipLevelService vipLevelService,
                               IOrderPayService orderPayService,
                               ICustomerService customerService,
@@ -79,8 +68,6 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
                               @Qualifier("weixin_mini_service") IPayService payService,
                               RedisUtil redisUtil,
                               IKryApiService kryApiService){
-        this.shopMapper = shopMapper;
-        this.vipShopBalanceService = vipShopBalanceService;
         this.vipRechargeRecordService = vipRechargeRecordService;
         this.vipLevelService = vipLevelService;
         this.orderPayService = orderPayService;
@@ -165,13 +152,13 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
 
         VipUserVO vipUserVO = new VipUserVO();
         vipUserVO.setCustomerId(customerId);
+        orderPayService.getPaidPriceByCustomerId(customerId);
         if(user == null){
             Customer customer = customerService.getById(customerId);
             CustomerQueryVO customerQueryVO = null;
             //查询是否是客如云的会员,需要控制查询频率,每个用户每2分钟查询一次
-            boolean ok = redisUtil.setIfAbsent(RedisKeyConstant.QUERY_KRY_VIP_USER + customerId, "1", 120, TimeUnit.SECONDS);
-            if(ok){
-
+            boolean lock = redisUtil.setIfAbsent(RedisKeyConstant.QUERY_KRY_VIP_USER + customerId, "1", 120, TimeUnit.SECONDS);
+            if(lock){
                 CustomerParam customerParam = new CustomerParam();
                 customerParam.setMobile(customer.getPhone());
                 customerQueryVO = kryApiService.queryByMobile(brandId, brandToken, customerParam);
@@ -197,51 +184,15 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
 
                 vipUserVO.setLevel(user.getLevel());
                 vipUserVO.setVipName(user.getVipName());
-                BigDecimal nextLevelDiffAmount = vipLevelService.nextLevelDiffAmount(customerId, vipUserVO.getLevel());
+                BigDecimal nextLevelDiffAmount = vipLevelService.nextLevelDiffAmount(customerId);
                 vipUserVO.setNextLevelDiffAmount(nextLevelDiffAmount);
             }
         }else {
             vipUserVO.setLevel(user.getLevel());
             vipUserVO.setVipName(user.getVipName());
-            BigDecimal nextLevelDiffAmount = vipLevelService.nextLevelDiffAmount(customerId, vipUserVO.getLevel());
+            BigDecimal nextLevelDiffAmount = vipLevelService.nextLevelDiffAmount(customerId);
             vipUserVO.setNextLevelDiffAmount(nextLevelDiffAmount);
         }
-        List<VipShopBalance> vipShopBalanceList = vipShopBalanceService.getByCustomerId(customerId);
-        if(CollectionUtils.isEmpty(vipShopBalanceList)){
-            VipUserVO.Amount amount = new VipUserVO.Amount();
-            amount.setAmount(BigDecimal.ZERO);
-            vipUserVO.setAmounts(Arrays.asList(amount));
-            return vipUserVO;
-        }
-
-        List<VipUserVO.Amount> shopAmountList = new ArrayList<>(vipShopBalanceList.size());
-        for(VipShopBalance vipShopBalance : vipShopBalanceList){
-            Shop shop = shopMapper.selectById(vipShopBalance.getShopId());
-            //查询客如云的余额，控制查询频率，30分钟查询一次
-            boolean ok = redisUtil.setIfAbsent(RedisKeyConstant.SYNC_KRY_BALANCE + customerId+"_"+shop.getId(), "1", 30 * 60L, TimeUnit.SECONDS);
-            if(ok){
-                CustomerPropertyParam param = new CustomerPropertyParam();
-                param.setCustomerId(user.getKryCustomerId());
-                param.setShopId(shop.getKryShopId().toString());
-                CustomerPropertyVO customerPropertyVO = kryApiService.queryCustomerProperty(brandId, brandToken, param);
-                if(customerPropertyVO != null){
-                    Integer totalValue = customerPropertyVO.getPosCardDTOList().stream()
-                            .map(CustomerPropertyVO.PosCardDTO::getPosRechargeAccountList)
-                            .filter(item -> !CollectionUtils.isEmpty(item))
-                            .map(item -> item.get(0).getRemainAvailableValue())
-                            .map(CustomerPropertyVO.RemainAvailable::getTotalValue)
-                            .findFirst()
-                            .orElse(0);
-                    vipShopBalance.setAmount(BigDecimalUtil.fenToYuan(totalValue));
-                }
-            }
-            VipUserVO.Amount amount = new VipUserVO.Amount();
-            amount.setAmount(vipShopBalance.getAmount());
-            amount.setShopId(vipShopBalance.getShopId());
-            amount.setShopName(shop.getShopName());
-            shopAmountList.add(amount);
-        }
-        vipUserVO.setAmounts(shopAmountList);
         return vipUserVO;
     }
 
@@ -260,37 +211,18 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
 
     @Override
     public void updateLevel(Long customerId,BigDecimal paidAmount) {
-        Integer level = currVipLevel(paidAmount);
-
         //如果目前等级大于level, 那就不用更新了，有些会员等级是在客如云那边直接设置的
         QueryWrapper<VipUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("customer_id",customerId);
         VipUser user = getOne(queryWrapper);
-        if(user.getLevel() >= level){
+
+        VipLevelEnum e = VipLevelEnum.getEnumByAmount(paidAmount);
+        if(user.getLevel() >= e.getLevel()){
             return;
         }
-        user.setLevel(level);
-        user.setVipName(VipLevelEnum.getNameByCode(level));
+        user.setLevel(e.getLevel());
+        user.setVipName(e.getName());
         updateById(user);
     }
-
-    /**
-     * 根据支付金额获取当前VIP等级
-     * @param paidAmount
-     * @return
-     */
-    private Integer currVipLevel(BigDecimal paidAmount) {
-        //倒序排列
-        QueryWrapper<VipLevel> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByDesc("id");
-        List<VipLevel> list = vipLevelService.list();
-        for(VipLevel vipLevel : list){
-            if(BigDecimalUtil.gt(paidAmount,vipLevel.getMinAmount())){
-                return vipLevel.getLevel();
-            }
-        }
-        return VipLevelEnum.VIP1.getLevel();
-    }
-
 
 }

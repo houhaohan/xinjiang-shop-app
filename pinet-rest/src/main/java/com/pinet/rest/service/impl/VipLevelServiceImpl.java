@@ -31,10 +31,11 @@ public class VipLevelServiceImpl extends ServiceImpl<VipLevelMapper, VipLevel> i
     private final OrdersMapper ordersMapper;
 
     @Override
-    public BigDecimal nextLevelDiffAmount(Long customerId,Integer level) {
+    public BigDecimal nextLevelDiffAmount(Long customerId) {
         BigDecimal paidAmount = ordersMapper.getPaidAmount(customerId);
+        VipLevelEnum e = VipLevelEnum.getEnumByAmount(paidAmount);
 
-        VipLevel vipLevel = getByLevel(VipLevelEnum.next(level).getLevel());
+        VipLevel vipLevel = getByLevel(VipLevelEnum.next(e.getLevel()).getLevel());
         return BigDecimalUtil.subtract(vipLevel.getMinAmount(),paidAmount);
     }
 

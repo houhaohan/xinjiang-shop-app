@@ -35,7 +35,6 @@ import java.util.List;
 @DS(DB.MASTER)
 public class ExchangeProductServiceImpl extends ServiceImpl<ExchangeProductMapper, ExchangeProduct> implements IExchangeProductService {
     private final ICouponService couponService;
-    private final ICustomerBalanceService customerBalanceService;
     private final ICustomerCouponService customerCouponService;
     private final IExchangeRecordService exchangeRecordService;
     private final IScoreRecordService scoreRecordService;
