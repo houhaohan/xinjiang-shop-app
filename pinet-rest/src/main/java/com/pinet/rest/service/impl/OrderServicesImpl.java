@@ -409,6 +409,16 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         //推送客如云,异步处理
         jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH, String.valueOf(orders.getId()));
         log.info("支付回调更新订单信息为{}", JSONObject.toJSONString(orders));
+
+        //自配送订单消息通知
+        if(Objects.equals(orders.getOrderType(),OrderTypeEnum.TAKEAWAY.getCode())){
+            Shop shop = shopService.getById(orders.getShopId());
+            if(shop.getSupportDelivery() == 1 && Objects.equals(DeliveryPlatformEnum.ZPS.getCode(),shop.getDeliveryPlatform())){
+                //延迟 6 小时自动完成订单
+                jmsUtil.delaySend(QueueConstants.ZPS_ORDER_NOTICE,orders.getId().toString(),6 * 60 * 60 * 1000L);
+            }
+        }
+
         return true;
     }
 

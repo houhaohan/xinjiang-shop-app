@@ -57,4 +57,9 @@ public class QueueConstants {
      * 消息通知发送,消费者在后台消费
      */
     public static final String MESSAGE_SEND = "message.send.queue";
+
+    /**
+     * 自配送订单消息通知，消费者在后台消费
+     */
+    public static final String ZPS_ORDER_NOTICE = "zps.order.notice.queue";
 }
