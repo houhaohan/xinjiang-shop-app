@@ -178,7 +178,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
                 user.setSex(customer.getSex());
                 user.setStatus(CommonConstant.ENABLE);
                 user.setNickname(customerQueryVO.getName());
-                user.setShopId(24L);
+                user.setShopId(24L);//默认店铺ID
                 user.setKryCustomerId(customerQueryVO.getCustomerId());
                 this.save(user);
 

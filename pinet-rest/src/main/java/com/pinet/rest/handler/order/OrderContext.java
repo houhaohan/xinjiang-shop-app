@@ -1,6 +1,7 @@
 package com.pinet.rest.handler.order;
 
 import com.pinet.common.mq.util.JmsUtil;
+import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.Shop;
@@ -39,6 +40,7 @@ public class OrderContext {
     protected final IKryApiService kryApiService;
     protected final OrderDishContext orderDishContext;
     protected final JmsUtil jmsUtil;
+    protected final RedisUtil redisUtil;
     protected Long customerId;
     protected Double distance;
     protected Shop shop;

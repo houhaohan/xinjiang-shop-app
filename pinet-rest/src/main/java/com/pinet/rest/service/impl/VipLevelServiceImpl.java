@@ -34,7 +34,9 @@ public class VipLevelServiceImpl extends ServiceImpl<VipLevelMapper, VipLevel> i
     public BigDecimal nextLevelDiffAmount(Long customerId) {
         BigDecimal paidAmount = ordersMapper.getPaidAmount(customerId);
         VipLevelEnum e = VipLevelEnum.getEnumByAmount(paidAmount);
-
+        if(e.equals(VipLevelEnum.VIP5)){
+            return BigDecimal.ZERO;
+        }
         VipLevel vipLevel = getByLevel(VipLevelEnum.next(e.getLevel()).getLevel());
         return BigDecimalUtil.subtract(vipLevel.getMinAmount(),paidAmount);
     }

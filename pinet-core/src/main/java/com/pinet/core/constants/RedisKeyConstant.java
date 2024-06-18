@@ -16,5 +16,10 @@ public class RedisKeyConstant {
      */
     public static final String SYNC_KRY_BALANCE = "sync_kry_balance:";
 
+    /**
+     * 是否满足免配送费
+     */
+    public static final String FREE_DELIVERY_FEE = "free_delivery_fee:";
+
 
 }

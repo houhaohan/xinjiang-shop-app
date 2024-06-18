@@ -20,6 +20,7 @@ public class OrderSetterContext {
     protected Long userId;
     protected Double distance;
     protected String deliveryPlatform;
+    protected Integer vipLevel;
     protected List<OrderProduct> response;
 
     protected BigDecimal packageFee = BigDecimal.ZERO;

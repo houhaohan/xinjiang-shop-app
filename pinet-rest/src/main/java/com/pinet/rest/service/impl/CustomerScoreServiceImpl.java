@@ -24,10 +24,18 @@ public class CustomerScoreServiceImpl extends ServiceImpl<CustomerScoreMapper, C
         if(score == 0){
             return;
         }
-        UpdateWrapper<CustomerScore> wrapper = new UpdateWrapper<>();
-        wrapper.eq("customer_id",customerId);
-        wrapper.setSql("score = score + " + score);
-        update(wrapper);
+        QueryWrapper<CustomerScore> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("customer_id",customerId);
+        CustomerScore customerScore = getOne(queryWrapper);
+        if(customerScore != null){
+            customerScore.setScore(customerScore.getScore() +score );
+            updateById(customerScore);
+            return;
+        }
+        customerScore = new CustomerScore();
+        customerScore.setCustomerId(customerId);
+        customerScore.setScore(score);
+        save(customerScore);
     }
 
     @Override
@@ -56,4 +64,5 @@ public class CustomerScoreServiceImpl extends ServiceImpl<CustomerScoreMapper, C
         queryWrapper.eq("customer_id",customerId);
         return getOne(queryWrapper);
     }
+
 }

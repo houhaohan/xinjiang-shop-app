@@ -12,14 +12,12 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.Environment;
 import com.pinet.core.util.StringUtil;
-import com.pinet.keruyun.openapi.param.CustomerParam;
-import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.*;
+import com.pinet.rest.entity.request.DeliveryFeeRequest;
 import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.mq.constants.QueueConstants;
-import com.pinet.rest.strategy.VipLevelStrategyContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -54,12 +52,17 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         order.setEstimateArrivalEndTime(DateUtil.offsetMinute(now, 90));
         order.setOrderDistance(context.distance.intValue());
 
-        BigDecimal shippingFee = calculate(context.request.getOrderType(), order.getOrderDistance(), context.shop.getDeliveryPlatform());
+        //配送费
+        Integer vipLevel = context.vipUserService.getLevelByCustomerId(order.getCustomerId());
+        DeliveryFeeRequest request = new DeliveryFeeRequest();
+        request.setCustomerId(context.customerId);
+        request.setDeliveryPlatform(context.shop.getDeliveryPlatform());
+        request.setOrderDistance(order.getOrderDistance());
+        BigDecimal shippingFee = calculate(request, vipLevel, context.redisUtil);
         order.setShippingFee(shippingFee);
         order.setRemark(context.request.getRemark());
         order.setShareId(context.request.getShareId());
         order.setCustomerCouponId(context.request.getCustomerCouponId());
-
         //初始化订单金额
         order.setOrderPrice(BigDecimal.ZERO);
         order.setPackageFee(BigDecimal.ZERO);
