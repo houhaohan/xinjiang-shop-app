@@ -2,6 +2,7 @@ package com.pinet.rest.handler.settle;
 
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.enums.SettlementTypeEnum;
+import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
 
 import java.math.BigDecimal;
@@ -16,11 +17,12 @@ import java.util.Objects;
  */
 public class OrderSetterContext {
     protected ICartService cartService;
+    protected IVipUserService vipUserService;
+    protected OrdersMapper ordersMapper;
     protected DishSettleContext dishSettleContext;
     protected Long userId;
     protected Double distance;
     protected String deliveryPlatform;
-    protected Integer vipLevel;
     protected List<OrderProduct> response;
 
     protected BigDecimal packageFee = BigDecimal.ZERO;
@@ -40,6 +42,12 @@ public class OrderSetterContext {
         this.cartService = cartService;
     }
 
+    public void setVipUserService(IVipUserService vipUserService){
+        this.vipUserService = vipUserService;
+    }
+    public void setOrdersMapper(OrdersMapper ordersMapper){
+        this.ordersMapper = ordersMapper;
+    }
 
     public void setDistance(Double distance) {
         this.distance = distance;

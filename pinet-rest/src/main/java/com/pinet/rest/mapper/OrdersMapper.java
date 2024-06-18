@@ -48,4 +48,11 @@ public interface OrdersMapper extends BaseMapper<Orders> {
      */
     BigDecimal getPaidAmount(@Param("customerId") Long customerId);
 
+    /**
+     * 查询免配送费的订单数量
+     * @param date
+     * @return
+     */
+    Integer getFreeDeliveryFeeCount(@Param("date") Date date);
+
 }

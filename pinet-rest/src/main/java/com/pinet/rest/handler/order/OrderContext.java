@@ -28,7 +28,6 @@ import java.util.Objects;
 public class OrderContext {
 
     protected final OrderPreferentialManager orderPreferentialManager;
-    protected final IVipUserService vipUserService;
     protected final OrdersMapper ordersMapper;
     protected final IShopProductService shopProductService;
     protected final IOrderAddressService orderAddressService;
@@ -37,12 +36,14 @@ public class OrderContext {
     protected final IDaDaService daDaService;
     protected final ICustomerAddressService customerAddressService;
     protected final ICartService cartService;
+    protected final IVipUserService vipUserService;
     protected final IKryApiService kryApiService;
     protected final OrderDishContext orderDishContext;
     protected final JmsUtil jmsUtil;
     protected final RedisUtil redisUtil;
     protected Long customerId;
     protected Double distance;
+    protected Integer vipLevel;
     protected Shop shop;
     protected CreateOrderDto request;
     protected CreateOrderVo response;
@@ -66,6 +67,10 @@ public class OrderContext {
 
     public void setRequest(CreateOrderDto request){
         this.request = request;
+    }
+
+    public void setVipLevel(Integer vipLevel){
+        this.vipLevel = vipLevel;
     }
 
     public CreateOrderVo getResponse(){

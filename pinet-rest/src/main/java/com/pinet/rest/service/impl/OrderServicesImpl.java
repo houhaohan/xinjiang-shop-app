@@ -203,6 +203,8 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setShopName(shop.getShopName());
         OrderSetterContext orderSetterContext = new OrderSetterContext();
         orderSetterContext.setCartService(cartService);
+        orderSetterContext.setVipUserService(vipUserService);
+        orderSetterContext.setOrdersMapper(baseMapper);
         dishSettleContext.setRequest(dto);
         orderSetterContext.setDishSettleContext(dishSettleContext);
         orderSetterContext.setUserId(customerId);
@@ -266,7 +268,9 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Shop shop = shopService.getById(request.getShopId());
         checkShop(shop);
 
+        Integer vipLevel = vipUserService.getLevelByCustomerId(userId);
         context.setCustomerId(userId);
+        context.setVipLevel(vipLevel);
         context.setShop(shop);
         context.setRequest(request);
         context.setDistance(getDistance(request.getCustomerAddressId(), request.getOrderType(), shop));

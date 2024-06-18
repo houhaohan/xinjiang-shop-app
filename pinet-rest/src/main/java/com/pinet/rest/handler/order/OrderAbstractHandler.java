@@ -36,6 +36,7 @@ import java.util.Objects;
 public abstract class OrderAbstractHandler extends ShippingFeeHandler implements OrderHandler{
     protected OrderContext context;
 
+
     protected Orders buildOrder(){
         Orders order = new Orders();
         order.setOrderNo(IdUtil.getSnowflake().nextId());
@@ -53,13 +54,17 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         order.setOrderDistance(context.distance.intValue());
 
         //配送费
-        Integer vipLevel = context.vipUserService.getLevelByCustomerId(order.getCustomerId());
         DeliveryFeeRequest request = new DeliveryFeeRequest();
-        request.setCustomerId(context.customerId);
         request.setDeliveryPlatform(context.shop.getDeliveryPlatform());
         request.setOrderDistance(order.getOrderDistance());
-        BigDecimal shippingFee = calculate(request, vipLevel, context.redisUtil);
-        order.setShippingFee(shippingFee);
+        request.setVipLevel(context.vipLevel);
+        //查询本周是否有免配送费的单
+        Date beginOfWeek = DateUtil.beginOfWeek(new Date()).toJdkDate();
+        Integer cnt = context.ordersMapper.getFreeDeliveryFeeCount(beginOfWeek);
+        request.setOrderCnt(cnt);
+        BigDecimal deliveryFee = calculateDeliveryFee(request);
+        order.setShippingFee(deliveryFee);
+
         order.setRemark(context.request.getRemark());
         order.setShareId(context.request.getShareId());
         order.setCustomerCouponId(context.request.getCustomerCouponId());

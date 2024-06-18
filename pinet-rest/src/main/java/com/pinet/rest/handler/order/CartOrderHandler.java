@@ -17,8 +17,7 @@ import java.util.Objects;
  * @data 2024-03-21 15:00
  */
 public class CartOrderHandler extends OrderAbstractHandler {
-
-    public CartOrderHandler(OrderContext context){
+    public CartOrderHandler(OrderContext context) {
         this.context = context;
     }
 
