@@ -6,6 +6,9 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
+import com.pinet.keruyun.openapi.dto.DirectChargeDTO;
+import com.pinet.keruyun.openapi.service.IKryApiService;
+import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.VipShopBalance;
 import com.pinet.rest.entity.VipUser;
@@ -17,6 +20,7 @@ import com.pinet.rest.entity.param.RefundParam;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -37,7 +41,12 @@ public class BalancePayServiceImpl implements IPayService {
     private final ICustomerBalanceRecordService customerBalanceRecordService;
     private final IVipUserService vipUserService;
     private final IVipShopBalanceService vipShopBalanceService;
+    private final IKryApiService kryApiService;
     private final JmsUtil jmsUtil;
+    @Value("${kry.brandId}")
+    private Long brandId;
+    @Value("${kry.brandToken}")
+    private String  brandToken;
 
     @Override
     @DSTransactional
@@ -88,8 +97,10 @@ public class BalancePayServiceImpl implements IPayService {
         orderRefundNotifyParam.setRefundNo(Long.valueOf(param.getOutRefundNo()));
         orderRefundNotifyParam.setOutTradeNo("");
         ordersService.orderRefundNotify(orderRefundNotifyParam);
+
+        //todo 客如云余额都手动操作新增，扣减吧，等后期客如云提供了扣减余额的接口再重新优化
         //消息通知
-        String msg = "会员订单已退款，订单号["+param.getOrderNo()+"]，请及时同步客如云余额。";
+        String msg = "会员订单已退添加订单号["+param.getOrderNo()+"]，退款金额["+param.getRefundFee()+"]，请及时同步客如云余额。";
         jmsUtil.sendMsgQueue(QueueConstants.MESSAGE_SEND,msg);
     }
 }

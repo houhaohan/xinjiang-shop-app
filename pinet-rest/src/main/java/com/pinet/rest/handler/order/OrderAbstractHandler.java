@@ -57,7 +57,8 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         DeliveryFeeRequest request = new DeliveryFeeRequest();
         request.setDeliveryPlatform(context.shop.getDeliveryPlatform());
         request.setOrderDistance(order.getOrderDistance());
-        request.setVipLevel(context.vipLevel);
+        Integer vipLevel = context.vipUserService.getLevelByCustomerId(context.customerId);
+        request.setVipLevel(vipLevel);
         //查询本周是否有免配送费的单
         Date beginOfWeek = DateUtil.beginOfWeek(new Date()).toJdkDate();
         Integer cnt = context.ordersMapper.getFreeDeliveryFeeCount(beginOfWeek);

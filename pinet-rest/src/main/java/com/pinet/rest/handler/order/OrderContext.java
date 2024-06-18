@@ -3,19 +3,16 @@ package com.pinet.rest.handler.order;
 import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.common.redis.util.RedisUtil;
 import com.pinet.keruyun.openapi.service.IKryApiService;
-import com.pinet.rest.entity.Cart;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.enums.SettlementTypeEnum;
 import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -43,7 +40,6 @@ public class OrderContext {
     protected final RedisUtil redisUtil;
     protected Long customerId;
     protected Double distance;
-    protected Integer vipLevel;
     protected Shop shop;
     protected CreateOrderDto request;
     protected CreateOrderVo response;
@@ -67,10 +63,6 @@ public class OrderContext {
 
     public void setRequest(CreateOrderDto request){
         this.request = request;
-    }
-
-    public void setVipLevel(Integer vipLevel){
-        this.vipLevel = vipLevel;
     }
 
     public CreateOrderVo getResponse(){

@@ -55,6 +55,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -229,9 +231,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         vo.setOrderPrice(BigDecimalUtil.sum(preferentialVo.getProductDiscountAmount(), orderSetterContext.getPackageFee(), orderSetterContext.getShippingFee()));
 
         //返回预计送达时间
-        Date now = new Date();
-        String estimateArrivalStartTime = DateUtil.format(DateUtil.offsetMinute(now, 15), "HH:mm");
-        String estimateArrivalEndTime = DateUtil.format(DateUtil.offsetMinute(now, 45), "HH:mm");
+        LocalTime now = LocalTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        String estimateArrivalStartTime = now.plusMinutes(15).format(formatter);
+        String estimateArrivalEndTime = now.plusMinutes(45).format(formatter);
         vo.setEstimateArrivalTime(estimateArrivalStartTime + "-" + estimateArrivalEndTime);
 
         vo.setOrderProductNum(orderSetterContext.getOrderProductNum());
@@ -268,9 +271,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Shop shop = shopService.getById(request.getShopId());
         checkShop(shop);
 
-        Integer vipLevel = vipUserService.getLevelByCustomerId(userId);
         context.setCustomerId(userId);
-        context.setVipLevel(vipLevel);
         context.setShop(shop);
         context.setRequest(request);
         context.setDistance(getDistance(request.getCustomerAddressId(), request.getOrderType(), shop));
@@ -422,6 +423,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 jmsUtil.delaySend(QueueConstants.ZPS_ORDER_NOTICE,orders.getId().toString(),6 * 60 * 60 * 1000L);
             }
         }
+        jmsUtil.sendMsgQueue(QueueConstants.VIP_ACTIVITY,orders.getCustomerId().toString());
         return true;
     }
 

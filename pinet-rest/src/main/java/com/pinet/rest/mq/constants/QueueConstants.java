@@ -62,4 +62,15 @@ public class QueueConstants {
      * 自配送订单消息通知，消费者在后台消费
      */
     public static final String ZPS_ORDER_NOTICE = "zps.order.notice.queue";
+
+    /**
+     * 会员权益活动
+     */
+    public static final String VIP_ACTIVITY = "vip.activity.queue";
+
+    /**
+     * 赠送优惠券
+     */
+    public static final String QINGSHI_COUPON_DELAY_GRANT = "qingshi.coupon.delay_grant.queue";
+
 }
