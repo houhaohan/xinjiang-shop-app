@@ -164,6 +164,11 @@
         select ifnull(sum(order_price),0) from orders where customer_id = #{customerId} and order_status = 100 and del_flag = 0
     </select>
 
+    <select id="selectShopPaidAmount" resultType="java.math.BigDecimal">
+        select ifnull(sum(order_price),0) from orders where customer_id = #{customerId} and shop_id = #{shopId} and order_status = 100 and del_flag = 0
+    </select>
+
+
     <select id="getFreeDeliveryFeeCount" resultType="int">
         select count(1) from orders
         where create_time &gt; #{date}

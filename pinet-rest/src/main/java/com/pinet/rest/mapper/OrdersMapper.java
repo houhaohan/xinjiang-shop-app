@@ -49,6 +49,14 @@ public interface OrdersMapper extends BaseMapper<Orders> {
     BigDecimal getPaidAmount(@Param("customerId") Long customerId);
 
     /**
+     * 查询用户店铺已支付金额
+     * @param shopId
+     * @param customerId
+     * @return
+     */
+    BigDecimal selectShopPaidAmount(@Param("shopId") Long shopId ,@Param("customerId") Long customerId);
+
+    /**
      * 查询免配送费的订单数量
      * @param date
      * @return

@@ -423,7 +423,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 jmsUtil.delaySend(QueueConstants.ZPS_ORDER_NOTICE,orders.getId().toString(),6 * 60 * 60 * 1000L);
             }
         }
-        jmsUtil.sendMsgQueue(QueueConstants.VIP_ACTIVITY,orders.getCustomerId().toString());
+        //VIP5 权益 活动
+        if(Objects.equals(vipLevel,VipLevelEnum.VIP5.getLevel())){
+            jmsUtil.sendMsgQueue(QueueConstants.VIP_ACTIVITY,orders.getId().toString());
+        }
         return true;
     }
 
