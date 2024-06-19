@@ -26,4 +26,7 @@ public class VipRechargeTemplateVO {
 
     @ApiModelProperty("描述 ")
     private String description;
+
+    @ApiModelProperty("是否推荐，0-否，1-是 ")
+    private Integer recommend;
 }

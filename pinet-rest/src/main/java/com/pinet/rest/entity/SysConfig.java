@@ -27,7 +27,7 @@ public class SysConfig extends BaseEntity {
     @ApiModelProperty("配置描述")
     private String name;
 
-    @ApiModelProperty("配置详情名称")
+    @ApiModelProperty("code编码")
     private String code;
 
     @ApiModelProperty("值")

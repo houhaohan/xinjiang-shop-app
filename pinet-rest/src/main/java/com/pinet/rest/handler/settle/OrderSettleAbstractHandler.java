@@ -22,6 +22,7 @@ public abstract class OrderSettleAbstractHandler extends ShippingFeeHandler impl
         DeliveryFeeRequest request = new DeliveryFeeRequest();
         request.setDeliveryPlatform(context.deliveryPlatform);
         request.setOrderDistance(context.distance.intValue());
+        request.setOrderType(context.dishSettleContext.request.getOrderType());
 
         Integer vipLevel = context.vipUserService.getLevelByCustomerId(context.userId);
         request.setVipLevel(vipLevel);

@@ -37,5 +37,8 @@ public class VipRechargeTemplate extends BaseEntity {
     @ApiModelProperty("描述")
     private String description;
 
+    @ApiModelProperty("推荐，0-否，1-是")
+    private Integer recommend;
+
 
 }

@@ -14,6 +14,7 @@
         <result column="amount" property="amount" />
         <result column="gift_amount" property="giftAmount" />
         <result column="description" property="description" />
+        <result column="recommend" property="recommend" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -24,7 +25,7 @@
         update_by,
         update_time,
         del_flag,
-        shop_id, amount, gift_amount, description
+        shop_id, amount, gift_amount, description, recommend
     </sql>
 
 </mapper>

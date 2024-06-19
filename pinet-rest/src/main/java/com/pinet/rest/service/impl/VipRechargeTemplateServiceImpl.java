@@ -58,6 +58,7 @@ public class VipRechargeTemplateServiceImpl extends ServiceImpl<VipRechargeTempl
             vipRechargeTemplateVO.setAmount(item.getAmount());
             vipRechargeTemplateVO.setGiftAmount(item.getGiftAmount());
             vipRechargeTemplateVO.setDescription(item.getDescription());
+            vipRechargeTemplateVO.setRecommend(item.getRecommend());
             vipRechargeTemplateVO.setTotalAmount(BigDecimalUtil.sum(item.getAmount(),item.getGiftAmount()));
             return vipRechargeTemplateVO;
         }).collect(Collectors.toList());
