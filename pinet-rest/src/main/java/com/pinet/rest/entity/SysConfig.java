@@ -1,8 +1,8 @@
 package com.pinet.rest.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.pinet.core.entity.BaseEntity;
-import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -19,10 +19,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @TableName("sys_config")
-@ApiModel(value = "SysConfig对象", description = "")
-public class SysConfig extends BaseEntity {
+@ApiModel(value = "SysConfig对象", description = "系统配置表")
+public class SysConfig {
 
     private static final long serialVersionUID = 1L;
+
+    @ApiModelProperty("id")
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
     @ApiModelProperty("配置描述")
     private String name;

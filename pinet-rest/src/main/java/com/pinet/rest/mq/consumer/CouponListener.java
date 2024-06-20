@@ -43,7 +43,7 @@ public class CouponListener {
      * @param message
      */
     @JmsListener(destination = QueueConstants.QING_COUPON_EXPIRE_WARN_NAME, containerFactory = "queueListener")
-    public void sendTemplateMessage(String message) {
+    public void couponExpireWarn(String message) {
         try {
             String templateId = WeChatTemplateEnum.COUPON_EXPIRE.getKey();
             String url = WeChatTemplateEnum.COUPON_EXPIRE.getPageUrl();
@@ -54,7 +54,6 @@ public class CouponListener {
             String couponName = customerCoupon.getCouponName();
             String couponType = CouponTypeEnum.getDescByCode(customerCoupon.getCouponType());
             String expireTime = DateUtil.format(customerCoupon.getExpireTime(), "yyyy-MM-dd HH:mm:ss");
-
             List<WxMaSubscribeMessage.MsgData> data = new ArrayList<>(4);
             //优惠券名称
             data.add(new WxMaSubscribeMessage.MsgData("thing10", couponName));

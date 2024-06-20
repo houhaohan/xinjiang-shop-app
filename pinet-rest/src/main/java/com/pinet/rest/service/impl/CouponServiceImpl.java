@@ -1,6 +1,8 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.pinet.core.constants.DB;
 import com.pinet.rest.entity.Coupon;
 import com.pinet.rest.mapper.CouponMapper;
 import com.pinet.rest.service.ICouponService;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
  * @since 2024-01-10
  */
 @Service
+@DS(DB.MASTER)
 public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> implements ICouponService {
 
 

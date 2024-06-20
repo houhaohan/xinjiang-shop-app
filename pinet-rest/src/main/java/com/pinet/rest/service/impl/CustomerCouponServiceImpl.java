@@ -204,10 +204,11 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
             return;
         }
         Date remindTime = DateUtil.offsetDay(customerCoupon.getExpireTime(), -1);
-        if (remindTime.getTime() - System.currentTimeMillis() <= 0) {
+        Long diffTime = remindTime.getTime() - System.currentTimeMillis();
+        if (diffTime <= 0) {
             return;
         }
-        jmsUtil.delaySend(QueueConstants.QING_COUPON_EXPIRE_WARN_NAME, customerCouponId.toString(), remindTime.getTime() - System.currentTimeMillis());
+        jmsUtil.delaySend(QueueConstants.QING_COUPON_EXPIRE_WARN_NAME, customerCouponId.toString(), diffTime);
 
     }
 

@@ -2,10 +2,12 @@ package com.pinet.rest.mq.consumer;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.constants.ConfigConstant;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
+import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.CouponReceiveStatusEnum;
 import com.pinet.rest.entity.enums.VipLevelEnum;
@@ -15,7 +17,6 @@ import com.pinet.rest.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -39,7 +40,7 @@ public class VipActivityListener {
 
 
     @JmsListener(destination = QueueConstants.VIP_ACTIVITY, containerFactory = "queueListener")
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
     public void send(String message) {
         JSONObject messageObj = JSON.parseObject(message);
         Long customerId = messageObj.getLong("customerId");
@@ -47,7 +48,7 @@ public class VipActivityListener {
         Integer level = vipUserService.getLevelByCustomerId(customerId);
         String giftBagKey = VipLevelEnum.getEnumByCode(level).getGiftBagKey();
         SysConfig sysConfig = sysConfigService.getByCode(giftBagKey);
-        if(sysConfig == null){
+        if(sysConfig == null || StringUtil.isBlank(sysConfig.getVal())){
             return;
         }
         String[] couponIds = sysConfig.getVal().split(",");
@@ -56,8 +57,8 @@ public class VipActivityListener {
         if(CollectionUtils.isEmpty(effectiveCoupons)){
             return;
         }
-        for(Coupon coupon : coupons){
-            this.send(coupon,customerId);
+        for(Coupon coupon : effectiveCoupons){
+            this.send(coupon,customerId,shopId);
         }
     }
 
@@ -66,7 +67,7 @@ public class VipActivityListener {
      * @param coupon
      * @param customerId
      */
-    private void send(Coupon coupon,Long customerId){
+    private void send(Coupon coupon,Long customerId,Long shopId){
         QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("customer_id",customerId);
         queryWrapper.eq("coupon_id",coupon.getId());
@@ -83,11 +84,12 @@ public class VipActivityListener {
         couponGrantRecord.setNum(1);
         couponGrantRecord.setRemark("VIP升级礼包");
         couponGrantRecord.setGrantTime(LocalDateTime.now());
+        couponGrantRecord.setShopId(shopId);
         couponGrantRecordService.save(couponGrantRecord);
 
         customerCoupon = new CustomerCoupon();
         customerCoupon.setCustomerId(customerId);
-        customerCoupon.setCouponStatus(CouponReceiveStatusEnum.RECEIVED.getCode());
+        customerCoupon.setCouponStatus(CouponReceiveStatusEnum.NOT_RECEIVE.getCode());
         customerCoupon.setExpireTime(DateUtils.addMonths(new Date(),1));
         customerCoupon.setCouponGrantId(couponGrantRecord.getCouponGrantId());
         customerCoupon.setCouponId(coupon.getId());
@@ -113,7 +115,7 @@ public class VipActivityListener {
         SysConfig sysConfig = sysConfigService.getByCode(ConfigConstant.YYBWC_COUPON_ID);
         BigDecimal paidAmount = ordersMapper.selectShopPaidAmount(shopId, customerId);
         if(BigDecimalUtil.lt(paidAmount,VipLevelEnum.VIP5.getMinAmount())){
-            //不满足条件，除去月月霸王餐优惠券
+            //达不到 VIP5的会员，除去月月霸王餐优惠券
             return coupons.stream().filter(o -> !Objects.equals(Long.valueOf(sysConfig.getVal()), o.getId())).collect(Collectors.toList());
         }
         return coupons;
