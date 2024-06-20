@@ -97,7 +97,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
                             .append(side.getSideDishName())
                             .append("x")
                             .append(side.getQuantity())
-                            .append("(+").append(BigDecimalUtil.stripTrailingZeros(addPrice))
+                            .append("(+")
+                            .append(BigDecimalUtil.stripTrailingZeros(addPrice))
                             .append("元)");
                 }
                 cart.setProdSpecName(specName.toString());

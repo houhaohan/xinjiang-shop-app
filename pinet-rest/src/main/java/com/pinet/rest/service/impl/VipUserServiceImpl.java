@@ -210,7 +210,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     }
 
     @Override
-    public void updateLevel(Long customerId,BigDecimal paidAmount) {
+    public boolean updateLevel(Long customerId,BigDecimal paidAmount) {
         //如果目前等级大于level, 那就不用更新了，有些会员等级是在客如云那边直接设置的
         QueryWrapper<VipUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("customer_id",customerId);
@@ -218,11 +218,11 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
 
         VipLevelEnum e = VipLevelEnum.getEnumByAmount(paidAmount);
         if(user.getLevel() >= e.getLevel()){
-            return;
+            return false;
         }
         user.setLevel(e.getLevel());
         user.setVipName(e.getName());
-        updateById(user);
+        return updateById(user);
     }
 
 }

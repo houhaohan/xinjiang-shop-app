@@ -409,7 +409,7 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //更新VIP等级
         BigDecimal paidAmount = baseMapper.getPaidAmount(orders.getCustomerId());
-        vipUserService.updateLevel(orders.getCustomerId(),BigDecimalUtil.sum(paidAmount,orders.getOrderPrice()));
+        boolean flag = vipUserService.updateLevel(orders.getCustomerId(), BigDecimalUtil.sum(paidAmount, orders.getOrderPrice()));
 
         //推送客如云,异步处理
         jmsUtil.sendMsgQueue(QueueConstants.KRY_ORDER_PUSH, String.valueOf(orders.getId()));
@@ -423,9 +423,12 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 jmsUtil.delaySend(QueueConstants.ZPS_ORDER_NOTICE,orders.getId().toString(),6 * 60 * 60 * 1000L);
             }
         }
-        //VIP5 权益 活动
-        if(Objects.equals(vipLevel,VipLevelEnum.VIP5.getLevel())){
-            jmsUtil.sendMsgQueue(QueueConstants.VIP_ACTIVITY,orders.getId().toString());
+        //会员权益
+        if(flag){
+            JSONObject messageObj = new JSONObject();
+            messageObj.put("customerId",orders.getCustomerId());
+            messageObj.put("shopId",orders.getShopId());
+            jmsUtil.sendMsgQueue(QueueConstants.VIP_ACTIVITY,messageObj.toJSONString());
         }
         return true;
     }

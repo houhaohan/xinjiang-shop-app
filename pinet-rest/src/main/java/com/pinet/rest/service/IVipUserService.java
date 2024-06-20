@@ -62,5 +62,5 @@ public interface IVipUserService extends IService<VipUser> {
      * @param orderPrice
      * @return
      */
-    void updateLevel(Long customerId,BigDecimal orderPrice);
+    boolean updateLevel(Long customerId,BigDecimal orderPrice);
 }

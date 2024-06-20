@@ -12,20 +12,22 @@ import java.math.BigDecimal;
  */
 @Getter
 public enum VipLevelEnum {
-    VIP1(1,"VIP1", BigDecimal.ZERO),
-    VIP2(2,"VIP2", new BigDecimal("500")),
-    VIP3(3,"VIP3",new BigDecimal("1000")),
-    VIP4(4,"VIP4",new BigDecimal("2000")),
-    VIP5(5,"VIP5",new BigDecimal("4000"));
+    VIP1(1,"VIP1", BigDecimal.ZERO,"vip1_gift_bag"),
+    VIP2(2,"VIP2", new BigDecimal("500"),"vip2_gift_bag"),
+    VIP3(3,"VIP3",new BigDecimal("1000"),"vip3_gift_bag"),
+    VIP4(4,"VIP4",new BigDecimal("2000"),"vip4_gift_bag"),
+    VIP5(5,"VIP5",new BigDecimal("4000"),"vip5_gift_bag");
 
     private Integer level;
     private String name;
     private BigDecimal minAmount;
+    private String giftBagKey;
 
-    VipLevelEnum(Integer level, String name,BigDecimal minAmount) {
+    VipLevelEnum(Integer level, String name,BigDecimal minAmount,String giftBagKey) {
         this.level = level;
         this.name = name;
         this.minAmount = minAmount;
+        this.giftBagKey = giftBagKey;
     }
 
     public static VipLevelEnum next(Integer level){

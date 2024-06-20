@@ -1,5 +1,8 @@
 package com.pinet.rest.mq.consumer;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pinet.core.constants.ConfigConstant;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.DateUtils;
@@ -12,11 +15,13 @@ import com.pinet.rest.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 月月霸王餐
@@ -34,39 +39,83 @@ public class VipActivityListener {
 
 
     @JmsListener(destination = QueueConstants.VIP_ACTIVITY, containerFactory = "queueListener")
+    @Transactional(rollbackFor = Exception.class)
     public void send(String message) {
-        Long orderId = Long.valueOf(message);
-        Orders orders = ordersMapper.selectById(orderId);
-        Integer level = vipUserService.getLevelByCustomerId(orders.getCustomerId());
-        if(Objects.equals(level, VipLevelEnum.VIP5.getLevel())){
-            //月月霸王餐，单店满4000
-            BigDecimal paidAmount = ordersMapper.selectShopPaidAmount(orders.getShopId(), orders.getCustomerId());
-            if(BigDecimalUtil.lt(paidAmount,VipLevelEnum.VIP5.getMinAmount())){
-                return;
-            }
-            SysConfig sysConfig = sysConfigService.getByCode(ConfigConstant.YYBWC_COUPON_ID);
-            Coupon coupon = couponService.getById(Long.valueOf(sysConfig.getVal()));
-            if(coupon == null){
-                return;
-            }
-            CouponGrantRecord couponGrantRecord = new CouponGrantRecord();
-            couponGrantRecord.setCouponGrantId(0L);
-            couponGrantRecord.setSubject("VIP5");
-            couponGrantRecord.setNum(1);
-            couponGrantRecord.setRemark("VIP5 月月霸王餐");
-            couponGrantRecord.setGrantTime(LocalDateTime.now());
-            couponGrantRecordService.save(couponGrantRecord);
-
-            CustomerCoupon customerCoupon = new CustomerCoupon();
-            customerCoupon.setCustomerId(orders.getCustomerId());
-            customerCoupon.setCouponStatus(CouponReceiveStatusEnum.RECEIVED.getCode());
-            customerCoupon.setExpireTime(DateUtils.addMonths(new Date(),1));
-            customerCoupon.setCouponGrantId(couponGrantRecord.getCouponGrantId());
-            customerCoupon.setCouponId(coupon.getId());
-            customerCoupon.setCouponName(coupon.getName());
-            customerCoupon.setCouponType(coupon.getType());
-            customerCoupon.setCouponGrantRecordId(couponGrantRecord.getId());
-            customerCouponService.save(customerCoupon);
+        JSONObject messageObj = JSON.parseObject(message);
+        Long customerId = messageObj.getLong("customerId");
+        Long shopId = messageObj.getLong("shopId");
+        Integer level = vipUserService.getLevelByCustomerId(customerId);
+        String giftBagKey = VipLevelEnum.getEnumByCode(level).getGiftBagKey();
+        SysConfig sysConfig = sysConfigService.getByCode(giftBagKey);
+        if(sysConfig == null){
+            return;
         }
+        String[] couponIds = sysConfig.getVal().split(",");
+        List<Coupon> coupons = couponService.listByIds(Arrays.asList(couponIds));
+        List<Coupon> effectiveCoupons = filterEffectiveCoupons(level, shopId, customerId, coupons);
+        if(CollectionUtils.isEmpty(effectiveCoupons)){
+            return;
+        }
+        for(Coupon coupon : coupons){
+            this.send(coupon,customerId);
+        }
+    }
+
+    /**
+     * 发送优惠券
+     * @param coupon
+     * @param customerId
+     */
+    private void send(Coupon coupon,Long customerId){
+        QueryWrapper<CustomerCoupon> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("customer_id",customerId);
+        queryWrapper.eq("coupon_id",coupon.getId());
+        queryWrapper.last("limit 1");
+        CustomerCoupon customerCoupon = customerCouponService.getOne(queryWrapper);
+        //已经发过的就不要发了
+        if(customerCoupon != null){
+            return;
+        }
+
+        CouponGrantRecord couponGrantRecord = new CouponGrantRecord();
+        couponGrantRecord.setCouponGrantId(0L);
+        couponGrantRecord.setSubject("VIP");
+        couponGrantRecord.setNum(1);
+        couponGrantRecord.setRemark("VIP升级礼包");
+        couponGrantRecord.setGrantTime(LocalDateTime.now());
+        couponGrantRecordService.save(couponGrantRecord);
+
+        customerCoupon = new CustomerCoupon();
+        customerCoupon.setCustomerId(customerId);
+        customerCoupon.setCouponStatus(CouponReceiveStatusEnum.RECEIVED.getCode());
+        customerCoupon.setExpireTime(DateUtils.addMonths(new Date(),1));
+        customerCoupon.setCouponGrantId(couponGrantRecord.getCouponGrantId());
+        customerCoupon.setCouponId(coupon.getId());
+        customerCoupon.setCouponName(coupon.getName());
+        customerCoupon.setCouponType(coupon.getType());
+        customerCoupon.setCouponGrantRecordId(couponGrantRecord.getId());
+        customerCouponService.save(customerCoupon);
+    }
+
+    /**
+     * 过滤有效优惠券
+     * @param level
+     * @param shopId
+     * @param customerId
+     * @param coupons
+     * @return
+     */
+    private List<Coupon> filterEffectiveCoupons(Integer level,Long shopId,Long customerId,List<Coupon> coupons){
+        if(level < VipLevelEnum.VIP5.getLevel() ){
+            return coupons;
+        }
+
+        SysConfig sysConfig = sysConfigService.getByCode(ConfigConstant.YYBWC_COUPON_ID);
+        BigDecimal paidAmount = ordersMapper.selectShopPaidAmount(shopId, customerId);
+        if(BigDecimalUtil.lt(paidAmount,VipLevelEnum.VIP5.getMinAmount())){
+            //不满足条件，除去月月霸王餐优惠券
+            return coupons.stream().filter(o -> !Objects.equals(Long.valueOf(sysConfig.getVal()), o.getId())).collect(Collectors.toList());
+        }
+        return coupons;
     }
 }
