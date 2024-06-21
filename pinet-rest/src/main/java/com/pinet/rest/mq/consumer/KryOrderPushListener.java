@@ -11,14 +11,11 @@ import com.pinet.common.mq.util.JmsUtil;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.StringUtil;
-import com.pinet.rest.entity.OrderPay;
 import com.pinet.rest.entity.Orders;
-import com.pinet.rest.entity.enums.OrderPayChannelEnum;
 import com.pinet.rest.entity.enums.OrderStatusEnum;
 import com.pinet.rest.entity.enums.OrderTypeEnum;
 import com.pinet.rest.mq.constants.QueueConstants;
 import com.pinet.rest.service.IDaDaService;
-import com.pinet.rest.service.IOrderPayService;
 import com.pinet.rest.service.IOrdersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,8 +39,6 @@ public class KryOrderPushListener {
     private final IOrdersService ordersService;
     private final JmsUtil jmsUtil;
     private final IDaDaService daDaService;
-    private final IOrderPayService orderPayService;
-
 
     /**
      *  推送订单到客如云
@@ -53,7 +48,7 @@ public class KryOrderPushListener {
     @Transactional(rollbackFor = Exception.class)
     public void orderPush(String message) {
         log.info("================================客如云订单 消费===============================");
-        Orders order = ordersService.getById(Long.parseLong(message));
+        Orders order = ordersService.getById(Long.parseLong(message));//57052
         //已推送的订单不用再推了
         if(StringUtil.isNotBlank(order.getMealCode()) || StringUtil.isNotBlank(order.getKryOrderNo())){
             return;
@@ -92,17 +87,6 @@ public class KryOrderPushListener {
         }
         entity.setOrderStatus(order.getOrderStatus());
         ordersService.updateById(entity);
-
-        //余额支付
-        OrderPay orderPay = orderPayService.getByOrderNo(order.getOrderNo());
-        if(orderPay == null){
-            return;
-        }
-        if(Objects.equals(OrderPayChannelEnum.BALANCE.getChannelId(),orderPay.getChannelId())){
-            String msg = "会员[ "+order.getCustomerId()+" ]已创建小程序订单，订单编号[ "+order.getOrderNo()+ " ]，请及时同步客如云余额。";
-            jmsUtil.sendMsgQueue(QueueConstants.MESSAGE_SEND,msg);
-        }
-
     }
 
 }

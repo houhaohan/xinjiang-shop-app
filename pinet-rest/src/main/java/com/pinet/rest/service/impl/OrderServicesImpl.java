@@ -430,6 +430,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             messageObj.put("shopId",orders.getShopId());
             jmsUtil.sendMsgQueue(QueueConstants.VIP_ACTIVITY,messageObj.toJSONString());
         }
+        if(Objects.equals(orderPay.getChannelId(),OrderPayChannelEnum.BALANCE.getChannelId())){
+            String msg = "会员[ "+orders.getCustomerId()+" ]已创建小程序订单，订单编号[ "+orders.getOrderNo()+ " ]，请及时同步客如云余额。";
+            jmsUtil.sendMsgQueue(QueueConstants.MESSAGE_SEND,msg);
+        }
         return true;
     }
 

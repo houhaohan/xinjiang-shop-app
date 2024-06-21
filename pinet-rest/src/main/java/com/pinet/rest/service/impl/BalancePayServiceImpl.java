@@ -6,9 +6,6 @@ import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.core.util.StringUtil;
 import com.pinet.core.util.ThreadLocalUtil;
-import com.pinet.keruyun.openapi.dto.DirectChargeDTO;
-import com.pinet.keruyun.openapi.service.IKryApiService;
-import com.pinet.keruyun.openapi.vo.customer.DirectChargeVO;
 import com.pinet.rest.entity.Customer;
 import com.pinet.rest.entity.VipShopBalance;
 import com.pinet.rest.entity.VipUser;
@@ -41,7 +38,6 @@ public class BalancePayServiceImpl implements IPayService {
     private final ICustomerBalanceRecordService customerBalanceRecordService;
     private final IVipUserService vipUserService;
     private final IVipShopBalanceService vipShopBalanceService;
-    private final IKryApiService kryApiService;
     private final JmsUtil jmsUtil;
     @Value("${kry.brandId}")
     private Long brandId;
