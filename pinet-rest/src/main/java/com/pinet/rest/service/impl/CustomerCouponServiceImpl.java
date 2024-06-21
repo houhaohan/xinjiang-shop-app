@@ -61,12 +61,12 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
     public List<CustomerCouponVo> customerCouponList(PageRequest pageRequest) {
         Long userId = ThreadLocalUtil.getUserLogin().getUserId();
 
-        Page<CustomerCoupon> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         QueryWrapper<CustomerCoupon> queryWrapper = initWrapper(userId, true);
         queryWrapper.in("cc.coupon_status", 1, 2)
                 .orderByAsc("cc.coupon_status")
-                .orderByDesc("cc.id");
-        return baseMapper.selectCustomerCouponList(page, queryWrapper);
+                .orderByDesc("cc.id")
+                .last("limit 10");
+        return baseMapper.selectCustomerCouponList(null, queryWrapper);
     }
 
     @Override
@@ -79,6 +79,7 @@ public class CustomerCouponServiceImpl extends ServiceImpl<CustomerCouponMapper,
             Boolean usable = this.checkCoupon(item, request.getShopId(), request.getOrderProducts());
             item.setIsUsable(usable);
         });
+        list.sort((o1,o2)-> o2.getIsUsable().compareTo(o1.getIsUsable()));
         return list;
     }
 

@@ -395,7 +395,10 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 orders.getScore(), orders.getId(), ScoreRecordTypeEnum.ORDER, orders.getCustomerId());
 
         //修改商家余额
-        ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
+        //todo 余额支付不用更新商家余额了,用户充值的时候已经更新余额了 balance
+        if(!Objects.equals(param.getChannelId(),OrderPayChannelEnum.BALANCE.getChannelId())){
+            ibUserBalanceService.addAmount(orders.getShopId(), shopEarnings);
+        }
         //修改用户积分
         customerScoreService.addScore(orders.getCustomerId(),orders.getScore());
 
@@ -663,9 +666,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (!Environment.isProd()) {
             return "";
         }
+        Integer level = vipUserService.getLevelByCustomerId(order.getCustomerId());
         KryOpenTakeoutOrderCreateDTO takeoutOrderCreateDTO = new KryOpenTakeoutOrderCreateDTO();
         takeoutOrderCreateDTO.setOutBizNo(String.valueOf(order.getOrderNo()));
-        takeoutOrderCreateDTO.setRemark(order.getRemark());
+        if(level >= VipLevelEnum.VIP3.getLevel()){
+            takeoutOrderCreateDTO.setRemark("▉▉▉▉▉▉ [优先制作 ] ▉▉▉▉▉▉\n"+order.getRemark());
+        }else {
+            takeoutOrderCreateDTO.setRemark(order.getRemark());
+        }
         takeoutOrderCreateDTO.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         takeoutOrderCreateDTO.setPromoFee(BigDecimalUtil.yuanToFen(order.getDiscountAmount()));//优惠
         takeoutOrderCreateDTO.setActualFee(BigDecimalUtil.yuan2Fen(order.getOrderPrice()));//应付
@@ -807,9 +815,14 @@ public class OrderServicesImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (!Environment.isProd()) {
             return null;
         }
+        Integer vipLevel = vipUserService.getLevelByCustomerId(orders.getCustomerId());
         KryScanCodeOrderCreateDTO dto = new KryScanCodeOrderCreateDTO();
         dto.setOutBizNo(String.valueOf(orders.getOrderNo()));
-        dto.setRemark(orders.getRemark());
+        if(vipLevel >= VipLevelEnum.VIP3.getLevel()){
+            dto.setRemark("▉▉▉▉▉▉ [优先制作 ] ▉▉▉▉▉▉\n"+orders.getRemark());
+        }else {
+            dto.setRemark(orders.getRemark());
+        }
         dto.setOrderSecondSource("WECHAT_MINI_PROGRAM");
         dto.setPromoFee(BigDecimalUtil.yuanToFen(orders.getDiscountAmount()));
         dto.setActualFee(BigDecimalUtil.yuanToFen(orders.getOrderPrice()));
