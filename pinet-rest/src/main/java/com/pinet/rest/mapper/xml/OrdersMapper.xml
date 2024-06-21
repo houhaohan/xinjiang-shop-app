@@ -130,7 +130,7 @@
         o.commission
         from orders o
         left join `xinjiang-shop`.customer c on c.customer_id = o.customer_id
-        where o.share_id = #{dto.customerId}
+        where o.share_id = #{dto.customerId} and o.order_source in (1,2)
         <if test="dto.queryDate != null">
             and o.create_time > #{dto.queryDate} and o.create_time &lt; date_add(#{dto.queryDate},INTERVAL 1 DAY)
         </if>
@@ -144,7 +144,7 @@
                o.commission
         from orders o
                  left join `xinjiang-shop`.customer c on c.customer_id = o.customer_id
-        where o.share_id = #{customerId}
+        where o.share_id = #{customerId} and o.order_source in (1,2)
         order by o.create_time desc
         limit 3
     </select>
@@ -161,11 +161,11 @@
     </select>
 
     <select id="getPaidAmount" resultType="java.math.BigDecimal">
-        select ifnull(sum(order_price),0) from orders where customer_id = #{customerId} and order_status = 100 and del_flag = 0
+        select ifnull(sum(order_price),0) from orders where customer_id = #{customerId} and order_source in (1,2) and order_status = 100 and del_flag = 0
     </select>
 
     <select id="selectShopPaidAmount" resultType="java.math.BigDecimal">
-        select ifnull(sum(order_price),0) from orders where customer_id = #{customerId} and shop_id = #{shopId} and order_status = 100 and del_flag = 0
+        select ifnull(sum(order_price),0) from orders where customer_id = #{customerId} and shop_id = #{shopId} and order_source in (1,2) and order_status = 100 and del_flag = 0
     </select>
 
 
@@ -173,6 +173,7 @@
         select count(1) from orders
         where create_time &gt; #{date}
         and order_type = 1
+        and order_source in (1,2)
         and order_status = 100
         and shipping_fee = 0
         and del_flag = 0

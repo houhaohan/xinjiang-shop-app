@@ -13,8 +13,10 @@ import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.constants.RedisKeyConstant;
 import com.pinet.core.exception.PinetException;
 import com.pinet.core.util.*;
+import com.pinet.keruyun.openapi.dto.CustomerCreateDTO;
 import com.pinet.keruyun.openapi.param.CustomerParam;
 import com.pinet.keruyun.openapi.service.IKryApiService;
+import com.pinet.keruyun.openapi.vo.customer.CustomerCreateVO;
 import com.pinet.keruyun.openapi.vo.customer.CustomerQueryVO;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.dto.VipRechargeDTO;
@@ -55,6 +57,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
     private final IPayService payService;
     private final RedisUtil redisUtil;
     private final IKryApiService kryApiService;
+    private final IShopService shopService;
     @Value("${kry.brandId}")
     private Long brandId;
     @Value("${kry.brandToken}")
@@ -64,6 +67,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
                               IVipLevelService vipLevelService,
                               IOrderPayService orderPayService,
                               ICustomerService customerService,
+                              IShopService shopService,
                               JmsUtil jmsUtil,
                               @Qualifier("weixin_mini_service") IPayService payService,
                               RedisUtil redisUtil,
@@ -72,6 +76,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         this.vipLevelService = vipLevelService;
         this.orderPayService = orderPayService;
         this.customerService = customerService;
+        this.shopService = shopService;
         this.jmsUtil = jmsUtil;
         this.payService = payService;
         this.redisUtil = redisUtil;
@@ -93,8 +98,7 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
             user.setShopId(shopId);
             this.save(user);
         }
-        //异步创建客如云会员
-        jmsUtil.sendMsgQueue(QueueConstants.KRY_VIP_CREATE, String.valueOf(user.getId()));
+        this.kryVipCreate(user);
     }
 
     @Override
@@ -223,6 +227,41 @@ public class VipUserServiceImpl extends ServiceImpl<VipUserMapper, VipUser> impl
         user.setLevel(e.getLevel());
         user.setVipName(e.getName());
         return updateById(user);
+    }
+
+    /**
+     * 创建客如云会员
+     * @param user
+     */
+    private void kryVipCreate(VipUser user){
+        //查询下客如云是否已经注册过会员
+        CustomerParam param = new CustomerParam();
+        param.setMobile(user.getPhone());
+        CustomerQueryVO customerQueryVO = kryApiService.queryByMobile(brandId, brandToken, param);
+        if(customerQueryVO != null){
+            user.setKryCustomerId(customerQueryVO.getCustomerId());
+            this.updateById(user);
+            return;
+        }
+        Shop shop = shopService.getById(user.getShopId());
+        CustomerCreateDTO customerCreateDTO = new CustomerCreateDTO();
+        customerCreateDTO.setShopId(shop.getKryShopId().toString());
+        customerCreateDTO.setMobile(user.getPhone());
+        customerCreateDTO.setName(user.getNickname());
+        if(user.getSex() == 0){
+            customerCreateDTO.setGender(2);
+        }else if(user.getSex() == 1){
+            customerCreateDTO.setGender(1);
+        }else {
+            customerCreateDTO.setGender(0);
+        }
+        CustomerCreateVO customerCreateVO = kryApiService.createCustomer(brandId, brandToken, customerCreateDTO);
+        if(customerCreateVO == null){
+            log.error("手机号{}创建会员失败",user.getPhone());
+            throw new PinetException("创建会员失败");
+        }
+        user.setKryCustomerId(customerCreateVO.getCustomerId());
+        this.updateById(user);
     }
 
 }
