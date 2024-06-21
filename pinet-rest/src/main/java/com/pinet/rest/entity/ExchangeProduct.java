@@ -35,7 +35,7 @@ public class ExchangeProduct extends BaseEntity {
     private String shopName;
 
     @ApiModelProperty("积分")
-    private Integer score;
+    private Double score;
 
     @ApiModelProperty("状态 1在售  2停售")
     private Integer prodStatus;

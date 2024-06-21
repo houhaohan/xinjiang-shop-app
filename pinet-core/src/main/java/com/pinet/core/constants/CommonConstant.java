@@ -1,7 +1,5 @@
 package com.pinet.core.constants;
 
-import java.math.BigDecimal;
-
 public class CommonConstant {
 
     public static final String SMS_CODE_LOGIN = "sms_code:login:";
@@ -37,6 +35,31 @@ public class CommonConstant {
     public static final int DEL_FLAG_N = 0;
 
     public static final int DEL_FLAG_Y = 1;
+
+    /**
+     * 启用/禁用，0-禁用，1-启用
+     */
+    public static final int ENABLE = 1;
+    public static final int DISABLE = 0;
+
+    /**
+     * 成功/失败
+     */
+
+    public static final String SUCCESS = "SUCCESS";
+    public static final String FAIL = "FAIL";
+
+    /**
+     * 未支付
+     */
+    public static final String UNPAY = "UNPAY";
+
+    /**
+     * 消息类型1:通知公告2:系统消息
+     */
+    public static final String MSG_CATEGORY_1 = "1";
+    public static final String MSG_CATEGORY_2 = "2";
+
 
 
 }

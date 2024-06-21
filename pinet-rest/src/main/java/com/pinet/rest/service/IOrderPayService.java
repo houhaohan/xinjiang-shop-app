@@ -3,6 +3,8 @@ package com.pinet.rest.service;
 import com.pinet.rest.entity.OrderPay;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.math.BigDecimal;
+
 /**
  * <p>
  * 支付记录表 服务类
@@ -25,4 +27,11 @@ public interface IOrderPayService extends IService<OrderPay> {
      * @param orderId 订单ID
      */
     OrderPay getByOrderId(Long orderId);
+
+    /**
+     * 查询用户消费金额
+     * @param customerId
+     * @return
+     */
+    BigDecimal getPaidPriceByCustomerId(Long customerId);
 }

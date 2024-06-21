@@ -1,10 +1,13 @@
 package com.pinet.rest.handler.settle;
 
 
+import cn.hutool.core.date.DateUtil;
 import com.pinet.rest.entity.OrderProduct;
 import com.pinet.rest.entity.ShopProduct;
+import com.pinet.rest.entity.request.DeliveryFeeRequest;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,7 +33,8 @@ public class DirectBuyOrderSettleHandler extends OrderSettleAbstractHandler {
         context.packageFee = orderProduct.getPackageFee();
         context.orderProdPrice = orderProduct.getProdPrice();
         context.orderProductNum = orderProduct.getProdNum();
-        context.shippingFee = calculate(context.dishSettleContext.request.getOrderType(), context.distance.intValue(), context.deliveryPlatform);
+
+        context.shippingFee = calculateDeliveryFee();
 
     }
 }

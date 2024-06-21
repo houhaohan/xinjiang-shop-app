@@ -1,8 +1,7 @@
 package com.pinet.rest.entity.param;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @program: xinjiang-shop-app
@@ -10,9 +9,8 @@ import lombok.NoArgsConstructor;
  * @author: hhh
  * @create: 2023-01-04 14:39
  **/
+@Builder
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class RefundParam {
 
     /**
@@ -44,5 +42,10 @@ public class RefundParam {
      * 下单的用户id
      */
     private Long customerId;
+
+    /**
+     * 店铺ID
+     */
+    private Long shopId;
 
 }

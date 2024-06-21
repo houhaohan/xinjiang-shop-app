@@ -1,5 +1,7 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.pinet.core.constants.DB;
 import com.pinet.core.constants.OrderConstant;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.BCapitalFlow;
@@ -25,6 +27,7 @@ import java.util.Date;
  * @since 2023-07-12
  */
 @Service
+@DS(DB.MASTER)
 public class BCapitalFlowServiceImpl extends ServiceImpl<BCapitalFlowMapper, BCapitalFlow> implements IBCapitalFlowService {
     @Resource
     private IBUserBalanceService balanceService;

@@ -17,8 +17,7 @@ import java.util.Objects;
  * @data 2024-03-21 15:00
  */
 public class CartOrderHandler extends OrderAbstractHandler {
-
-    public CartOrderHandler(OrderContext context){
+    public CartOrderHandler(OrderContext context) {
         this.context = context;
     }
 
@@ -26,6 +25,8 @@ public class CartOrderHandler extends OrderAbstractHandler {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create() {
+        super.checkVipUser();
+
         Orders orders = buildOrder();
         boolean condition = commissionCondition(orders.getCustomerId(),orders.getShareId());
         List<Cart> cartList = context.cartService.getByUserIdAndShopId(context.customerId, context.request.getShopId());
@@ -69,4 +70,6 @@ public class CartOrderHandler extends OrderAbstractHandler {
         afterHandler(orders,orderProducts);
 
     }
+
+
 }

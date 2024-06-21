@@ -3,20 +3,17 @@ package com.pinet.keruyun.openapi.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.pinet.keruyun.openapi.config.KryApiParamConfig;
 import com.pinet.keruyun.openapi.dto.*;
-import com.pinet.keruyun.openapi.param.CategoryParam;
-import com.pinet.keruyun.openapi.param.DetailDishParam;
-import com.pinet.keruyun.openapi.param.DishListParam;
+import com.pinet.keruyun.openapi.param.*;
 import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.keruyun.openapi.service.KryCallService;
 import com.pinet.keruyun.openapi.type.AuthType;
 import com.pinet.keruyun.openapi.type.KryAPI;
 import com.pinet.keruyun.openapi.util.JsonUtil;
 import com.pinet.keruyun.openapi.vo.*;
+import com.pinet.keruyun.openapi.vo.customer.*;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -119,6 +116,54 @@ public class KryApiServiceImpl extends KryCallService implements IKryApiService 
         String responseStr = super.postCall(KryAPI.ORDER_DETAIL, AuthType.SHOP, orgId, token, dto);
         log.info("客如云订单详情结果=============>{}",responseStr);
         KryResponse<KryOrderDetailResult> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<KryOrderDetailResult>>() {
+        });
+        if (0 == response.getCode()) {
+            return response.getResult().getData();
+        }
+        return null;
+    }
+
+    @Override
+    public CustomerCreateVO createCustomer(Long orgId, String token, CustomerCreateDTO dto) {
+        String responseStr = super.postCall(KryAPI.CUSTOMER_CREATE, AuthType.BRAND, orgId, token, dto);
+        log.info("客如云创建会员结果=============>{}",responseStr);
+        KryResponse<Result<CustomerCreateVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<CustomerCreateVO>>>() {
+        });
+        if (0 == response.getCode()) {
+            return response.getResult().getData();
+        }
+        return null;
+    }
+
+    @Override
+    public CustomerQueryVO queryByMobile(Long orgId, String token, CustomerParam param) {
+        String responseStr = super.postCall(KryAPI.CUSTOMER_QUERY, AuthType.BRAND, orgId, token, param);
+        log.info("客如云查询会员结果=============>{}",responseStr);
+        KryResponse<Result<CustomerQueryVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<CustomerQueryVO>>>() {
+        });
+        if (0 == response.getCode()) {
+            return response.getResult().getData();
+        }
+        return null;
+    }
+
+    @Override
+    public CustomerPropertyVO queryCustomerProperty(Long orgId, String token, CustomerPropertyParam param) {
+        String responseStr = super.postCall(KryAPI.CUSTOMER_PROPERTY, AuthType.BRAND, orgId, token, param);
+        log.info("客如云查询会员资产结果=============>{}",responseStr);
+        KryResponse<Result<CustomerPropertyVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<CustomerPropertyVO>>>() {
+        });
+        if (0 == response.getCode()) {
+            return response.getResult().getData();
+        }
+        return null;
+    }
+
+    @Override
+    public DirectChargeVO directCharge(Long orgId, String token, DirectChargeDTO dto) {
+        String responseStr = super.postCall(KryAPI.DIRECT_CHARGE, AuthType.BRAND, orgId, token, dto);
+        log.info("客如云会员充值结果=============>{}",responseStr);
+        KryResponse<Result<DirectChargeVO>> response = JsonUtil.fromJson(responseStr, new TypeReference<KryResponse<Result<DirectChargeVO>>>() {
         });
         if (0 == response.getCode()) {
             return response.getResult().getData();

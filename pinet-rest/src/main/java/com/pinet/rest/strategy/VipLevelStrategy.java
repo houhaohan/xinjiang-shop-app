@@ -6,7 +6,7 @@ import java.math.BigDecimal;
  *
  * @author chengshuanghui
  */
-public interface MemberLevelStrategy {
+public interface VipLevelStrategy {
 
     /**
      * 积分比率

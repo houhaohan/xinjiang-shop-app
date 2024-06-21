@@ -47,4 +47,30 @@ public class QueueConstants {
      * 轻食外卖订单 配送平台创建订单失败 短信提醒 Delivery
      */
     public static final String KRY_ORDER_PUSH = "kry.order.push.queue";
+
+    /**
+     * 创建客如云会员
+     */
+    public static final String KRY_VIP_CREATE = "kry.vip.create.queue";
+
+    /**
+     * 消息通知发送,消费者在后台消费
+     */
+    public static final String MESSAGE_SEND = "message.send.queue";
+
+    /**
+     * 自配送订单消息通知，消费者在后台消费
+     */
+    public static final String ZPS_ORDER_NOTICE = "zps.order.notice.queue";
+
+    /**
+     * 会员权益活动
+     */
+    public static final String VIP_ACTIVITY = "vip.activity.queue";
+
+    /**
+     * 赠送优惠券
+     */
+    public static final String QINGSHI_COUPON_DELAY_GRANT = "qingshi.coupon.delay_grant.queue";
+
 }

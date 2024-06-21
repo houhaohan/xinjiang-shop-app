@@ -31,7 +31,7 @@ import java.util.List;
  * @create: 2023-06-13 14:09
  **/
 @Service("recharge_notify_service")
-public class RechargeNotifyServiceImpl implements IPayNotifyService {
+public class DbzRechargeNotifyServiceImpl implements IPayNotifyService {
     @Resource
     private IOrderPayService orderPayService;
 
@@ -62,7 +62,7 @@ public class RechargeNotifyServiceImpl implements IPayNotifyService {
         orderPayService.updateById(orderPay);
 
         //更新用户钱包表
-        customerBalanceService.addAvailableBalance(orderPay.getCustomerId(), orderPay.getPayPrice());
+        //customerBalanceService.addAvailableBalance(orderPay.getCustomerId(), orderPay.getPayPrice());
 
 
         //插入流水记录表

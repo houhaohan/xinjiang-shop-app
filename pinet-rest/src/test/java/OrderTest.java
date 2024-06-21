@@ -56,10 +56,10 @@ public class OrderTest {
 
     @Test
     public void test2(){
-        String token = kryApiService.getToken(AuthType.SHOP, 13290197L);
+        String token = kryApiService.getToken(AuthType.SHOP, 33858124L);
         KryOrderDetailDTO kryOrderDetailDTO = new KryOrderDetailDTO();
-        kryOrderDetailDTO.setOrderId("20231220061316000116975405200184");
-        OrderDetailVO orderDetail = kryApiService.getOrderDetail(13290197L, token, kryOrderDetailDTO);
+        kryOrderDetailDTO.setOrderId("20240612061316000122643209880040");
+        OrderDetailVO orderDetail = kryApiService.getOrderDetail(33858124L, token, kryOrderDetailDTO);
 
 //        DetailDishParam param = new DetailDishParam();
 //        param.setDishIds(Arrays.asList("1065757360555"));

@@ -68,13 +68,6 @@ public interface IOrdersService extends IService<Orders> {
      */
     void recurOrder(Long orderId,Long customerId);
 
-    /**
-     * 获取折后价
-     * @param customerId 用户id
-     * @param originalPrice 原价
-     * @return
-     */
-    BigDecimal getDiscountedPrice(Long customerId, BigDecimal originalPrice, List<OrderDiscount> orderDiscounts);
 
     /**
      * 自提兑换码

@@ -73,6 +73,7 @@
         select <include refid="Base_Column_List"/> from kry_combo_group kcg
         inner join kry_combo_group_detail kcgd on kcgd.combo_group_id = kcg.id and kcgd.del_flag = 0
         where kcg.shop_prod_id = #{shopProdId} and kcg.del_flag = 0
+        order by kcg.id
     </select>
 
     <select id="getPriceByShopProdId" resultType="Long">

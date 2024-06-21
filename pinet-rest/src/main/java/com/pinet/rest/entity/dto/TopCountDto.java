@@ -16,5 +16,5 @@ public class TopCountDto {
 
     private BigDecimal balance = BigDecimal.ZERO;
 
-    private Integer point = 0;
+    private Double point = 0D;
 }

@@ -1,9 +1,6 @@
 package com.pinet.rest.entity.enums;
 
-import com.pinet.core.util.BigDecimalUtil;
 import lombok.Getter;
-
-import java.math.BigDecimal;
 
 /**
  * @program:

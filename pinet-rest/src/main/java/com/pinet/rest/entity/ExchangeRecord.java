@@ -31,7 +31,7 @@ public class ExchangeRecord extends BaseEntity {
     private Long exchangeProductId;
 
     @ApiModelProperty("积分")
-    private Integer score;
+    private Double score;
 
     @ApiModelProperty("类型 1礼品  2优惠券")
     private Integer prodType;

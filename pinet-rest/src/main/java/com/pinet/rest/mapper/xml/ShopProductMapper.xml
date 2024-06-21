@@ -308,7 +308,7 @@
         t.min_choose,
 		t.price/100 as price,
         t.sell_price/100 as market_price,
-        t.dish_sku_price/100 as add_price,
+        (case when sps.spec_name = '标准' then t.dish_sku_price/100 else 0 end) as add_price,
         sps.default_flag
         from shop_product sp
         left join shop_product_spec sps on sp.id = sps.shop_prod_id and sps.del_flag = 0

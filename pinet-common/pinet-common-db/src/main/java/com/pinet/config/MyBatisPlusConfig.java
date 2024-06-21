@@ -7,6 +7,11 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * @description:
+ * @author: chengshuanghui
+ * @date: 2024-06-06 11:20
+ */
 @Configuration
 public class MyBatisPlusConfig {
     @Bean
@@ -15,6 +20,11 @@ public class MyBatisPlusConfig {
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
+    }
+
+    @Bean
+    public InsertBatchSqlInjector insertBatchSqlInjector(){
+        return new InsertBatchSqlInjector();
     }
 
 }

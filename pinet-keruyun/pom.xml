@@ -13,7 +13,7 @@
 
     <groupId>com.pinet</groupId>
     <artifactId>pinet-keruyun</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 
     <properties>
         <!--基本配置-->
@@ -95,24 +95,6 @@
                 </executions>
             </plugin>
         </plugins>
-
-
-<!--        <resources>-->
-<!--            <resource>-->
-<!--                <directory>src/main/java</directory>-->
-<!--                <includes>-->
-<!--                    <include>**/*.xml</include>-->
-<!--                </includes>-->
-<!--                <filtering>false</filtering>-->
-<!--            </resource>-->
-<!--            <resource>-->
-<!--                <directory>src/main/resources</directory>-->
-<!--                <includes>-->
-<!--                    <include>**/*.*</include>-->
-<!--                </includes>-->
-<!--                <filtering>true</filtering>-->
-<!--            </resource>-->
-<!--        </resources>-->
     </build>
 
 

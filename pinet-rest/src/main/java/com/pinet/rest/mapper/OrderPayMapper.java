@@ -4,6 +4,8 @@ import com.pinet.rest.entity.OrderPay;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
+
 /**
  * <p>
  * 支付记录表 Mapper 接口
@@ -15,4 +17,5 @@ import org.apache.ibatis.annotations.Param;
 public interface OrderPayMapper extends BaseMapper<OrderPay> {
 
     OrderPay selectByOrderIdAndChannelId(@Param("orderId") Long orderId,@Param("channelId") String channelId);
+
 }

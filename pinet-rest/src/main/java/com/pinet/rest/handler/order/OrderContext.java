@@ -1,18 +1,18 @@
 package com.pinet.rest.handler.order;
 
 import com.pinet.common.mq.util.JmsUtil;
-import com.pinet.rest.entity.Cart;
+import com.pinet.common.redis.util.RedisUtil;
+import com.pinet.keruyun.openapi.service.IKryApiService;
 import com.pinet.rest.entity.Shop;
 import com.pinet.rest.entity.dto.CreateOrderDto;
 import com.pinet.rest.entity.enums.SettlementTypeEnum;
 import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.mapper.OrdersMapper;
 import com.pinet.rest.service.*;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,7 +25,6 @@ import java.util.Objects;
 public class OrderContext {
 
     protected final OrderPreferentialManager orderPreferentialManager;
-    protected final ICustomerMemberService customerMemberService;
     protected final OrdersMapper ordersMapper;
     protected final IShopProductService shopProductService;
     protected final IOrderAddressService orderAddressService;
@@ -34,14 +33,21 @@ public class OrderContext {
     protected final IDaDaService daDaService;
     protected final ICustomerAddressService customerAddressService;
     protected final ICartService cartService;
+    protected final IVipUserService vipUserService;
+    protected final IKryApiService kryApiService;
     protected final OrderDishContext orderDishContext;
     protected final JmsUtil jmsUtil;
+    protected final RedisUtil redisUtil;
     protected Long customerId;
     protected Double distance;
     protected Shop shop;
     protected CreateOrderDto request;
     protected CreateOrderVo response;
     protected OrderHandler orderHandler;
+    @Value("${kry.brandId}")
+    protected Long brandId;
+    @Value("${kry.brandToken}")
+    protected String brandToken;
 
     public void setCustomerId(Long customerId){
         this.customerId =  customerId;

@@ -1,5 +1,6 @@
 package com.pinet.rest.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pinet.rest.entity.OrderRefund;
 import com.pinet.rest.mapper.OrderRefundMapper;
 import com.pinet.rest.service.IOrderRefundService;
@@ -17,4 +18,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderRefundServiceImpl extends ServiceImpl<OrderRefundMapper, OrderRefund> implements IOrderRefundService {
 
+    @Override
+    public OrderRefund getByRefundNo(Long refundNo) {
+        LambdaQueryWrapper<OrderRefund> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderRefund::getRefundNo,refundNo);
+        return getOne(queryWrapper);
+    }
 }

@@ -48,7 +48,7 @@ public class KryOrderPushListener {
     @Transactional(rollbackFor = Exception.class)
     public void orderPush(String message) {
         log.info("================================客如云订单 消费===============================");
-        Orders order = ordersService.getById(Long.parseLong(message));
+        Orders order = ordersService.getById(Long.parseLong(message));//57052
         //已推送的订单不用再推了
         if(StringUtil.isNotBlank(order.getMealCode()) || StringUtil.isNotBlank(order.getKryOrderNo())){
             return;

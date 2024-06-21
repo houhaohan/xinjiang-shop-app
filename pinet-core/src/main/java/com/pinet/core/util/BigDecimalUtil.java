@@ -13,6 +13,13 @@ public class BigDecimalUtil {
                 .setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
+    //分转元
+    public static BigDecimal fenToYuan(Integer amount) {
+        return new BigDecimal(String.valueOf(amount))
+                .multiply(new BigDecimal("0.01"))
+                .setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
     /**
      * 元转分，返回Integer
      * @param amount
@@ -158,6 +165,15 @@ public class BigDecimalUtil {
      */
     public static BigDecimal min(BigDecimal val1,BigDecimal val2) {
         return val1.compareTo(val2) < 0 ? val1 : val2;
+    }
+
+    /**
+     * val 大于 0
+     * @param val
+     * @return
+     */
+    public static boolean gtZero(BigDecimal val) {
+        return gt(val,BigDecimal.ZERO);
     }
 
     /**

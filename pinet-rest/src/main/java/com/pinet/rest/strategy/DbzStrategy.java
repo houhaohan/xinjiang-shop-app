@@ -6,7 +6,7 @@ import java.math.BigDecimal;
  * 店帮主策略
  * @author chengshuanghui
  */
-public class DbzStrategy implements MemberLevelStrategy {
+public class DbzStrategy implements VipLevelStrategy {
 
     public DbzStrategy(){
     }

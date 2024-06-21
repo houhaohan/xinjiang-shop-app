@@ -17,7 +17,7 @@ import java.util.Objects;
  */
 public class CartOrderSettleHandler extends OrderSettleAbstractHandler{
 
-    public CartOrderSettleHandler(OrderSetterContext context){
+    public CartOrderSettleHandler(OrderSetterContext context) {
         this.context = context;
     }
 
@@ -42,7 +42,8 @@ public class CartOrderSettleHandler extends OrderSettleAbstractHandler{
             context.orderProdPrice = BigDecimalUtil.sum(context.orderProdPrice,orderProduct.getProdPrice());
             context.orderProductNum = context.orderProductNum + orderProduct.getProdNum();
         });
-        context.shippingFee = calculate(context.dishSettleContext.request.getOrderType(), context.distance.intValue(), context.deliveryPlatform);
+
+        context.shippingFee = calculateDeliveryFee();
         context.response = orderProducts;
     }
 

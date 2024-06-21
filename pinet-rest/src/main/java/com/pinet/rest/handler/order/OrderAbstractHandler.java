@@ -14,10 +14,10 @@ import com.pinet.core.util.Environment;
 import com.pinet.core.util.StringUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.*;
+import com.pinet.rest.entity.request.DeliveryFeeRequest;
 import com.pinet.rest.entity.vo.CreateOrderVo;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.mq.constants.QueueConstants;
-import com.pinet.rest.strategy.MemberLevelStrategyContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -53,12 +53,23 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         order.setEstimateArrivalEndTime(DateUtil.offsetMinute(now, 90));
         order.setOrderDistance(context.distance.intValue());
 
-        BigDecimal shippingFee = calculate(context.request.getOrderType(), order.getOrderDistance(), context.shop.getDeliveryPlatform());
-        order.setShippingFee(shippingFee);
+        //配送费
+        DeliveryFeeRequest request = new DeliveryFeeRequest();
+        request.setDeliveryPlatform(context.shop.getDeliveryPlatform());
+        request.setOrderDistance(order.getOrderDistance());
+        Integer vipLevel = context.vipUserService.getLevelByCustomerId(context.customerId);
+        request.setVipLevel(vipLevel);
+        request.setOrderType(context.request.getOrderType());
+        //查询本周是否有免配送费的单
+        Date beginOfWeek = DateUtil.beginOfWeek(new Date()).toJdkDate();
+        Integer cnt = context.ordersMapper.getFreeDeliveryFeeCount(beginOfWeek);
+        request.setOrderCnt(cnt);
+        BigDecimal deliveryFee = calculateDeliveryFee(request);
+        order.setShippingFee(deliveryFee);
+
         order.setRemark(context.request.getRemark());
         order.setShareId(context.request.getShareId());
         order.setCustomerCouponId(context.request.getCustomerCouponId());
-
         //初始化订单金额
         order.setOrderPrice(BigDecimal.ZERO);
         order.setPackageFee(BigDecimal.ZERO);
@@ -128,21 +139,36 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
      * @param shareId 分享人 ID
      */
     protected boolean commissionCondition(Long customerId,Long shareId) {
-        if (Objects.isNull(shareId) || shareId <= 0) {
-            return false;
-        }
 
-        //判断下单人和分享人是否是同一个人
-        if (Objects.equals(customerId,shareId)) {
-            return false;
-        }
-        //分享人会员等级
-        Integer shareMemberLevel = context.customerMemberService.getMemberLevel(shareId);
-        Integer orderMemberLevel = context.customerMemberService.getMemberLevel(customerId);
-
-        //邀请人必须是店帮主  被邀人不能是店帮主
-        return shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !orderMemberLevel.equals(MemberLevelEnum._20.getCode());
+        //todo 店帮主逻辑暂时没有了，等后面版本再继续更新店帮主逻辑
+        return false;
+//        if (Objects.isNull(shareId) || shareId <= 0) {
+//            return false;
+//        }
+//
+//        //判断下单人和分享人是否是同一个人
+//        if (Objects.equals(customerId,shareId)) {
+//            return false;
+//        }
+//        //分享人会员等级
+//        Integer shareMemberLevel = context.customerMemberService.getMemberLevel(shareId);
+//        Integer orderMemberLevel = context.customerMemberService.getMemberLevel(customerId);
+//
+//        //邀请人必须是店帮主  被邀人不能是店帮主
+//        return shareMemberLevel.equals(MemberLevelEnum._20.getCode()) && !orderMemberLevel.equals(MemberLevelEnum._20.getCode());
     }
+
+
+    protected void checkVipUser(){
+        //客如云是会员，小程序不是会员，需要添加为小程序会员（线下收银机添加会员的情况）
+        VipUser vipUser = context.vipUserService.getByCustomerId(context.customerId);
+        if(vipUser != null && StringUtil.isNotBlank(vipUser.getKryCustomerId())){
+            return;
+        }
+        Customer customer = context.customerService.getById(context.customerId);
+        context.vipUserService.create(customer,context.shop.getId());
+    }
+
 
 
     /**
@@ -170,9 +196,8 @@ public abstract class OrderAbstractHandler extends ShippingFeeHandler implements
         BigDecimal commission = orderProducts.stream().map(OrderProduct::getCommission).reduce(BigDecimal.ZERO, BigDecimal::add);
         entity.setCommission(commission);
         entity.setDiscountAmount(preferentialVo.getDiscountAmount());
-        Integer level = context.customerMemberService.getMemberLevel(orders.getCustomerId());
-        Integer score = new MemberLevelStrategyContext(orders.getOrderPrice()).getScore(level);
-        entity.setScore(score);
+        //创建订单不set积分，积分在支付回调里set
+        //entity.setScore(0D);
         entity.setShippingFeePlat(getShippingFeePlat(orders.getOrderType(),context.shop,context.request.getCustomerAddressId(),orders.getOrderProdPrice()));
         context.ordersMapper.updateById(entity);
 

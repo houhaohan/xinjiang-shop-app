@@ -3,7 +3,8 @@ package com.pinet.rest.service;
 import com.pinet.core.util.BigDecimalUtil;
 import com.pinet.rest.entity.*;
 import com.pinet.rest.entity.enums.DiscountTypeEnum;
-import com.pinet.rest.entity.enums.MemberLevelEnum;
+import com.pinet.rest.entity.enums.VipDiscountEnum;
+import com.pinet.rest.entity.enums.VipLevelEnum;
 import com.pinet.rest.entity.vo.PreferentialVo;
 import com.pinet.rest.factory.PromotionStrategyFactory;
 import org.springframework.stereotype.Component;
@@ -21,14 +22,14 @@ import java.util.stream.Collectors;
 public class OrderPreferentialManager {
 
     private final ICouponService couponService;
-    private final ICustomerMemberService customerMemberService;
     private final ICouponProductService couponProductService;
+    private final IVipUserService vipUserService;
 
     public OrderPreferentialManager(ICouponService couponService,
-                                    ICustomerMemberService customerMemberService,
+                                    IVipUserService vipUserService,
                                     ICouponProductService couponProductService){
         this.couponService =  couponService;
-        this.customerMemberService =  customerMemberService;
+        this.vipUserService =  vipUserService;
         this.couponProductService =  couponProductService;
     }
 
@@ -41,16 +42,16 @@ public class OrderPreferentialManager {
         preferentialVo.setProductDiscountAmount(orderProductPrice);
         preferentialVo.setOrderProductPrice(orderProductPrice);
 
-        CustomerMember customerMember = customerMemberService.getByCustomerId(customerId);
+        VipUser vipUser = vipUserService.getByCustomerId(customerId);
         //店帮主、会员 折扣
-        if(Objects.nonNull(customerMember)){
+        if(Objects.nonNull(vipUser) && vipUser.getLevel() > VipLevelEnum.VIP1.getLevel()){
             //优惠后金额
-            MemberLevelEnum e = MemberLevelEnum.getEnumByCode(customerMember.getMemberLevel());
-            BigDecimal discountedPrice = BigDecimalUtil.multiply(orderProductPrice, e.getDiscount());
+            VipDiscountEnum e = VipDiscountEnum.getEnumByCode(vipUser.getLevel());
+            BigDecimal discountedPrice = BigDecimalUtil.multiply(orderProductPrice, VipDiscountEnum.getDiscountValue(e));
             OrderDiscount orderDiscount = new OrderDiscount();
-            orderDiscount.setDiscountMsg(e.getMsg() + BigDecimalUtil.stripTrailingZeros(BigDecimalUtil.multiply(e.getDiscount(),new BigDecimal("10"))) + "折优惠")
+            orderDiscount.setDiscountMsg(e.getDescription())
                     .setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountedPrice))
-                    .setType(DiscountTypeEnum.VIP_1.getCode());
+                    .setType(DiscountTypeEnum.VIP_2.getCode());
             orderDiscounts.add(orderDiscount);
             preferentialVo.setOrderDiscounts(orderDiscounts);
             preferentialVo.setDiscountAmount(BigDecimalUtil.subtract(orderProductPrice,discountedPrice));
