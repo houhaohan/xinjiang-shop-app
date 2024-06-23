@@ -103,7 +103,7 @@ public class VipShopBalanceServiceImpl extends ServiceImpl<VipShopBalanceMapper,
                 balance = vipShopBalance.getAmount();
             }
             //查询客如云的余额，控制查询频率，30分钟查询一次
-            boolean lock = redisUtil.setIfAbsent(RedisKeyConstant.SYNC_KRY_BALANCE + customerId+"_"+shopId, "1", 30 * 60L, TimeUnit.SECONDS);
+            boolean lock = redisUtil.setIfAbsent(RedisKeyConstant.SYNC_KRY_BALANCE + customerId+"_"+shopId, "1", 60 * 60L, TimeUnit.SECONDS);
             if(lock){
                 VipUser user = vipUserService.getByCustomerId(customerId);
                 if(user != null){
@@ -120,6 +120,16 @@ public class VipShopBalanceServiceImpl extends ServiceImpl<VipShopBalanceMapper,
                                 .findFirst()
                                 .orElse(0);
                         balance = BigDecimalUtil.fenToYuan(totalValue);
+                        if(vipShopBalance == null){
+                            vipShopBalance = new VipShopBalance();
+                            vipShopBalance.setShopId(shopId);
+                            vipShopBalance.setCustomerId(customerId);
+                            vipShopBalance.setAmount(balance);
+                            this.save(vipShopBalance);
+                        }else {
+                            vipShopBalance.setAmount(balance);
+                            this.updateById(vipShopBalance);
+                        }
                     }
                 }
             }
